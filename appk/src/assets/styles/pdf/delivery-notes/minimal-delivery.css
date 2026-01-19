@@ -1,0 +1,404 @@
+/* minimal-delivery.css - Diseño minimalista optimizado para html2pdf */
+
+/* Configuración base */
+@page {
+    size: A4;
+    margin: 8mm;
+}
+
+body {
+    font-family: 'Arial', sans-serif;
+    margin: 0;
+    padding: 0;
+    color: #000;
+    background-color: #f5f5f5;
+    line-height: 1.4;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+}
+
+/* Contenedor principal */
+.container {
+    width: 100%;
+    max-width: 190mm;
+    height: auto;
+    max-height: 250mm; /* Límite para una página */
+    margin: 0 auto;
+    background-color: #fff;
+    padding: 0;
+    box-sizing: border-box;
+    border: none !important;
+    border-radius: 0 !important;
+    page-break-after: avoid;
+    page-break-inside: avoid;
+}
+
+/* Encabezado minimalista */
+.header {
+    background-color: #060e28; /* Azul marino oscuro */
+    padding: 15px; /* Reducido */
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+}
+
+.logo-container {
+    display: flex;
+    align-items: center;
+    color: #fff;
+}
+
+.logo {
+    width: 60px; /* Reducido */
+    height: 60px;
+    margin-right: 15px; /* Reducido */
+    position: relative;
+}
+
+.logo-img {
+    width: 100%;
+    height: 100%;
+    border-radius: 50%;
+    object-fit: contain;
+}
+
+/* Logo con puntos para cuando no hay imagen */
+.logo-dots {
+    width: 60px;
+    height: 60px;
+    background: repeating-conic-gradient(
+        from 0deg,
+        #a599e9 0deg 10deg,
+        transparent 10deg 20deg
+    );
+    border-radius: 50%;
+    transform: rotate(45deg);
+    display: none; /* Solo mostrar si falla la imagen */
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+}
+
+.logo-text {
+    font-size: 1.3rem; /* Reducido */
+    letter-spacing: 1px;
+    color: #fff;
+    font-weight: bold;
+}
+
+.title-container {
+    flex-grow: 1;
+    text-align: right;
+}
+
+.document-title {
+    color: #a599e9; /* Púrpura claro */
+    font-size: 1.8rem; /* Reducido */
+    font-weight: bold;
+    margin: 0;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+}
+
+/* Tablas de información con estilo minimalista */
+.info-tables {
+    border-collapse: collapse;
+    width: 100%;
+    margin-bottom: 0;
+}
+
+.info-tables td {
+    border: 1px solid #ccc;
+    padding: 8px 12px; /* Reducido */
+    font-size: 12px; /* Reducido */
+}
+
+.info-tables th {
+    background-color: #060e28; /* Azul marino oscuro */
+    color: #fff;
+    padding: 8px 12px; /* Reducido */
+    font-weight: normal;
+    text-align: center;
+    font-size: 12px; /* Reducido */
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+}
+
+.date-cells {
+    display: flex;
+    height: 100%;
+    justify-content: center;
+    align-items: center;
+}
+
+.date-cell {
+    width: 33.33%;
+    border-right: 1px solid #ccc;
+    height: 100%;
+    text-align: center;
+    padding: 4px; /* Reducido */
+    font-size: 11px; /* Reducido */
+}
+
+.date-cell:last-child {
+    border-right: none;
+}
+
+/* Separador minimalista */
+.separator {
+    height: 20px; /* Reducido */
+}
+
+/* Tabla de productos con diseño limpio */
+.products-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-bottom: 0;
+}
+
+.products-table th {
+    background-color: #060e28; /* Azul marino oscuro */
+    color: #fff;
+    padding: 8px 12px; /* Reducido */
+    text-align: left;
+    font-size: 12px; /* Reducido */
+    font-weight: bold;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+}
+
+.products-table th:first-child {
+    text-align: center;
+}
+
+.products-table th:nth-child(3),
+.products-table th:nth-child(4) {
+    text-align: right;
+}
+
+.products-table td {
+    border: 1px solid #ccc;
+    padding: 8px 12px; /* Reducido */
+    font-size: 11px; /* Reducido */
+    min-height: 20px; /* Reducido */
+}
+
+.products-table td:first-child {
+    text-align: center;
+}
+
+.products-table td:nth-child(2) {
+    text-align: left;
+}
+
+.products-table td:nth-child(3),
+.products-table td:nth-child(4) {
+    text-align: right;
+}
+
+/* Sección de totales */
+.totals-section {
+    margin-top: -1px;
+}
+
+.totals-section th {
+    background-color: #060e28; /* Azul marino oscuro */
+    color: #fff;
+    padding: 8px 12px; /* Reducido */
+    text-align: right;
+    width: 150px;
+    font-size: 12px; /* Reducido */
+    font-weight: bold;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+}
+
+.totals-section td {
+    border: 1px solid #ccc;
+    padding: 8px 12px; /* Reducido */
+    text-align: right;
+    font-size: 12px; /* Reducido */
+    font-weight: bold;
+}
+
+/* Sección de observaciones minimalista */
+.observations-section {
+    padding: 15px; /* Reducido */
+    margin-top: 20px; /* Reducido */
+}
+
+.observations-title {
+    font-weight: bold;
+    margin-bottom: 8px; /* Reducido */
+    font-size: 13px; /* Reducido */
+    color: #060e28;
+}
+
+.observations-box {
+    border: 1px solid #ccc;
+    padding: 12px; /* Reducido */
+    min-height: 50px; /* Reducido */
+    background-color: #fff;
+    font-size: 12px; /* Reducido */
+    line-height: 1.4;
+}
+
+/* Pie de página con diseño minimalista */
+.footer {
+    background-color: #060e28; /* Azul marino oscuro */
+    color: #fff;
+    padding: 15px; /* Reducido */
+    display: flex;
+    justify-content: space-between;
+    margin-top: 20px; /* Reducido */
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+}
+
+.footer-info {
+    text-align: center;
+    flex: 1;
+}
+
+.footer-title {
+    font-weight: bold;
+    margin-bottom: 4px; /* Reducido */
+    font-size: 11px; /* Reducido */
+    color: #a599e9;
+}
+
+.footer-info div:not(.footer-title) {
+    font-size: 10px; /* Reducido */
+    line-height: 1.2;
+    color: #fff;
+}
+
+/* Manejo de imagen del logo */
+.logo-img:not([src]),
+.logo-img[src=""],
+.logo-img[src="#"] {
+    display: none;
+}
+
+.logo-img:not([src]) + .logo-dots,
+.logo-img[src=""] + .logo-dots,
+.logo-img[src="#"] + .logo-dots {
+    display: block !important;
+}
+
+/* Filas vacías en tabla de productos */
+.products-table tbody tr:empty td {
+    min-height: 15px; /* Reducido */
+    padding: 6px; /* Reducido */
+}
+
+/* Ajustes para impresión */
+@media print {
+    body, .container {
+        margin: 0;
+        padding: 0;
+        width: 100%;
+        background-color: #f5f5f5 !important;
+    }
+
+    .container {
+        height: 275mm !important;
+        max-height: 275mm !important;
+        page-break-after: avoid !important;
+        page-break-inside: avoid !important;
+        background-color: #fff !important;
+    }
+
+    /* Forzar colores en impresión */
+    .header,
+    .info-tables th,
+    .products-table th,
+    .totals-section th,
+    .footer,
+    .logo-dots,
+    .document-title {
+        -webkit-print-color-adjust: exact !important;
+        print-color-adjust: exact !important;
+        color-adjust: exact !important;
+    }
+
+    /* Evitar saltos de página en elementos críticos */
+    .header,
+    .info-tables,
+    .products-table,
+    .totals-section,
+    .observations-section,
+    .footer {
+        page-break-inside: avoid !important;
+        break-inside: avoid !important;
+    }
+
+    /* Mantener flexbox en impresión */
+    .header,
+    .footer {
+        display: flex !important;
+    }
+
+    .logo-container {
+        display: flex !important;
+        align-items: center !important;
+    }
+
+    .date-cells {
+        display: flex !important;
+    }
+
+    /* Asegurar que las tablas no se rompan */
+    .info-tables,
+    .products-table {
+        break-inside: avoid !important;
+    }
+}
+
+/* Responsive simplificado */
+@media (max-width: 768px) {
+    .header {
+        flex-direction: column;
+        text-align: center;
+        padding: 12px;
+    }
+    
+    .logo-container {
+        margin-bottom: 10px;
+        justify-content: center;
+    }
+    
+    .title-container {
+        text-align: center;
+    }
+    
+    .footer {
+        flex-direction: column;
+        padding: 12px;
+    }
+    
+    .footer-info {
+        margin-bottom: 10px;
+    }
+
+    .footer-info:last-child {
+        margin-bottom: 0;
+    }
+}
+
+/* Mejoras específicas para estructura de tabla fija */
+.products-table tbody {
+    min-height: 200px; /* Altura mínima para mantener estructura */
+}
+
+.products-table tbody tr {
+    height: 25px; /* Altura fija para filas */
+}
+
+/* Asegurar que los totales se muestren correctamente */
+.totals-section tr:last-child th,
+.totals-section tr:last-child td {
+    font-weight: bold;
+    font-size: 13px !important;
+}

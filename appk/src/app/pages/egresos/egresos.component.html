@@ -1,0 +1,942 @@
+<div class="egresos-container">
+  
+  <!-- HEADER CON FILTROS -->
+  <div class="page-header">
+    <h1>💸 Análisis de Egresos y Gastos</h1>
+    
+    <div class="filters-row">
+      <mat-form-field appearance="outline">
+        <mat-label>Fecha Inicio</mat-label>
+        <input matInput type="date" [formControl]="fechaInicioControl" (change)="onFechaChange()">
+      </mat-form-field>
+
+      <mat-form-field appearance="outline">
+        <mat-label>Fecha Fin</mat-label>
+        <input matInput type="date" [formControl]="fechaFinControl" (change)="onFechaChange()">
+      </mat-form-field>
+
+      <button mat-raised-button color="primary" (click)="loadAnalisisCompleto()">
+        <mat-icon>refresh</mat-icon>
+        Actualizar
+      </button>
+
+      <button mat-raised-button color="accent" (click)="exportToExcel()">
+        <mat-icon>download</mat-icon>
+        Exportar Excel
+      </button>
+    </div>
+  </div>
+
+  <!-- LOADING SPINNER -->
+  <div *ngIf="isLoading" class="loading-container">
+    <mat-spinner></mat-spinner>
+    <p>Cargando análisis...</p>
+  </div>
+
+  <!-- CONTENIDO PRINCIPAL -->
+  <div *ngIf="!isLoading && analisisCompleto" class="content-grid">
+
+    <!-- SECCIÓN 1: RESUMEN GENERAL -->
+    <mat-card class="section-card full-width">
+      <mat-card-header>
+        <mat-card-title>📊 Resumen General de Egresos</mat-card-title>
+      </mat-card-header>
+      <mat-card-content>
+        <div class="kpi-grid">
+          <div class="kpi-card danger">
+            <div class="kpi-icon">📄</div>
+            <div class="kpi-content">
+              <h3>{{formatNumber(resumenGeneral.totalCfdis)}}</h3>
+              <p>Total CFDIs</p>
+              <small>{{resumenGeneral.cfdisVigentes}} vigentes | {{resumenGeneral.cfdisCancelados}} cancelados</small>
+            </div>
+          </div>
+
+          <div class="kpi-card warning">
+            <div class="kpi-icon">💸</div>
+            <div class="kpi-content">
+              <h3>{{formatCurrency(resumenGeneral.subtotal)}}</h3>
+              <p>Total Egresos (sin IVA)</p>
+              <small>Subtotal gastado</small>
+            </div>
+          </div>
+
+          <div class="kpi-card info">
+            <div class="kpi-icon">📋</div>
+            <div class="kpi-content">
+              <h3>{{formatCurrency(resumenGeneral.ivaTotal)}}</h3>
+              <p>IVA Acreditable</p>
+              <small>Impuesto total</small>
+            </div>
+          </div>
+
+          <div class="kpi-card primary">
+            <div class="kpi-icon">💰</div>
+            <div class="kpi-content">
+              <h3>{{formatCurrency(resumenGeneral.total)}}</h3>
+              <p>Total con IVA</p>
+              <small>Monto total gastado</small>
+            </div>
+          </div>
+
+          <div class="kpi-card accent">
+            <div class="kpi-icon">📈</div>
+            <div class="kpi-content">
+              <h3>{{formatCurrency(resumenGeneral.promedioGasto)}}</h3>
+              <p>Gasto Promedio</p>
+              <small>Por CFDI</small>
+            </div>
+          </div>
+
+          <div class="kpi-card" [ngClass]="resumenGeneral.porcentajeVigentes > 90 ? 'success' : 'danger'">
+            <div class="kpi-icon">✅</div>
+            <div class="kpi-content">
+              <h3>{{formatPercentage(resumenGeneral.porcentajeVigentes)}}</h3>
+              <p>CFDIs Vigentes</p>
+              <small>{{resumenGeneral.cfdisVigentes}} de {{resumenGeneral.totalCfdis}}</small>
+            </div>
+          </div>
+        </div>
+      </mat-card-content>
+    </mat-card>
+
+    <!-- SECCIÓN 2: TIPO DE GASTO (DEDUCIBLE/NO DEDUCIBLE) -->
+    <mat-card class="section-card full-width">
+      <mat-card-header>
+        <mat-card-title>🎯 Clasificación por Deducibilidad</mat-card-title>
+      </mat-card-header>
+      <mat-card-content>
+        <div class="deducibilidad-grid">
+          <div class="deducibilidad-item deducible">
+            <div class="deducibilidad-header">
+              <mat-icon>check_circle</mat-icon>
+              <h3>Gastos Deducibles</h3>
+            </div>
+            <div class="deducibilidad-stats">
+              <div class="stat-item">
+                <span class="stat-label">Monto</span>
+                <span class="stat-value">{{formatCurrency(porTipoGasto.deducibles)}}</span>
+              </div>
+              <div class="stat-item">
+                <span class="stat-label">Cantidad</span>
+                <span class="stat-value">{{formatNumber(porTipoGasto.cantidadDeducibles)}} CFDIs</span>
+              </div>
+              <div class="stat-item">
+                <span class="stat-label">Porcentaje</span>
+                <span class="stat-value">{{formatPercentage(porTipoGasto.porcentajeDeducibles)}}</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="deducibilidad-item no-deducible">
+            <div class="deducibilidad-header">
+              <mat-icon>cancel</mat-icon>
+              <h3>Gastos No Deducibles</h3>
+            </div>
+            <div class="deducibilidad-stats">
+              <div class="stat-item">
+                <span class="stat-label">Monto</span>
+                <span class="stat-value">{{formatCurrency(porTipoGasto.noDeducibles)}}</span>
+              </div>
+              <div class="stat-item">
+                <span class="stat-label">Cantidad</span>
+                <span class="stat-value">{{formatNumber(porTipoGasto.cantidadNoDeducibles)}} CFDIs</span>
+              </div>
+              <div class="stat-item">
+                <span class="stat-label">Porcentaje</span>
+                <span class="stat-value">{{formatPercentage(100 - porTipoGasto.porcentajeDeducibles)}}</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </mat-card-content>
+    </mat-card>
+
+    <!-- SECCIÓN 3: GRÁFICA DE TENDENCIA TEMPORAL -->
+    <mat-card class="section-card full-width">
+      <mat-card-header>
+        <mat-card-title>📅 Evolución de Gastos</mat-card-title>
+      </mat-card-header>
+      <mat-card-content>
+        <div class="chart-container" *ngIf="chartDataTemporal.length > 0">
+          <ngx-charts-line-chart
+            [scheme]="colorScheme"
+            [results]="chartDataTemporal"
+            [xAxis]="true"
+            [yAxis]="true"
+            [legend]="true"
+            [showXAxisLabel]="true"
+            [showYAxisLabel]="true"
+            xAxisLabel="Período"
+            yAxisLabel="Monto"
+            [autoScale]="true">
+          </ngx-charts-line-chart>
+        </div>
+        
+        <!-- Tabla de análisis temporal -->
+        <div class="table-responsive mt-3">
+          <table mat-table [dataSource]="analisisTemporal" class="mat-elevation-z2">
+            <ng-container matColumnDef="periodo">
+              <th mat-header-cell *matHeaderCellDef>Período</th>
+              <td mat-cell *matCellDef="let row">{{formatPeriodo(row.periodo)}}</td>
+            </ng-container>
+
+            <ng-container matColumnDef="cantidad">
+              <th mat-header-cell *matHeaderCellDef>Cantidad</th>
+              <td mat-cell *matCellDef="let row">{{formatNumber(row.cantidad)}}</td>
+            </ng-container>
+
+            <ng-container matColumnDef="subtotal">
+              <th mat-header-cell *matHeaderCellDef>Subtotal</th>
+              <td mat-cell *matCellDef="let row">{{formatCurrency(row.subtotal)}}</td>
+            </ng-container>
+
+            <ng-container matColumnDef="iva">
+              <th mat-header-cell *matHeaderCellDef>IVA</th>
+              <td mat-cell *matCellDef="let row">{{formatCurrency(row.iva)}}</td>
+            </ng-container>
+
+            <ng-container matColumnDef="total">
+              <th mat-header-cell *matHeaderCellDef>Total</th>
+              <td mat-cell *matCellDef="let row" class="font-weight-bold text-danger">{{formatCurrency(row.total)}}</td>
+            </ng-container>
+
+            <tr mat-header-row *matHeaderRowDef="['periodo', 'cantidad', 'subtotal', 'iva', 'total']"></tr>
+            <tr mat-row *matRowDef="let row; columns: ['periodo', 'cantidad', 'subtotal', 'iva', 'total']"></tr>
+          </table>
+        </div>
+      </mat-card-content>
+    </mat-card>
+
+    <!-- SECCIÓN 4: TOP PROVEEDORES -->
+    <mat-card class="section-card half-width">
+      <mat-card-header>
+        <mat-card-title>🏆 Top 5 Proveedores por Monto</mat-card-title>
+      </mat-card-header>
+      <mat-card-content>
+        <div class="table-responsive">
+          <table mat-table [dataSource]="topProveedoresPorMonto" class="mat-elevation-z1">
+            <ng-container matColumnDef="nombre">
+              <th mat-header-cell *matHeaderCellDef>Proveedor</th>
+              <td mat-cell *matCellDef="let proveedor">
+                <div class="client-info">
+                  <strong>{{proveedor.nombre}}</strong>
+                  <small>{{proveedor.rfc}}</small>
+                </div>
+              </td>
+            </ng-container>
+
+            <ng-container matColumnDef="cantidad">
+              <th mat-header-cell *matHeaderCellDef class="text-center">CFDIs</th>
+              <td mat-cell *matCellDef="let proveedor" class="text-center">
+                <span class="badge badge-info">{{proveedor.cantidad}}</span>
+              </td>
+            </ng-container>
+
+            <ng-container matColumnDef="totalMonto">
+              <th mat-header-cell *matHeaderCellDef class="text-right">Total</th>
+              <td mat-cell *matCellDef="let proveedor" class="text-right font-weight-bold text-danger">
+                {{formatCurrency(proveedor.totalMonto)}}
+              </td>
+            </ng-container>
+
+            <tr mat-header-row *matHeaderRowDef="['nombre', 'cantidad', 'totalMonto']"></tr>
+            <tr mat-row *matRowDef="let row; columns: ['nombre', 'cantidad', 'totalMonto']"></tr>
+          </table>
+        </div>
+
+        <div *ngIf="topProveedoresPorMonto.length === 0" class="empty-state">
+          <p>No hay datos de proveedores disponibles</p>
+        </div>
+      </mat-card-content>
+    </mat-card>
+
+    <mat-card class="section-card half-width">
+      <mat-card-header>
+        <mat-card-title>📊 Top 5 Proveedores por Cantidad</mat-card-title>
+      </mat-card-header>
+      <mat-card-content>
+        <div class="table-responsive">
+          <table mat-table [dataSource]="topProveedoresPorCantidad" class="mat-elevation-z1">
+            <ng-container matColumnDef="nombre">
+              <th mat-header-cell *matHeaderCellDef>Proveedor</th>
+              <td mat-cell *matCellDef="let proveedor">
+                <div class="client-info">
+                  <strong>{{proveedor.nombre}}</strong>
+                  <small>{{proveedor.rfc}}</small>
+                </div>
+              </td>
+            </ng-container>
+
+            <ng-container matColumnDef="cantidad">
+              <th mat-header-cell *matHeaderCellDef class="text-center">CFDIs</th>
+              <td mat-cell *matCellDef="let proveedor" class="text-center">
+                <span class="badge badge-primary">{{proveedor.cantidad}}</span>
+              </td>
+            </ng-container>
+
+            <ng-container matColumnDef="totalMonto">
+              <th mat-header-cell *matHeaderCellDef class="text-right">Total</th>
+              <td mat-cell *matCellDef="let proveedor" class="text-right">
+                {{formatCurrency(proveedor.totalMonto)}}
+              </td>
+            </ng-container>
+
+            <tr mat-header-row *matHeaderRowDef="['nombre', 'cantidad', 'totalMonto']"></tr>
+            <tr mat-row *matRowDef="let row; columns: ['nombre', 'cantidad', 'totalMonto']"></tr>
+          </table>
+        </div>
+
+        <div *ngIf="topProveedoresPorCantidad.length === 0" class="empty-state">
+          <p>No hay datos de proveedores disponibles</p>
+        </div>
+      </mat-card-content>
+    </mat-card>
+
+    <!-- SECCIÓN 5: FORMA DE PAGO -->
+    <mat-card class="section-card third-width">
+      <mat-card-header>
+        <mat-card-title>💳 Por Forma de Pago</mat-card-title>
+      </mat-card-header>
+      <mat-card-content>
+        <div class="classification-list">
+          <div *ngFor="let forma of porFormaPago" class="classification-item">
+            <div class="classification-header">
+              <span class="classification-label">{{getFormaPagoLabel(forma.formaPago)}}</span>
+              <span class="classification-count badge badge-secondary">{{forma.cantidad}}</span>
+            </div>
+            <div class="classification-amount text-danger">
+              {{formatCurrency(forma.total)}}
+            </div>
+            <mat-progress-bar 
+              mode="determinate" 
+              [value]="(forma.total / resumenGeneral.total) * 100"
+              color="warn">
+            </mat-progress-bar>
+          </div>
+        </div>
+
+        <div *ngIf="porFormaPago.length === 0" class="empty-state">
+          <p>No hay datos disponibles</p>
+        </div>
+      </mat-card-content>
+    </mat-card>
+
+    <!-- SECCIÓN 6: USO DE CFDI -->
+    <mat-card class="section-card two-thirds-width">
+      <mat-card-header>
+        <mat-card-title>🏷️ Por Uso de CFDI</mat-card-title>
+      </mat-card-header>
+      <mat-card-content>
+        <div class="classification-list-horizontal">
+          <div *ngFor="let uso of porUsoCfdi.slice(0, 6)" class="classification-item-horizontal">
+            <div class="classification-header">
+              <span class="classification-label">{{getUsoCfdiLabel(uso.usoCfdi)}}</span>
+              <span class="classification-count badge badge-secondary">{{uso.cantidad}}</span>
+            </div>
+            <div class="classification-amount text-danger">
+              {{formatCurrency(uso.total)}}
+            </div>
+            <mat-progress-bar 
+              mode="determinate" 
+              [value]="(uso.total / resumenGeneral.total) * 100"
+              color="accent">
+            </mat-progress-bar>
+          </div>
+        </div>
+
+        <div *ngIf="porUsoCfdi.length === 0" class="empty-state">
+          <p>No hay datos disponibles</p>
+        </div>
+      </mat-card-content>
+    </mat-card>
+
+    <!-- SECCIÓN 7: INFORMACIÓN FISCAL -->
+    <mat-card class="section-card half-width">
+      <mat-card-header>
+        <mat-card-title>🧾 Información Fiscal</mat-card-title>
+      </mat-card-header>
+      <mat-card-content>
+        <div class="fiscal-grid">
+          <div class="fiscal-item acreditable">
+            <mat-icon color="primary">add_circle</mat-icon>
+            <div class="fiscal-content">
+              <h4>IVA Acreditable</h4>
+              <p class="amount">{{formatCurrency(informacionFiscal.ivaAcreditable)}}</p>
+              <small>A favor del contribuyente</small>
+            </div>
+          </div>
+
+          <div class="fiscal-item">
+            <mat-icon color="warn">remove_circle</mat-icon>
+            <div class="fiscal-content">
+              <h4>ISR Retenido</h4>
+              <p class="amount">{{formatCurrency(informacionFiscal.isrRetenido)}}</p>
+            </div>
+          </div>
+
+          <div class="fiscal-item">
+            <mat-icon color="warn">remove_circle</mat-icon>
+            <div class="fiscal-content">
+              <h4>IVA Retenido</h4>
+              <p class="amount">{{formatCurrency(informacionFiscal.ivaRetenido)}}</p>
+            </div>
+          </div>
+
+          <div class="fiscal-item">
+            <mat-icon color="warn">remove_circle</mat-icon>
+            <div class="fiscal-content">
+              <h4>IEPS Retenido</h4>
+              <p class="amount">{{formatCurrency(informacionFiscal.iepsRetenido)}}</p>
+            </div>
+          </div>
+
+          <div class="fiscal-item complementos">
+            <mat-icon color="accent">receipt_long</mat-icon>
+            <div class="fiscal-content">
+              <h4>CFDIs de Pago</h4>
+              <p class="amount">{{formatNumber(informacionFiscal.cfdisPago)}}</p>
+              <small>Complementos de pago</small>
+            </div>
+          </div>
+
+          <div class="fiscal-item total">
+            <mat-icon>calculate</mat-icon>
+            <div class="fiscal-content">
+              <h4>Total Retenciones</h4>
+              <p class="amount">{{formatCurrency(informacionFiscal.totalRetenciones)}}</p>
+            </div>
+          </div>
+        </div>
+
+        <mat-divider class="my-3"></mat-divider>
+
+        <div class="fiscal-summary">
+          <p class="info-text">
+            <mat-icon class="info-icon">info</mat-icon>
+            El IVA acreditable puede restarse del IVA a pagar. Las retenciones ya fueron pagadas al SAT por tus proveedores.
+          </p>
+        </div>
+      </mat-card-content>
+    </mat-card>
+
+    <!-- SECCIÓN 8: GASTOS RECURRENTES -->
+    <mat-card class="section-card half-width">
+      <mat-card-header>
+        <mat-card-title>🔄 Gastos Recurrentes</mat-card-title>
+      </mat-card-header>
+      <mat-card-content>
+        <div class="table-responsive">
+          <table mat-table [dataSource]="gastosRecurrentes" class="mat-elevation-z1">
+            <ng-container matColumnDef="nombre">
+              <th mat-header-cell *matHeaderCellDef>Proveedor</th>
+              <td mat-cell *matCellDef="let gasto">
+                <div class="client-info">
+                  <strong>{{gasto.nombre}}</strong>
+                  <small>{{gasto.rfc}}</small>
+                </div>
+              </td>
+            </ng-container>
+
+            <ng-container matColumnDef="cantidad">
+              <th mat-header-cell *matHeaderCellDef class="text-center">Frecuencia</th>
+              <td mat-cell *matCellDef="let gasto" class="text-center">
+                <span class="badge badge-warning">{{gasto.cantidad}} CFDIs</span>
+              </td>
+            </ng-container>
+
+            <ng-container matColumnDef="montoPromedio">
+              <th mat-header-cell *matHeaderCellDef class="text-right">Promedio</th>
+              <td mat-cell *matCellDef="let gasto" class="text-right">
+                {{formatCurrency(gasto.montoPromedio)}}
+              </td>
+            </ng-container>
+
+            <ng-container matColumnDef="totalMonto">
+              <th mat-header-cell *matHeaderCellDef class="text-right">Total</th>
+              <td mat-cell *matCellDef="let gasto" class="text-right font-weight-bold">
+                {{formatCurrency(gasto.totalMonto)}}
+              </td>
+            </ng-container>
+
+            <tr mat-header-row *matHeaderRowDef="['nombre', 'cantidad', 'montoPromedio', 'totalMonto']"></tr>
+            <tr mat-row *matRowDef="let row; columns: ['nombre', 'cantidad', 'montoPromedio', 'totalMonto']"></tr>
+          </table>
+        </div>
+
+        <div *ngIf="gastosRecurrentes.length === 0" class="empty-state">
+          <mat-icon>check_circle</mat-icon>
+          <p>No se detectaron gastos recurrentes</p>
+        </div>
+
+        <div *ngIf="gastosRecurrentes.length > 0" class="info-box mt-3">
+          <mat-icon>lightbulb</mat-icon>
+          <p>Estos proveedores tienen más de 2 CFDIs en el período. Considera negociar mejores condiciones.</p>
+        </div>
+      </mat-card-content>
+    </mat-card>
+
+    <!-- SECCIÓN 9: PROVEEDORES NUEVOS -->
+    <mat-card class="section-card full-width">
+      <mat-card-header>
+        <mat-card-title>🆕 Proveedores Nuevos del Período</mat-card-title>
+      </mat-card-header>
+      <mat-card-content>
+        <div class="table-responsive">
+          <table mat-table [dataSource]="proveedoresNuevos" class="mat-elevation-z1">
+            <ng-container matColumnDef="nombre">
+              <th mat-header-cell *matHeaderCellDef>Proveedor</th>
+              <td mat-cell *matCellDef="let proveedor">
+                <div class="client-info">
+                  <strong>{{proveedor.nombre}}</strong>
+                  <small>{{proveedor.rfc}}</small>
+                </div>
+              </td>
+            </ng-container>
+
+            <ng-container matColumnDef="primeraFactura">
+              <th mat-header-cell *matHeaderCellDef>Primera Factura</th>
+              <td mat-cell *matCellDef="let proveedor">
+                <span class="badge badge-success">{{formatDate(proveedor.primeraFactura)}}</span>
+              </td>
+            </ng-container>
+
+            <ng-container matColumnDef="cantidadFacturas">
+              <th mat-header-cell *matHeaderCellDef class="text-center">CFDIs</th>
+              <td mat-cell *matCellDef="let proveedor" class="text-center">
+                {{proveedor.cantidadFacturas}}
+              </td>
+            </ng-container>
+
+            <ng-container matColumnDef="totalMonto">
+              <th mat-header-cell *matHeaderCellDef class="text-right">Total</th>
+              <td mat-cell *matCellDef="let proveedor" class="text-right font-weight-bold">
+                {{formatCurrency(proveedor.totalMonto)}}
+              </td>
+            </ng-container>
+
+            <tr mat-header-row *matHeaderRowDef="['nombre', 'primeraFactura', 'cantidadFacturas', 'totalMonto']"></tr>
+            <tr mat-row *matRowDef="let row; columns: ['nombre', 'primeraFactura', 'cantidadFacturas', 'totalMonto']"></tr>
+          </table>
+        </div>
+
+        <div *ngIf="proveedoresNuevos.length === 0" class="empty-state">
+          <mat-icon>info</mat-icon>
+          <p>No se encontraron proveedores nuevos en este período</p>
+        </div>
+      </mat-card-content>
+    </mat-card>
+
+  </div>
+
+  <!-- MENSAJE SI NO HAY DATOS -->
+  <div *ngIf="!isLoading && !analisisCompleto" class="empty-state-main">
+    <mat-icon>analytics</mat-icon>
+    <h2>No hay datos disponibles</h2>
+    <p>Selecciona un rango de fechas y presiona "Actualizar" para ver el análisis.</p>
+  </div>
+
+  <!-- ====== SIDE SHEET DE BÚSQUEDA AVANZADA ====== -->
+<div class="side-sheet-overlay" *ngIf="sideSheetOpen" (click)="closeSearchPanel()"></div>
+
+<div class="side-sheet" [class.open]="sideSheetOpen">
+  <!-- Header del Side Sheet -->
+  <div class="side-sheet-header">
+    <h2>
+      <mat-icon>search</mat-icon>
+      Búsqueda Avanzada de Egresos
+    </h2>
+    <button mat-icon-button (click)="closeSearchPanel()">
+      <mat-icon>close</mat-icon>
+    </button>
+  </div>
+
+  <!-- Contenido del Side Sheet -->
+  <div class="side-sheet-content">
+    
+    <!-- Búsqueda Rápida (Autocomplete) -->
+    <div class="search-section">
+      <h3>🔍 Búsqueda Rápida</h3>
+      <mat-form-field appearance="outline" class="full-width">
+        <mat-label>Buscar por RFC, Nombre, UUID, Folio...</mat-label>
+        <input 
+          matInput 
+          [(ngModel)]="searchQuery" 
+          (input)="onSearchChange()"
+          placeholder="Escribe al menos 3 caracteres">
+        <mat-icon matPrefix>search</mat-icon>
+        <button 
+          mat-icon-button 
+          matSuffix 
+          *ngIf="searchQuery" 
+          (click)="searchQuery = ''; searchResults = []">
+          <mat-icon>clear</mat-icon>
+        </button>
+      </mat-form-field>
+
+      <!-- Loading de búsqueda -->
+      <div *ngIf="isSearching" class="search-loading">
+        <mat-spinner diameter="30"></mat-spinner>
+        <span>Buscando...</span>
+      </div>
+
+      <!-- Resultados en tiempo real -->
+      <div *ngIf="searchResults.length > 0 && !isSearching" class="search-results-quick">
+        <p class="results-count">{{ searchResults.length }} resultados encontrados</p>
+      </div>
+    </div>
+
+    <mat-divider></mat-divider>
+
+    <!-- Filtros Avanzados -->
+    <div class="search-section">
+      <h3>🎯 Filtros Avanzados</h3>
+
+      <!-- RFC -->
+      <mat-form-field appearance="outline" class="full-width">
+        <mat-label>RFC del Proveedor</mat-label>
+        <input matInput [(ngModel)]="searchFilters.rfc" placeholder="Ej: ABC123456XYZ">
+        <mat-icon matPrefix>badge</mat-icon>
+      </mat-form-field>
+
+      <!-- Nombre -->
+      <mat-form-field appearance="outline" class="full-width">
+        <mat-label>Nombre del Proveedor</mat-label>
+        <input matInput [(ngModel)]="searchFilters.nombre" placeholder="Ej: Proveedor SA de CV">
+        <mat-icon matPrefix>business</mat-icon>
+      </mat-form-field>
+
+      <!-- UUID -->
+      <mat-form-field appearance="outline" class="full-width">
+        <mat-label>UUID (Folio Fiscal)</mat-label>
+        <input matInput [(ngModel)]="searchFilters.uuid" placeholder="Ej: 12345678-1234-1234-1234-123456789012">
+        <mat-icon matPrefix>fingerprint</mat-icon>
+      </mat-form-field>
+
+      <!-- Folio -->
+      <mat-form-field appearance="outline" class="full-width">
+        <mat-label>Folio</mat-label>
+        <input matInput [(ngModel)]="searchFilters.folio" placeholder="Ej: A-001">
+        <mat-icon matPrefix>receipt</mat-icon>
+      </mat-form-field>
+
+      <!-- Serie -->
+      <mat-form-field appearance="outline" class="full-width">
+        <mat-label>Serie</mat-label>
+        <input matInput [(ngModel)]="searchFilters.serie" placeholder="Ej: A">
+        <mat-icon matPrefix>label</mat-icon>
+      </mat-form-field>
+
+      <!-- Rango de Fechas -->
+      <div class="date-range">
+        <mat-form-field appearance="outline" class="half-width">
+          <mat-label>Fecha Inicio</mat-label>
+          <input matInput type="date" [(ngModel)]="searchFilters.fechaInicio">
+          <mat-icon matPrefix>calendar_today</mat-icon>
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" class="half-width">
+          <mat-label>Fecha Fin</mat-label>
+          <input matInput type="date" [(ngModel)]="searchFilters.fechaFin">
+          <mat-icon matPrefix>calendar_today</mat-icon>
+        </mat-form-field>
+      </div>
+
+      <!-- Rango de Montos -->
+      <div class="amount-range">
+        <mat-form-field appearance="outline" class="half-width">
+          <mat-label>Monto Mínimo</mat-label>
+          <input matInput type="number" [(ngModel)]="searchFilters.montoMin" placeholder="0.00">
+          <span matPrefix>$&nbsp;</span>
+          <mat-icon matPrefix>attach_money</mat-icon>
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" class="half-width">
+          <mat-label>Monto Máximo</mat-label>
+          <input matInput type="number" [(ngModel)]="searchFilters.montoMax" placeholder="0.00">
+          <span matPrefix>$&nbsp;</span>
+          <mat-icon matPrefix>attach_money</mat-icon>
+        </mat-form-field>
+      </div>
+
+      <!-- Botones de Acción -->
+      <div class="filter-actions">
+        <button mat-raised-button color="primary" (click)="buscarAvanzado()" [disabled]="isSearching">
+          <mat-icon>search</mat-icon>
+          Buscar
+        </button>
+        <button mat-stroked-button (click)="resetSearchFilters()">
+          <mat-icon>clear_all</mat-icon>
+          Limpiar Filtros
+        </button>
+      </div>
+    </div>
+
+    <mat-divider></mat-divider>
+
+    <!-- Resultados de Búsqueda -->
+    <div class="search-section" *ngIf="searchResults.length > 0">
+  <h3>📋 Resultados ({{ searchResults.length }})</h3>
+
+  <div class="results-list">
+    <mat-card *ngFor="let cfdi of searchResults" class="result-card" (click)="selectCfdi(cfdi)">
+      <mat-card-content>
+        <div class="result-header">
+          <div class="result-info">
+            <h4>{{ cfdi.nombre_emisor || 'Sin nombre' }}</h4>
+            <p class="rfc">RFC: {{ cfdi.rfc_emisor || 'N/A' }}</p>
+          </div>
+          <mat-chip [color]="getEstadoBadgeColor(cfdi.estado_procesamiento)" selected>
+            {{ cfdi.estado_procesamiento || 'PROCESADO' }}
+          </mat-chip>
+        </div>
+
+        <div class="result-details">
+          <div class="detail-item">
+            <mat-icon>receipt</mat-icon>
+            <span>{{ cfdi.serie || '' }}{{ cfdi.folio || 'S/N' }}</span>
+          </div>
+          <div class="detail-item">
+            <mat-icon>calendar_today</mat-icon>
+            <span>{{ formatDate(cfdi.fecha) }}</span>
+          </div>
+          <div class="detail-item">
+            <mat-icon>attach_money</mat-icon>
+            <span class="amount">{{ formatCurrency(cfdi.total) }}</span>
+          </div>
+        </div>
+
+        <div class="result-uuid">
+          <small>UUID: {{ cfdi.folio_fiscal || 'N/A' }}</small>
+        </div>
+      </mat-card-content>
+    </mat-card>
+  </div>
+    </div>
+
+    <!-- Estado Vacío -->
+    <div class="empty-state" *ngIf="searchResults.length === 0 && !isSearching && searchQuery.length >= 3">
+      <mat-icon>search_off</mat-icon>
+      <p>No se encontraron resultados</p>
+      <small>Intenta con otros criterios de búsqueda</small>
+    </div>
+
+  </div>
+</div>
+
+<!-- ====== PANEL DE DETALLES DEL CFDI ====== -->
+<div class="detail-overlay" *ngIf="detailPanelOpen" (click)="closeDetailPanel()"></div>
+
+<div class="detail-panel" [class.open]="detailPanelOpen">
+  <div class="detail-header">
+    <h2>
+      <mat-icon>description</mat-icon>
+      Detalles del CFDI
+    </h2>
+    <button mat-icon-button (click)="closeDetailPanel()">
+      <mat-icon>close</mat-icon>
+    </button>
+  </div>
+
+  <div class="detail-content" *ngIf="selectedCfdi">
+    
+    <!-- Información General -->
+    <mat-card class="detail-section">
+      <mat-card-header>
+        <mat-card-title>📄 Información General</mat-card-title>
+      </mat-card-header>
+      <mat-card-content>
+        <div class="info-grid">
+          <div class="info-item">
+            <label>UUID:</label>
+            <span>{{ selectedCfdi.folio_fiscal || 'N/A' }}</span>
+          </div>
+          <div class="info-item">
+            <label>Serie - Folio:</label>
+            <span>{{ selectedCfdi.serie || '' }} {{ selectedCfdi.folio || 'S/N' }}</span>
+          </div>
+          <div class="info-item">
+            <label>Fecha:</label>
+            <span>{{ formatDate(selectedCfdi.fecha) }}</span>
+          </div>
+          <div class="info-item">
+            <label>Estado:</label>
+            <mat-chip [color]="getEstadoBadgeColor(selectedCfdi.estado_procesamiento)" selected>
+              {{ selectedCfdi.estado_procesamiento || 'PROCESADO' }}
+            </mat-chip>
+          </div>
+          <div class="info-item">
+            <label>Método de Pago:</label>
+            <span>{{ selectedCfdi.metodo_pago || 'N/A' }}</span>
+          </div>
+          <div class="info-item" *ngIf="selectedCfdi.forma_pago">
+            <label>Forma de Pago:</label>
+            <span>{{ getFormaPagoLabel(selectedCfdi.forma_pago) }}</span>
+          </div>
+          <div class="info-item">
+            <label>Moneda:</label>
+            <span>{{ selectedCfdi.moneda || 'MXN' }}</span>
+          </div>
+          <div class="info-item" *ngIf="selectedCfdi.tipo_cambio">
+            <label>Tipo de Cambio:</label>
+            <span>{{ selectedCfdi.tipo_cambio }}</span>
+          </div>
+        </div>
+      </mat-card-content>
+    </mat-card>
+
+    <!-- Emisor (Proveedor) -->
+    <mat-card class="detail-section">
+      <mat-card-header>
+        <mat-card-title>🏢 Emisor (Proveedor)</mat-card-title>
+      </mat-card-header>
+      <mat-card-content>
+        <div class="info-grid">
+          <div class="info-item">
+            <label>Nombre:</label>
+            <span>{{ selectedCfdi.nombre_emisor || 'N/A' }}</span>
+          </div>
+          <div class="info-item">
+            <label>RFC:</label>
+            <span>{{ selectedCfdi.rfc_emisor || 'N/A' }}</span>
+          </div>
+          <div class="info-item" *ngIf="selectedCfdi.regimen_fiscal_emisor">
+            <label>Régimen Fiscal:</label>
+            <span>{{ selectedCfdi.regimen_fiscal_emisor }}</span>
+          </div>
+        </div>
+      </mat-card-content>
+    </mat-card>
+
+    <!-- Receptor (Tu empresa) -->
+    <mat-card class="detail-section">
+      <mat-card-header>
+        <mat-card-title>👤 Receptor (Tu Empresa)</mat-card-title>
+      </mat-card-header>
+      <mat-card-content>
+        <div class="info-grid">
+          <div class="info-item">
+            <label>Nombre:</label>
+            <span>{{ selectedCfdi.nombre_receptor || 'N/A' }}</span>
+          </div>
+          <div class="info-item">
+            <label>RFC:</label>
+            <span>{{ selectedCfdi.rfc_receptor || 'N/A' }}</span>
+          </div>
+          <div class="info-item" *ngIf="selectedCfdi.uso_cfdi">
+            <label>Uso de CFDI:</label>
+            <span>{{ getUsoCfdiLabel(selectedCfdi.uso_cfdi) }}</span>
+          </div>
+        </div>
+      </mat-card-content>
+    </mat-card>
+
+    <!-- Montos -->
+    <mat-card class="detail-section">
+      <mat-card-header>
+        <mat-card-title>💰 Montos</mat-card-title>
+      </mat-card-header>
+      <mat-card-content>
+        <div class="info-grid">
+          <div class="info-item">
+            <label>Subtotal:</label>
+            <span>{{ formatCurrency(selectedCfdi.sub_total || 0) }}</span>
+          </div>
+          <div class="info-item" *ngIf="selectedCfdi.descuento && selectedCfdi.descuento > 0">
+            <label>Descuento:</label>
+            <span>{{ formatCurrency(selectedCfdi.descuento) }}</span>
+          </div>
+          <div class="info-item">
+            <label>IVA Trasladado:</label>
+            <span>{{ formatCurrency(selectedCfdi.iva_trasladado || 0) }}</span>
+          </div>
+          <div class="info-item" *ngIf="selectedCfdi.total_impuestos_trasladados && selectedCfdi.total_impuestos_trasladados > 0">
+            <label>Total Impuestos Trasladados:</label>
+            <span>{{ formatCurrency(selectedCfdi.total_impuestos_trasladados) }}</span>
+          </div>
+          <div class="info-item" *ngIf="selectedCfdi.total_impuestos_retenidos && selectedCfdi.total_impuestos_retenidos > 0">
+            <label>Total Impuestos Retenidos:</label>
+            <span class="text-danger">{{ formatCurrency(selectedCfdi.total_impuestos_retenidos) }}</span>
+          </div>
+          <div class="info-item">
+            <label>Total:</label>
+            <span class="amount-total">{{ formatCurrency(selectedCfdi.total || 0) }}</span>
+          </div>
+        </div>
+      </mat-card-content>
+    </mat-card>
+
+    <!-- Retenciones (si existen) -->
+    <mat-card class="detail-section" *ngIf="tieneRetenciones(selectedCfdi)">
+      <mat-card-header>
+        <mat-card-title>📊 Retenciones</mat-card-title>
+      </mat-card-header>
+      <mat-card-content>
+        <div class="info-grid">
+          <div class="info-item" *ngIf="selectedCfdi.iva_retenido && selectedCfdi.iva_retenido > 0">
+            <label>IVA Retenido:</label>
+            <span class="text-danger">{{ formatCurrency(selectedCfdi.iva_retenido) }}</span>
+          </div>
+          <div class="info-item" *ngIf="selectedCfdi.isr_retenido && selectedCfdi.isr_retenido > 0">
+            <label>ISR Retenido:</label>
+            <span class="text-danger">{{ formatCurrency(selectedCfdi.isr_retenido) }}</span>
+          </div>
+          <div class="info-item" *ngIf="selectedCfdi.ieps_retenido && selectedCfdi.ieps_retenido > 0">
+            <label>IEPS Retenido:</label>
+            <span class="text-danger">{{ formatCurrency(selectedCfdi.ieps_retenido) }}</span>
+          </div>
+        </div>
+      </mat-card-content>
+    </mat-card>
+
+    <!-- Acciones -->
+    <div class="detail-actions">
+      <button mat-raised-button color="primary" (click)="descargarXml(selectedCfdi)">
+        <mat-icon>code</mat-icon>
+        Descargar XML
+      </button>
+      <button mat-raised-button color="accent" (click)="descargarPdf(selectedCfdi)">
+  <mat-icon>picture_as_pdf</mat-icon>
+  Descargar PDF
+</button>
+    </div>
+
+    <!-- Secciones adicionales con tabs -->
+    <mat-tab-group class="detail-tabs" *ngIf="selectedCfdi.conceptos_detalle">
+      <mat-tab label="Conceptos/Partidas">
+        <div class="tab-content">
+          <div *ngIf="selectedCfdi.conceptos_detalle && selectedCfdi.conceptos_detalle.length > 0; else noConceptos">
+            <div class="partida-item" *ngFor="let concepto of selectedCfdi.conceptos_detalle; let i = index">
+              <div class="partida-number">{{ i + 1 }}</div>
+              <div class="partida-info">
+                <h4>{{ concepto.descripcion || 'Sin descripción' }}</h4>
+                <div class="partida-details">
+                  <span>Cant: {{ concepto.cantidad || 1 }}</span>
+                  <span>P.U: {{ formatCurrency(concepto.valorUnitario || 0) }}</span>
+                  <span class="partida-total">Total: {{ formatCurrency(concepto.importe || 0) }}</span>
+                </div>
+              </div>
+            </div>
+          </div>
+          <ng-template #noConceptos>
+            <p class="empty-message">No hay conceptos registrados</p>
+          </ng-template>
+        </div>
+      </mat-tab>
+    </mat-tab-group>
+
+  </div>
+</div>
+
+<!-- Botón flotante para abrir el side sheet -->
+<button 
+  mat-fab 
+  color="primary" 
+  class="search-fab" 
+  (click)="openSearchPanel()"
+  matTooltip="Búsqueda Avanzada"
+  matTooltipPosition="left">
+  <mat-icon>search</mat-icon>
+</button>
+
+</div>

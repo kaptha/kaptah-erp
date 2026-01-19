@@ -1,0 +1,28 @@
+version: '3.8'
+
+services:
+  email-service:
+    build:
+      context: .
+      dockerfile: Dockerfile.dev
+    volumes:
+      - .:/app
+      - /app/node_modules
+    environment:
+      NODE_ENV: development
+    command: npm run start:dev
+
+  postgres:
+    ports:
+      - "5433:5432"
+
+  redis:
+    ports:
+      - "6380:6379"
+
+  # Herramientas de desarrollo activadas
+  redis-commander:
+    profiles: []
+
+  pgadmin:
+    profiles: []

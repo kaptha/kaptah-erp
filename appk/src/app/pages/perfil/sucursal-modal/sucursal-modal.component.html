@@ -1,0 +1,45 @@
+<h2 mat-dialog-title>Crear Sucursal</h2>
+<mat-dialog-content>
+  <form [formGroup]="sucursalForm" (ngSubmit)="onSubmit()">
+    <mat-form-field appearance="outline" class="full-width">
+      <mat-label>Alias sucursal</mat-label>
+      <input matInput formControlName="alias">
+    </mat-form-field>
+    <mat-form-field appearance="outline" class="full-width">
+      <mat-label>Telefono</mat-label>
+      <input matInput formControlName="telefono">
+    </mat-form-field>
+    <mat-form-field appearance="outline" class="full-width">
+      <mat-label>Direccion</mat-label>
+      <input matInput formControlName="direccion">
+    </mat-form-field>
+    <mat-form-field>
+      <mat-label>Código Postal</mat-label>
+      <input matInput 
+             formControlName="codigoPostal" 
+             [matAutocomplete]="auto">
+      <mat-autocomplete #auto="matAutocomplete" 
+                        [displayWith]="displayFn"
+                        (optionSelected)="onCodigoPostalSeleccionado($event)">
+        <mat-option *ngFor="let option of opcionesFiltradas | async" [value]="option">
+          {{option}}
+        </mat-option>
+      </mat-autocomplete>
+    </mat-form-field>
+    <mat-form-field>
+      <mat-label>Colonia</mat-label>
+      <mat-select formControlName="colonia">
+        <mat-option *ngFor="let colonia of colonias" [value]="colonia">
+          {{colonia}}
+        </mat-option>
+      </mat-select>
+    </mat-form-field>
+    <mat-dialog-actions>
+  <button mat-button mat-dialog-close class="btn-danger">Cancelar</button>
+  <button mat-button (click)="guardarSucursal()" class="btn-primary" type="submit" [disabled]="!sucursalForm.valid">Crear</button>
+</mat-dialog-actions>
+  </form>
+</mat-dialog-content>
+
+
+

@@ -1,0 +1,559 @@
+/* modern-quote.css - Diseño moderno para cotizaciones optimizado para html2pdf */
+
+/* Configuración base */
+@page {
+    size: A4;
+    margin: 8mm;
+}
+
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    margin: 0;
+    padding: 0;
+    color: #333;
+    background-color: #fff;
+    line-height: 1.4;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+}
+
+/* Contenedor principal */
+.container {
+    width: 100%;
+    max-width: 190mm;
+    height: auto;
+    max-height: 250mm;
+    margin: 0 auto;
+    position: relative;
+    padding: 0;
+    box-sizing: border-box;
+    background: white;
+    border: none !important;
+    border-radius: 0 !important;
+    overflow: hidden;
+    page-break-after: avoid;
+    page-break-inside: avoid;
+}
+
+/* Elementos decorativos simplificados para html2pdf */
+.decoration-top-right {
+    position: absolute;
+    top: -20px;
+    right: -20px;
+    width: 120px;
+    height: 120px;
+    z-index: -1;
+}
+
+/* Starburst simplificado con CSS */
+.burst {
+    position: absolute;
+    top: 0;
+    right: 0;
+    width: 100px;
+    height: 100px;
+    background: linear-gradient(135deg, #8a2be2, #5d15a1);
+    /* Crear forma de estrella simplificada con border-radius */
+    border-radius: 20% 80% 20% 80%;
+    transform: rotate(45deg);
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+}
+
+.burst::after {
+    content: "";
+    position: absolute;
+    top: 10px;
+    left: 10px;
+    width: 80px;
+    height: 80px;
+    background: rgba(255, 102, 0, 0.3);
+    border-radius: 20% 80% 20% 80%;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+}
+
+.decoration-bottom-left {
+    position: absolute;
+    bottom: -30px;
+    left: -30px;
+    width: 200px;
+    height: 200px;
+    z-index: -1;
+    overflow: hidden;
+}
+
+.quarter-circle {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 200px;
+    height: 200px;
+    background: linear-gradient(135deg, #8a2be2, #5d15a1);
+    border-radius: 100% 0 0 0;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+}
+
+.quarter-circle::after {
+    content: "";
+    position: absolute;
+    top: 30px;
+    left: 30px;
+    width: 140px;
+    height: 140px;
+    background: rgba(255, 102, 0, 0.3);
+    border-radius: 100% 0 0 0;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+}
+
+.quarter-circle-outline {
+    position: absolute;
+    top: 40px;
+    left: 40px;
+    width: 100px;
+    height: 100px;
+    border: 2px solid rgba(255, 102, 0, 0.5);
+    border-radius: 100% 0 0 0;
+}
+
+/* Encabezado */
+.header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    padding: 30px 15px 15px; /* Reducido */
+    position: relative;
+    z-index: 1;
+}
+
+.company-logo {
+    display: flex;
+    align-items: center;
+}
+
+.logo-shape {
+    width: 60px; /* Reducido */
+    height: 60px;
+    position: relative;
+    margin-right: 10px;
+}
+
+.logo-img {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    border-radius: 8px;
+}
+
+.logo-fallback {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    display: none; /* Solo mostrar si falla la imagen */
+}
+
+.logo-circle {
+    position: absolute;
+    width: 45px; /* Reducido */
+    height: 45px;
+    border: 2px solid #ff6600;
+    border-radius: 50%;
+    bottom: 0;
+    left: 0;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+}
+
+.logo-quarter {
+    position: absolute;
+    width: 45px; /* Reducido */
+    height: 45px;
+    background-color: #8a2be2;
+    border-radius: 0 0 0 100%;
+    transform: rotate(180deg);
+    top: 0;
+    right: 0;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+}
+
+.company-name h1 {
+    margin: 0;
+    font-size: 1.3rem; /* Reducido */
+    color: #8a2be2;
+    font-weight: bold;
+    line-height: 1.2;
+}
+
+.company-name h2 {
+    margin: 0;
+    font-size: 1.1rem; /* Reducido */
+    color: #aaa;
+    font-weight: normal;
+    line-height: 1.2;
+}
+
+.date {
+    font-size: 1rem; /* Reducido */
+    padding: 8px 15px; /* Reducido */
+    color: #333;
+    font-weight: 600;
+}
+
+/* Información del cliente */
+.client-info {
+    padding: 15px; /* Reducido */
+    margin-top: 20px; /* Reducido */
+    position: relative;
+    z-index: 1;
+}
+
+.client-name {
+    font-size: 1.2rem; /* Reducido */
+    font-weight: bold;
+    color: #8a2be2;
+    margin-bottom: 5px;
+}
+
+.client-contact {
+    margin-bottom: 20px; /* Reducido */
+}
+
+.client-contact div {
+    margin-bottom: 3px;
+    font-size: 0.9rem; /* Reducido */
+    color: #666;
+}
+
+/* Tabla de servicios/productos moderna */
+.items-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-bottom: 15px; /* Reducido */
+    position: relative;
+    z-index: 1;
+}
+
+.items-table th {
+    background-color: #8a2be2;
+    color: white;
+    padding: 10px 12px; /* Reducido */
+    text-align: left;
+    font-weight: bold;
+    font-size: 0.9rem; /* Reducido */
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+}
+
+.items-table th:nth-child(2),
+.items-table th:nth-child(3),
+.items-table th:nth-child(4) {
+    text-align: center;
+}
+
+.items-table th:nth-child(4) {
+    text-align: right;
+}
+
+.items-table td {
+    padding: 10px 12px; /* Reducido */
+    font-size: 0.85rem; /* Reducido */
+    border-bottom: 1px solid #eee;
+}
+
+.items-table tr:nth-child(even) {
+    background-color: #f0e6ff; /* Lila claro */
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+}
+
+.items-table td:first-child {
+    text-align: left;
+}
+
+.items-table td:nth-child(2),
+.items-table td:nth-child(3) {
+    text-align: center;
+}
+
+.items-table td:nth-child(4) {
+    text-align: right;
+    font-weight: 600;
+}
+
+/* Totales */
+.totals-section {
+    margin-top: 15px; /* Reducido */
+    display: flex;
+    justify-content: flex-end;
+    position: relative;
+    z-index: 1;
+}
+
+.totals-table {
+    width: 250px; /* Reducido */
+}
+
+.totals-row {
+    display: flex;
+    justify-content: space-between;
+    padding: 6px 12px; /* Reducido */
+    border-bottom: 1px solid #eee;
+    font-size: 0.9rem; /* Reducido */
+}
+
+.totals-row:last-child {
+    border-bottom: none;
+}
+
+.grand-total {
+    background-color: #8a2be2 !important;
+    color: white !important;
+    padding: 10px 12px !important; /* Reducido */
+    font-weight: bold !important;
+    font-size: 1rem !important;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+}
+
+/* Sección nota */
+.note-section {
+    padding: 15px; /* Reducido */
+    margin-top: 20px; /* Reducido */
+    display: flex;
+    flex-direction: column;
+    position: relative;
+    z-index: 1;
+}
+
+.note-title {
+    font-weight: bold;
+    color: #8a2be2;
+    margin-bottom: 8px; /* Reducido */
+    font-size: 1.1rem; /* Reducido */
+}
+
+.note-content {
+    margin-bottom: 20px; /* Reducido */
+    font-size: 0.9rem; /* Reducido */
+    color: #666;
+    line-height: 1.4;
+}
+
+/* Firma */
+.signature-section {
+    display: flex;
+    justify-content: flex-end;
+    margin-top: 15px; /* Reducido */
+    margin-right: 15px; /* Reducido */
+}
+
+.signature {
+    text-align: center;
+}
+
+.signature-img {
+    max-height: 40px; /* Reducido */
+    margin-bottom: 5px;
+}
+
+.signature-line {
+    width: 150px; /* Reducido */
+    height: 1px;
+    background-color: #333;
+    margin: 8px auto; /* Reducido */
+}
+
+.signature-text {
+    font-size: 0.85rem; /* Reducido */
+    font-weight: bold;
+    color: #333;
+}
+
+.signature-document {
+    font-size: 0.8rem; /* Reducido */
+    color: #666;
+    margin-top: 2px;
+}
+
+/* Pie de página moderno */
+.footer {
+    background-color: #f0e6ff;
+    padding: 15px; /* Reducido */
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-radius: 0 60px 0 0; /* Reducido */
+    margin-top: 25px; /* Reducido */
+    position: relative;
+    z-index: 1;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+}
+
+.contact-item {
+    display: flex;
+    align-items: center;
+    margin: 0 8px; /* Reducido */
+}
+
+.contact-icon {
+    width: 30px; /* Reducido */
+    height: 30px;
+    background-color: #8a2be2;
+    border-radius: 50%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin-right: 8px; /* Reducido */
+    color: white;
+    font-size: 0.9rem; /* Reducido */
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+}
+
+.contact-item div:last-child {
+    font-size: 0.8rem; /* Reducido */
+    color: #333;
+}
+
+/* Manejo de imagen del logo */
+.logo-img:not([src]),
+.logo-img[src=""],
+.logo-img[src="#"] {
+    display: none;
+}
+
+.logo-img:not([src]) + .logo-fallback,
+.logo-img[src=""] + .logo-fallback,
+.logo-img[src="#"] + .logo-fallback {
+    display: block !important;
+}
+
+/* Ajustes específicos para impresión */
+@media print {
+    body, .container {
+        margin: 0;
+        padding: 0;
+        width: 100%;
+    }
+    
+    .container {
+        height: 275mm !important;
+        max-height: 275mm !important;
+        page-break-after: avoid !important;
+        page-break-inside: avoid !important;
+    }
+    
+    /* Forzar colores en impresión */
+    .burst,
+    .burst::after,
+    .quarter-circle,
+    .quarter-circle::after,
+    .logo-circle,
+    .logo-quarter,
+    .items-table th,
+    .items-table tr:nth-child(even),
+    .grand-total,
+    .footer,
+    .contact-icon {
+        -webkit-print-color-adjust: exact !important;
+        color-adjust: exact !important;
+        print-color-adjust: exact !important;
+    }
+    
+    /* Evitar saltos de página */
+    .header,
+    .client-info,
+    .items-table,
+    .totals-section,
+    .note-section,
+    .footer {
+        page-break-inside: avoid !important;
+        break-inside: avoid !important;
+    }
+    
+    /* Mantener flexbox */
+    .header,
+    .totals-section,
+    .signature-section,
+    .footer {
+        display: flex !important;
+    }
+    
+    .company-logo,
+    .contact-item {
+        display: flex !important;
+        align-items: center !important;
+    }
+    
+    .contact-icon {
+        display: flex !important;
+        justify-content: center !important;
+        align-items: center !important;
+    }
+    
+    /* Asegurar que las decoraciones se mantengan */
+    .decoration-top-right,
+    .decoration-bottom-left {
+        position: absolute !important;
+    }
+    
+    .burst,
+    .quarter-circle {
+        position: absolute !important;
+    }
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .header {
+        flex-direction: column;
+        align-items: center;
+        text-align: center;
+        padding: 20px 12px 12px;
+    }
+    
+    .date {
+        margin-top: 15px;
+        text-align: center;
+    }
+    
+    .client-info,
+    .note-section {
+        padding: 12px;
+    }
+    
+    .totals-table {
+        width: 100%;
+        margin: 10px 0;
+    }
+    
+    .footer {
+        flex-direction: column;
+        border-radius: 0;
+        padding: 12px;
+    }
+    
+    .contact-item {
+        margin-bottom: 10px;
+    }
+    
+    .contact-item:last-child {
+        margin-bottom: 0;
+    }
+    
+    /* Ocultar decoraciones en móvil para mejor legibilidad */
+    .burst, 
+    .quarter-circle {
+        opacity: 0.3;
+    }
+    
+    .items-table th,
+    .items-table td {
+        padding: 6px 4px;
+        font-size: 0.8rem;
+    }
+}

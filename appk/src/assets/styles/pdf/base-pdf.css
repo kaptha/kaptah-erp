@@ -1,0 +1,219 @@
+/* base-pdf.css - Estilos base para generación de PDFs */
+
+/* Configuración de página */
+@page {
+  size: A4;
+  margin: 10mm;
+  padding: 0;
+}
+
+/* Reset y configuración base */
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html, body {
+  margin: 0;
+  padding: 0;
+  font-family: 'Arial', 'Helvetica', sans-serif;
+  font-size: 12px;
+  line-height: 1.4;
+  color: #333;
+  background: white;
+  -webkit-print-color-adjust: exact;
+  print-color-adjust: exact;
+}
+
+/* Contenedor principal - CRÍTICO para bordes */
+.container {
+  width: 100%;
+  max-width: 190mm; /* A4 menos márgenes */
+  margin: 0 auto;
+  padding: 15mm;
+  background: white;
+  border: 2px solid #000 !important;
+  border-radius: 25px !important;
+  box-sizing: border-box;
+  min-height: 270mm; /* A4 menos márgenes */
+  position: relative;
+}
+
+/* Asegurar que el contenedor se vea bien en vista previa */
+.pdf-wrapper {
+  padding: 5mm;
+  background: #f5f5f5;
+  min-height: 100vh;
+}
+
+/* Logo y encabezado */
+.logo-container {
+  text-align: center;
+  margin-bottom: 20px;
+}
+
+.logo-container img {
+  max-width: 150px;
+  max-height: 80px;
+  object-fit: contain;
+  display: block;
+  margin: 0 auto;
+}
+
+.logo-text {
+  font-size: 24px;
+  font-weight: bold;
+  color: #333;
+  display: none; /* Mostrar solo si falla la imagen */
+}
+
+/* Información de empresa */
+.company-info {
+  text-align: center;
+  margin-bottom: 20px;
+  border-bottom: 1px solid #ddd;
+  padding-bottom: 15px;
+}
+
+.company-name {
+  font-size: 18px;
+  font-weight: bold;
+  margin-bottom: 5px;
+}
+
+.company-details {
+  font-size: 11px;
+  color: #666;
+}
+
+/* Información del cliente */
+.client-info {
+  margin-bottom: 20px;
+}
+
+.client-info h3 {
+  font-size: 14px;
+  margin-bottom: 10px;
+  border-bottom: 1px solid #eee;
+  padding-bottom: 5px;
+}
+
+/* Tablas - MUY IMPORTANTE para html2pdf */
+table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 15px 0;
+  font-size: 11px;
+}
+
+table th {
+  background-color: #f8f9fa;
+  border: 1px solid #333;
+  padding: 8px 6px;
+  text-align: left;
+  font-weight: bold;
+  font-size: 11px;
+}
+
+table td {
+  border: 1px solid #333;
+  padding: 6px;
+  vertical-align: top;
+  font-size: 11px;
+}
+
+/* Columnas específicas */
+.col-qty { width: 8%; text-align: center; }
+.col-description { width: 50%; }
+.col-price { width: 21%; text-align: right; }
+.col-total { width: 21%; text-align: right; }
+
+/* Totales */
+.totals-section {
+  margin-top: 20px;
+  text-align: right;
+}
+
+.totals-table {
+  width: 300px;
+  margin-left: auto;
+  margin-right: 0;
+}
+
+.totals-table td {
+  padding: 5px 10px;
+  border: 1px solid #333;
+}
+
+.total-final {
+  font-weight: bold;
+  background-color: #f8f9fa;
+}
+
+/* Prevenir saltos de página problemáticos */
+.no-break {
+  page-break-inside: avoid;
+}
+
+.page-break-before {
+  page-break-before: always;
+}
+
+/* Footer */
+.footer {
+  position: absolute;
+  bottom: 15mm;
+  left: 15mm;
+  right: 15mm;
+  text-align: center;
+  font-size: 10px;
+  color: #666;
+  border-top: 1px solid #eee;
+  padding-top: 10px;
+}
+
+/* Estilos específicos para impresión */
+@media print {
+  html, body {
+    margin: 0 !important;
+    padding: 0 !important;
+  }
+  
+  .pdf-wrapper {
+    padding: 0 !important;
+    background: white !important;
+  }
+  
+  .container {
+    margin: 0 !important;
+    max-width: 100% !important;
+    border: 2px solid #000 !important;
+    border-radius: 25px !important;
+    page-break-inside: avoid;
+  }
+  
+  .no-print {
+    display: none !important;
+  }
+}
+
+/* Utilidades */
+.text-center { text-align: center; }
+.text-right { text-align: right; }
+.text-left { text-align: left; }
+.bold { font-weight: bold; }
+.small { font-size: 10px; }
+
+/* Status badges */
+.status {
+  padding: 2px 8px;
+  border-radius: 3px;
+  font-size: 10px;
+  font-weight: bold;
+}
+
+.status-pending { background: #fff3cd; color: #856404; }
+.status-completed { background: #d4edda; color: #155724; }
+.status-processing { background: #cce5ff; color: #004085; }
+.status-cancelled { background: #f8d7da; color: #721c24; }

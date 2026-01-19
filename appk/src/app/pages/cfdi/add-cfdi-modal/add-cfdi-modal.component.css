@@ -1,0 +1,474 @@
+/* Estilos básicos del modal */
+.cfdi-modal-container {
+  max-width: 950px;
+}
+
+.mat-dialog-title {
+  margin-bottom: 20px;
+  color: #333;
+  font-size: 20px;
+  font-weight: 500;
+}
+
+.mat-dialog-content {
+  max-height: 75vh;
+  overflow-y: auto;
+}
+
+/* Pestañas principales */
+.tab-container {
+  display: flex;
+  margin-bottom: 20px;
+  border-bottom: 1px solid #e0e0e0;
+}
+
+.tab-container button {
+  padding: 10px 20px;
+  border-radius: 0;
+  margin-right: 4px;
+  font-weight: 500;
+}
+
+.active-tab {
+  color: #8e24aa;
+  border-bottom: 2px solid #8e24aa;
+}
+
+/* Títulos de sección */
+.section-title {
+  font-size: 16px;
+  font-weight: 500;
+  margin-top: 24px;
+  margin-bottom: 16px;
+  color: #555;
+  padding-bottom: 8px;
+  border-bottom: 1px solid #eee;
+}
+
+/* Filas del formulario */
+.form-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16px;
+  margin-bottom: 16px;
+}
+
+.form-row:last-child {
+  margin-bottom: 0;
+}
+
+.form-row mat-form-field {
+  flex: 1;
+  min-width: 200px;
+}
+
+.full-width {
+  width: 100%;
+}
+
+/* Contenedor de conceptos */
+.concepto-container {
+  background-color: #f8f8f8;
+  border: 1px solid #e0e0e0;
+  border-radius: 8px;
+  padding: 16px;
+  margin-bottom: 16px;
+}
+
+.concepto-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16px;
+}
+
+.concepto-title {
+  font-weight: 500;
+  color: #333;
+  font-size: 16px;
+}
+
+/* Botón para agregar */
+.add-button {
+  margin-top: 16px;
+  margin-bottom: 24px;
+  display: flex;
+  justify-content: center;
+}
+
+/* Totales */
+.totals-container {
+  background-color: #f9f9f9;
+  padding: 20px;
+  border-radius: 8px;
+  border-left: 4px solid #8e24aa;
+  margin-top: 24px;
+}
+
+.total-row {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 8px;
+}
+
+.total-label {
+  font-weight: 500;
+  color: #555;
+}
+
+.total-value {
+  font-weight: 500;
+  color: #333;
+}
+
+.grand-total {
+  margin-top: 8px;
+  padding-top: 12px;
+  border-top: 1px solid #e0e0e0;
+}
+
+.grand-total .total-label,
+.grand-total .total-value {
+  font-weight: 700;
+  font-size: 18px;
+  color: #333;
+}
+
+/* Overlay de carga */
+.loading-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background-color: rgba(255, 255, 255, 0.7);
+  z-index: 10;
+}
+
+/* Tarjeta de información de sucursal */
+.sucursal-info-card {
+  margin: 16px 0 20px 0;
+}
+
+.info-card {
+  background-color: #f5f5f5;
+  border-left: 4px solid #8e24aa;
+}
+
+.info-card mat-card-header {
+  margin-bottom: 12px;
+}
+
+.info-card mat-card-title {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 16px;
+  color: #8e24aa;
+  font-weight: 500;
+}
+
+.info-card mat-card-title mat-icon {
+  font-size: 20px;
+  width: 20px;
+  height: 20px;
+}
+
+.info-card .info-row {
+  display: flex;
+  justify-content: space-between;
+  padding: 8px 0;
+  border-bottom: 1px solid #e0e0e0;
+  margin-bottom: 0;
+}
+
+.info-card .info-row:last-child {
+  border-bottom: none;
+}
+
+.info-card .info-row .info-label {
+  color: #666;
+  font-weight: 600;
+  min-width: 120px;
+}
+
+.info-card .info-row .info-value {
+  color: #333;
+  text-align: right;
+  flex: 1;
+}
+
+/* Información del cliente */
+.cliente-info {
+  background: #f5f9ff;
+  padding: 16px;
+  border-radius: 8px;
+  border: 1px solid #d6e4ff;
+  border-left: 4px solid #8e24aa;
+  margin: 16px 0;
+}
+
+.info-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  padding: 8px 0;
+  border-bottom: 1px solid rgba(0,0,0,0.05);
+}
+
+.info-row:last-child {
+  border-bottom: none;
+}
+
+.info-label {
+  font-weight: 600;
+  color: #666;
+  font-size: 13px;
+  min-width: 120px;
+  padding-top: 4px;
+}
+
+.info-value {
+  color: #333;
+  font-size: 14px;
+  font-weight: 500;
+  flex: 1;
+}
+
+.info-row mat-form-field {
+  flex: 1;
+  margin-bottom: -16px;
+}
+
+.info-row .full-width {
+  width: 100%;
+}
+
+/* Sección de certificado digital */
+.certificado-section {
+  margin-top: 24px;
+  padding: 16px;
+  background: #f5f5f5;
+  border-radius: 8px;
+}
+
+.certificado-section h3 {
+  margin: 0 0 16px 0;
+  color: #673ab7;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.password-hint {
+  display: block;
+  font-size: 12px;
+  color: #666;
+  margin-top: 8px;
+  font-style: italic;
+}
+
+/* Impuestos del concepto */
+.impuestos-concepto-container {
+  margin-top: 20px;
+  padding: 16px;
+  background: #f8f9fa;
+  border-radius: 8px;
+  border: 1px solid #dee2e6;
+}
+
+.tax-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16px;
+  padding-bottom: 12px;
+  border-bottom: 2px solid #dee2e6;
+}
+
+.tax-header strong {
+  font-size: 15px;
+  color: #495057;
+}
+
+.totales-impuestos {
+  display: flex;
+  gap: 16px;
+  font-size: 13px;
+  color: #666;
+}
+
+.totales-impuestos span {
+  white-space: nowrap;
+}
+
+.totales-impuestos strong {
+  color: #333;
+}
+
+.item-taxes {
+  margin-top: 20px;
+  padding: 16px;
+  background: white;
+  border-radius: 8px;
+  border: 1px solid #dee2e6;
+}
+
+.item-taxes:first-child {
+  margin-top: 0;
+}
+
+.tax-section-title {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 15px;
+  font-weight: 600;
+  color: #495057;
+  margin: 0 0 12px 0;
+}
+
+.tax-section-title mat-icon {
+  font-size: 20px;
+  width: 20px;
+  height: 20px;
+}
+
+.taxes-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-top: 12px;
+}
+
+.tax-item {
+  flex: 1 1 calc(50% - 6px);
+  min-width: 280px;
+  background: white;
+  border: 2px solid #e0e0e0;
+  border-radius: 6px;
+  padding: 12px;
+  cursor: pointer;
+  transition: all 0.3s;
+}
+
+.tax-item:hover {
+  border-color: #8e24aa;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+}
+
+.tax-item.selected {
+  border-color: #8e24aa;
+  background: #f3e5f8;
+}
+
+.tax-item.traslado {
+  border-left: 4px solid #4caf50;
+}
+
+.tax-item.traslado.selected {
+  border-color: #4caf50;
+  background: #e8f5e9;
+}
+
+.tax-item.retencion {
+  border-left: 4px solid #f44336;
+}
+
+.tax-item.retencion.selected {
+  border-color: #f44336;
+  background: #ffebee;
+}
+
+.tax-content {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.tax-name {
+  font-weight: 600;
+  font-size: 14px;
+  color: #333;
+}
+
+.tax-description {
+  font-size: 12px;
+  color: #666;
+}
+
+.tax-rate {
+  font-size: 13px;
+  font-weight: 500;
+  color: #8e24aa;
+}
+
+.tax-amount {
+  font-size: 14px;
+  font-weight: 700;
+  color: #4caf50;
+  margin-top: 4px;
+}
+
+.tax-item.retencion .tax-amount {
+  color: #f44336;
+}
+
+.no-taxes-message {
+  text-align: center;
+  padding: 30px;
+  color: #999;
+  font-style: italic;
+  background: #f9f9f9;
+  border-radius: 6px;
+  margin: 0;
+}
+
+/* Media queries */
+@media (max-width: 768px) {
+  .form-row {
+    flex-direction: column;
+    gap: 0;
+  }
+  
+  .form-row mat-form-field {
+    width: 100%;
+  }
+  
+  .tab-container button {
+    padding: 8px 12px;
+    font-size: 14px;
+  }
+  
+  .concepto-container {
+    padding: 12px;
+  }
+  
+  .mat-dialog-content {
+    max-height: 80vh;
+  }
+  
+  .taxes-grid {
+    flex-direction: column;
+  }
+  
+  .tax-item {
+    flex: 1 1 100%;
+    min-width: 100%;
+  }
+  
+  .tax-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 12px;
+  }
+  
+  .totales-impuestos {
+    flex-direction: column;
+    gap: 8px;
+    width: 100%;
+  }
+}

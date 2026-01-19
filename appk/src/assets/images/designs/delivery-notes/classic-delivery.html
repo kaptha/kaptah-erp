@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Nota de Remisión - Classic Delivery</title>
+</head>
+<body>
+    <div class="container">
+        <!-- Encabezado -->
+        <div class="header">
+            <div class="header-left">
+                <div class="logo-container">
+                    <!-- Usar imagen real si hay URL de logo disponible -->
+                    <img src="[[LOGO_URL]]" alt="Logo de la empresa" class="logo-img" onerror="this.style.display='none'; this.nextElementSibling.style.display='block';">
+                    <!-- Texto de respaldo que se muestra si la imagen falla en cargar -->
+                    <div class="logo-text">TU LOGO AQUÍ</div>
+                    <div class="remission-number">#[[NUMERO_FOLIO]]</div>
+                </div>
+            </div>
+            <div class="header-right">
+                <!-- Fecha -->
+                <div class="date-container">
+                    <div class="date-label">FECHA</div>
+                    <div class="date-boxes">
+                        <div class="date-box">[[DIA]]</div>
+                        <div class="date-box">[[MES]]</div>
+                        <div class="date-box">[[AÑO]]</div>
+                    </div>
+                </div>
+                
+                <div class="title-section">
+                    <h1 class="remission-title">ORDEN DE VENTA</h1>
+                    <p class="remission-description">[[NOMBRE_EMPRESA]] - Servicios profesionales</p>
+                    
+                    <!-- Información de contacto -->
+                    <div class="contact-info">
+                        <div class="contact-item">
+                            <span class="contact-icon">📍</span>
+                            <span>[[DIRECCION_EMPRESA]]</span>
+                        </div>
+                        <div class="contact-item">
+                            <span class="contact-icon">📧</span>
+                            <span>[[EMAIL_EMPRESA]]</span>
+                        </div>
+                        <div class="contact-item">
+                            <span class="contact-icon">📞</span>
+                            <span>[[TELEFONO_EMPRESA]]</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Información del cliente -->
+        <div class="client-info">
+            <div class="client-field">
+                <div class="client-label">NOMBRE</div>
+                <div class="client-value">[[NOMBRE_CLIENTE]]</div>
+            </div>
+            <div class="client-field">
+                <div class="client-label">RFC</div>
+                <div class="client-value">[[RFC_CLIENTE]]</div>
+            </div>
+            <div class="client-field">
+                <div class="client-label">TELÉFONO</div>
+                <div class="client-value">[[TELEFONO_CLIENTE]]</div>
+            </div>
+            <div class="client-field">
+                <div class="client-label">DIRECCIÓN</div>
+                <div class="client-value">[[DIRECCION_CLIENTE]]</div>
+            </div>
+        </div>
+        
+        <!-- Tabla de productos -->
+        <table class="products-table">
+            <thead>
+                <tr>
+                    <th>Cantidad</th>
+                    <th>Descripción</th>
+                    <th>Precio Unitario</th>
+                    <th>Total</th>
+                </tr>
+            </thead>
+            <tbody>
+                <!-- Filas de productos que se repetirán según los ítems -->
+                [[FILAS_PRODUCTOS]]
+                <!-- Fin de las filas repetibles -->
+            </tbody>
+        </table>
+        
+        <!-- Sección de observaciones -->
+        <div class="observations-section">
+            <div class="observations-title">OBSERVACIONES</div>
+            <div class="observations-box">
+                [[OBSERVACIONES]]
+            </div>
+        </div>
+        
+        <!-- Sección de totales y firma -->
+        <div class="totals-signature">
+            <div class="totals-container">
+                <div class="total-row">
+                    <div class="total-label">SUBTOTAL</div>
+                    <div class="total-value">[[SUBTOTAL]]</div>
+                </div>
+                <div class="total-row">
+                    <div class="total-label">IVA ([[PORCENTAJE_IVA]]%)</div>
+                    <div class="total-value">[[MONTO_IVA]]</div>
+                </div>
+                <div class="total-row grand-total">
+                    <div class="total-label">TOTAL</div>
+                    <div class="total-value">[[TOTAL]]</div>
+                </div>
+            </div>
+            <div class="signature-container">
+                <div class="signature-line"></div>
+                <div class="signature-text">FIRMA CLIENTE</div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

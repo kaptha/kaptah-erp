@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cotización - Modern Quote</title>
+</head>
+<body>
+    <div class="container">
+        <!-- Elementos decorativos -->
+        <div class="decoration-top-right">
+            <div class="burst"></div>
+        </div>
+        <div class="decoration-bottom-left">
+            <div class="quarter-circle"></div>
+            <div class="quarter-circle-outline"></div>
+        </div>
+        
+        <!-- Encabezado -->
+        <div class="header">
+            <div class="company-logo">
+                <div class="logo-shape">
+                    <img src="[[LOGO_URL]]" alt="Logo" class="logo-img" onerror="this.style.display='none'; this.nextElementSibling.style.display='block';">
+                    <div class="logo-fallback">
+                        <div class="logo-quarter"></div>
+                        <div class="logo-circle"></div>
+                    </div>
+                </div>
+                <div class="company-name">
+                    <h1>[[NOMBRE_EMPRESA]]</h1>
+                    <h2>EMPRESA</h2>
+                </div>
+            </div>
+            <div class="date">[[FECHA_COTIZACION]]</div>
+        </div>
+        
+        <!-- Información del cliente -->
+        <div class="client-info">
+            <div class="client-name">[[NOMBRE_CLIENTE]]</div>
+            <div class="client-contact">
+                <div>Email: [[EMAIL_CLIENTE]]</div>
+                <div>Tel: [[TELEFONO_CLIENTE]]</div>
+                <div>RFC: [[RFC_CLIENTE]]</div>
+                <div>[[DIRECCION_CLIENTE]]</div>
+            </div>
+        </div>
+        
+        <!-- Tabla de servicios/productos -->
+        <table class="items-table">
+            <thead>
+                <tr>
+                    <th>Descripción</th>
+                    <th>Cantidad</th>
+                    <th>Precio U.</th>
+                    <th>Total</th>
+                </tr>
+            </thead>
+            <tbody>
+                <!-- Filas de productos/servicios que se repetirán según los ítems -->
+                [[FILAS_ITEMS]]
+                <!-- Fin de las filas repetibles -->
+            </tbody>
+        </table>
+        
+        <!-- Totales -->
+        <div class="totals-section">
+            <div class="totals-table">
+                <div class="totals-row">
+                    <span>SUBTOTAL:</span>
+                    <span>[[SUBTOTAL]]</span>
+                </div>
+                <div class="totals-row">
+                    <span>IVA ([[PORCENTAJE_IVA]]%):</span>
+                    <span>[[MONTO_IVA]]</span>
+                </div>
+                <div class="totals-row grand-total">
+                    <span>TOTAL:</span>
+                    <span>[[TOTAL]]</span>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Sección nota -->
+        <div class="note-section">
+            <div class="note-title">Nota:</div>
+            <div class="note-content">
+                [[OBSERVACIONES]]
+            </div>
+            
+            <!-- Firma -->
+            <div class="signature-section">
+                <div class="signature">
+                    <img src="[[FIRMA_URL]]" alt="Firma" class="signature-img" onerror="this.style.display='none';">
+                    <div class="signature-line"></div>
+                    <div class="signature-text">[[NOMBRE_EMPRESA]]</div>
+                    <div class="signature-document">Representante Legal</div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Pie de página -->
+        <div class="footer">
+            <div class="contact-item">
+                <div class="contact-icon">📞</div>
+                <div>[[TELEFONO_EMPRESA]]</div>
+            </div>
+            <div class="contact-item">
+                <div class="contact-icon">✉️</div>
+                <div>[[EMAIL_EMPRESA]]</div>
+            </div>
+            <div class="contact-item">
+                <div class="contact-icon">🌐</div>
+                <div>[[SITIO_WEB_EMPRESA]]</div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

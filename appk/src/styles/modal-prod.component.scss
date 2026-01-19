@@ -1,0 +1,94 @@
+// Estilos específicos para el modal de productos
+.modal-prod-container {
+  .mat-mdc-dialog-container {
+    padding: 0 !important;
+  }
+
+  .mdc-dialog__surface {
+    min-width: 600px !important;
+    max-width: 800px !important;
+    width: 90% !important;
+    overflow: hidden !important;
+
+    @media (max-width: 768px) {
+      min-width: 90% !important;
+    }
+  }
+
+  .mat-mdc-dialog-content {
+    margin: 0 !important;
+    padding: 24px !important;
+    max-height: none !important;
+    overflow: visible !important;
+  }
+
+  .mat-mdc-dialog-title {
+    padding: 20px 20px 0 20px !important;
+    margin: 0 !important;
+    color: #8e24aa !important; // Color primario
+    font-size: 24px !important;
+    font-weight: bold !important;
+  }
+
+  .mat-mdc-dialog-actions {
+    padding: 20px !important;
+    display: flex !important;
+    justify-content: flex-end !important;
+    gap: 8px !important;
+    margin: 0 !important;
+    border-top: 1px solid rgba(0, 0, 0, 0.12);
+  }
+
+  // Estilos para las filas del formulario
+  .form-row {
+    display: flex;
+    gap: 16px;
+    margin-bottom: 16px;
+
+    @media (max-width: 768px) {
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    mat-form-field {
+      flex: 1;
+      min-width: 0;
+    }
+
+    // Campos numéricos más estrechos
+    &.numbers-row {
+      mat-form-field {
+        flex: 0 0 calc(33.33% - 11px);
+        @media (max-width: 768px) {
+          flex: 1;
+        }
+      }
+    }
+
+    // Campos de precio más estrechos
+    &.price-row {
+      mat-form-field {
+        &:not(:last-child) {
+          flex: 0 0 180px;
+        }
+      }
+    }
+  }
+
+  // Sobrescribe los estilos de Material Design
+  .mat-mdc-form-field {
+    width: 100%;
+  }
+
+  textarea.mat-mdc-input-element {
+    min-height: 60px !important;
+    resize: vertical;
+  }
+}
+
+// Media Queries
+@media (max-width: 768px) {
+  .mat-mdc-dialog-actions button {
+    flex: 1;
+  }
+}

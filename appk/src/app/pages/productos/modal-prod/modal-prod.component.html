@@ -1,0 +1,110 @@
+<h2 mat-dialog-title>{{isEdit ? 'Editar' : 'Nuevo'}} Producto</h2>
+<mat-dialog-content>
+  <form [formGroup]="productForm">
+    <!-- Campos principales -->
+    <div class="form-row">
+      <mat-form-field appearance="outline">
+        <mat-label>Categoría</mat-label>
+        <mat-select formControlName="categoryId">
+          <mat-option *ngFor="let categoria of categorias" [value]="categoria.id">
+            {{categoria.name}}
+          </mat-option>
+        </mat-select>
+      </mat-form-field>
+      <mat-form-field appearance="outline">
+        <mat-label>Nombre del producto</mat-label>
+        <input matInput formControlName="name">
+      </mat-form-field>
+    </div>
+
+    <!-- SKU y Código de barras -->
+    <div class="form-row">
+      <mat-form-field appearance="outline">
+        <mat-label>SKU</mat-label>
+        <input matInput formControlName="sku">
+      </mat-form-field>
+      <mat-form-field appearance="outline">
+        <mat-label>Código de barras</mat-label>
+        <input matInput formControlName="barcode">
+      </mat-form-field>
+    </div>
+
+    <!-- Descripción -->
+    <mat-form-field appearance="outline">
+      <mat-label>Descripción</mat-label>
+      <textarea matInput formControlName="description" rows="3"></textarea>
+    </mat-form-field>
+
+    <!-- Clave SAT y Unidad SAT -->
+    <div class="form-row">
+      <mat-form-field appearance="outline">
+        <mat-label>Clave SAT</mat-label>
+        <input matInput formControlName="sat_key" [matAutocomplete]="autoSat">
+        <mat-autocomplete #autoSat="matAutocomplete" [displayWith]="displayFn">
+          <mat-option *ngFor="let clave of clavesSatFiltradas | async" [value]="clave">
+            {{clave.c_ClaveProdServ}} - {{clave.descripcion}}
+          </mat-option>
+        </mat-autocomplete>
+      </mat-form-field>
+
+      <mat-form-field appearance="outline">
+        <mat-label>Unidad SAT</mat-label>
+        <input matInput formControlName="unit_key" [matAutocomplete]="autoUnidad">
+        <mat-autocomplete #autoUnidad="matAutocomplete" [displayWith]="displayFn">
+          <mat-option *ngFor="let unidad of unidadesSatFiltradas | async" [value]="unidad">
+            {{unidad.clave_unidad}} - {{unidad.nombre}}
+          </mat-option>
+        </mat-autocomplete>
+      </mat-form-field>
+    </div>
+
+    <!-- Stock -->
+    <div class="form-row numbers-row">
+      <mat-form-field appearance="outline">
+        <mat-label>Stock actual</mat-label>
+        <input matInput type="number" formControlName="current_stock">
+      </mat-form-field>
+      <mat-form-field appearance="outline">
+        <mat-label>Stock mín</mat-label>
+        <input matInput type="number" formControlName="min_stock">
+      </mat-form-field>
+      <mat-form-field appearance="outline">
+        <mat-label>Stock máx</mat-label>
+        <input matInput type="number" formControlName="max_stock">
+      </mat-form-field>
+    </div>
+
+    <!-- Precios y Moneda -->
+    <div class="form-row price-row">
+      <mat-form-field appearance="outline" class="currency-field">
+        <mat-label>Precio</mat-label>
+        <span matPrefix>$&nbsp;</span>
+        <input matInput type="number" formControlName="price">
+      </mat-form-field>
+      <mat-form-field appearance="outline">
+        <mat-label>Costo</mat-label>
+        <span matPrefix>$&nbsp;</span>
+        <input matInput type="number" formControlName="cost">
+      </mat-form-field>
+      <mat-form-field appearance="outline">
+        <mat-label>Moneda</mat-label>
+        <input matInput formControlName="currency" [matAutocomplete]="autoMoneda">
+        <mat-autocomplete #autoMoneda="matAutocomplete" [displayWith]="displayFn" (optionSelected)="onSelectionChanged($event, 'moneda')">
+          <mat-option *ngFor="let moneda of monedasFiltradas | async" [value]="moneda">
+            {{moneda.c_moneda}} - {{moneda.descripcion}}
+          </mat-option>
+        </mat-autocomplete>
+      </mat-form-field>
+    </div>
+
+    <!-- Estado -->
+    <mat-slide-toggle formControlName="active">Activo</mat-slide-toggle>
+  </form>
+</mat-dialog-content>
+
+<mat-dialog-actions align="end">
+  <button mat-button mat-dialog-close class="btn-danger">Cancelar</button>
+  <button mat-raised-button class="btn-primary" (click)="onAdd()" [disabled]="!productForm.valid">
+    {{isEdit ? 'Actualizar' : 'Agregar'}}
+  </button>
+</mat-dialog-actions>

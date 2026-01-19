@@ -1,0 +1,608 @@
+/* Asegurar que el contenido del diálogo sea scrolleable */
+mat-dialog-content {
+  max-height: 75vh; /* Limitar altura máxima */
+  overflow-y: auto; /* Scroll vertical */
+  padding: 24px !important;
+  margin: 0;
+}
+
+/* Mejoras para el contenedor del diálogo */
+.mat-mdc-dialog-container .mdc-dialog__surface,
+.mat-dialog-container {
+  max-height: 90vh !important; /* Altura máxima del modal */
+  overflow: visible !important;
+}
+
+/* Asegurar que los botones siempre sean visibles */
+mat-dialog-actions {
+  position: sticky;
+  bottom: 0;
+  background: #fff8e1;
+  z-index: 10;
+  box-shadow: 0 -2px 8px rgba(255, 111, 0, 0.15);
+}
+
+/* Estilos generales del formulario */
+.pago-form {
+  max-width: 100%;
+  padding: 0;
+  margin-bottom: 16px; /* Espacio extra antes de los botones */
+}
+
+/* ===== ENCABEZADO DEL DIÁLOGO ===== */
+.dialog-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 16px 24px;
+  border-bottom: 1px solid #ffcc80;
+  background: linear-gradient(135deg, #fff8e1 0%, #fff3e0 100%);
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  box-shadow: 0 2px 4px rgba(255, 111, 0, 0.1);
+}
+
+.dialog-icon {
+  margin-right: 8px;
+  vertical-align: middle;
+  color: #ff6f00;
+}
+
+/* Secciones del formulario - más compactas */
+.form-section {
+  margin-bottom: 20px; /* Reducido de 24px */
+  padding: 14px; /* Reducido de 16px */
+  background-color: #fafafa;
+  border-radius: 8px;
+  border-left: 4px solid #ff6f00;
+}
+
+.form-section:hover {
+  background-color: #f0f0f0;
+  transition: background-color 0.2s ease;
+}
+
+.form-section:nth-child(1):hover {
+  background-color: #fff8f0;
+}
+
+.section-title {
+  display: flex;
+  align-items: center;
+  margin-bottom: 14px; /* Reducido de 16px */
+  font-size: 15px; /* Reducido de 16px */
+  font-weight: 500;
+  color: #ff6f00;
+}
+
+.section-title mat-icon {
+  margin-right: 8px;
+  font-size: 20px;
+  color: #ff6f00;
+}
+
+.section-title small {
+  margin-left: 8px;
+  font-size: 12px;
+  color: #666;
+  font-weight: normal;
+}
+
+/* Filas y columnas del formulario - más compactas */
+.form-row {
+  display: flex;
+  gap: 16px;
+  margin-bottom: 12px; /* Reducido de 16px */
+}
+
+.form-row:last-child {
+  margin-bottom: 0;
+}
+
+.form-col {
+  flex: 1;
+}
+
+.full-width {
+  width: 100%;
+}
+
+/* ===== SELECTOR DE PROVEEDORES ===== */
+.provider-option {
+  display: flex;
+  flex-direction: column;
+  padding: 8px 4px;
+  border-radius: 4px;
+  transition: background-color 0.2s ease;
+}
+
+.provider-option:hover {
+  background-color: rgba(255, 111, 0, 0.05);
+}
+
+.provider-name {
+  font-weight: 500;
+  color: #333;
+  font-size: 14px;
+}
+
+.provider-rfc {
+  font-size: 12px;
+  color: #666;
+  margin-top: 2px;
+}
+
+/* ===== INFORMACIÓN DEL PROVEEDOR SELECCIONADO ===== */
+.provider-info {
+  margin-top: 14px; /* Reducido de 16px */
+  animation: slideInUpPayable 0.3s ease-out;
+}
+
+.info-card {
+  background: white;
+  border: 1px solid #ffcc02;
+  border-radius: 8px;
+  padding: 14px; /* Reducido de 16px */
+  box-shadow: 0 2px 4px rgba(255, 111, 0, 0.2);
+}
+
+.info-card.payable {
+  border-color: #ff9800;
+  background: linear-gradient(135deg, #fff8e1 0%, #fff3e0 100%);
+}
+
+.info-card h4 {
+  margin: 0 0 10px 0; /* Reducido de 12px */
+  color: #e65100;
+  font-size: 15px; /* Reducido de 16px */
+  font-weight: 500;
+  display: flex;
+  align-items: center;
+}
+
+.info-card h4::before {
+  content: "✓";
+  background: #ff6f00;
+  color: white;
+  border-radius: 50%;
+  width: 20px;
+  height: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 12px;
+  margin-right: 8px;
+}
+
+.info-row {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 6px; /* Reducido de 8px */
+  padding: 3px 0; /* Reducido de 4px */
+  font-size: 13px; /* Añadido */
+}
+
+.info-row:last-child {
+  margin-bottom: 0;
+}
+
+.info-row .label {
+  font-weight: 500;
+  color: #666;
+  min-width: 80px;
+}
+
+.info-row .value {
+  color: #333;
+  text-align: right;
+  flex: 1;
+}
+
+/* Acciones del diálogo - MEJORADO */
+.dialog-actions {
+  padding: 14px 24px; /* Reducido de 16px */
+  background-color: #fff8e1;
+  margin: 0;
+  border-top: 1px solid #ffcc80;
+  position: sticky;
+  bottom: 0;
+  z-index: 10;
+  box-shadow: 0 -2px 8px rgba(255, 111, 0, 0.15);
+}
+
+.dialog-actions button {
+  margin-left: 8px;
+}
+
+/* Tarjeta de resumen - más compacta */
+.form-summary {
+  margin-top: 20px; /* Reducido de 24px */
+  animation: fadeInPayable 0.4s ease-out;
+}
+
+.summary-card {
+  border-radius: 8px;
+  padding: 14px; /* Reducido de 16px */
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.summary-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+}
+
+.summary-card.payable {
+  background-color: #fff3e0;
+  border: 1px solid #ff9800;
+}
+
+.summary-card h4 {
+  margin: 0 0 10px 0; /* Reducido de 12px */
+  font-weight: 500;
+  text-align: center;
+  padding-bottom: 6px; /* Reducido de 8px */
+  border-bottom: 2px solid #ffcc80;
+  font-size: 15px; /* Añadido */
+}
+
+.summary-card.payable h4 {
+  color: #e65100;
+}
+
+.summary-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 6px; /* Reducido de 8px */
+  padding: 3px 0; /* Reducido de 4px */
+  border-bottom: 1px solid #fff8e1;
+  font-size: 13px; /* Añadido */
+}
+
+.summary-row:last-child {
+  margin-bottom: 0;
+  padding-top: 6px; /* Reducido de 8px */
+  border-top: 1px solid #ffcc80;
+  border-bottom: none;
+  font-weight: 500;
+}
+
+.summary-row span:first-child {
+  color: #666;
+  font-weight: 500;
+}
+
+.summary-row span:last-child {
+  font-weight: 500;
+  color: #333;
+}
+
+.summary-row .amount {
+  font-weight: 600;
+  font-size: 15px; /* Reducido de 16px */
+}
+
+.summary-row .amount.payable {
+  color: #e65100;
+}
+
+/* Estilos para campos específicos */
+.mat-form-field {
+  font-size: 14px;
+  transition: all 0.2s ease;
+}
+
+.mat-form-field-label {
+  color: #666;
+}
+
+/* Estilos para iconos en campos */
+.mat-form-field .mat-icon {
+  color: #666;
+}
+
+.mat-form-field.mat-focused .mat-icon {
+  color: #ff6f00;
+}
+
+/* ===== ESTADOS DE CAMPOS ===== */
+.mat-form-field.ng-invalid.ng-touched .mat-form-field-outline-thick {
+  color: #f44336;
+}
+
+.mat-form-field.ng-valid.ng-touched .mat-form-field-outline-thick {
+  color: #4caf50;
+}
+
+.mat-form-field.mat-form-field-invalid .mat-form-field-outline {
+  color: #f44336;
+}
+
+.mat-form-field.mat-form-field-invalid .mat-form-field-label {
+  color: #f44336;
+}
+
+/* ===== INDICADORES DE CARGA ===== */
+.mat-form-field .mat-hint {
+  color: #666;
+  font-size: 12px;
+  font-style: italic;
+}
+
+/* Spinner en el botón */
+button mat-spinner {
+  margin-right: 8px;
+}
+
+/* ===== BÚSQUEDA DE PROVEEDORES ===== */
+.ngx-mat-select-search {
+  border-bottom: 1px solid #ffcc80;
+  margin-bottom: 8px;
+}
+
+.mat-option.mat-selected:not(.mat-option-multiple) {
+  background: rgba(255, 111, 0, 0.1);
+}
+
+.mat-option:hover:not(.mat-option-disabled) {
+  background-color: #fff3e0 !important;
+}
+
+.mat-select-panel .mat-option {
+  line-height: 1.4;
+  padding: 12px 16px;
+}
+
+.mat-form-field-appearance-outline .mat-form-field-outline {
+  color: rgba(0,0,0,0.12);
+}
+
+.mat-form-field-appearance-outline.mat-focused .mat-form-field-outline-thick {
+  color: #ff6f00;
+}
+
+/* Estados hover mejorados */
+.mat-form-field:not(.mat-form-field-disabled):hover .mat-form-field-outline {
+  color: rgba(255, 111, 0, 0.6);
+}
+
+/* Estilos específicos para cuentas por pagar */
+.form-section:nth-child(1) {
+  border-left-color: #ff6f00;
+}
+
+.form-section:nth-child(2) {
+  border-left-color: #ff8f00;
+}
+
+.form-section:nth-child(3) {
+  border-left-color: #ff8f00;
+}
+
+.form-section:nth-child(4) {
+  border-left-color: #ffa000;
+}
+
+.form-section:nth-child(5) {
+  border-left-color: #ffb300;
+}
+
+/* ===== CUSTOM SCROLLBAR ===== */
+mat-dialog-content::-webkit-scrollbar {
+  width: 8px;
+}
+
+mat-dialog-content::-webkit-scrollbar-track {
+  background: #fff8e1;
+  border-radius: 4px;
+}
+
+mat-dialog-content::-webkit-scrollbar-thumb {
+  background: #ffcc80;
+  border-radius: 4px;
+}
+
+mat-dialog-content::-webkit-scrollbar-thumb:hover {
+  background: #ff9800;
+}
+
+/* Responsive */
+@media (max-width: 600px) {
+  mat-dialog-content {
+    max-height: 70vh;
+    padding: 16px !important;
+  }
+
+  .form-row {
+    flex-direction: column;
+    gap: 0;
+  }
+  
+  .form-col {
+    width: 100%;
+  }
+  
+  .form-section {
+    padding: 12px;
+    margin-bottom: 14px;
+  }
+  
+  .dialog-header {
+    padding: 12px 16px;
+  }
+  
+  .section-title {
+    font-size: 14px;
+    margin-bottom: 12px;
+  }
+  
+  .dialog-actions {
+    flex-direction: column-reverse;
+    gap: 8px;
+    padding: 12px 16px;
+  }
+  
+  .dialog-actions button {
+    margin: 0;
+    width: 100%;
+  }
+  
+  .summary-row {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 4px;
+  }
+  
+  .info-row {
+    flex-direction: column;
+    gap: 4px;
+  }
+  
+  .info-row .value {
+    text-align: left;
+  }
+  
+  .summary-card {
+    padding: 12px;
+  }
+}
+
+/* Animaciones */
+@keyframes fadeInPayable {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes slideInUpPayable {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.form-section {
+  animation: fadeInPayable 0.3s ease-out;
+}
+
+.form-summary {
+  animation: fadeInPayable 0.4s ease-out;
+}
+
+/* Estilos para campos de fecha */
+.mat-datepicker-toggle {
+  color: #ff6f00;
+}
+
+.mat-datepicker-toggle:hover {
+  color: #e65100;
+}
+
+/* Validaciones específicas */
+.mat-error {
+  font-size: 12px;
+  margin-top: 4px;
+}
+
+/* Estilos para textarea de notas */
+textarea.mat-input-element {
+  resize: vertical;
+  min-height: 60px;
+}
+
+/* Mejoras para el botón de guardar */
+button[color="accent"] {
+  background-color: #ff6f00 !important;
+  color: white !important;
+}
+
+button[color="accent"]:hover {
+  background-color: #e65100 !important;
+}
+
+button[color="accent"]:disabled {
+  background-color: #ffcc80 !important;
+  color: rgba(255, 255, 255, 0.6) !important;
+}
+
+/* ===== TEMA ESPECÍFICO PARA PAGOS ===== */
+.mat-raised-button.mat-accent {
+  background-color: #ff6f00;
+}
+
+.mat-raised-button.mat-accent:hover {
+  background-color: #e65100;
+}
+
+/* Color accent para iconos */
+.mat-icon.mat-accent {
+  color: #ff6f00;
+}
+
+/* ===== MEJORAS VISUALES ESPECÍFICAS PARA PAGOS ===== */
+.form-section {
+  position: relative;
+}
+
+.form-section::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 4px;
+  height: 100%;
+  background: linear-gradient(180deg, #ff6f00 0%, #e65100 100%);
+  border-radius: 2px 0 0 2px;
+}
+
+/* Transiciones suaves */
+.mat-form-field {
+  transition: all 0.2s ease;
+}
+
+.summary-card {
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+/* Estilos para la tarjeta de CFDI de cuentas por pagar */
+.info-card.cfdi-payable {
+  background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+  color: white;
+}
+
+.info-card.cfdi-payable h4 {
+  color: white;
+  border-bottom-color: rgba(255, 255, 255, 0.3);
+}
+
+.info-card.cfdi-payable .label {
+  color: rgba(255, 255, 255, 0.8);
+}
+
+.info-card.cfdi-payable .value {
+  color: white;
+}
+
+.amount-payable {
+  color: #f5576c !important;
+  font-weight: 700;
+  font-size: 1.1em;
+}
+
+.summary-card.payable {
+  border-left: 4px solid #f5576c;
+}
+
+.summary-card.payable .amount {
+  color: #f5576c;
+}

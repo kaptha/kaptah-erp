@@ -1,0 +1,571 @@
+/* Asegurar que el contenido del diálogo sea scrolleable */
+mat-dialog-content {
+  max-height: 75vh; /* Limitar altura máxima */
+  overflow-y: auto; /* Scroll vertical */
+  padding: 24px !important;
+  margin: 0;
+}
+
+/* Mejoras para el contenedor del diálogo */
+.mat-mdc-dialog-container .mdc-dialog__surface,
+.mat-dialog-container {
+  max-height: 90vh !important; /* Altura máxima del modal */
+  overflow: visible !important;
+}
+
+/* Asegurar que los botones siempre sean visibles */
+mat-dialog-actions {
+  position: sticky;
+  bottom: 0;
+  background: #f5f5f5;
+  z-index: 10;
+  box-shadow: 0 -2px 8px rgba(0,0,0,0.1);
+}
+
+/* Estilos generales del formulario */
+.cobro-form {
+  max-width: 100%;
+  padding: 0;
+  margin-bottom: 16px; /* Espacio extra antes de los botones */
+}
+
+/* ===== ENCABEZADO DEL DIÁLOGO ===== */
+.dialog-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 16px 24px;
+  border-bottom: 1px solid #e0e0e0;
+  position: sticky;
+  top: 0;
+  background: white;
+  z-index: 10;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+}
+
+.dialog-icon {
+  margin-right: 8px;
+  vertical-align: middle;
+}
+
+/* Secciones del formulario - más compactas */
+.form-section {
+  margin-bottom: 20px; /* Reducido de 24px */
+  padding: 14px; /* Reducido de 16px */
+  background-color: #fafafa;
+  border-radius: 8px;
+  border-left: 4px solid #3f51b5;
+}
+
+.form-section:hover {
+  background-color: #f0f0f0;
+  transition: background-color 0.2s ease;
+}
+
+.section-title {
+  display: flex;
+  align-items: center;
+  margin-bottom: 14px; /* Reducido de 16px */
+  font-size: 15px; /* Reducido de 16px */
+  font-weight: 500;
+  color: #3f51b5;
+}
+
+.section-title mat-icon {
+  margin-right: 8px;
+  font-size: 20px;
+}
+
+.section-title small {
+  margin-left: 8px;
+  font-size: 12px;
+  color: #666;
+  font-weight: normal;
+}
+
+/* Filas y columnas del formulario - más compactas */
+.form-row {
+  display: flex;
+  gap: 16px;
+  margin-bottom: 12px; /* Reducido de 16px */
+}
+
+.form-row:last-child {
+  margin-bottom: 0;
+}
+
+.form-col {
+  flex: 1;
+}
+
+.full-width {
+  width: 100%;
+}
+
+/* ===== SELECTOR DE CLIENTES ===== */
+.customer-option {
+  display: flex;
+  flex-direction: column;
+  padding: 4px 0;
+}
+
+.customer-name {
+  font-weight: 500;
+  color: #333;
+}
+
+.customer-rfc {
+  font-size: 12px;
+  color: #666;
+  margin-top: 2px;
+}
+
+/* ===== INFORMACIÓN DEL CLIENTE SELECCIONADO ===== */
+.customer-info {
+  margin-top: 14px; /* Reducido de 16px */
+  animation: slideInUp 0.3s ease-out;
+}
+
+.info-card {
+  background: white;
+  border: 1px solid #e0e0e0;
+  border-radius: 8px;
+  padding: 14px; /* Reducido de 16px */
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.info-card h4 {
+  margin: 0 0 10px 0; /* Reducido de 12px */
+  color: #1976d2;
+  font-size: 15px; /* Reducido de 16px */
+  font-weight: 500;
+  display: flex;
+  align-items: center;
+}
+
+.info-card h4::before {
+  content: "✓";
+  background: #4caf50;
+  color: white;
+  border-radius: 50%;
+  width: 20px;
+  height: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 12px;
+  margin-right: 8px;
+}
+
+.info-row {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 6px; /* Reducido de 8px */
+  padding: 3px 0; /* Reducido de 4px */
+  font-size: 13px; /* Añadido para hacer el texto más compacto */
+}
+
+.info-row:last-child {
+  margin-bottom: 0;
+}
+
+.info-row .label {
+  font-weight: 500;
+  color: #666;
+  min-width: 80px;
+}
+
+.info-row .value {
+  color: #333;
+  text-align: right;
+  flex: 1;
+}
+
+/* Acciones del diálogo - MEJORADO */
+.dialog-actions {
+  padding: 14px 24px; /* Reducido de 16px */
+  background-color: #f5f5f5;
+  margin: 0;
+  border-top: 1px solid #e0e0e0;
+  position: sticky;
+  bottom: 0;
+  z-index: 10;
+  box-shadow: 0 -2px 8px rgba(0,0,0,0.1);
+}
+
+.dialog-actions button {
+  margin-left: 8px;
+}
+
+/* Tarjeta de resumen - más compacta */
+.form-summary {
+  margin-top: 20px; /* Reducido de 24px */
+  animation: fadeIn 0.4s ease-out;
+}
+
+.summary-card {
+  background-color: #e3f2fd;
+  border: 1px solid #2196f3;
+  border-radius: 8px;
+  padding: 14px; /* Reducido de 16px */
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.summary-card h4 {
+  margin: 0 0 10px 0; /* Reducido de 12px */
+  color: #1976d2;
+  font-weight: 500;
+  text-align: center;
+  padding-bottom: 6px; /* Reducido de 8px */
+  border-bottom: 2px solid #bbdefb;
+  font-size: 15px; /* Añadido */
+}
+
+.summary-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 6px; /* Reducido de 8px */
+  padding: 3px 0; /* Reducido de 4px */
+  border-bottom: 1px solid #f5f5f5;
+  font-size: 13px; /* Añadido */
+}
+
+.summary-row:last-child {
+  margin-bottom: 0;
+  padding-top: 6px; /* Reducido de 8px */
+  border-top: 1px solid #bbdefb;
+  border-bottom: none;
+  font-weight: 500;
+}
+
+.summary-row span:first-child {
+  color: #666;
+  font-weight: 500;
+}
+
+.summary-row span:last-child {
+  font-weight: 500;
+  color: #333;
+}
+
+.summary-row .amount {
+  color: #1976d2;
+  font-weight: 600;
+  font-size: 15px; /* Reducido de 16px */
+}
+
+/* Estilos para campos específicos */
+.mat-form-field {
+  font-size: 14px;
+}
+
+.mat-form-field-label {
+  color: #666;
+}
+
+/* Estilos para iconos en campos */
+.mat-form-field .mat-icon {
+  color: #666;
+}
+
+.mat-form-field.mat-focused .mat-icon {
+  color: #3f51b5;
+}
+
+/* ===== ESTADOS DE CAMPOS ===== */
+.mat-form-field.ng-invalid.ng-touched .mat-form-field-outline-thick {
+  color: #f44336;
+}
+
+.mat-form-field.ng-valid.ng-touched .mat-form-field-outline-thick {
+  color: #4caf50;
+}
+
+.mat-form-field.mat-form-field-invalid .mat-form-field-outline {
+  color: #f44336;
+}
+
+.mat-form-field.mat-form-field-invalid .mat-form-field-label {
+  color: #f44336;
+}
+
+/* ===== INDICADORES DE CARGA ===== */
+.mat-form-field .mat-hint {
+  color: #666;
+  font-size: 12px;
+  font-style: italic;
+}
+
+/* Spinner en el botón */
+button mat-spinner {
+  margin-right: 8px;
+}
+
+/* ===== SELECTOR DE NOTAS DE VENTA ===== */
+.sale-note-option {
+  display: flex;
+  flex-direction: column;
+  padding: 4px 0;
+}
+
+.note-number {
+  font-weight: 500;
+  color: #333;
+  font-size: 14px;
+}
+
+.note-details {
+  font-size: 12px;
+  color: #666;
+  margin-top: 2px;
+}
+
+/* ===== INFORMACIÓN DE LA NOTA DE VENTA SELECCIONADA ===== */
+.sale-note-info {
+  margin-top: 14px; /* Reducido de 16px */
+  animation: slideInUp 0.3s ease-out;
+}
+
+.info-card.sale-note {
+  border-color: #2196f3;
+  background: linear-gradient(135deg, #e3f2fd 0%, #f3e5f5 100%);
+}
+
+.info-card.sale-note h4 {
+  color: #1976d2;
+}
+
+.info-card.sale-note h4::before {
+  background: #2196f3;
+  content: "📋";
+  font-size: 10px;
+}
+
+/* ===== MEJORAS PARA SELECTOR DE DOCUMENTOS ===== */
+.mat-option .sale-note-option:hover {
+  background-color: rgba(33, 150, 243, 0.05);
+  border-radius: 4px;
+  transition: background-color 0.2s ease;
+}
+
+/* ===== HINTS PARA NOTAS DE VENTA ===== */
+.mat-form-field .mat-hint {
+  color: #666;
+  font-size: 12px;
+  font-style: italic;
+}
+
+/* ===== ESTADOS DE NOTAS DE VENTA ===== */
+.status-completed {
+  color: #4caf50;
+  font-weight: 500;
+}
+
+.status-pending {
+  color: #ff9800;
+  font-weight: 500;
+}
+
+.status-cancelled {
+  color: #f44336;
+  font-weight: 500;
+}
+
+.ngx-mat-select-search {
+  border-bottom: 1px solid #e0e0e0;
+  margin-bottom: 8px;
+}
+
+.mat-option.mat-selected:not(.mat-option-multiple) {
+  background: rgba(63, 81, 181, 0.1);
+}
+
+.mat-option:hover:not(.mat-option-disabled) {
+  background: rgba(63, 81, 181, 0.05);
+}
+
+.mat-select-panel .mat-option {
+  line-height: 1.4;
+}
+
+.mat-form-field-appearance-outline .mat-form-field-outline {
+  color: rgba(0,0,0,0.12);
+}
+
+.mat-form-field-appearance-outline.mat-focused .mat-form-field-outline-thick {
+  color: #3f51b5;
+}
+
+/* ===== CUSTOM SCROLLBAR ===== */
+mat-dialog-content::-webkit-scrollbar {
+  width: 8px;
+}
+
+mat-dialog-content::-webkit-scrollbar-track {
+  background: #f1f1f1;
+  border-radius: 4px;
+}
+
+mat-dialog-content::-webkit-scrollbar-thumb {
+  background: #888;
+  border-radius: 4px;
+}
+
+mat-dialog-content::-webkit-scrollbar-thumb:hover {
+  background: #555;
+}
+
+/* Responsive */
+@media (max-width: 600px) {
+  mat-dialog-content {
+    max-height: 70vh;
+    padding: 16px !important;
+  }
+
+  .form-row {
+    flex-direction: column;
+    gap: 0;
+  }
+  
+  .form-col {
+    width: 100%;
+  }
+  
+  .form-section {
+    padding: 12px;
+    margin-bottom: 14px;
+  }
+  
+  .dialog-header {
+    padding: 12px 16px;
+  }
+  
+  .section-title {
+    font-size: 14px;
+    margin-bottom: 12px;
+  }
+  
+  .dialog-actions {
+    flex-direction: column-reverse;
+    gap: 8px;
+    padding: 12px 16px;
+  }
+  
+  .dialog-actions button {
+    margin: 0;
+    width: 100%;
+  }
+  
+  .summary-row {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 4px;
+  }
+  
+  .info-row {
+    flex-direction: column;
+    gap: 4px;
+  }
+  
+  .info-row .value {
+    text-align: left;
+  }
+  
+  .summary-card {
+    padding: 12px;
+  }
+}
+
+/* Animaciones */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes slideInUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.form-section {
+  animation: fadeIn 0.3s ease-out;
+}
+
+.form-summary {
+  animation: fadeIn 0.4s ease-out;
+}
+/* Estilos para opciones de CFDI */
+.cfdi-option {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.cfdi-folio {
+  font-weight: 600;
+  color: #1976d2;
+  font-size: 14px;
+}
+
+.cfdi-details {
+  font-size: 12px;
+  color: #666;
+}
+
+/* Estilos para la tarjeta de información del CFDI */
+.cfdi-info {
+  margin-top: 16px;
+}
+
+.info-card.cfdi {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+}
+
+.info-card.cfdi h4 {
+  color: white;
+  border-bottom-color: rgba(255, 255, 255, 0.3);
+}
+
+.info-card.cfdi .label {
+  color: rgba(255, 255, 255, 0.8);
+}
+
+.info-card.cfdi .value {
+  color: white;
+}
+
+.value.uuid {
+  font-family: 'Courier New', monospace;
+  font-size: 11px;
+  word-break: break-all;
+}
+
+/* Estados del CFDI */
+.status-active {
+  color: #4caf50;
+  font-weight: 600;
+}
+
+.status-cancelled {
+  color: #f44336;
+  font-weight: 600;
+}
+
+.status-pending {
+  color: #ff9800;
+  font-weight: 600;
+}

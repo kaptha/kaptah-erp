@@ -1,0 +1,420 @@
+/* minimal-quote.css - Diseño minimalista para cotizaciones optimizado para html2pdf */
+
+/* Configuración base */
+@page {
+    size: A4;
+    margin: 10mm;
+}
+
+body {
+    font-family: 'Arial', sans-serif;
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    background-color: white;
+    line-height: 1.4;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+}
+
+/* Contenedor principal con borde característico */
+.container {
+    border: 2px solid #000;
+    border-radius: 15px;
+    overflow: hidden;
+    padding: 0;
+    max-width: 190mm;
+    height: auto;
+    max-height: 250mm;
+    box-sizing: border-box;
+    background-color: white;
+    margin: 0 auto;
+    page-break-after: avoid;
+    page-break-inside: avoid;
+}
+
+/* Encabezado con fondo oscuro */
+.header {
+    display: flex;
+    justify-content: space-between;
+    background-color: #222;
+    color: white;
+    padding: 10px 15px;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+}
+
+.logo-container {
+    display: flex;
+    align-items: center;
+}
+
+.logo-img {
+    max-height: 40px;
+    max-width: 100px;
+    margin-right: 10px;
+    object-fit: contain;
+}
+
+/* Logo de respaldo */
+.fallback-logo {
+    display: none; /* Solo mostrar si falla la imagen */
+    align-items: center;
+    color: white;
+}
+
+.logo-circle {
+    background-color: #e91e63; /* Color rosa característico */
+    color: white;
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin-right: 10px;
+    font-weight: bold;
+    font-size: 20px;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+}
+
+.logo-text {
+    color: white;
+    font-weight: bold;
+}
+
+.company-info {
+    text-align: right;
+    font-size: 12px;
+    color: white;
+}
+
+.quote-title {
+    font-size: 18px;
+    margin-bottom: 3px;
+    color: white;
+    font-weight: bold;
+}
+
+.quote-date,
+.quote-email,
+.quote-phone {
+    color: white;
+    margin-bottom: 2px;
+}
+
+/* Contenido principal */
+.content {
+    padding: 15px;
+}
+
+.client-section {
+    color: #00b8d4; /* Azul cian característico */
+    font-size: 14px;
+    margin-bottom: 5px;
+    font-weight: bold;
+}
+
+.form-row {
+    display: flex;
+    margin-bottom: 10px;
+}
+
+.form-group {
+    flex: 1;
+    margin-right: 15px;
+}
+
+.form-group:last-child {
+    margin-right: 0;
+}
+
+.form-label {
+    font-weight: bold;
+    display: block;
+    margin-bottom: 2px;
+    font-size: 13px;
+    color: #333;
+}
+
+.form-input {
+    width: 100%;
+    border: none;
+    border-bottom: 1px solid #ccc;
+    padding: 2px 0;
+    font-size: 13px;
+    color: #333;
+    background: transparent;
+}
+
+.project-section {
+    color: #00b8d4; /* Azul cian */
+    font-size: 14px;
+    margin-top: 10px;
+    margin-bottom: 5px;
+    font-weight: bold;
+}
+
+.project-box {
+    border: 1px solid #ddd;
+    padding: 8px;
+    margin-bottom: 10px;
+    font-size: 13px;
+    background: #fff;
+}
+
+.project-box-title {
+    font-weight: bold;
+    margin-bottom: 3px;
+    color: #333;
+}
+
+.separator {
+    border-top: 1px dashed #ccc;
+    margin: 5px 0;
+}
+
+/* Tabla de servicios con encabezado rosa */
+.services-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 13px;
+    margin-bottom: 15px;
+}
+
+.services-table th {
+    background-color: #e91e63; /* Rosa característico */
+    color: white;
+    padding: 8px 6px; /* Aumentado ligeramente */
+    text-align: left;
+    font-weight: bold;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+}
+
+.services-table th:first-child {
+    width: 15%;
+    text-align: center;
+}
+
+.services-table th:nth-child(2) {
+    width: 45%;
+}
+
+.services-table th:nth-child(3),
+.services-table th:nth-child(4) {
+    width: 20%;
+    text-align: right;
+}
+
+.services-table td {
+    padding: 6px;
+    border-bottom: 1px solid #eee;
+    color: #333;
+}
+
+.services-table td:first-child {
+    text-align: center;
+    font-weight: bold;
+}
+
+.services-table td:nth-child(2) {
+    text-align: left;
+}
+
+.services-table td:nth-child(3),
+.services-table td:nth-child(4) {
+    text-align: right;
+}
+
+/* Texto de validez */
+.validity-text {
+    font-style: italic;
+    text-align: center;
+    margin: 5px 0;
+    font-size: 12px;
+    color: #666;
+}
+
+/* Tabla de totales */
+.totals-table {
+    width: 40%;
+    margin-left: auto;
+    border-collapse: collapse;
+    font-size: 13px;
+    margin-bottom: 10px;
+}
+
+.totals-table td {
+    padding: 6px 8px; /* Aumentado */
+    border: 1px solid #eee;
+    color: #333;
+}
+
+.totals-table td:first-child {
+    font-weight: bold;
+    background: #f8f9fa;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+}
+
+.totals-table td:last-child {
+    text-align: right;
+    font-weight: 600;
+}
+
+.totals-table tr:last-child td {
+    background: #e91e63 !important; /* Fila del total en rosa */
+    color: white !important;
+    font-weight: bold !important;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+}
+
+/* Sección de términos */
+.terms-section {
+    background-color: #222;
+    color: white;
+    padding: 10px 15px; /* Aumentado */
+    margin-top: 0;
+    font-size: 12px;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+}
+
+.terms-title {
+    color: #ffc107; /* Amarillo característico */
+    font-size: 14px;
+    margin-bottom: 5px; /* Aumentado */
+    font-weight: bold;
+}
+
+.terms-text {
+    line-height: 1.4; /* Aumentado */
+    color: white;
+}
+
+/* Manejo de imagen del logo */
+.logo-img:not([src]),
+.logo-img[src=""],
+.logo-img[src="#"] {
+    display: none;
+}
+
+.logo-img:not([src]) + .fallback-logo,
+.logo-img[src=""] + .fallback-logo,
+.logo-img[src="#"] + .fallback-logo {
+    display: flex !important;
+}
+
+/* Ajustes específicos para impresión */
+@media print {
+    body {
+        margin: 0;
+        padding: 0;
+    }
+    
+    .container {
+        border: 2px solid #000 !important;
+        margin: 0 !important;
+        padding: 0 !important;
+        max-width: 100% !important;
+        border-radius: 15px !important;
+        overflow: hidden !important;
+        page-break-after: avoid !important;
+        page-break-inside: avoid !important;
+        height: 275mm !important;
+        max-height: 275mm !important;
+    }
+    
+    /* Forzar colores en impresión */
+    .header,
+    .terms-section,
+    .services-table th,
+    .totals-table tr:last-child td,
+    .logo-circle {
+        -webkit-print-color-adjust: exact !important;
+        color-adjust: exact !important;
+        print-color-adjust: exact !important;
+    }
+    
+    /* Evitar saltos de página */
+    .header,
+    .content,
+    .services-table,
+    .totals-table,
+    .terms-section {
+        page-break-inside: avoid !important;
+        break-inside: avoid !important;
+    }
+    
+    /* Mantener flexbox */
+    .header,
+    .form-row {
+        display: flex !important;
+    }
+    
+    .logo-container,
+    .fallback-logo {
+        display: flex !important;
+        align-items: center !important;
+    }
+    
+    .logo-circle {
+        display: flex !important;
+        justify-content: center !important;
+        align-items: center !important;
+    }
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .container {
+        border-radius: 10px;
+        margin: 5px;
+    }
+    
+    .header {
+        flex-direction: column;
+        text-align: center;
+        padding: 8px 12px;
+    }
+    
+    .logo-container {
+        justify-content: center;
+        margin-bottom: 8px;
+    }
+    
+    .company-info {
+        text-align: center;
+    }
+    
+    .content {
+        padding: 12px;
+    }
+    
+    .form-row {
+        flex-direction: column;
+    }
+    
+    .form-group {
+        margin-right: 0;
+        margin-bottom: 8px;
+    }
+    
+    .services-table th,
+    .services-table td {
+        padding: 4px;
+        font-size: 11px;
+    }
+    
+    .totals-table {
+        width: 100%;
+        margin: 10px 0;
+    }
+    
+    .terms-section {
+        padding: 8px 12px;
+    }
+}

@@ -1,0 +1,244 @@
+<h2 mat-dialog-title>
+  <mat-icon>shopping_cart</mat-icon>
+  {{viewMode ? 'Detalle de' : (isEditMode ? 'Editar' : 'Nueva')}} Orden de Compra
+</h2>
+
+<mat-dialog-content>
+  <form [formGroup]="orderForm">
+    
+    <!-- Selector de Proveedor -->
+    <mat-form-field appearance="outline" class="full-width">
+      <mat-label>Proveedor</mat-label>
+      <mat-select formControlName="supplierId" (selectionChange)="onSupplierSelect($event)">
+        <mat-option *ngIf="loadingSuppliers">
+          <mat-spinner diameter="20" style="margin: 0 auto;"></mat-spinner>
+          <span style="margin-left: 10px;">Cargando proveedores...</span>
+        </mat-option>
+        <mat-option *ngIf="!loadingSuppliers">
+          <ngx-mat-select-search 
+            [formControl]="supplierFilterCtrl"
+            placeholderLabel="Buscar proveedor..."
+            noEntriesFoundLabel="No se encontraron proveedores">
+          </ngx-mat-select-search>
+        </mat-option>
+        <mat-option *ngFor="let supplier of filteredSuppliers | async" [value]="supplier.id">
+          {{supplier.nombre}} <span *ngIf="supplier.rfc">- {{supplier.rfc}}</span>
+        </mat-option>
+      </mat-select>
+      <mat-error *ngIf="orderForm.get('supplierId')?.hasError('required')">
+        Seleccione un proveedor
+      </mat-error>
+      <mat-hint *ngIf="loadingSuppliers">Cargando proveedores desde el servidor...</mat-hint>
+    </mat-form-field>
+
+    <!-- ✨ Información del proveedor seleccionado -->
+    <div *ngIf="selectedSupplier" class="supplier-info-card">
+      <mat-card class="info-card">
+        <mat-card-header>
+          <mat-card-title>
+            <mat-icon>store</mat-icon>
+            Información del Proveedor
+          </mat-card-title>
+        </mat-card-header>
+        <mat-card-content>
+          <div class="info-row">
+            <strong>Nombre Comercial:</strong>
+            <span>{{ selectedSupplier.nombre }}</span>
+          </div>
+          <div class="info-row" *ngIf="selectedSupplier.rfc">
+            <strong>RFC:</strong>
+            <span>{{ selectedSupplier.rfc }}</span>
+          </div>
+          <div class="info-row" *ngIf="selectedSupplier.direccion">
+            <strong>Dirección:</strong>
+            <span>{{ selectedSupplier.direccion }}</span>
+          </div>
+        </mat-card-content>
+      </mat-card>
+    </div>
+
+    <!-- Fechas y Moneda -->
+    <div class="form-section">
+      <h3>Información General</h3>
+      
+      <div class="row">
+        <mat-form-field appearance="outline" class="col-md-4">
+          <mat-label>Fecha de Orden</mat-label>
+          <input matInput [matDatepicker]="orderPicker" formControlName="orderDate" required>
+          <mat-datepicker-toggle matSuffix [for]="orderPicker"></mat-datepicker-toggle>
+          <mat-datepicker #orderPicker></mat-datepicker>
+          <mat-error *ngIf="orderForm.get('orderDate')?.hasError('required')">
+            La fecha de orden es requerida
+          </mat-error>
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" class="col-md-4">
+          <mat-label>Fecha Esperada de Entrega</mat-label>
+          <input matInput [matDatepicker]="expectedPicker" formControlName="expectedDate">
+          <mat-datepicker-toggle matSuffix [for]="expectedPicker"></mat-datepicker-toggle>
+          <mat-datepicker #expectedPicker></mat-datepicker>
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" class="col-md-4">
+          <mat-label>Moneda</mat-label>
+          <mat-select formControlName="currency" required>
+            <mat-option value="MXN">MXN - Peso Mexicano</mat-option>
+            <mat-option value="USD">USD - Dólar</mat-option>
+            <mat-option value="EUR">EUR - Euro</mat-option>
+          </mat-select>
+        </mat-form-field>
+      </div>
+
+      <mat-form-field appearance="outline" class="full-width">
+        <mat-label>Notas</mat-label>
+        <textarea matInput formControlName="notes" rows="3" 
+                  placeholder="Notas adicionales sobre la orden..."></textarea>
+      </mat-form-field>
+    </div>
+
+    <!-- Lista de Productos -->
+    <div formArrayName="items" class="items-container">
+      <div class="section-header">
+        <h3>
+          <mat-icon>inventory_2</mat-icon>
+          Productos
+        </h3>
+        <button mat-raised-button color="primary" (click)="addItem()" type="button" *ngIf="!viewMode">
+          <mat-icon>add</mat-icon>
+          Agregar Producto
+        </button>
+      </div>
+      
+      <div *ngFor="let item of items.controls; let i=index" [formGroupName]="i" class="item-row">
+        <div class="item-header-actions">
+          <span class="item-number">Producto #{{i + 1}}</span>
+          <button mat-icon-button color="warn" (click)="removeItem(i)" 
+                  *ngIf="!viewMode && items.length > 1" type="button">
+            <mat-icon>delete</mat-icon>
+          </button>
+        </div>
+
+        <div class="item-fields">
+          <!-- Selector de Producto -->
+          <mat-form-field appearance="outline" class="product-field">
+            <mat-label>Producto</mat-label>
+            <mat-select formControlName="productId" (selectionChange)="onProductSelect($event, i)">
+              <mat-option *ngIf="loadingProducts">
+                <mat-spinner diameter="20" style="margin: 0 auto;"></mat-spinner>
+                <span style="margin-left: 10px;">Cargando productos...</span>
+              </mat-option>
+              <mat-option *ngIf="!loadingProducts">
+                <ngx-mat-select-search 
+                  [formControl]="productFilterCtrl"
+                  placeholderLabel="Buscar producto..."
+                  noEntriesFoundLabel="No se encontraron productos">
+                </ngx-mat-select-search>
+              </mat-option>
+              <mat-option *ngFor="let product of filteredProducts[i] | async" [value]="product.id">
+                {{product.name}} - ID: {{product.id}}
+              </mat-option>
+            </mat-select>
+            <mat-error>El producto es requerido</mat-error>
+            <mat-hint *ngIf="loadingProducts">Cargando productos desde el inventario...</mat-hint>
+          </mat-form-field>
+
+          <!-- Cantidad -->
+          <mat-form-field appearance="outline" class="quantity-field">
+            <mat-label>Cantidad</mat-label>
+            <input matInput type="number" formControlName="quantity" min="1" required
+                   (change)="calculateItemTotal(i)">
+            <mat-error>Cantidad requerida (mín. 1)</mat-error>
+          </mat-form-field>
+
+          <!-- Costo Unitario -->
+          <mat-form-field appearance="outline" class="price-field">
+            <mat-label>Costo Unitario</mat-label>
+            <input matInput type="number" formControlName="unitCost" min="0" step="0.01" required
+                   (change)="calculateItemTotal(i)">
+            <span matPrefix>$&nbsp;</span>
+            <mat-error>Costo requerido</mat-error>
+          </mat-form-field>
+
+          <!-- IVA -->
+          <mat-form-field appearance="outline" class="tax-field">
+            <mat-label>IVA (%)</mat-label>
+            <input matInput type="number" formControlName="taxRate" min="0" max="100" step="0.01" required
+                   (change)="calculateItemTotal(i)">
+            <span matSuffix>%</span>
+            <mat-error>IVA requerido</mat-error>
+          </mat-form-field>
+        </div>
+
+        <!-- Totales del item -->
+        <div class="item-totals">
+          <div class="total-item">
+            <span class="total-label">Subtotal:</span>
+            <span class="total-value">${{item.get('subtotal')?.value | number:'1.2-2'}}</span>
+          </div>
+          <div class="total-item">
+            <span class="total-label">IVA:</span>
+            <span class="total-value">${{item.get('taxAmount')?.value | number:'1.2-2'}}</span>
+          </div>
+          <div class="total-item total-highlighted">
+            <span class="total-label"><strong>Total:</strong></span>
+            <span class="total-value"><strong>${{item.get('total')?.value | number:'1.2-2'}}</strong></span>
+          </div>
+        </div>
+
+        <!-- Notas del producto -->
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label>Notas del producto</mat-label>
+          <input matInput formControlName="notes" placeholder="Notas adicionales...">
+        </mat-form-field>
+      </div>
+
+      <!-- Mensaje si no hay items -->
+      <div *ngIf="items.length === 0" class="no-items">
+        <mat-icon>inventory_2</mat-icon>
+        <p>No hay productos agregados</p>
+        <button mat-raised-button color="primary" type="button" (click)="addItem()">
+          <mat-icon>add</mat-icon>
+          Agregar Primer Producto
+        </button>
+      </div>
+    </div>
+
+    <!-- Totales generales -->
+    <div class="totals-container">
+      <h3>Resumen de la Orden</h3>
+      <div class="totals-content">
+        <div class="total-row">
+          <span class="total-label">Total de Productos:</span>
+          <span class="total-value">{{items.length}}</span>
+        </div>
+        <div class="total-row">
+          <span class="total-label">Subtotal:</span>
+          <span class="total-value">${{orderForm.get('subtotal')?.value | number:'1.2-2'}}</span>
+        </div>
+        <div class="total-row">
+          <span class="total-label">Total IVA:</span>
+          <span class="total-value">${{orderForm.get('tax')?.value | number:'1.2-2'}}</span>
+        </div>
+        <mat-divider></mat-divider>
+        <div class="total-row grand-total">
+          <span class="total-label">Total General:</span>
+          <span class="total-value">${{orderForm.get('total')?.value | number:'1.2-2'}}</span>
+        </div>
+      </div>
+    </div>
+  </form>
+</mat-dialog-content>
+
+<mat-dialog-actions align="end">
+  <button mat-button (click)="onClose()">
+    {{ viewMode ? 'Cerrar' : 'Cancelar' }}
+  </button>
+  <button mat-raised-button color="primary" (click)="onSubmit()" 
+          [disabled]="!orderForm.valid || loading || viewMode">
+    <mat-spinner diameter="20" *ngIf="loading" style="display: inline-block; margin-right: 8px;"></mat-spinner>
+    <span *ngIf="!loading">
+      <mat-icon>save</mat-icon>
+      {{ isEditMode ? 'Actualizar' : 'Crear Orden' }}
+    </span>
+  </button>
+</mat-dialog-actions>

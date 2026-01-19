@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Nota de Remisión - Minimal Delivery</title>
+</head>
+<body>
+    <div class="container">
+        <!-- Encabezado -->
+        <div class="header">
+            <div class="logo-container">
+                <div class="logo">
+                    <img src="[[LOGO_URL]]" alt="Logo" class="logo-img" onerror="this.style.display='none'; this.nextElementSibling.style.display='block';">
+                    <div class="logo-dots"></div>
+                </div>
+                <div class="logo-text">[[NOMBRE_EMPRESA]]</div>
+            </div>
+            <div class="title-container">
+                <h1 class="document-title">ORDEN DE VENTA</h1>
+            </div>
+        </div>
+        
+        <!-- Información principal -->
+        <table class="info-tables">
+            <tr>
+                <td width="20%"><strong>NÚMERO:</strong></td>
+                <td width="45%"><strong>DATOS FISCALES:</strong></td>
+                <th width="35%" rowspan="1">FECHA</th>
+            </tr>
+            <tr>
+                <td>[[NUMERO_FOLIO]]</td>
+                <td>RFC: [[RFC_CLIENTE]]</td>
+                <td>
+                    <div class="date-cells">
+                        <div class="date-cell">[[DIA]]</div>
+                        <div class="date-cell">[[MES]]</div>
+                        <div class="date-cell">[[AÑO]]</div>
+                    </div>
+                </td>
+            </tr>
+            <tr>
+                <td><strong>CLIENTE:</strong></td>
+                <td colspan="2">[[NOMBRE_CLIENTE]]</td>
+            </tr>
+            <tr>
+                <td><strong>DOMICILIO:</strong></td>
+                <td colspan="2">[[DIRECCION_CLIENTE]]</td>
+            </tr>
+            <tr>
+                <td><strong>CIUDAD O ESTADO:</strong></td>
+                <td>[[DIRECCION_CLIENTE]]</td>
+                <td><strong>TEL.:</strong> [[TELEFONO_CLIENTE]]</td>
+            </tr>
+        </table>
+        
+        <div class="separator"></div>
+        
+        <!-- Tabla de productos -->
+        <table class="products-table">
+            <thead>
+                <tr>
+                    <th width="15%">CANTIDAD</th>
+                    <th width="45%">DESCRIPCIÓN</th>
+                    <th width="20%">VALOR UNITARIO</th>
+                    <th width="20%">IMPORTE</th>
+                </tr>
+            </thead>
+            <tbody>
+                <!-- Filas de productos que se repetirán según los ítems -->
+                [[FILAS_PRODUCTOS]]
+            </tbody>
+        </table>
+        
+        <!-- Totales -->
+        <table class="products-table totals-section">
+            <tr>
+                <th>SUBTOTAL</th>
+                <td width="20%">[[SUBTOTAL]]</td>
+            </tr>
+            <tr>
+                <th>IVA ([[PORCENTAJE_IVA]]%)</th>
+                <td>[[MONTO_IVA]]</td>
+            </tr>
+            <tr>
+                <th>TOTAL</th>
+                <td>[[TOTAL]]</td>
+            </tr>
+        </table>
+        
+        <!-- Sección de observaciones -->
+        <div class="observations-section">
+            <div class="observations-title">OBSERVACIONES:</div>
+            <div class="observations-box">
+                [[OBSERVACIONES]]
+            </div>
+        </div>
+        
+        <!-- Pie de página -->
+        <div class="footer">
+            <div class="footer-info">
+                <div class="footer-title">DIRECCIÓN</div>
+                <div>[[DIRECCION_EMPRESA]]</div>
+            </div>
+            <div class="footer-info">
+                <div class="footer-title">TELÉFONO</div>
+                <div>[[TELEFONO_EMPRESA]]</div>
+            </div>
+            <div class="footer-info">
+                <div class="footer-title">EMAIL</div>
+                <div>[[EMAIL_EMPRESA]]</div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

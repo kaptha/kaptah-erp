@@ -1,0 +1,307 @@
+/* Estilos básicos del modal */
+.cfdi-modal-container {
+  max-width: 950px;
+}
+
+.mat-dialog-title {
+  margin-bottom: 20px;
+  color: #333;
+  font-size: 20px;
+  font-weight: 500;
+}
+
+.mat-dialog-content {
+  max-height: 75vh;
+  overflow-y: auto;
+}
+
+/* Pestañas principales */
+.tab-container {
+  display: flex;
+  margin-bottom: 20px;
+  border-bottom: 1px solid #e0e0e0;
+}
+
+.tab-container button {
+  padding: 10px 20px;
+  border-radius: 0;
+  margin-right: 4px;
+  font-weight: 500;
+}
+
+.active-tab {
+  color: #8e24aa;
+  border-bottom: 2px solid #8e24aa;
+}
+
+/* Subpestañas para Partida */
+.subtab-container {
+  display: flex;
+  margin-bottom: 16px;
+  border-bottom: 1px solid #e0e0e0;
+}
+
+.subtab-container button {
+  padding: 8px 16px;
+  border-radius: 0;
+  margin-right: 4px;
+  font-weight: 500;
+  font-size: 14px;
+}
+
+/* Títulos de sección */
+.section-title {
+  font-size: 16px;
+  font-weight: 500;
+  margin-top: 24px;
+  margin-bottom: 16px;
+  color: #555;
+  padding-bottom: 8px;
+  border-bottom: 1px solid #eee;
+}
+
+/* Filas del formulario */
+.form-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16px;
+  margin-bottom: 16px;
+}
+
+.form-row:last-child {
+  margin-bottom: 0;
+}
+
+.form-row mat-form-field {
+  flex: 1;
+  min-width: 200px;
+}
+
+.full-width {
+  width: 100%;
+}
+
+/* Contenedor de percepciones, deducciones y otros pagos */
+.partida-container {
+  background-color: #f8f8f8;
+  border: 1px solid #e0e0e0;
+  border-radius: 8px;
+  padding: 16px;
+  margin-bottom: 16px;
+}
+
+.partida-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16px;
+}
+
+.partida-title {
+  font-weight: 500;
+  color: #333;
+  font-size: 16px;
+}
+
+/* Botón para agregar */
+.add-button {
+  margin-top: 16px;
+  margin-bottom: 24px;
+  display: flex;
+  justify-content: center;
+}
+
+/* Información del empleado */
+.employee-info {
+  background-color: #f5f9ff;
+  border-radius: 8px;
+  border: 1px solid #d6e4ff;
+  padding: 16px;
+  margin-top: 16px;
+  margin-bottom: 16px;
+}
+
+/* Totales */
+.totals-container {
+  background-color: #f9f9f9;
+  padding: 20px;
+  border-radius: 8px;
+  border-left: 4px solid #8e24aa;
+  margin-top: 24px;
+}
+
+.total-row {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 8px;
+}
+
+.total-label {
+  font-weight: 500;
+  color: #555;
+}
+
+.total-value {
+  font-weight: 500;
+  color: #333;
+}
+
+.grand-total {
+  margin-top: 8px;
+  padding-top: 12px;
+  border-top: 1px solid #e0e0e0;
+}
+
+.grand-total .total-label,
+.grand-total .total-value {
+  font-weight: 700;
+  font-size: 18px;
+  color: #333;
+}
+
+/* Overlay de carga */
+.loading-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background-color: rgba(255, 255, 255, 0.7);
+  z-index: 10;
+}
+
+/* Media queries */
+@media (max-width: 768px) {
+  .form-row {
+    flex-direction: column;
+    gap: 0;
+  }
+  
+  .form-row mat-form-field {
+    width: 100%;
+  }
+  
+  .tab-container button,
+  .subtab-container button {
+    padding: 8px 12px;
+    font-size: 14px;
+  }
+  
+  .partida-container {
+    padding: 12px;
+  }
+  
+  .mat-dialog-content {
+    max-height: 80vh;
+  }
+}
+/* ✨ NUEVO: Tarjeta de información de sucursal */
+.sucursal-info-card {
+  margin: 16px 0 20px 0;
+}
+
+.info-card {
+  background-color: #f5f5f5;
+  border-left: 4px solid #8e24aa;
+}
+
+.info-card mat-card-header {
+  margin-bottom: 12px;
+}
+
+.info-card mat-card-title {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 16px;
+  color: #8e24aa;
+  font-weight: 500;
+}
+
+.info-card mat-card-title mat-icon {
+  font-size: 20px;
+  width: 20px;
+  height: 20px;
+}
+
+.info-card .info-row {
+  display: flex;
+  justify-content: space-between;
+  padding: 8px 0;
+  border-bottom: 1px solid #e0e0e0;
+  margin-bottom: 0;
+}
+
+.info-card .info-row:last-child {
+  border-bottom: none;
+}
+
+.info-card .info-row .info-label {
+  color: #666;
+  font-weight: 600;
+  min-width: 120px;
+}
+
+.info-card .info-row .info-value {
+  color: #333;
+  text-align: right;
+  flex: 1;
+}
+
+/* Estilos adicionales para info-row fuera de info-card */
+.info-row {
+  display: flex;
+  align-items: center;
+  margin-bottom: 8px;
+}
+
+.info-label {
+  font-weight: 500;
+  color: #555;
+  min-width: 120px;
+  flex-shrink: 0;
+}
+
+.info-value {
+  flex: 1;
+}
+
+/* ✨ NUEVO: Tarjeta de información del empleado */
+.employee-info-card {
+  margin: 16px 0 20px 0;
+}
+
+.employee-info-card .info-card {
+  background-color: #f5f5f5;
+  border-left: 4px solid #3f51b5;
+}
+
+.employee-info-card mat-card-title {
+  color: #3f51b5;
+}
+/* Sección de certificado digital */
+.certificado-section {
+  margin-top: 24px;
+  padding: 16px;
+  background: #f5f5f5;
+  border-radius: 8px;
+}
+
+.certificado-section h3 {
+  margin: 0 0 16px 0;
+  color: #673ab7;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.password-hint {
+  display: block;
+  font-size: 12px;
+  color: #666;
+  margin-top: 8px;
+  font-style: italic;
+}

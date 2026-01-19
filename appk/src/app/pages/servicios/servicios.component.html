@@ -1,0 +1,164 @@
+<div class="servicios-container">
+  <h2>Servicios</h2>
+  
+  <div class="breadcrumb">
+    <a routerLink="/dashboard">Dashboard</a> / <a routerLink="/almacen">Almacén</a> / Catálogo de servicios
+  </div>
+
+  <!-- Filtro para móvil -->
+  <div class="mobile-filter-section">
+    <mat-form-field appearance="outline">
+      <mat-label>Buscar servicios</mat-label>
+      <input matInput (keyup)="applyFilter($event)" placeholder="Ej. Consultoría">
+      <mat-icon matSuffix>search</mat-icon>
+    </mat-form-field>
+  </div>
+
+  <!-- Acciones principales -->
+  <div class="actions">
+    <button mat-raised-button class="btn-primary" (click)="agregarServicio()">
+      <mat-icon>add</mat-icon> Agregar servicio
+    </button>
+    
+    <!-- Filtro para pantallas grandes -->
+    <mat-form-field appearance="outline" [style.display]="isMobile ? 'none' : 'block'">
+      <mat-label>Filtrar</mat-label>
+      <input matInput (keyup)="applyFilter($event)" placeholder="Ej. Consultoría">
+      <mat-icon matSuffix>search</mat-icon>
+    </mat-form-field>
+    
+    <span class="spacer"></span>
+    
+    <button mat-raised-button [matMenuTriggerFor]="exportMenu" class="btn-white">
+      <mat-icon>file_download</mat-icon> Exportar
+    </button>
+    <mat-menu #exportMenu="matMenu">
+  <button mat-menu-item (click)="exportar('csv')">
+    <mat-icon>description</mat-icon>
+    <span>Exportar como CSV</span>
+  </button>
+  <button mat-menu-item (click)="exportar('xlsx')">
+    <mat-icon>table_chart</mat-icon>
+    <span>Exportar como Excel</span>
+  </button>
+    </mat-menu>
+    
+    <button mat-icon-button color="primary" (click)="refrescar()" matTooltip="Refrescar">
+      <mat-icon>refresh</mat-icon>
+    </button>
+  </div>
+
+  <!-- Tabla para pantallas grandes -->
+  <div class="table-container mat-elevation-z8">
+    <mat-table [dataSource]="dataSource">
+      <!-- Categoria Column -->
+      <ng-container matColumnDef="categoria">
+        <mat-header-cell *matHeaderCellDef> Categoría </mat-header-cell>
+        <mat-cell *matCellDef="let element"> {{element.categoria}} </mat-cell>
+      </ng-container>
+
+      <!-- Cod. Servicios Column -->
+      <ng-container matColumnDef="codServicios">
+        <mat-header-cell *matHeaderCellDef> Cod. Servicios </mat-header-cell>
+        <mat-cell *matCellDef="let element"> {{element.codServicios}} </mat-cell>
+      </ng-container>
+
+      <!-- Servicio Column -->
+      <ng-container matColumnDef="servicio">
+        <mat-header-cell *matHeaderCellDef> Servicio </mat-header-cell>
+        <mat-cell *matCellDef="let element"> {{element.servicio}} </mat-cell>
+      </ng-container>
+
+      <!-- Descripción Column -->
+      <ng-container matColumnDef="descripcion">
+        <mat-header-cell *matHeaderCellDef> Descripción </mat-header-cell>
+        <mat-cell *matCellDef="let element"> {{element.descripcion}} </mat-cell>
+      </ng-container>
+
+      <!-- Acciones Column -->
+      <ng-container matColumnDef="acciones">
+        <mat-header-cell *matHeaderCellDef></mat-header-cell>
+        <mat-cell *matCellDef="let element">
+          <button mat-icon-button [matMenuTriggerFor]="menu">
+            <mat-icon>more_vert</mat-icon>
+          </button>
+          <mat-menu #menu="matMenu">
+            <button mat-menu-item (click)="editarServicio(element)">
+              <mat-icon>edit</mat-icon>
+              <span>Editar</span>
+            </button>
+            <button mat-menu-item (click)="eliminarServicio(element.id)">
+              <mat-icon color="warn">delete</mat-icon>
+              <span class="text-warn">Eliminar</span>
+            </button>
+          </mat-menu>
+        </mat-cell>
+      </ng-container>
+
+      <mat-header-row *matHeaderRowDef="displayedColumns"></mat-header-row>
+      <mat-row *matRowDef="let row; columns: displayedColumns;"></mat-row>
+      
+      <!-- Fila para cuando no hay datos -->
+      <tr class="mat-row" *matNoDataRow>
+        <td class="mat-cell empty-state" [attr.colspan]="displayedColumns.length">
+          No hay servicios que coincidan con el filtro.
+        </td>
+      </tr>
+    </mat-table>
+  </div>
+
+  <!-- Vista de tarjetas para móviles -->
+  <div class="mobile-cards">
+    <div *ngIf="dataSource.filteredData.length === 0" class="empty-state">
+      No hay servicios que coincidan con el filtro.
+    </div>
+    
+    <div class="mobile-card" *ngFor="let servicio of dataSource.filteredData | slice: getMobileStartIndex(): getMobileEndIndex()">
+      <div class="mobile-card-header">
+        <div class="mobile-card-title">{{servicio.servicio}}</div>
+        <div class="mobile-card-code">{{servicio.codServicios}}</div>
+      </div>
+      
+      <div class="mobile-card-content">
+        <div class="mobile-card-row">
+          <div class="mobile-card-label">Categoría:</div>
+          <div class="mobile-card-value">{{servicio.categoria}}</div>
+        </div>
+        
+        <div class="mobile-card-row">
+          <div class="mobile-card-label">Descripción:</div>
+          <div class="mobile-card-value">{{servicio.descripcion || 'Sin descripción'}}</div>
+        </div>
+        
+        <div class="mobile-card-row" *ngIf="servicio.precio">
+          <div class="mobile-card-label">Precio:</div>
+          <div class="mobile-card-value">{{servicio.precio | currency}}</div>
+        </div>
+      </div>
+      
+      <div class="mobile-card-actions">
+        <button mat-icon-button color="primary" matTooltip="Editar" (click)="editarServicio(servicio)">
+          <mat-icon>edit</mat-icon>
+        </button>
+        <button mat-icon-button color="warn" matTooltip="Eliminar" (click)="eliminarServicio(servicio.id)">
+          <mat-icon>delete</mat-icon>
+        </button>
+      </div>
+    </div>
+    
+    <!-- Paginador mobile simplificado -->
+    <div class="mobile-paginator" *ngIf="dataSource.filteredData.length > mobilePaginator.pageSize">
+      <div class="mobile-paginator-info">
+        Mostrando {{getMobileStartIndex() + 1}} - {{getMobileEndIndex()}} de {{dataSource.filteredData.length}}
+      </div>
+      <div class="mobile-paginator-actions">
+        <button mat-icon-button [disabled]="mobilePaginator.pageIndex === 0" (click)="previousMobilePage()">
+          <mat-icon>navigate_before</mat-icon>
+        </button>
+        <button mat-icon-button [disabled]="isLastMobilePage()" (click)="nextMobilePage()">
+          <mat-icon>navigate_next</mat-icon>
+        </button>
+      </div>
+    </div>
+  </div>
+</div>

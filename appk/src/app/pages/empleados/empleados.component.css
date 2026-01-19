@@ -1,0 +1,352 @@
+/* Estilos base */
+.empleados-container {
+  padding: 16px;
+  width: 100%;
+}
+
+.page-title {
+  margin-bottom: 16px;
+  color: #333;
+  font-size: 24px;
+}
+
+.breadcrumb {
+  margin-bottom: 20px;
+  font-size: 14px;
+  white-space: nowrap;
+  overflow-x: auto;
+  padding-bottom: 5px;
+}
+
+.breadcrumb a {
+  color: #8e24aa;
+  text-decoration: none;
+}
+
+.breadcrumb a:hover {
+  text-decoration: underline;
+}
+
+/* Sección de acciones y filtros */
+.actions-container {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.search-field {
+  flex: 1;
+  min-width: 200px;
+  max-width: 500px;
+}
+
+.actions-right {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+}
+
+.spacer {
+  flex: 1 1 auto;
+}
+
+/* Contenedor de la tabla */
+.table-container {
+  width: 100%;
+  overflow-x: auto;
+  margin-bottom: 20px;
+  position: relative;
+}
+
+/* Estilos de la tabla */
+table.mat-table {
+  width: 100%;
+  min-width: 900px; /* Ancho mínimo para garantizar legibilidad */
+}
+
+.mat-column-nombre {
+  min-width: 180px;
+}
+
+.mat-column-rfc {
+  min-width: 120px;
+}
+
+.mat-column-email {
+  min-width: 180px;
+}
+
+.mat-column-telefono {
+  min-width: 120px;
+}
+
+.mat-column-puesto {
+  min-width: 150px;
+}
+
+.mat-column-departamento {
+  min-width: 150px;
+}
+
+.mat-column-estado {
+  min-width: 100px;
+}
+
+.mat-column-actions {
+  width: 100px;
+  text-align: right;
+}
+
+/* Estilos para cabeceras y celdas */
+.mat-header-cell {
+  font-weight: bold;
+  color: rgba(0, 0, 0, 0.7);
+  background-color: #f5f5f5;
+}
+
+.mat-row:hover {
+  background-color: rgba(142, 36, 170, 0.05);
+}
+
+/* Estado activo/inactivo */
+.active-status {
+  color: #4caf50;
+  font-weight: bold;
+}
+
+.inactive-status {
+  color: #f44336;
+  font-weight: bold;
+}
+
+/* Estado vacío y carga */
+.empty-state {
+  padding: 30px;
+  text-align: center;
+  color: #666;
+  font-style: italic;
+}
+
+.loading-container {
+  display: flex;
+  justify-content: center;
+  padding: 30px;
+}
+
+/* Tarjetas para vista móvil */
+.mobile-cards {
+  display: none;
+}
+
+.mobile-card {
+  display: flex;
+  flex-direction: column;
+  margin-bottom: 16px;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  overflow: hidden;
+  background-color: white;
+}
+
+.mobile-card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background-color: #f5f5f5;
+  padding: 12px 16px;
+}
+
+.mobile-card-title {
+  font-weight: 500;
+  color: #333;
+  font-size: 16px;
+}
+
+.mobile-card-subtitle {
+  font-size: 14px;
+  color: #666;
+  padding: 4px 8px;
+  background-color: #eeeeee;
+  border-radius: 4px;
+}
+
+.mobile-card-status {
+  padding: 2px 8px;
+  border-radius: 4px;
+  font-weight: bold;
+  font-size: 12px;
+}
+
+.mobile-card-status.active {
+  background-color: rgba(76, 175, 80, 0.1);
+  color: #4caf50;
+}
+
+.mobile-card-status.inactive {
+  background-color: rgba(244, 67, 54, 0.1);
+  color: #f44336;
+}
+
+.mobile-card-content {
+  padding: 16px;
+}
+
+.mobile-card-row {
+  display: flex;
+  justify-content: space-between;
+  padding: 8px 0;
+  border-bottom: 1px solid #eee;
+}
+
+.mobile-card-row:last-child {
+  border-bottom: none;
+}
+
+.mobile-card-label {
+  font-weight: 500;
+  color: #666;
+}
+
+.mobile-card-value {
+  text-align: right;
+  flex: 1;
+  margin-left: 16px;
+  word-break: break-word;
+}
+
+.mobile-card-actions {
+  display: flex;
+  justify-content: flex-end;
+  padding: 8px 16px;
+  background-color: #fafafa;
+  gap: 8px;
+}
+
+.mobile-filter-section {
+  display: none;
+  margin-bottom: 16px;
+}
+
+/* Paginador móvil */
+.mobile-paginator {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px 16px;
+  background-color: #f5f5f5;
+  border-radius: 8px;
+  margin-top: 16px;
+  margin-bottom: 20px;
+}
+
+.mobile-paginator-info {
+  font-size: 14px;
+  color: #666;
+}
+
+.mobile-paginator-actions {
+  display: flex;
+  gap: 8px;
+}
+
+/* Media queries */
+@media screen and (max-width: 1024px) {
+  .page-title {
+    font-size: 22px;
+  }
+  
+  .actions-container {
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+  
+  .search-field {
+    flex: 0 0 100%;
+    max-width: 100%;
+  }
+}
+
+@media screen and (max-width: 768px) {
+  .page-title {
+    font-size: 20px;
+  }
+  
+  .actions-container {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  
+  .actions-right {
+    width: 100%;
+    justify-content: space-between;
+  }
+  
+  .mobile-filter-section {
+    display: block;
+  }
+}
+
+/* Vista alternativa para móviles */
+@media screen and (max-width: 600px) {
+  .table-container, 
+  .mat-table {
+    display: none;
+  }
+  
+  .mobile-cards {
+    display: block;
+  }
+  
+  .empleados-container {
+    padding: 10px;
+  }
+  
+  .page-title {
+    font-size: 18px;
+    margin-top: 10px;
+    margin-bottom: 10px;
+  }
+  
+  .breadcrumb {
+    font-size: 12px;
+    margin-bottom: 10px;
+  }
+  
+  .actions-container {
+    margin-bottom: 10px;
+  }
+  
+  .mobile-card-header {
+    padding: 10px 12px;
+  }
+  
+  .mobile-card-content {
+    padding: 12px;
+  }
+  
+  .mobile-card-actions {
+    padding: 6px 12px;
+  }
+}
+
+/* Fix para spinner de carga */
+.loading-spinner {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 100px;
+  width: 100%;
+  margin: 20px 0;
+}
+.active-status {
+  color: green;
+  font-weight: bold;
+}
+
+.inactive-status {
+  color: red;
+  font-weight: bold;
+}

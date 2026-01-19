@@ -1,0 +1,199 @@
+<div class="productos-container">
+  <h2>Productos</h2>
+  
+  <div class="breadcrumb">
+    <a routerLink="/dashboard">Dashboard</a> / <a routerLink="/almacen">Almacén</a> / Catálogo de productos
+  </div>
+
+  <!-- Filtro para móvil -->
+  <div class="mobile-filter-section">
+    <mat-form-field appearance="outline">
+      <mat-label>Buscar productos</mat-label>
+      <input matInput (keyup)="applyFilter($event)" placeholder="Ej. Laptop">
+      <mat-icon matSuffix>search</mat-icon>
+    </mat-form-field>
+  </div>
+
+  <!-- Acciones principales -->
+  <div class="actions">
+    <button mat-raised-button class="btn-primary" (click)="agregarProducto()">
+      <mat-icon>add</mat-icon> Agregar producto
+    </button>
+    
+    <!-- Filtro para pantallas grandes -->
+    <mat-form-field appearance="outline" [style.display]="isMobile ? 'none' : 'block'">
+      <mat-label>Filtrar</mat-label>
+      <input matInput (keyup)="applyFilter($event)" placeholder="Ej. Laptop">
+      <mat-icon matSuffix>search</mat-icon>
+    </mat-form-field>
+    
+    <span class="spacer"></span>
+    
+    <button mat-raised-button [matMenuTriggerFor]="exportMenu" class="btn-white">
+      <mat-icon>file_download</mat-icon> Exportar
+    </button>
+    <mat-menu #exportMenu="matMenu">
+  <button mat-menu-item (click)="exportar('csv')">
+    <mat-icon>description</mat-icon>
+    <span>Exportar como CSV</span>
+  </button>
+  <button mat-menu-item (click)="exportar('xlsx')">
+    <mat-icon>table_chart</mat-icon>
+    <span>Exportar como Excel</span>
+  </button>
+    </mat-menu>
+    
+    <button mat-icon-button color="primary" (click)="refrescar()" matTooltip="Refrescar">
+      <mat-icon>refresh</mat-icon>
+    </button>
+  </div>
+
+  <!-- Tabla para pantallas grandes -->
+  <div class="table-container mat-elevation-z8">
+    <mat-table [dataSource]="dataSource" matSort>
+      <!-- SKU Column -->
+      <ng-container matColumnDef="sku">
+        <mat-header-cell *matHeaderCellDef mat-sort-header> SKU </mat-header-cell>
+        <mat-cell *matCellDef="let element"> {{element.sku}} </mat-cell>
+      </ng-container>
+
+      <!-- Name Column -->
+      <ng-container matColumnDef="name">
+        <mat-header-cell *matHeaderCellDef mat-sort-header> Producto </mat-header-cell>
+        <mat-cell *matCellDef="let element" [matTooltip]="element.description"> {{element.name}} </mat-cell>
+      </ng-container>
+
+      <!-- Stock Column -->
+      <ng-container matColumnDef="current_stock">
+        <mat-header-cell *matHeaderCellDef mat-sort-header> Stock </mat-header-cell>
+        <mat-cell *matCellDef="let element"> 
+          <span [ngClass]="{'stock-warning': element.current_stock <= element.min_stock}">
+            {{element.currentStock}}
+          </span>
+        </mat-cell>
+      </ng-container>
+
+      <!-- Price Column -->
+      <ng-container matColumnDef="price">
+        <mat-header-cell *matHeaderCellDef mat-sort-header> Precio </mat-header-cell>
+        <mat-cell *matCellDef="let element"> {{element.price | currency}} </mat-cell>
+      </ng-container>
+
+      <!-- Category Column -->
+      <ng-container matColumnDef="categoryId">
+        <mat-header-cell *matHeaderCellDef mat-sort-header> Categoría </mat-header-cell>
+        <mat-cell *matCellDef="let element"> {{getCategoryName(element.categoryId)}} </mat-cell>
+      </ng-container>
+
+      <!-- Status Column -->
+      <ng-container matColumnDef="active">
+        <mat-header-cell *matHeaderCellDef mat-sort-header> Estado </mat-header-cell>
+        <mat-cell *matCellDef="let element">
+          <mat-icon [ngClass]="{'active': element.active, 'inactive': !element.active}">
+            {{element.active ? 'check_circle' : 'cancel'}}
+          </mat-icon>
+        </mat-cell>
+      </ng-container>
+
+      <!-- Actions Column -->
+      <ng-container matColumnDef="acciones">
+        <mat-header-cell *matHeaderCellDef></mat-header-cell>
+        <mat-cell *matCellDef="let element">
+          <button mat-icon-button [matMenuTriggerFor]="menu">
+            <mat-icon>more_vert</mat-icon>
+          </button>
+          <mat-menu #menu="matMenu">
+            <button mat-menu-item (click)="editarProducto(element)">
+              <mat-icon>edit</mat-icon>
+              <span>Editar</span>
+            </button>
+            <button mat-menu-item (click)="eliminarProducto(element)">
+              <mat-icon color="warn">delete</mat-icon>
+              <span>Eliminar</span>
+            </button>
+          </mat-menu>
+        </mat-cell>
+      </ng-container>
+
+      <mat-header-row *matHeaderRowDef="displayedColumns"></mat-header-row>
+      <mat-row *matRowDef="let row; columns: displayedColumns;"></mat-row>
+      
+      <!-- Fila para cuando no hay datos -->
+      <tr class="mat-row" *matNoDataRow>
+        <td class="mat-cell empty-state" [attr.colspan]="displayedColumns.length">
+          No hay productos que coincidan con el filtro.
+        </td>
+      </tr>
+    </mat-table>
+
+    <mat-paginator [pageSizeOptions]="[5, 10, 25, 100]" aria-label="Seleccionar página de productos">
+    </mat-paginator>
+  </div>
+
+  <!-- Vista de tarjetas para móviles -->
+  <div class="mobile-cards">
+    <div *ngIf="dataSource.filteredData.length === 0" class="empty-state">
+      No hay productos que coincidan con el filtro.
+    </div>
+    
+    <div class="mobile-card" *ngFor="let product of dataSource.filteredData | slice: getMobileStartIndex(): getMobileEndIndex()">
+      <div class="mobile-card-header">
+        <div class="mobile-card-title">{{product.name}}</div>
+        <div class="mobile-card-sku">SKU: {{product.sku}}</div>
+      </div>
+      
+      <div class="mobile-card-content">
+        <div class="mobile-card-row">
+          <div class="mobile-card-label">Precio:</div>
+          <div class="mobile-card-value">{{product.price | currency}}</div>
+        </div>
+        
+        <div class="mobile-card-row">
+          <div class="mobile-card-label">Stock:</div>
+          <div class="mobile-card-value" [ngClass]="{'stock-warning': product.current_stock <= product.min_stock}">
+            {{product.current_stock}}
+          </div>
+        </div>
+        
+        <div class="mobile-card-row">
+          <div class="mobile-card-label">Categoría:</div>
+          <div class="mobile-card-value">{{getCategoryName(product.categoryId)}}</div>
+        </div>
+        
+        <div class="mobile-card-row">
+          <div class="mobile-card-label">Estado:</div>
+          <div class="mobile-card-value">
+            <span class="mobile-card-status" [ngClass]="product.active ? 'active' : 'inactive'">
+              <mat-icon>{{product.active ? 'check_circle' : 'cancel'}}</mat-icon>
+              {{product.active ? 'Activo' : 'Inactivo'}}
+            </span>
+          </div>
+        </div>
+      </div>
+      
+      <div class="mobile-card-actions">
+        <button mat-icon-button color="primary" matTooltip="Editar" (click)="editarProducto(product)">
+          <mat-icon>edit</mat-icon>
+        </button>
+        <button mat-icon-button color="warn" matTooltip="Eliminar" (click)="eliminarProducto(product)">
+          <mat-icon>delete</mat-icon>
+        </button>
+      </div>
+    </div>
+    
+    <!-- Paginador mobile simplificado -->
+    <div class="mobile-paginator" *ngIf="dataSource.filteredData.length > mobilePaginator.pageSize">
+      <div class="mobile-paginator-info">
+        Mostrando {{getMobileStartIndex() + 1}} - {{getMobileEndIndex()}} de {{dataSource.filteredData.length}}
+      </div>
+      <div class="mobile-paginator-actions">
+        <button mat-icon-button [disabled]="mobilePaginator.pageIndex === 0" (click)="previousMobilePage()">
+          <mat-icon>navigate_before</mat-icon>
+        </button>
+        <button mat-icon-button [disabled]="isLastMobilePage()" (click)="nextMobilePage()">
+          <mat-icon>navigate_next</mat-icon>
+        </button>
+      </div>
+    </div>
+  </div>
+</div>

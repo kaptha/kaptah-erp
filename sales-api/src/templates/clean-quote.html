@@ -1,0 +1,436 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>{{tipo_documento}} - Clean</title>
+
+  <style>
+    :root{
+      --ink:#0f172a;
+      --muted:#475569;
+      --line:#cbd5e1;
+
+      --navy:#0b3b55;   /* barra footer + líneas */
+      --cyan:#8fd3e8;   /* headers tabla / totales */
+      --cyan2:#bfe8f5;  /* rellenos suaves */
+      --bg:#ffffff;
+    }
+
+    *{ margin:0; padding:0; box-sizing:border-box; }
+
+    body{
+      font-family: Arial, Helvetica, sans-serif;
+      background: var(--bg);
+      color: var(--ink);
+      line-height: 1.35;
+    }
+
+    /* PAGE */
+    .page{
+      width: 210mm;
+      min-height: 297mm;
+      margin: 0 auto;
+      padding: 26mm 16mm 22mm 16mm; /* deja aire arriba y abajo */
+      position: relative;
+      overflow: hidden;
+      background: var(--bg);
+    }
+
+    /* CLEAN DOT PATTERNS (top-left, bottom-right) */
+    .dots-top-left, .dots-bottom-right{
+      position:absolute;
+      width: 210px;
+      height: 210px;
+      opacity: .22;
+      pointer-events:none;
+      background:
+        radial-gradient(circle at 8px 8px, var(--navy) 2px, transparent 3px) 0 0/18px 18px;
+    }
+    .dots-top-left{
+      top: -40px;
+      left: -40px;
+      transform: rotate(0deg);
+    }
+    .dots-bottom-right{
+      bottom: 55px;
+      right: -40px;
+      transform: rotate(0deg);
+    }
+
+    /* TOP LINE */
+    .top-line{
+      position:absolute;
+      left: 16mm;
+      right: 16mm;
+      top: 18mm;
+      height: 3px;
+      background: var(--navy);
+      opacity: .95;
+    }
+
+    /* TOP-RIGHT DECOR (rings) */
+    .rings{
+      position:absolute;
+      top: 16mm;
+      right: 16mm;
+      width: 70px;
+      height: 110px;
+      display:grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px 10px;
+      align-content:start;
+      opacity:.95;
+    }
+    .ring{
+      width: 26px;
+      height: 26px;
+      border-radius: 50%;
+      border: 6px solid var(--navy);
+      background: transparent;
+    }
+
+    /* HEADER / BRAND */
+    .brand{
+      text-align:center;
+      margin-top: 2mm;
+      position: relative;
+      z-index: 2;
+    }
+    .brand .logo{
+      width: 52px;
+      height: 52px;
+      margin: 0 auto 20px auto;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      overflow:hidden;
+    }
+    .brand .logo img{
+      max-width: 100%;
+      max-height: 100%;
+      object-fit: contain;
+    }
+    .brand .company{
+      font-size: 20px;
+      font-weight: 900;
+      letter-spacing: .4px;
+      color: var(--navy);
+      text-transform: uppercase;
+    }
+    .brand .rfc{
+      margin-top: 4px;
+      font-size: 11px;
+      color: var(--muted);
+    }
+
+    /* META ROW: CUSTOMER LEFT / DOC META RIGHT */
+    .meta-row{
+      margin-top: 18mm;
+      display:flex;
+      justify-content: space-between;
+      gap: 16px;
+      position: relative;
+      z-index: 2;
+    }
+
+    .block{
+      width: 48%;
+      font-size: 12px;
+      color: var(--ink);
+    }
+    .block .title{
+      font-weight: 900;
+      letter-spacing: .6px;
+      text-transform: uppercase;
+      margin-bottom: 6px;
+      color: var(--ink);
+    }
+    .block p{ margin: 3px 0; color: var(--ink); }
+    .block .muted{ color: var(--muted); }
+
+    .doc-meta{
+      text-align:right;
+      font-size: 12px;
+    }
+    .doc-meta .row{ margin: 3px 0; }
+    .doc-meta .label{
+      font-weight: 900;
+      letter-spacing: .3px;
+    }
+    .doc-meta .status{
+      margin-top: 8px;
+      display:inline-block;
+      padding: 4px 10px;
+      border: 1px solid var(--line);
+      border-radius: 999px;
+      font-weight: 900;
+      text-transform: uppercase;
+      letter-spacing: .6px;
+      color: var(--navy);
+      background: rgba(143,211,232,.20);
+    }
+
+    /* MAIN TABLE */
+    .table-wrap{
+      margin-top: 34mm;
+      position: relative;
+      z-index: 2;
+    }
+
+    table{
+      width:100%;
+      border-collapse: collapse;
+      font-size: 12.5px;
+    }
+
+    thead th{
+      background: var(--cyan);
+      color: var(--ink);
+      padding: 12px 10px;
+      border: 1px solid var(--navy);
+      text-transform: uppercase;
+      letter-spacing: .6px;
+      font-weight: 900;
+    }
+
+    tbody td{
+      padding: 14px 10px;
+      border: 1px solid var(--navy);
+      vertical-align: middle;
+      background: #fff;
+    }
+
+    /* column widths + alignment */
+    .c-desc{ width: 50%; font-weight: 700; }
+    .c-qty{ width: 18%; text-align:center; font-weight: 800; }
+    .c-price{ width: 16%; text-align:right; font-weight: 800; }
+    .c-total{ width: 16%; text-align:right; font-weight: 900; }
+
+    /* separator line under table */
+    .hr{
+      margin-top: 18mm;
+      height: 3px;
+      background: var(--navy);
+      opacity: .95;
+      width:100%;
+      position: relative;
+      z-index: 2;
+    }
+
+    /* TERMS + TOTALS GRID */
+    .bottom-grid{
+      margin-top: 14mm;
+      display:grid;
+      grid-template-columns: 1fr 86mm;
+      gap: 14mm;
+      align-items:start;
+      position: relative;
+      z-index: 2;
+    }
+
+    .terms{
+      font-size: 11px;
+      color: var(--ink);
+    }
+    .terms .title{
+      font-weight: 900;
+      letter-spacing: .6px;
+      text-transform: uppercase;
+      margin-bottom: 8px;
+    }
+
+    /* Si términos viene como texto con saltos de línea, respétalos */
+    .terms .content{
+      white-space: pre-line;
+      color: var(--muted);
+      line-height: 1.55;
+    }
+
+    .totals{
+      width: 100%;
+      border: 1px solid var(--navy);
+    }
+    .totals table{ width:100%; border-collapse: collapse; }
+    .totals td{
+      border: 1px solid var(--navy);
+      padding: 12px 10px;
+      font-size: 12.5px;
+    }
+    .totals .t-label{
+      width: 55%;
+      font-weight: 900;
+      text-transform: uppercase;
+      letter-spacing: .4px;
+      background: var(--cyan);
+    }
+    .totals .t-value{
+      width: 45%;
+      text-align: right;
+      font-weight: 900;
+      background: #fff;
+    }
+    .totals .t-total-label,
+    .totals .t-total-value{
+      background: var(--cyan);
+      font-weight: 900;
+    }
+
+    /* OBSERVACIONES */
+    .observaciones{
+      margin-top: 16mm;
+      text-align:center;
+      position: relative;
+      z-index: 2;
+    }
+    .observaciones .title{
+      font-weight: 900;
+      letter-spacing: .6px;
+      text-transform: uppercase;
+      margin-bottom: 8px;
+    }
+    .observaciones .content{
+      font-size: 11px;
+      color: var(--muted);
+      max-width: 160mm;
+      margin: 0 auto;
+      white-space: pre-line;
+    }
+
+    /* FOOTER BAR */
+    .footer{
+      position:absolute;
+      left:0;
+      right:0;
+      bottom:0;
+      height: 18mm;
+      background: var(--navy);
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      padding: 0 16mm;
+      color: #fff;
+      font-size: 11.5px;
+      z-index: 3;
+      letter-spacing: .2px;
+    }
+    .footer .sep{ margin: 0 10px; opacity: .8; }
+
+    /* PRINT SETTINGS */
+    @media print{
+      body{ background:#fff; }
+      .page{ margin:0; }
+      .top-line, .footer, thead th, .totals .t-label, .totals .t-total-label, .totals .t-total-value{
+        -webkit-print-color-adjust: exact;
+        print-color-adjust: exact;
+      }
+      .dots-top-left, .dots-bottom-right{
+        -webkit-print-color-adjust: exact;
+        print-color-adjust: exact;
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <div class="page">
+    <div class="dots-top-left"></div>
+    <div class="dots-bottom-right"></div>
+
+    <div class="top-line"></div>
+
+    <div class="rings">
+      <div class="ring"></div><div class="ring"></div>
+      <div class="ring"></div><div class="ring"></div>
+      <div class="ring"></div><div class="ring"></div>
+      <div class="ring"></div><div class="ring"></div>
+    </div>
+
+    <!-- BRAND CENTER -->
+    <div class="brand">
+      <div class="logo">
+        <img src="{{logo}}" alt="Logo">
+      </div>
+      <div class="company">{{sucursal_nombre}}</div>
+      <div class="rfc">RFC: {{empresa_rfc}}</div>
+    </div>
+
+    <!-- CUSTOMER + DOC META -->
+    <div class="meta-row">
+      <div class="block">
+        <div class="title">Cliente</div>
+        <p><strong>{{cliente}}</strong></p>
+        <p class="muted">{{direccion}}</p>
+        <p class="muted">{{telefono}}</p>
+        <p class="muted">RFC: {{rfc}}</p>
+      </div>
+
+      <div class="block doc-meta">
+        <div class="row"><span class="label">Date:</span> {{fecha}}</div>
+        <div class="row"><span class="label">Valid Until:</span> {{fecha_validez}}</div>
+        <div class="row"><span class="label">{{tipo_documento}}:</span> {{folio}}</div>
+        <div class="status">{{estado}}</div>
+      </div>
+    </div>
+
+    <!-- ITEMS TABLE -->
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th class="c-desc">Cantidad</th>
+            <th class="c-qty">Descripcion</th>
+            <th class="c-price">Precio</th>
+            <th class="c-total">Total</th>
+          </tr>
+        </thead>
+        <tbody>
+          {{items}}
+        </tbody>
+      </table>
+    </div>
+
+    <div class="hr"></div>
+
+    <!-- TERMS + TOTALS -->
+    <div class="bottom-grid">
+      <div class="terms">
+        <div class="title">Terms &amp; Condiciones:</div>
+        <div class="content">{{terminos_condiciones}}</div>
+      </div>
+
+      <div class="totals">
+        <table>
+          <tr>
+            <td class="t-label">Subtotal:</td>
+            <td class="t-value">$ {{subtotal}}</td>
+          </tr>
+          <tr>
+            <td class="t-label">Tax:</td>
+            <td class="t-value">$ {{impuestos}}</td>
+          </tr>
+          <tr>
+            <td class="t-label t-total-label">Total:</td>
+            <td class="t-value t-total-value">$ {{total}}</td>
+          </tr>
+        </table>
+      </div>
+    </div>
+
+    <!-- OBSERVACIONES -->
+    <div class="observaciones">
+      <div class="title">Observaciones</div>
+      <div class="content">{{observaciones}}</div>
+    </div>
+
+    <!-- FOOTER -->
+    <div class="footer">
+      <span>{{sucursal_calle}}, {{sucursal_ciudad}} C.P. {{sucursal_codigoPostal}}</span>
+      <span class="sep">|</span>
+      <span>{{sucursal_telefono}}</span>
+      <span class="sep">|</span>
+      <span>{{sucursal_email}}</span>
+    </div>
+  </div>
+</body>
+</html>

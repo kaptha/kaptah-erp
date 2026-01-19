@@ -1,0 +1,945 @@
+<div class="ingresos-container">
+  
+  <!-- HEADER CON FILTROS -->
+  <div class="page-header">
+    <h1>📊 Análisis de Ingresos</h1>
+    
+    <div class="filters-row">
+      <mat-form-field appearance="outline">
+        <mat-label>Fecha Inicio</mat-label>
+        <input matInput type="date" [formControl]="fechaInicioControl" (change)="onFechaChange()">
+      </mat-form-field>
+
+      <mat-form-field appearance="outline">
+        <mat-label>Fecha Fin</mat-label>
+        <input matInput type="date" [formControl]="fechaFinControl" (change)="onFechaChange()">
+      </mat-form-field>
+
+      <button mat-raised-button color="primary" (click)="loadAnalisisCompleto()">
+        <mat-icon>refresh</mat-icon>
+        Actualizar
+      </button>
+
+      <button mat-raised-button color="accent" (click)="exportToExcel()">
+        <mat-icon>download</mat-icon>
+        Exportar Excel
+      </button>
+    </div>
+  </div>
+
+  <!-- LOADING SPINNER -->
+  <div *ngIf="isLoading" class="loading-container">
+    <mat-spinner></mat-spinner>
+    <p>Cargando análisis...</p>
+  </div>
+
+  <!-- CONTENIDO PRINCIPAL -->
+  <div *ngIf="!isLoading && analisisCompleto" class="content-grid">
+
+    <!-- SECCIÓN 1: RESUMEN GENERAL -->
+    <mat-card class="section-card full-width">
+      <mat-card-header>
+        <mat-card-title>📈 Resumen General</mat-card-title>
+      </mat-card-header>
+      <mat-card-content>
+        <div class="kpi-grid">
+          <div class="kpi-card primary">
+            <div class="kpi-icon">📄</div>
+            <div class="kpi-content">
+              <h3>{{formatNumber(resumenGeneral.totalCfdis)}}</h3>
+              <p>Total CFDIs</p>
+              <small>{{resumenGeneral.cfdisVigentes}} vigentes | {{resumenGeneral.cfdisCancelados}} cancelados</small>
+            </div>
+          </div>
+
+          <div class="kpi-card success">
+            <div class="kpi-icon">💰</div>
+            <div class="kpi-content">
+              <h3>{{formatCurrency(resumenGeneral.subtotal)}}</h3>
+              <p>Monto Total (sin IVA)</p>
+              <small>Subtotal facturado</small>
+            </div>
+          </div>
+
+          <div class="kpi-card info">
+            <div class="kpi-icon">📊</div>
+            <div class="kpi-content">
+              <h3>{{formatCurrency(resumenGeneral.ivaTotal)}}</h3>
+              <p>IVA Trasladado</p>
+              <small>Impuesto total</small>
+            </div>
+          </div>
+
+          <div class="kpi-card warning">
+            <div class="kpi-icon">💵</div>
+            <div class="kpi-content">
+              <h3>{{formatCurrency(resumenGeneral.total)}}</h3>
+              <p>Total con IVA</p>
+              <small>Monto facturado total</small>
+            </div>
+          </div>
+
+          <div class="kpi-card accent">
+            <div class="kpi-icon">📈</div>
+            <div class="kpi-content">
+              <h3>{{formatCurrency(resumenGeneral.promedioIngreso)}}</h3>
+              <p>Ticket Promedio</p>
+              <small>Por CFDI</small>
+            </div>
+          </div>
+
+          <div class="kpi-card" [ngClass]="resumenGeneral.porcentajeVigentes > 90 ? 'success' : 'danger'">
+            <div class="kpi-icon">✅</div>
+            <div class="kpi-content">
+              <h3>{{formatPercentage(resumenGeneral.porcentajeVigentes)}}</h3>
+              <p>CFDIs Vigentes</p>
+              <small>{{resumenGeneral.cfdisVigentes}} de {{resumenGeneral.totalCfdis}}</small>
+            </div>
+          </div>
+        </div>
+      </mat-card-content>
+    </mat-card>
+
+    <!-- SECCIÓN 2: GRÁFICA DE TENDENCIA TEMPORAL -->
+    <mat-card class="section-card full-width">
+      <mat-card-header>
+        <mat-card-title>📅 Tendencia de Ingresos</mat-card-title>
+      </mat-card-header>
+      <mat-card-content>
+        <div class="chart-container" *ngIf="chartDataTemporal.length > 0">
+          <ngx-charts-line-chart
+            [scheme]="colorScheme"
+            [results]="chartDataTemporal"
+            [xAxis]="true"
+            [yAxis]="true"
+            [legend]="true"
+            [showXAxisLabel]="true"
+            [showYAxisLabel]="true"
+            xAxisLabel="Período"
+            yAxisLabel="Monto"
+            [autoScale]="true">
+          </ngx-charts-line-chart>
+        </div>
+        
+        <!-- Tabla de análisis temporal -->
+        <div class="table-responsive mt-3">
+          <table mat-table [dataSource]="analisisTemporal" class="mat-elevation-z2">
+            <ng-container matColumnDef="periodo">
+              <th mat-header-cell *matHeaderCellDef>Período</th>
+              <td mat-cell *matCellDef="let row">{{formatPeriodo(row.periodo)}}</td>
+            </ng-container>
+
+            <ng-container matColumnDef="cantidad">
+              <th mat-header-cell *matHeaderCellDef>Cantidad</th>
+              <td mat-cell *matCellDef="let row">{{formatNumber(row.cantidad)}}</td>
+            </ng-container>
+
+            <ng-container matColumnDef="subtotal">
+              <th mat-header-cell *matHeaderCellDef>Subtotal</th>
+              <td mat-cell *matCellDef="let row">{{formatCurrency(row.subtotal)}}</td>
+            </ng-container>
+
+            <ng-container matColumnDef="iva">
+              <th mat-header-cell *matHeaderCellDef>IVA</th>
+              <td mat-cell *matCellDef="let row">{{formatCurrency(row.iva)}}</td>
+            </ng-container>
+
+            <ng-container matColumnDef="total">
+              <th mat-header-cell *matHeaderCellDef>Total</th>
+              <td mat-cell *matCellDef="let row" class="font-weight-bold">{{formatCurrency(row.total)}}</td>
+            </ng-container>
+
+            <tr mat-header-row *matHeaderRowDef="['periodo', 'cantidad', 'subtotal', 'iva', 'total']"></tr>
+            <tr mat-row *matRowDef="let row; columns: ['periodo', 'cantidad', 'subtotal', 'iva', 'total']"></tr>
+          </table>
+        </div>
+      </mat-card-content>
+    </mat-card>
+
+    <!-- SECCIÓN 3: TOP CLIENTES -->
+    <mat-card class="section-card half-width">
+      <mat-card-header>
+        <mat-card-title>🏆 Top 5 Clientes por Monto</mat-card-title>
+      </mat-card-header>
+      <mat-card-content>
+        <div class="table-responsive">
+          <table mat-table [dataSource]="topClientesPorMonto" class="mat-elevation-z1">
+            <ng-container matColumnDef="nombre">
+              <th mat-header-cell *matHeaderCellDef>Cliente</th>
+              <td mat-cell *matCellDef="let cliente">
+                <div class="client-info">
+                  <strong>{{cliente.nombre}}</strong>
+                  <small>{{cliente.rfc}}</small>
+                </div>
+              </td>
+            </ng-container>
+
+            <ng-container matColumnDef="cantidad">
+              <th mat-header-cell *matHeaderCellDef class="text-center">CFDIs</th>
+              <td mat-cell *matCellDef="let cliente" class="text-center">
+                <span class="badge badge-info">{{cliente.cantidad}}</span>
+              </td>
+            </ng-container>
+
+            <ng-container matColumnDef="totalMonto">
+              <th mat-header-cell *matHeaderCellDef class="text-right">Total</th>
+              <td mat-cell *matCellDef="let cliente" class="text-right font-weight-bold text-success">
+                {{formatCurrency(cliente.totalMonto)}}
+              </td>
+            </ng-container>
+
+            <tr mat-header-row *matHeaderRowDef="['nombre', 'cantidad', 'totalMonto']"></tr>
+            <tr mat-row *matRowDef="let row; columns: ['nombre', 'cantidad', 'totalMonto']"></tr>
+          </table>
+        </div>
+
+        <div *ngIf="topClientesPorMonto.length === 0" class="empty-state">
+          <p>No hay datos de clientes disponibles</p>
+        </div>
+      </mat-card-content>
+    </mat-card>
+
+    <mat-card class="section-card half-width">
+      <mat-card-header>
+        <mat-card-title>📊 Top 5 Clientes por Cantidad</mat-card-title>
+      </mat-card-header>
+      <mat-card-content>
+        <div class="table-responsive">
+          <table mat-table [dataSource]="topClientesPorCantidad" class="mat-elevation-z1">
+            <ng-container matColumnDef="nombre">
+              <th mat-header-cell *matHeaderCellDef>Cliente</th>
+              <td mat-cell *matCellDef="let cliente">
+                <div class="client-info">
+                  <strong>{{cliente.nombre}}</strong>
+                  <small>{{cliente.rfc}}</small>
+                </div>
+              </td>
+            </ng-container>
+
+            <ng-container matColumnDef="cantidad">
+              <th mat-header-cell *matHeaderCellDef class="text-center">CFDIs</th>
+              <td mat-cell *matCellDef="let cliente" class="text-center">
+                <span class="badge badge-primary">{{cliente.cantidad}}</span>
+              </td>
+            </ng-container>
+
+            <ng-container matColumnDef="totalMonto">
+              <th mat-header-cell *matHeaderCellDef class="text-right">Total</th>
+              <td mat-cell *matCellDef="let cliente" class="text-right">
+                {{formatCurrency(cliente.totalMonto)}}
+              </td>
+            </ng-container>
+
+            <tr mat-header-row *matHeaderRowDef="['nombre', 'cantidad', 'totalMonto']"></tr>
+            <tr mat-row *matRowDef="let row; columns: ['nombre', 'cantidad', 'totalMonto']"></tr>
+          </table>
+        </div>
+
+        <div *ngIf="topClientesPorCantidad.length === 0" class="empty-state">
+          <p>No hay datos de clientes disponibles</p>
+        </div>
+      </mat-card-content>
+    </mat-card>
+
+    <!-- SECCIÓN 4: FORMA DE PAGO -->
+    <mat-card class="section-card third-width">
+      <mat-card-header>
+        <mat-card-title>💳 Por Forma de Pago</mat-card-title>
+      </mat-card-header>
+      <mat-card-content>
+        <div class="classification-list">
+          <div *ngFor="let forma of porFormaPago" class="classification-item">
+            <div class="classification-header">
+              <span class="classification-label">{{getFormaPagoLabel(forma.formaPago)}}</span>
+              <span class="classification-count badge badge-secondary">{{forma.cantidad}}</span>
+            </div>
+            <div class="classification-amount">
+              {{formatCurrency(forma.total)}}
+            </div>
+            <mat-progress-bar 
+              mode="determinate" 
+              [value]="(forma.total / resumenGeneral.total) * 100"
+              color="primary">
+            </mat-progress-bar>
+          </div>
+        </div>
+
+        <div *ngIf="porFormaPago.length === 0" class="empty-state">
+          <p>No hay datos disponibles</p>
+        </div>
+      </mat-card-content>
+    </mat-card>
+
+    <!-- SECCIÓN 5: MÉTODO DE PAGO -->
+    <mat-card class="section-card third-width">
+      <mat-card-header>
+        <mat-card-title>📋 Por Método de Pago</mat-card-title>
+      </mat-card-header>
+      <mat-card-content>
+        <div class="classification-list">
+          <div *ngFor="let metodo of porMetodoPago" class="classification-item">
+            <div class="classification-header">
+              <span class="classification-label">{{getMetodoPagoLabel(metodo.metodoPago)}}</span>
+              <span class="classification-count badge badge-secondary">{{metodo.cantidad}}</span>
+            </div>
+            <div class="classification-amount">
+              {{formatCurrency(metodo.total)}}
+            </div>
+            <mat-progress-bar 
+              mode="determinate" 
+              [value]="(metodo.total / resumenGeneral.total) * 100"
+              color="accent">
+            </mat-progress-bar>
+          </div>
+        </div>
+
+        <div *ngIf="porMetodoPago.length === 0" class="empty-state">
+          <p>No hay datos disponibles</p>
+        </div>
+      </mat-card-content>
+    </mat-card>
+
+    <!-- SECCIÓN 6: USO DE CFDI -->
+    <mat-card class="section-card third-width">
+      <mat-card-header>
+        <mat-card-title>🏷️ Por Uso de CFDI</mat-card-title>
+      </mat-card-header>
+      <mat-card-content>
+        <div class="classification-list">
+          <div *ngFor="let uso of porUsoCfdi" class="classification-item">
+            <div class="classification-header">
+              <span class="classification-label">{{getUsoCfdiLabel(uso.usoCfdi)}}</span>
+              <span class="classification-count badge badge-secondary">{{uso.cantidad}}</span>
+            </div>
+            <div class="classification-amount">
+              {{formatCurrency(uso.total)}}
+            </div>
+            <mat-progress-bar 
+              mode="determinate" 
+              [value]="(uso.total / resumenGeneral.total) * 100"
+              color="warn">
+            </mat-progress-bar>
+          </div>
+        </div>
+
+        <div *ngIf="porUsoCfdi.length === 0" class="empty-state">
+          <p>No hay datos disponibles</p>
+        </div>
+      </mat-card-content>
+    </mat-card>
+
+    <!-- SECCIÓN 7: RETENCIONES -->
+    <mat-card class="section-card half-width">
+      <mat-card-header>
+        <mat-card-title>🧾 Retenciones Fiscales</mat-card-title>
+      </mat-card-header>
+      <mat-card-content>
+        <div class="retenciones-grid">
+          <div class="retencion-item">
+            <mat-icon color="warn">remove_circle</mat-icon>
+            <div class="retencion-content">
+              <h4>IVA Retenido</h4>
+              <p class="amount">{{formatCurrency(retenciones.ivaRetenido)}}</p>
+            </div>
+          </div>
+
+          <div class="retencion-item">
+            <mat-icon color="warn">remove_circle</mat-icon>
+            <div class="retencion-content">
+              <h4>ISR Retenido</h4>
+              <p class="amount">{{formatCurrency(retenciones.isrRetenido)}}</p>
+            </div>
+          </div>
+
+          <div class="retencion-item">
+            <mat-icon color="warn">remove_circle</mat-icon>
+            <div class="retencion-content">
+              <h4>IEPS Retenido</h4>
+              <p class="amount">{{formatCurrency(retenciones.iepsRetenido)}}</p>
+            </div>
+          </div>
+
+          <div class="retencion-item total">
+            <mat-icon color="primary">calculate</mat-icon>
+            <div class="retencion-content">
+              <h4>Total Retenido</h4>
+              <p class="amount total-amount">{{formatCurrency(retenciones.totalRetenido)}}</p>
+            </div>
+          </div>
+        </div>
+
+        <mat-divider class="my-3"></mat-divider>
+
+        <div class="retenciones-summary">
+          <p class="info-text">
+            <mat-icon class="info-icon">info</mat-icon>
+            Las retenciones son impuestos que tus clientes te descuentan y pagan directamente al SAT.
+          </p>
+        </div>
+      </mat-card-content>
+    </mat-card>
+
+    <!-- SECCIÓN 8: CLIENTES INACTIVOS -->
+    <mat-card class="section-card half-width">
+      <mat-card-header>
+        <mat-card-title>😴 Clientes Inactivos (30+ días)</mat-card-title>
+      </mat-card-header>
+      <mat-card-content>
+        <div class="table-responsive">
+          <table mat-table [dataSource]="clientesInactivos" class="mat-elevation-z1">
+            <ng-container matColumnDef="nombre">
+              <th mat-header-cell *matHeaderCellDef>Cliente</th>
+              <td mat-cell *matCellDef="let cliente">
+                <div class="client-info">
+                  <strong>{{cliente.nombre}}</strong>
+                  <small>{{cliente.rfc}}</small>
+                </div>
+              </td>
+            </ng-container>
+
+            <ng-container matColumnDef="diasInactivo">
+              <th mat-header-cell *matHeaderCellDef class="text-center">Días</th>
+              <td mat-cell *matCellDef="let cliente" class="text-center">
+                <span class="badge" [ngClass]="cliente.diasInactivo > 60 ? 'badge-danger' : 'badge-warning'">
+                  {{cliente.diasInactivo}}
+                </span>
+              </td>
+            </ng-container>
+
+            <ng-container matColumnDef="totalFacturas">
+              <th mat-header-cell *matHeaderCellDef class="text-center">CFDIs</th>
+              <td mat-cell *matCellDef="let cliente" class="text-center">
+                {{cliente.totalFacturas}}
+              </td>
+            </ng-container>
+
+            <ng-container matColumnDef="totalMonto">
+              <th mat-header-cell *matHeaderCellDef class="text-right">Total Hist.</th>
+              <td mat-cell *matCellDef="let cliente" class="text-right">
+                {{formatCurrency(cliente.totalMonto)}}
+              </td>
+            </ng-container>
+
+            <tr mat-header-row *matHeaderRowDef="['nombre', 'diasInactivo', 'totalFacturas', 'totalMonto']"></tr>
+            <tr mat-row *matRowDef="let row; columns: ['nombre', 'diasInactivo', 'totalFacturas', 'totalMonto']"></tr>
+          </table>
+        </div>
+
+        <div *ngIf="clientesInactivos.length === 0" class="empty-state success">
+          <mat-icon>check_circle</mat-icon>
+          <p>¡Excelente! No hay clientes inactivos</p>
+        </div>
+      </mat-card-content>
+    </mat-card>
+
+  </div>
+
+  <!-- MENSAJE SI NO HAY DATOS -->
+  <div *ngIf="!isLoading && !analisisCompleto" class="empty-state-main">
+    <mat-icon>analytics</mat-icon>
+    <h2>No hay datos disponibles</h2>
+    <p>Selecciona un rango de fechas y presiona "Actualizar" para ver el análisis.</p>
+  </div>
+
+  <!-- ====== SIDE SHEET DE BÚSQUEDA AVANZADA ====== -->
+<div class="side-sheet-overlay" *ngIf="sideSheetOpen" (click)="closeSearchPanel()"></div>
+
+<div class="side-sheet" [class.open]="sideSheetOpen">
+  <!-- Header del Side Sheet -->
+  <div class="side-sheet-header">
+    <h2>
+      <mat-icon>search</mat-icon>
+      Búsqueda Avanzada de Ingresos
+    </h2>
+    <button mat-icon-button (click)="closeSearchPanel()">
+      <mat-icon>close</mat-icon>
+    </button>
+  </div>
+
+  <!-- Contenido del Side Sheet -->
+  <div class="side-sheet-content">
+    
+    <!-- Búsqueda Rápida (Autocomplete) -->
+    <div class="search-section">
+      <h3>🔍 Búsqueda Rápida</h3>
+      <mat-form-field appearance="outline" class="full-width">
+        <mat-label>Buscar por RFC, Nombre, UUID, Folio...</mat-label>
+        <input 
+          matInput 
+          [(ngModel)]="searchQuery" 
+          (input)="onSearchChange()"
+          placeholder="Escribe al menos 3 caracteres">
+        <mat-icon matPrefix>search</mat-icon>
+        <button 
+          mat-icon-button 
+          matSuffix 
+          *ngIf="searchQuery" 
+          (click)="searchQuery = ''; searchResults = []">
+          <mat-icon>clear</mat-icon>
+        </button>
+      </mat-form-field>
+
+      <!-- Loading de búsqueda -->
+      <div *ngIf="isSearching" class="search-loading">
+        <mat-spinner diameter="30"></mat-spinner>
+        <span>Buscando...</span>
+      </div>
+
+      <!-- Resultados en tiempo real -->
+      <div *ngIf="searchResults.length > 0 && !isSearching" class="search-results-quick">
+        <p class="results-count">{{ searchResults.length }} resultados encontrados</p>
+      </div>
+    </div>
+
+    <mat-divider></mat-divider>
+
+    <!-- Filtros Avanzados -->
+    <div class="search-section">
+      <h3>🎯 Filtros Avanzados</h3>
+
+      <!-- RFC del Cliente -->
+      <mat-form-field appearance="outline" class="full-width">
+        <mat-label>RFC del Cliente</mat-label>
+        <input matInput [(ngModel)]="searchFilters.rfc" placeholder="Ej: ABC123456XYZ">
+        <mat-icon matPrefix>badge</mat-icon>
+      </mat-form-field>
+
+      <!-- Nombre del Cliente -->
+      <mat-form-field appearance="outline" class="full-width">
+        <mat-label>Nombre del Cliente</mat-label>
+        <input matInput [(ngModel)]="searchFilters.nombre" placeholder="Ej: Cliente SA de CV">
+        <mat-icon matPrefix>business</mat-icon>
+      </mat-form-field>
+
+      <!-- UUID -->
+      <mat-form-field appearance="outline" class="full-width">
+        <mat-label>UUID (Folio Fiscal)</mat-label>
+        <input matInput [(ngModel)]="searchFilters.uuid" placeholder="Ej: 12345678-1234-1234-1234-123456789012">
+        <mat-icon matPrefix>fingerprint</mat-icon>
+      </mat-form-field>
+
+      <!-- Folio -->
+      <mat-form-field appearance="outline" class="full-width">
+        <mat-label>Folio</mat-label>
+        <input matInput [(ngModel)]="searchFilters.folio" placeholder="Ej: A-001">
+        <mat-icon matPrefix>receipt</mat-icon>
+      </mat-form-field>
+
+      <!-- Serie -->
+      <mat-form-field appearance="outline" class="full-width">
+        <mat-label>Serie</mat-label>
+        <input matInput [(ngModel)]="searchFilters.serie" placeholder="Ej: A">
+        <mat-icon matPrefix>label</mat-icon>
+      </mat-form-field>
+
+      <!-- Método de Pago -->
+      <mat-form-field appearance="outline" class="full-width">
+        <mat-label>Método de Pago</mat-label>
+        <mat-select [(ngModel)]="searchFilters.metodoPago">
+          <mat-option value="">Todos</mat-option>
+          <mat-option value="PUE">PUE - Pago en una exhibición</mat-option>
+          <mat-option value="PPD">PPD - Pago en parcialidades</mat-option>
+        </mat-select>
+        <mat-icon matPrefix>payment</mat-icon>
+      </mat-form-field>
+
+      <!-- Forma de Pago -->
+      <mat-form-field appearance="outline" class="full-width">
+        <mat-label>Forma de Pago</mat-label>
+        <mat-select [(ngModel)]="searchFilters.formaPago">
+          <mat-option value="">Todas</mat-option>
+          <mat-option value="01">01 - Efectivo</mat-option>
+          <mat-option value="02">02 - Cheque</mat-option>
+          <mat-option value="03">03 - Transferencia</mat-option>
+          <mat-option value="04">04 - Tarjeta de Crédito</mat-option>
+          <mat-option value="28">28 - Tarjeta de Débito</mat-option>
+          <mat-option value="99">99 - Por Definir</mat-option>
+        </mat-select>
+        <mat-icon matPrefix>account_balance_wallet</mat-icon>
+      </mat-form-field>
+
+      <!-- Rango de Fechas -->
+      <div class="date-range">
+        <mat-form-field appearance="outline" class="half-width">
+          <mat-label>Fecha Inicio</mat-label>
+          <input matInput type="date" [(ngModel)]="searchFilters.fechaInicio">
+          <mat-icon matPrefix>calendar_today</mat-icon>
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" class="half-width">
+          <mat-label>Fecha Fin</mat-label>
+          <input matInput type="date" [(ngModel)]="searchFilters.fechaFin">
+          <mat-icon matPrefix>calendar_today</mat-icon>
+        </mat-form-field>
+      </div>
+
+      <!-- Rango de Montos -->
+      <div class="amount-range">
+        <mat-form-field appearance="outline" class="half-width">
+          <mat-label>Monto Mínimo</mat-label>
+          <input matInput type="number" [(ngModel)]="searchFilters.montoMin" placeholder="0.00">
+          <span matPrefix>$&nbsp;</span>
+          <mat-icon matPrefix>attach_money</mat-icon>
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" class="half-width">
+          <mat-label>Monto Máximo</mat-label>
+          <input matInput type="number" [(ngModel)]="searchFilters.montoMax" placeholder="0.00">
+          <span matPrefix>$&nbsp;</span>
+          <mat-icon matPrefix>attach_money</mat-icon>
+        </mat-form-field>
+      </div>
+
+      <!-- Botones de Acción -->
+      <div class="filter-actions">
+        <button mat-raised-button color="primary" (click)="buscarAvanzado()" [disabled]="isSearching">
+          <mat-icon>search</mat-icon>
+          Buscar
+        </button>
+        <button mat-stroked-button (click)="resetSearchFilters()">
+          <mat-icon>clear_all</mat-icon>
+          Limpiar Filtros
+        </button>
+      </div>
+    </div>
+
+    <mat-divider></mat-divider>
+
+    <!-- Resultados de Búsqueda -->
+<div class="search-section" *ngIf="searchResults.length > 0">
+  <h3>📋 Resultados ({{ searchResults.length }})</h3>
+
+  <div class="results-list">
+    <mat-card *ngFor="let cfdi of searchResults" class="result-card" (click)="selectCfdi(cfdi)">
+      <mat-card-content>
+        <div class="result-header">
+          <div class="result-info">
+            <h4>{{ cfdi.nombre_receptor || 'Sin nombre' }}</h4>
+            <p class="rfc">RFC: {{ cfdi.rfc_receptor || 'N/A' }}</p>
+          </div>
+          <div class="result-badges">
+            <mat-chip [color]="getEstadoBadgeColor(cfdi.estado_procesamiento)" selected>
+              {{ cfdi.estado_procesamiento || 'PROCESADO' }}
+            </mat-chip>
+            <mat-chip *ngIf="cfdi.metodo_pago === 'PPD'" color="accent" selected>
+              PPD
+            </mat-chip>
+          </div>
+        </div>
+
+        <div class="result-details">
+          <div class="detail-item">
+            <mat-icon>receipt</mat-icon>
+            <span>{{ cfdi.serie || '' }}{{ cfdi.folio || 'S/N' }}</span>
+          </div>
+          <div class="detail-item">
+            <mat-icon>calendar_today</mat-icon>
+            <span>{{ formatDate(cfdi.fecha) }}</span>
+          </div>
+          <div class="detail-item">
+            <mat-icon>attach_money</mat-icon>
+            <span class="amount">{{ formatCurrency(cfdi.total) }}</span>
+          </div>
+          <div class="detail-item" *ngIf="cfdi.metodo_pago === 'PPD'">
+            <mat-icon>account_balance</mat-icon>
+            <span>{{ getMetodoPagoLabel(cfdi.metodo_pago) }}</span>
+          </div>
+        </div>
+
+        <div class="result-uuid">
+          <small>UUID: {{ cfdi.folio_fiscal || 'N/A' }}</small>
+        </div>
+      </mat-card-content>
+    </mat-card>
+  </div>
+</div>
+
+    <!-- Estado Vacío -->
+    <div class="empty-state" *ngIf="searchResults.length === 0 && !isSearching && searchQuery.length >= 3">
+      <mat-icon>search_off</mat-icon>
+      <p>No se encontraron resultados</p>
+      <small>Intenta con otros criterios de búsqueda</small>
+    </div>
+
+  </div>
+</div>
+
+<!-- ====== PANEL DE DETALLES DEL CFDI ====== -->
+<div class="detail-overlay" *ngIf="detailPanelOpen" (click)="closeDetailPanel()"></div>
+
+<div class="detail-panel" [class.open]="detailPanelOpen">
+  <div class="detail-header">
+    <h2>
+      <mat-icon>description</mat-icon>
+      Detalles del CFDI
+    </h2>
+    <button mat-icon-button (click)="closeDetailPanel()">
+      <mat-icon>close</mat-icon>
+    </button>
+  </div>
+
+  <div class="detail-content" *ngIf="selectedCfdi">
+    
+    <!-- Información General -->
+    <mat-card class="detail-section">
+      <mat-card-header>
+        <mat-card-title>📄 Información General</mat-card-title>
+      </mat-card-header>
+      <mat-card-content>
+        <div class="info-grid">
+          <div class="info-item">
+            <label>UUID:</label>
+            <span>{{ selectedCfdi.folio_fiscal || 'N/A' }}</span>
+          </div>
+          <div class="info-item">
+            <label>Serie - Folio:</label>
+            <span>{{ selectedCfdi.serie || '' }} {{ selectedCfdi.folio || 'S/N' }}</span>
+          </div>
+          <div class="info-item">
+            <label>Fecha:</label>
+            <span>{{ formatDate(selectedCfdi.fecha) }}</span>
+          </div>
+          <div class="info-item">
+            <label>Estado:</label>
+            <mat-chip [color]="getEstadoBadgeColor(selectedCfdi.estado_procesamiento)" selected>
+              {{ selectedCfdi.estado_procesamiento || 'PROCESADO' }}
+            </mat-chip>
+          </div>
+          <div class="info-item">
+            <label>Método de Pago:</label>
+            <span>{{ getMetodoPagoLabel(selectedCfdi.metodo_pago) }}</span>
+          </div>
+          <div class="info-item" *ngIf="selectedCfdi.forma_pago">
+            <label>Forma de Pago:</label>
+            <span>{{ getFormaPagoLabel(selectedCfdi.forma_pago) }}</span>
+          </div>
+          <div class="info-item">
+            <label>Moneda:</label>
+            <span>{{ selectedCfdi.moneda || 'MXN' }}</span>
+          </div>
+          <div class="info-item" *ngIf="selectedCfdi.tipo_cambio">
+            <label>Tipo de Cambio:</label>
+            <span>{{ selectedCfdi.tipo_cambio }}</span>
+          </div>
+          <div class="info-item" *ngIf="selectedCfdi.condiciones_pago">
+            <label>Condiciones de Pago:</label>
+            <span>{{ selectedCfdi.condiciones_pago }}</span>
+          </div>
+        </div>
+      </mat-card-content>
+    </mat-card>
+
+    <!-- Receptor (Cliente) -->
+    <mat-card class="detail-section">
+      <mat-card-header>
+        <mat-card-title>👤 Receptor (Cliente)</mat-card-title>
+      </mat-card-header>
+      <mat-card-content>
+        <div class="info-grid">
+          <div class="info-item">
+            <label>Nombre:</label>
+            <span>{{ selectedCfdi.nombre_receptor || 'N/A' }}</span>
+          </div>
+          <div class="info-item">
+            <label>RFC:</label>
+            <span>{{ selectedCfdi.rfc_receptor || 'N/A' }}</span>
+          </div>
+          <div class="info-item" *ngIf="selectedCfdi.uso_cfdi">
+            <label>Uso de CFDI:</label>
+            <span>{{ getUsoCfdiLabel(selectedCfdi.uso_cfdi) }}</span>
+          </div>
+        </div>
+      </mat-card-content>
+    </mat-card>
+
+    <!-- Emisor (Tu Empresa) -->
+    <mat-card class="detail-section">
+      <mat-card-header>
+        <mat-card-title>🏢 Emisor (Tu Empresa)</mat-card-title>
+      </mat-card-header>
+      <mat-card-content>
+        <div class="info-grid">
+          <div class="info-item">
+            <label>Nombre:</label>
+            <span>{{ selectedCfdi.nombre_emisor || 'N/A' }}</span>
+          </div>
+          <div class="info-item">
+            <label>RFC:</label>
+            <span>{{ selectedCfdi.rfc_emisor || 'N/A' }}</span>
+          </div>
+          <div class="info-item" *ngIf="selectedCfdi.regimen_fiscal_emisor">
+            <label>Régimen Fiscal:</label>
+            <span>{{ selectedCfdi.regimen_fiscal_emisor }}</span>
+          </div>
+          <div class="info-item" *ngIf="selectedCfdi.lugar_expedicion">
+            <label>Lugar de Expedición:</label>
+            <span>{{ selectedCfdi.lugar_expedicion }}</span>
+          </div>
+        </div>
+      </mat-card-content>
+    </mat-card>
+
+    <!-- Montos -->
+    <mat-card class="detail-section">
+      <mat-card-header>
+        <mat-card-title>💰 Montos</mat-card-title>
+      </mat-card-header>
+      <mat-card-content>
+        <div class="info-grid">
+          <div class="info-item">
+            <label>Subtotal:</label>
+            <span>{{ formatCurrency(selectedCfdi.sub_total || 0) }}</span>
+          </div>
+          <div class="info-item" *ngIf="selectedCfdi.descuento && selectedCfdi.descuento > 0">
+            <label>Descuento:</label>
+            <span>{{ formatCurrency(selectedCfdi.descuento) }}</span>
+          </div>
+          <div class="info-item">
+            <label>IVA Trasladado:</label>
+            <span>{{ formatCurrency(selectedCfdi.iva_trasladado || 0) }}</span>
+          </div>
+          <div class="info-item" *ngIf="selectedCfdi.total_impuestos_trasladados && selectedCfdi.total_impuestos_trasladados > 0">
+            <label>Total Impuestos Trasladados:</label>
+            <span>{{ formatCurrency(selectedCfdi.total_impuestos_trasladados) }}</span>
+          </div>
+          <div class="info-item" *ngIf="selectedCfdi.total_impuestos_retenidos && selectedCfdi.total_impuestos_retenidos > 0">
+            <label>Total Impuestos Retenidos:</label>
+            <span class="text-danger">{{ formatCurrency(selectedCfdi.total_impuestos_retenidos) }}</span>
+          </div>
+          <div class="info-item">
+            <label>Total:</label>
+            <span class="amount-total">{{ formatCurrency(selectedCfdi.total || 0) }}</span>
+          </div>
+        </div>
+      </mat-card-content>
+    </mat-card>
+
+    <!-- Estado de Pago (solo para PPD) -->
+    <mat-card class="detail-section" *ngIf="selectedCfdi.metodo_pago === 'PPD'">
+      <mat-card-header>
+        <mat-card-title>💳 Estado de Pago</mat-card-title>
+      </mat-card-header>
+      <mat-card-content>
+        <div class="info-grid">
+          <div class="info-item">
+            <label>Total Facturado:</label>
+            <span>{{ formatCurrency(selectedCfdi.total) }}</span>
+          </div>
+          <div class="info-item">
+            <label>Saldo Pendiente:</label>
+            <span class="amount-pending">{{ formatCurrency(calcularSaldoPendiente(selectedCfdi)) }}</span>
+          </div>
+          <div class="info-item">
+            <label>Porcentaje Pagado:</label>
+            <span>{{ getPorcentajePagado(selectedCfdi).toFixed(2) }}%</span>
+          </div>
+        </div>
+
+        <!-- Barra de Progreso -->
+        <div class="payment-progress" *ngIf="selectedCfdi.pagos">
+          <mat-progress-bar 
+            mode="determinate" 
+            [value]="getPorcentajePagado(selectedCfdi)"
+            [color]="getPorcentajePagado(selectedCfdi) >= 100 ? 'primary' : 'accent'">
+          </mat-progress-bar>
+        </div>
+      </mat-card-content>
+    </mat-card>
+
+    <!-- Retenciones (si existen) -->
+    <mat-card class="detail-section" *ngIf="tieneRetenciones(selectedCfdi)">
+      <mat-card-header>
+        <mat-card-title>📊 Retenciones</mat-card-title>
+      </mat-card-header>
+      <mat-card-content>
+        <div class="info-grid">
+          <div class="info-item" *ngIf="selectedCfdi.iva_retenido && selectedCfdi.iva_retenido > 0">
+            <label>IVA Retenido:</label>
+            <span class="text-danger">{{ formatCurrency(selectedCfdi.iva_retenido) }}</span>
+          </div>
+          <div class="info-item" *ngIf="selectedCfdi.isr_retenido && selectedCfdi.isr_retenido > 0">
+            <label>ISR Retenido:</label>
+            <span class="text-danger">{{ formatCurrency(selectedCfdi.isr_retenido) }}</span>
+          </div>
+          <div class="info-item" *ngIf="selectedCfdi.ieps_retenido && selectedCfdi.ieps_retenido > 0">
+            <label>IEPS Retenido:</label>
+            <span class="text-danger">{{ formatCurrency(selectedCfdi.ieps_retenido) }}</span>
+          </div>
+        </div>
+      </mat-card-content>
+    </mat-card>
+
+    <!-- Acciones -->
+    <div class="detail-actions">
+      <button mat-raised-button color="primary" (click)="descargarXml(selectedCfdi)">
+        <mat-icon>code</mat-icon>
+        Descargar XML
+      </button>
+      <button mat-raised-button color="accent" (click)="descargarPdf(selectedCfdi)">
+  <mat-icon>picture_as_pdf</mat-icon>
+  Descargar PDF
+</button>
+    </div>
+
+    <!-- Secciones adicionales con tabs -->
+    <mat-tab-group class="detail-tabs" *ngIf="selectedCfdi.conceptos_detalle">
+      
+      <mat-tab label="Conceptos/Partidas">
+        <div class="tab-content">
+          <div *ngIf="selectedCfdi.conceptos_detalle && selectedCfdi.conceptos_detalle.length > 0; else noPartidas">
+            <div class="partida-item" *ngFor="let partida of selectedCfdi.conceptos_detalle; let i = index">
+              <div class="partida-number">{{ i + 1 }}</div>
+              <div class="partida-info">
+                <h4>{{ partida.descripcion || 'Sin descripción' }}</h4>
+                <div class="partida-details">
+                  <span>Cant: {{ partida.cantidad || 1 }}</span>
+                  <span>P.U: {{ formatCurrency(partida.valorUnitario || 0) }}</span>
+                  <span class="partida-total">Total: {{ formatCurrency(partida.importe || 0) }}</span>
+                </div>
+              </div>
+            </div>
+          </div>
+          <ng-template #noPartidas>
+            <p class="empty-message">No hay partidas registradas</p>
+          </ng-template>
+        </div>
+      </mat-tab>
+      
+      <mat-tab label="Pagos" *ngIf="selectedCfdi.metodo_pago === 'PPD'">
+        <div class="tab-content">
+          <div *ngIf="selectedCfdi.pagos && selectedCfdi.pagos.length > 0; else noPagos">
+            <div class="pago-item" *ngFor="let pago of selectedCfdi.pagos">
+              <div class="pago-header">
+                <strong>{{ formatDate(pago.fecha_pago) }}</strong>
+                <mat-chip color="primary" selected>{{ pago.forma_pago }}</mat-chip>
+              </div>
+              <div class="pago-monto">
+                {{ formatCurrency(pago.monto) }}
+              </div>
+              <div class="pago-uuid" *ngIf="pago.uuid">
+                <small>UUID Pago: {{ pago.uuid }}</small>
+              </div>
+            </div>
+          </div>
+          <ng-template #noPagos>
+            <p class="empty-message">No hay pagos registrados</p>
+          </ng-template>
+        </div>
+      </mat-tab>
+    </mat-tab-group>
+
+  </div>
+</div>
+
+<!-- Botón flotante para abrir el side sheet -->
+<button 
+  mat-fab 
+  color="primary" 
+  class="search-fab" 
+  (click)="openSearchPanel()"
+  matTooltip="Búsqueda Avanzada"
+  matTooltipPosition="left">
+  <mat-icon>search</mat-icon>
+</button>
+
+</div>

@@ -1,0 +1,328 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CFDI - {{folio_fiscal}}</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Arial', sans-serif;
+            font-size: 11px;
+            line-height: 1.4;
+            color: #333;
+            padding: 20px;
+        }
+        
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 3px solid #667eea;
+        }
+        
+        .logo-section {
+            flex: 1;
+        }
+        
+        .logo {
+            max-width: 150px;
+            max-height: 80px;
+        }
+        
+        .company-info {
+            flex: 2;
+            text-align: center;
+        }
+        
+        .company-name {
+            font-size: 18px;
+            font-weight: bold;
+            color: #667eea;
+            margin-bottom: 5px;
+        }
+        
+        .company-details {
+            font-size: 10px;
+            color: #666;
+        }
+        
+        .cfdi-type {
+            flex: 1;
+            text-align: right;
+        }
+        
+        .cfdi-badge {
+            background: #667eea;
+            color: white;
+            padding: 10px 15px;
+            border-radius: 5px;
+            font-weight: bold;
+            display: inline-block;
+        }
+        
+        .info-section {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 20px;
+        }
+        
+        .info-box {
+            flex: 1;
+            border: 1px solid #ddd;
+            padding: 15px;
+            margin: 0 5px;
+            border-radius: 5px;
+            background: #f9f9f9;
+        }
+        
+        .info-box h3 {
+            font-size: 12px;
+            color: #667eea;
+            margin-bottom: 10px;
+            padding-bottom: 5px;
+            border-bottom: 2px solid #667eea;
+        }
+        
+        .info-row {
+            display: flex;
+            margin-bottom: 5px;
+        }
+        
+        .info-label {
+            font-weight: bold;
+            min-width: 80px;
+            color: #666;
+        }
+        
+        .info-value {
+            flex: 1;
+        }
+        
+        .items-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 20px;
+        }
+        
+        .items-table thead {
+            background: #667eea;
+            color: white;
+        }
+        
+        .items-table th {
+            padding: 10px;
+            text-align: left;
+            font-weight: bold;
+        }
+        
+        .items-table td {
+            padding: 8px;
+            border-bottom: 1px solid #eee;
+        }
+        
+        .items-table tbody tr:hover {
+            background: #f5f5f5;
+        }
+        
+        .text-right {
+            text-align: right;
+        }
+        
+        .text-center {
+            text-align: center;
+        }
+        
+        .totals-section {
+            display: flex;
+            justify-content: flex-end;
+            margin-bottom: 20px;
+        }
+        
+        .totals-box {
+            width: 300px;
+            border: 2px solid #667eea;
+            border-radius: 5px;
+            overflow: hidden;
+        }
+        
+        .total-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 10px 15px;
+            border-bottom: 1px solid #eee;
+        }
+        
+        .total-row:last-child {
+            border-bottom: none;
+            background: #667eea;
+            color: white;
+            font-weight: bold;
+            font-size: 14px;
+        }
+        
+        .fiscal-info {
+            background: #f9f9f9;
+            border: 1px solid #ddd;
+            padding: 15px;
+            border-radius: 5px;
+            margin-bottom: 20px;
+        }
+        
+        .fiscal-info h3 {
+            font-size: 12px;
+            color: #667eea;
+            margin-bottom: 10px;
+        }
+        
+        .uuid-box {
+            background: white;
+            border: 1px dashed #667eea;
+            padding: 10px;
+            border-radius: 3px;
+            word-break: break-all;
+            font-family: 'Courier New', monospace;
+            font-size: 9px;
+        }
+        
+        .footer {
+            text-align: center;
+            margin-top: 30px;
+            padding-top: 15px;
+            border-top: 2px solid #667eea;
+            font-size: 10px;
+            color: #666;
+        }
+        
+        .sello-box {
+            background: #f0f0f0;
+            padding: 10px;
+            border-radius: 3px;
+            margin-top: 10px;
+            font-family: 'Courier New', monospace;
+            font-size: 8px;
+            word-break: break-all;
+        }
+    </style>
+</head>
+<body>
+    <!-- Header -->
+    <div class="header">
+        <div class="logo-section">
+            <img src="{{logo}}" alt="Logo" class="logo">
+        </div>
+        <div class="company-info">
+            <div class="company-name">{{nombre_emisor}}</div>
+            <div class="company-details">
+                RFC: {{rfc_emisor}}<br>
+                Régimen Fiscal: {{regimen_fiscal_emisor}}<br>
+                {{lugar_expedicion}}
+            </div>
+        </div>
+        <div class="cfdi-type">
+            <div class="cfdi-badge">{{tipo_documento}}</div>
+            <div style="margin-top: 10px; font-size: 10px;">
+                <strong>Folio:</strong> {{serie}}-{{folio}}<br>
+                <strong>Fecha:</strong> {{fecha}}
+            </div>
+        </div>
+    </div>
+
+    <!-- Info Section -->
+    <div class="info-section">
+        <div class="info-box">
+            <h3>Cliente / Receptor</h3>
+            <div class="info-row">
+                <span class="info-label">Nombre:</span>
+                <span class="info-value">{{nombre_receptor}}</span>
+            </div>
+            <div class="info-row">
+                <span class="info-label">RFC:</span>
+                <span class="info-value">{{rfc_receptor}}</span>
+            </div>
+            <div class="info-row">
+                <span class="info-label">Uso CFDI:</span>
+                <span class="info-value">{{uso_cfdi}}</span>
+            </div>
+        </div>
+        
+        <div class="info-box">
+            <h3>Información de Pago</h3>
+            <div class="info-row">
+                <span class="info-label">Método:</span>
+                <span class="info-value">{{metodo_pago}}</span>
+            </div>
+            <div class="info-row">
+                <span class="info-label">Forma:</span>
+                <span class="info-value">{{forma_pago}}</span>
+            </div>
+            <div class="info-row">
+                <span class="info-label">Moneda:</span>
+                <span class="info-value">{{moneda}}</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Items Table -->
+    <table class="items-table">
+        <thead>
+            <tr>
+                <th style="width: 8%;">Cant.</th>
+                <th style="width: 12%;">Clave</th>
+                <th style="width: 40%;">Descripción</th>
+                <th style="width: 15%;" class="text-right">P. Unitario</th>
+                <th style="width: 15%;" class="text-right">Importe</th>
+            </tr>
+        </thead>
+        <tbody>
+            {{items}}
+        </tbody>
+    </table>
+
+    <!-- Totals -->
+    <div class="totals-section">
+        <div class="totals-box">
+            <div class="total-row">
+                <span>Subtotal:</span>
+                <span>$ {{subtotal}}</span>
+            </div>
+            <div class="total-row">
+                <span>IVA Trasladado:</span>
+                <span>$ {{iva_trasladado}}</span>
+            </div>
+            {{retenciones_html}}
+            <div class="total-row">
+                <span>TOTAL:</span>
+                <span>$ {{total}}</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Fiscal Info -->
+    <div class="fiscal-info">
+        <h3>Información Fiscal</h3>
+        <div class="info-row">
+            <span class="info-label">UUID:</span>
+        </div>
+        <div class="uuid-box">{{folio_fiscal}}</div>
+        
+        <div class="info-row" style="margin-top: 10px;">
+            <span class="info-label">Fecha de Certificación:</span>
+            <span class="info-value">{{fecha}}</span>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <div class="footer">
+        <p><strong>Este documento es una representación impresa de un CFDI</strong></p>
+        <p>Generado el {{fecha_generacion}}</p>
+    </div>
+</body>
+</html>

@@ -1,0 +1,333 @@
+.w-full {
+  width: 100%;
+}
+
+.mb-4 {
+  margin-bottom: 1rem;
+}
+
+.mt-3 {
+  margin-top: 0.75rem;
+}
+
+.mt-4 {
+  margin-top: 1rem;
+}
+
+.row {
+  display: flex;
+  flex-wrap: wrap;
+  margin-right: -15px;
+  margin-left: -15px;
+}
+
+.col-md-4 {
+  position: relative;
+  width: 100%;
+  padding-right: 15px;
+  padding-left: 15px;
+  flex: 0 0 33.333333%;
+  max-width: 33.333333%;
+}
+
+.col-md-6 {
+  position: relative;
+  width: 100%;
+  padding-right: 15px;
+  padding-left: 15px;
+  flex: 0 0 50%;
+  max-width: 50%;
+}
+
+.customer-info {
+  background-color: #f5f5f5;
+  padding: 10px;
+  border-radius: 4px;
+  margin-bottom: 15px;
+}
+
+/* ✨ NUEVO: Estilos para info de sucursal */
+.sucursal-info-box {
+  background-color: #e8f5e9;
+  border-left: 4px solid #4caf50;
+  padding: 12px 16px;
+  border-radius: 4px;
+  margin-bottom: 16px;
+}
+
+.sucursal-info-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 8px;
+  color: #2e7d32;
+}
+
+.sucursal-info-header mat-icon {
+  color: #4caf50;
+}
+
+.sucursal-info-header strong {
+  font-size: 16px;
+}
+
+.sucursal-info-box p {
+  margin: 4px 0;
+  font-size: 14px;
+  color: #424242;
+}
+
+/* ✨ NUEVO: Estilos para opciones de sucursal en select */
+.sucursal-option {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 8px 0;
+}
+
+.sucursal-icon {
+  color: #8e24aa;
+  font-size: 24px;
+  width: 24px;
+  height: 24px;
+}
+
+.sucursal-info {
+  display: flex;
+  flex-direction: column;
+}
+
+.sucursal-name {
+  font-weight: 500;
+  font-size: 14px;
+  color: #333;
+}
+
+.sucursal-detail {
+  font-size: 12px;
+  color: #666;
+}
+
+.item-row {
+  border: 1px solid #e0e0e0;
+  border-radius: 8px;
+  padding: 15px;
+  margin-bottom: 20px;
+  background-color: #f9f9f9;
+}
+
+.item-header {
+  display: grid;
+  grid-template-columns: 1fr 1.5fr 1.5fr 1fr 1fr auto;
+  gap: 10px;
+  align-items: center;
+  margin-bottom: 10px;
+}
+
+.items-container {
+  margin-top: 20px;
+  margin-bottom: 20px;
+}
+
+.totals-container {
+  background-color: #f9f9f9;
+  padding: 15px;
+  border-radius: 4px;
+  border-left: 4px solid #1976d2;
+}
+
+/* Estilos para impuestos */
+.tax-item {
+  background-color: white;
+  border: 1px solid #e0e0e0;
+  border-radius: 4px;
+  padding: 8px 12px;
+  margin: 4px 0;
+  display: flex;
+  align-items: center;
+}
+
+.tax-item mat-checkbox {
+  display: flex;
+  width: 100%;
+}
+
+.tax-item .mat-checkbox-layout {
+  width: 100%;
+}
+
+.tax-content {
+  display: flex;
+  flex-direction: column;
+  margin-left: 8px;
+}
+
+.tax-name {
+  font-weight: 500;
+}
+
+.tax-description {
+  font-size: 0.8em;
+  color: #757575;
+}
+
+.tax-rate {
+  font-weight: 500;
+  color: #1976d2;
+  margin-left: 5px;
+  padding: 2px 6px;
+  background-color: #e3f2fd;
+  border-radius: 4px;
+}
+
+::ng-deep .tax-item .mat-checkbox-inner-container {
+  height: 20px !important;
+  width: 20px !important;
+}
+
+.item-taxes .tax-item {
+  background-color: #ffffff !important;
+  border: 2px solid #e0e0e0 !important;
+  border-radius: 4px !important;
+  padding: 12px 15px !important;
+  margin: 8px 0 !important;
+  display: flex !important;
+  align-items: center !important;
+  position: relative !important;
+  overflow: visible !important;
+  cursor: pointer !important;
+}
+
+.item-taxes .tax-item:hover {
+  border-color: #1976d2 !important;
+  background-color: #e3f2fd !important;
+}
+
+.item-taxes .tax-item .mat-checkbox {
+  display: block !important;
+  width: 100% !important;
+}
+
+.item-taxes .tax-item ::ng-deep .mat-checkbox-inner-container {
+  opacity: 1 !important;
+  visibility: visible !important;
+  height: 20px !important;
+  width: 20px !important;
+  margin-right: 10px !important;
+}
+
+.item-taxes .tax-item ::ng-deep .mat-checkbox-checked .mat-checkbox-background {
+  background-color: #1976d2 !important;
+}
+
+.item-taxes .tax-item ::ng-deep .mat-checkbox-checked .mat-checkbox-checkmark-path {
+  stroke: #ffffff !important;
+}
+
+.item-taxes .tax-item .tax-info {
+  margin-left: 30px !important;
+  flex: 1 !important;
+}
+
+.item-taxes .tax-item .tax-name {
+  font-weight: bold !important;
+  color: #333333 !important;
+}
+
+.item-taxes .tax-item .tax-rate {
+  display: inline-block !important;
+  margin-left: 8px !important;
+  padding: 2px 8px !important;
+  background-color: #e3f2fd !important;
+  color: #1976d2 !important;
+  border-radius: 12px !important;
+  font-weight: 500 !important;
+  font-size: 0.9em !important;
+}
+
+.item-taxes {
+  margin-top: 15px !important;
+  padding: 16px !important;
+  background-color: #f5f9ff !important;
+  border-radius: 6px !important;
+  border: 2px solid #d0e1fd !important;
+}
+
+.tax-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 10px;
+  flex-wrap: wrap;
+}
+
+.item-subtotal {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+.taxes-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+  gap: 10px;
+}
+
+.item-taxes .tax-item.selected {
+  border-color: #1976d2 !important;
+  background-color: #e3f2fd !important;
+}
+
+.no-taxes-message {
+  text-align: center;
+  color: #757575;
+  font-style: italic;
+  padding: 10px;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .row {
+    flex-direction: column;
+  }
+  
+  .col-md-4,
+  .col-md-6 {
+    flex: 0 0 100%;
+    max-width: 100%;
+  }
+  
+  .item-header {
+    grid-template-columns: 1fr;
+  }
+  
+  .tax-header {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+  
+  .item-subtotal {
+    margin-top: 10px;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 5px;
+  }
+  
+  .taxes-grid {
+    grid-template-columns: 1fr;
+  }
+
+  /* ✨ NUEVO: Responsive para sucursal */
+  .sucursal-option {
+    padding: 12px 0;
+  }
+
+  .sucursal-info-box {
+    padding: 10px 12px;
+  }
+
+  .sucursal-info-box p {
+    font-size: 13px;
+  }
+}

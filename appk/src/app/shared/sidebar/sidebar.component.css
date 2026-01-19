@@ -1,0 +1,202 @@
+body {
+  margin: 0;
+  padding: 0;
+  font-family: Arial, sans-serif;
+}
+
+.sidebar {
+  background-color: #444444; /* Cambiado de negro a gris oscuro */
+  color: white;
+  width: 250px;
+  height: 100vh;
+  position: fixed;
+  top: 0;
+  left: 0;
+  padding: 0;
+  overflow-x: hidden;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  box-shadow: 2px 0 5px rgba(0, 0, 0, 0.1); /* Sombra sutil a la derecha */
+}
+
+.logo-container {
+  background-color: #333333; /* Gris más oscuro para el área del logo */
+  padding: 10px 0;
+  text-align: center;
+  height: 64px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1); /* Borde sutil */
+}
+
+.logo {
+  max-width: 80%;
+  max-height: 80%;
+  object-fit: contain;
+}
+
+mat-nav-list {
+  padding: 0;
+  flex-grow: 1;
+}
+
+mat-nav-list a {
+  display: flex;
+  align-items: center;
+  padding: 15px 20px;
+  color: white !important;
+  text-decoration: none;
+  font-size: 16px;
+  transition: background-color 0.3s, color 0.3s;
+  font-weight: 400; /* Añadido para mejorar legibilidad */
+}
+
+mat-nav-list a mat-icon,
+mat-nav-list a .mat-icon {
+  margin-right: 10px;
+  color: white !important;
+}
+
+mat-nav-list a:hover {
+  background-color: rgba(255, 255, 255, 0.1);
+}
+
+.active-link {
+  font-weight: bold;
+  background-color: #8e24aa !important; /* Color púrpura para el enlace activo, similar al header */
+  border-left: 4px solid #ffffff; /* Borde blanco a la izquierda */
+}
+
+/* Estilos para los paneles de expansión */
+mat-expansion-panel {
+  background-color: #444444 !important; /* Mismo color de fondo que el sidebar */
+  color: white !important;
+  box-shadow: none !important;
+}
+
+mat-expansion-panel-header {
+  padding: 0 16px !important;
+  height: 48px !important;
+}
+
+.mat-expansion-panel-header-title {
+  color: white !important;
+  display: flex !important;
+  align-items: center !important;
+  font-weight: 400; /* Añadido para mejor legibilidad */
+}
+
+.mat-expansion-panel-header-title mat-icon {
+  margin-right: 16px !important;
+}
+
+.mat-expansion-panel-body {
+  padding: 0 !important;
+}
+
+/* Sobreescribir los estilos de Angular Material para los paneles */
+::ng-deep .sidebar .mat-expansion-panel {
+  background-color: #444444 !important;
+}
+
+::ng-deep .sidebar .mat-expansion-panel-header {
+  background-color: #444444 !important;
+}
+
+::ng-deep .sidebar .mat-expansion-panel-header-title, 
+::ng-deep .sidebar .mat-expansion-panel-header-description {
+  color: white !important;
+}
+
+::ng-deep .sidebar .mat-expansion-panel-body {
+  background-color: #505050 !important; /* Ligeramente más claro para el panel expandido */
+}
+
+::ng-deep .sidebar .mat-expansion-indicator::after {
+  color: white !important;
+}
+
+/* Ajustes para dispositivos pequeños */
+@media screen and (max-height: 450px) {
+  .sidebar {
+    padding-top: 15px;
+  }
+  mat-nav-list a {
+    font-size: 18px;
+  }
+}
+
+a.mat-list-item {
+  color: white !important;
+  height: 48px;
+}
+
+a.mat-list-item:hover {
+  background-color: rgba(255, 255, 255, 0.1);
+}
+
+a.mat-list-item.active-link {
+  background-color: #8e24aa !important; /* Color púrpura para el enlace activo */
+}
+
+mat-icon,
+.mat-icon {
+  margin-right: 16px;
+  color: white !important;
+}
+
+.mat-list-item-content {
+  padding: 0 16px;
+  color: white !important;
+}
+
+.mat-list-item {
+  font-size: 14px;
+}
+
+.menu-icon {
+  color: white !important;
+  background-color: transparent;
+}
+
+/* Estilo para las secciones principales */
+.section-header {
+  padding: 10px 20px;
+  font-size: 12px;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  color: rgba(255, 255, 255, 0.5);
+  margin-top: 20px;
+}
+
+/* Forzar color blanco para todos los elementos relevantes */
+::ng-deep .sidebar {
+  .mat-list-item-content,
+  .mat-list-item-content .mat-list-text,
+  .mat-list-item-content .mat-list-text > *,
+  mat-icon,
+  .mat-icon,
+  .mat-expansion-panel-header-title,
+  .mat-expansion-panel-header-description,
+  mat-panel-title,
+  span {
+    color: white !important;
+  }
+}
+
+/* Asegurar que todo el texto en el sidebar sea blanco */
+::ng-deep .sidebar * {
+  color: white !important;
+}
+
+/* Estilo personalizado para los submenús */
+::ng-deep .sidebar mat-nav-list mat-nav-list {
+  padding-left: 10px !important;
+}
+
+::ng-deep .sidebar mat-nav-list mat-nav-list a.mat-list-item {
+  padding-left: 36px;
+  font-size: 14px;
+}

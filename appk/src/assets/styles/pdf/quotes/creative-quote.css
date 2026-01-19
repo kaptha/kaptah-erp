@@ -1,0 +1,731 @@
+/* creative-quote.css - Diseño creativo real optimizado para html2pdf */
+
+/* Configuración base */
+@page {
+    size: A4;
+    margin: 8mm;
+}
+
+body {
+    font-family: 'Segoe UI', Arial, sans-serif;
+    margin: 0;
+    padding: 0;
+    color: #444;
+    background-color: #fff;
+    line-height: 1.4;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+}
+
+/* Contenedor principal */
+.container {
+    width: 100%;
+    max-width: 190mm;
+    height: auto;
+    max-height: 250mm;
+    margin: 0 auto;
+    position: relative;
+    padding: 15mm;
+    box-sizing: border-box;
+    background: white;
+    border: none !important;
+    border-radius: 0 !important;
+    overflow: hidden;
+    page-break-after: avoid;
+    page-break-inside: avoid;
+}
+
+/* Elementos decorativos flotantes */
+.floating-shapes {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: -1;
+    pointer-events: none;
+}
+
+/* Formas geométricas flotantes */
+.shape-top-left,
+.shape-top-right,
+.shape-bottom-left,
+.shape-bottom-right {
+    position: absolute;
+    background: linear-gradient(135deg, rgba(70, 176, 248, 0.1), rgba(21, 122, 159, 0.2));
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+}
+
+.shape-top-left {
+    top: 0;
+    left: 0;
+    width: 200px;
+    height: 150px;
+    border-radius: 0 0 80px 0;
+    background: linear-gradient(135deg, rgba(70, 176, 248, 0.15), rgba(21, 122, 159, 0.1));
+}
+
+.shape-top-right {
+    top: 0;
+    right: 0;
+    width: 100px;
+    height: 100px;
+    border-radius: 0 0 0 50px;
+    background: linear-gradient(225deg, rgba(70, 176, 248, 0.1), rgba(21, 122, 159, 0.15));
+}
+
+.shape-bottom-left {
+    bottom: 0;
+    left: 0;
+    width: 80px;
+    height: 120px;
+    border-radius: 0 40px 0 0;
+    background: linear-gradient(45deg, rgba(70, 176, 248, 0.1), rgba(21, 122, 159, 0.2));
+}
+
+.shape-bottom-right {
+    bottom: 0;
+    right: 0;
+    width: 150px;
+    height: 200px;
+    border-radius: 80px 0 0 0;
+    background: linear-gradient(315deg, rgba(70, 176, 248, 0.15), rgba(21, 122, 159, 0.1));
+}
+
+/* Encabezado */
+.header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 30px;
+    position: relative;
+    z-index: 1;
+}
+
+.logo-section {
+    display: flex;
+    align-items: center;
+}
+
+/* Logo hexagonal */
+.logo-hexagon {
+    width: 60px;
+    height: 60px;
+    margin-right: 15px;
+    position: relative;
+    background: white;
+    border: 3px solid #46b0f8;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    /* Hexágono simplificado con border-radius para PDF */
+    border-radius: 12px;
+    transform: rotate(45deg);
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+}
+
+.logo-img {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    border-radius: 8px;
+    transform: rotate(-45deg);
+}
+
+.logo-letter {
+    font-size: 24px;
+    font-weight: bold;
+    color: #46b0f8;
+    transform: rotate(-45deg);
+    display: none; /* Solo mostrar si falla la imagen */
+}
+
+.company-info {
+    transform: translateY(0);
+}
+
+.company-name {
+    font-size: 18px;
+    font-weight: bold;
+    color: #46b0f8;
+    margin: 0;
+    line-height: 1.2;
+}
+
+.company-subtitle {
+    font-size: 14px;
+    color: #777;
+    margin: 0;
+    line-height: 1.2;
+}
+
+.document-title {
+    font-size: 3rem;
+    font-weight: bold;
+    color: #666;
+    margin: 0;
+    letter-spacing: 2px;
+}
+
+/* Información del cliente y cotización */
+.client-quote-info {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 30px;
+    position: relative;
+    z-index: 1;
+}
+
+.client-section {
+    width: 50%;
+}
+
+.quote-section {
+    width: 40%;
+    text-align: right;
+}
+
+.section-label {
+    font-size: 14px;
+    color: #666;
+    margin-bottom: 8px;
+}
+
+.client-name {
+    font-size: 18px;
+    font-weight: bold;
+    color: #333;
+    margin-bottom: 8px;
+}
+
+.client-details div {
+    color: #777;
+    margin-bottom: 4px;
+    font-size: 14px;
+}
+
+.quote-detail {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 8px;
+    font-size: 14px;
+}
+
+.quote-label {
+    color: #666;
+}
+
+.quote-value {
+    font-weight: bold;
+    color: #333;
+}
+
+/* Tabla de productos moderna */
+.items-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-bottom: 30px;
+    position: relative;
+    z-index: 1;
+}
+
+.items-table thead tr {
+    background: linear-gradient(135deg, #46b0f8, #1e8eb8);
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+}
+
+.items-table th {
+    color: white;
+    padding: 15px 12px;
+    text-align: left;
+    font-weight: bold;
+    font-size: 14px;
+    border: none;
+}
+
+.col-number {
+    width: 8%;
+    text-align: center;
+}
+
+.col-description {
+    width: 42%;
+}
+
+.col-price,
+.col-quantity {
+    width: 15%;
+    text-align: right;
+}
+
+.col-total {
+    width: 20%;
+    text-align: right;
+}
+
+.items-table tbody tr {
+    border-bottom: 1px solid #e0e0e0;
+}
+
+.items-table tbody tr:last-child {
+    border-bottom: none;
+}
+
+.items-table td {
+    padding: 15px 12px;
+    font-size: 14px;
+    color: #333;
+}
+
+.items-table td:first-child {
+    text-align: center;
+    font-weight: bold;
+    color: #46b0f8;
+}
+
+.items-table td:nth-child(2) {
+    text-align: left;
+}
+
+.items-table td:nth-child(3),
+.items-table td:nth-child(4),
+.items-table td:nth-child(5) {
+    text-align: right;
+}
+
+/* Sección de términos y totales */
+.terms-totals-section {
+    display: flex;
+    justify-content: space-between;
+    gap: 30px;
+    position: relative;
+    z-index: 1;
+}
+
+.terms-section {
+    width: 55%;
+}
+
+.terms-title {
+    font-weight: bold;
+    margin-bottom: 10px;
+    color: #333;
+    font-size: 16px;
+}
+
+.terms-content {
+    color: #666;
+    font-size: 13px;
+    line-height: 1.5;
+    text-align: justify;
+}
+
+.totals-section {
+    width: 40%;
+}
+
+.total-row {
+    display: flex;
+    justify-content: space-between;
+    padding: 8px 0;
+    border-bottom: 1px solid #e0e0e0;
+    font-size: 14px;
+}
+
+.total-row:last-child {
+    border-bottom: none;
+}
+
+.total-label {
+    color: #666;
+}
+
+.total-value {
+    font-weight: 600;
+    color: #333;
+}
+
+.grand-total {
+    border-top: 2px solid #46b0f8 !important;
+    border-bottom: none !important;
+    margin-top: 10px;
+    padding-top: 15px !important;
+    font-size: 18px !important;
+    font-weight: bold !important;
+}
+
+.grand-total .total-label,
+.grand-total .total-value {
+    color: #1e8eb8 !important;
+    font-size: 20px !important;
+    font-weight: bold !important;
+}
+
+/* Manejo de imagen del logo */
+.logo-img:not([src]),
+.logo-img[src=""],
+.logo-img[src="#"] {
+    display: none;
+}
+
+.logo-img:not([src]) + .logo-letter,
+.logo-img[src=""] + .logo-letter,
+.logo-img[src="#"] + .logo-letter {
+    display: block !important;
+}
+
+/* Ajustes para impresión */
+@media print {
+    body, .container {
+        margin: 0;
+        padding: 0;
+        width: 100%;
+    }
+
+    .container {
+        padding: 12mm;
+        height: 275mm !important;
+        max-height: 275mm !important;
+        page-break-after: avoid !important;
+        page-break-inside: avoid !important;
+    }
+
+    /* Forzar colores en impresión */
+    .floating-shapes div,
+    .logo-hexagon,
+    .items-table thead tr,
+    .shape-top-left,
+    .shape-top-right,
+    .shape-bottom-left,
+    .shape-bottom-right {
+        -webkit-print-color-adjust: exact !important;
+        print-color-adjust: exact !important;
+        color-adjust: exact !important;
+    }
+
+    /* Evitar saltos de página */
+    .header,
+    .client-quote-info,
+    .items-table,
+    .terms-totals-section {
+        page-break-inside: avoid !important;
+        break-inside: avoid !important;
+    }
+
+    /* Mantener flexbox */
+    .header,
+    .client-quote-info,
+    .terms-totals-section {
+        display: flex !important;
+    }
+
+    .logo-section {
+        display: flex !important;
+        align-items: center !important;
+    }
+
+    .logo-hexagon {
+        display: flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+    }
+
+    /* Asegurar que las formas flotantes se mantengan */
+    .floating-shapes {
+        position: absolute !important;
+    }
+
+    .shape-top-left,
+    .shape-top-right,
+    .shape-bottom-left,
+    .shape-bottom-right {
+        position: absolute !important;
+    }
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .container {
+        padding: 10mm;
+    }
+    
+    .header {
+        flex-direction: column;
+        text-align: center;
+        margin-bottom: 20px;
+    }
+    
+    .document-title {
+        font-size: 2rem;
+        margin-top: 15px;
+    }
+    
+    .client-quote-info {
+        flex-direction: column;
+    }
+    
+    .client-section,
+    .quote-section {
+        width: 100%;
+        margin-bottom: 20px;
+    }
+    
+    .quote-section {
+        text-align: left;
+    }
+    
+    .terms-totals-section {
+        flex-direction: column;
+        gap: 20px;
+    }
+    
+    .terms-section,
+    .totals-section {
+        width: 100%;
+    }
+    
+    .items-table th,
+    .items-table td {
+        padding: 8px 6px;
+        font-size: 12px;
+    }
+    
+    .col-number {
+        display: none;
+    }
+    
+    .items-table td:first-child {
+        display: none;
+    }
+    
+    .col-description {
+        width: 50%;
+    }
+    
+    /* Ajustar formas flotantes en móvil */
+    .shape-top-left,
+    .shape-top-right,
+    .shape-bottom-left,
+    .shape-bottom-right {
+        opacity: 0.5;
+    }
+}do */
+    border-bottom: 1px solid #ddd;
+    font-size: 0.8rem; /* Reducido */
+}
+
+.items-table tr:last-child td {
+    border-bottom: none;
+}
+
+.items-table td:first-child {
+    text-align: center;
+    font-weight: bold;
+    color: #2980b9;
+}
+
+.items-table td:nth-child(2) {
+    text-align: left;
+}
+
+.items-table td:nth-child(3),
+.items-table td:nth-child(4),
+.items-table td:nth-child(5) {
+    text-align: right;
+}
+
+/* Divisor */
+.item-divider {
+    height: 1px;
+    width: 100%;
+    background-color: #ddd;
+    margin: 8px 0; /* Reducido */
+}
+
+/* Totales con diseño moderno */
+.totals-section {
+    display: flex;
+    justify-content: flex-end;
+    margin-bottom: 20px; /* Reducido */
+}
+
+.totals-table {
+    width: 250px; /* Reducido */
+}
+
+.total-row {
+    display: flex;
+    justify-content: space-between;
+    padding: 6px 0; /* Reducido */
+    border-bottom: 1px solid #ddd;
+    font-size: 0.9rem; /* Reducido */
+}
+
+.total-row:last-child {
+    border-bottom: none;
+}
+
+.grand-total {
+    font-weight: bold;
+    font-size: 1.1rem !important; /* Reducido */
+    padding-top: 10px !important; /* Reducido */
+    color: #157a9f !important; /* Azul */
+    border-top: 2px solid #157a9f !important;
+}
+
+/* Términos y condiciones */
+.terms-section {
+    margin-bottom: 25px; /* Reducido */
+}
+
+.terms-title {
+    font-weight: bold;
+    margin-bottom: 8px; /* Reducido */
+    font-size: 0.9rem; /* Reducido */
+    color: #333;
+}
+
+.terms-content {
+    color: #666;
+    font-size: 0.8rem; /* Reducido */
+    line-height: 1.4;
+    padding: 10px; /* Reducido */
+    background: #f8f9fa;
+    border-left: 3px solid #2980b9;
+    border-radius: 4px;
+}
+
+/* Manejo de imagen del logo */
+.logo-img:not([src]),
+.logo-img[src=""],
+.logo-img[src="#"] {
+    display: none;
+}
+
+.logo-img:not([src]) + .hexagon,
+.logo-img[src=""] + .hexagon,
+.logo-img[src="#"] + .hexagon {
+    display: flex !important;
+}
+
+/* Ajustes para impresión */
+@media print {
+    body, .container {
+        margin: 0;
+        padding: 0;
+        width: 100%;
+    }
+
+    .container {
+        height: 275mm !important;
+        max-height: 275mm !important;
+        page-break-after: avoid !important;
+        page-break-inside: avoid !important;
+    }
+
+    /* Forzar colores en impresión */
+    .wave-image-top,
+    .wave-image-bottom,
+    .wave-image-top::after,
+    .wave-image-bottom::before,
+    .items-table th,
+    .hexagon,
+    .terms-content {
+        -webkit-print-color-adjust: exact !important;
+        print-color-adjust: exact !important;
+        color-adjust: exact !important;
+    }
+
+    /* Evitar saltos de página */
+    .header,
+    .client-section,
+    .items-table,
+    .totals-section,
+    .terms-section {
+        page-break-inside: avoid !important;
+        break-inside: avoid !important;
+    }
+
+    /* Mantener flexbox */
+    .header,
+    .client-section,
+    .totals-section {
+        display: flex !important;
+    }
+
+    .company-logo {
+        display: flex !important;
+        align-items: center !important;
+    }
+
+    .hexagon {
+        display: flex !important;
+        justify-content: center !important;
+        align-items: center !important;
+    }
+
+    /* Asegurar que las ondas se mantengan */
+    .wave-top,
+    .wave-bottom {
+        position: relative !important;
+    }
+
+    .wave-image-top,
+    .wave-image-bottom {
+        position: absolute !important;
+    }
+}
+
+/* Responsive simplificado */
+@media (max-width: 768px) {
+    .header {
+        flex-direction: column;
+        align-items: flex-start;
+        padding: 12px;
+    }
+    
+    .quote-title {
+        text-align: left;
+        margin-top: 12px;
+        font-size: 1.5rem;
+    }
+    
+    .client-section {
+        flex-direction: column;
+    }
+    
+    .client-info, 
+    .invoice-info {
+        width: 100%;
+        margin-bottom: 15px;
+    }
+    
+    .totals-table {
+        width: 100%;
+    }
+    
+    .content {
+        padding: 60px 12px 12px;
+    }
+    
+    .items-table th,
+    .items-table td {
+        padding: 6px 8px;
+        font-size: 0.75rem;
+    }
+    
+    .items-table th.item-number {
+        display: none;
+    }
+    
+    .items-table td:first-child {
+        display: none;
+    }
+    
+    .items-table th.item-description {
+        width: 50%;
+    }
+}

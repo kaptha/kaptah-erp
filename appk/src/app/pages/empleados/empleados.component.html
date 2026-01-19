@@ -1,0 +1,209 @@
+<div class="empleados-container">
+  <h2 class="page-title">Empleados</h2>
+  
+  <div class="breadcrumb">
+    <a routerLink="/dashboard">Dashboard</a> / Gestión de empleados
+  </div>
+
+  <!-- Filtro para móvil -->
+  <div class="mobile-filter-section">
+    <mat-form-field appearance="outline" class="search-field">
+      <mat-label>Buscar empleados</mat-label>
+      <input matInput (keyup)="applyFilter($event)" placeholder="Buscar por nombre, RFC, email...">
+      <mat-icon matSuffix>search</mat-icon>
+    </mat-form-field>
+  </div>
+
+  <!-- Acciones principales y búsqueda -->
+  <div class="actions-container">
+    <button mat-raised-button class="btn-primary" (click)="openEmployeeDialog()">
+      <mat-icon>add</mat-icon> Agregar empleado
+    </button>
+    
+    <!-- Filtro para pantallas grandes -->
+    <mat-form-field appearance="outline" class="search-field" [style.display]="isMobile ? 'none' : 'block'">
+      <mat-label>Buscar empleados</mat-label>
+      <input matInput (keyup)="applyFilter($event)" placeholder="Buscar por nombre, RFC, email...">
+      <mat-icon matSuffix>search</mat-icon>
+    </mat-form-field>
+    
+    <div class="actions-right">
+      <button mat-raised-button [matMenuTriggerFor]="exportMenu" class="btn-white">
+        <mat-icon>file_download</mat-icon> Exportar
+      </button>
+      <mat-menu #exportMenu="matMenu">
+        <button mat-menu-item (click)="exportar('csv')">
+          <mat-icon>description</mat-icon>
+          <span>Exportar como CSV</span>
+        </button>
+        <button mat-menu-item (click)="exportar('xlsx')">
+          <mat-icon>table_chart</mat-icon>
+          <span>Exportar como Excel</span>
+        </button>
+      </mat-menu>
+      
+      <button mat-icon-button color="primary" (click)="loadEmpleados()" matTooltip="Refrescar">
+        <mat-icon>refresh</mat-icon>
+      </button>
+    </div>
+  </div>
+  
+  <!-- Indicador de carga -->
+  <div class="loading-container" *ngIf="loading">
+    <mat-spinner></mat-spinner>
+  </div>
+
+  <!-- Tabla para pantallas grandes -->
+  <div class="table-container mat-elevation-z8" *ngIf="!loading">
+    <table mat-table [dataSource]="dataSource" class="mat-elevation-z8">
+      <!-- Nombre Column -->
+      <ng-container matColumnDef="nombre">
+        <th mat-header-cell *matHeaderCellDef> Nombre </th>
+        <td mat-cell *matCellDef="let empleado"> {{empleado.nombre}} </td>
+      </ng-container>
+  
+      <!-- RFC Column -->
+      <ng-container matColumnDef="rfc">
+        <th mat-header-cell *matHeaderCellDef> RFC </th>
+        <td mat-cell *matCellDef="let empleado"> {{empleado.rfc}} </td>
+      </ng-container>
+  
+      <!-- Email Column -->
+      <ng-container matColumnDef="email">
+        <th mat-header-cell *matHeaderCellDef> Email </th>
+        <td mat-cell *matCellDef="let empleado"> {{empleado.email}} </td>
+      </ng-container>
+  
+      <!-- Teléfono Column -->
+      <ng-container matColumnDef="telefono">
+        <th mat-header-cell *matHeaderCellDef> Teléfono </th>
+        <td mat-cell *matCellDef="let empleado"> {{empleado.telefono}} </td>
+      </ng-container>
+
+      <!-- Puesto Column -->
+      <ng-container matColumnDef="puesto">
+        <th mat-header-cell *matHeaderCellDef> Puesto </th>
+        <td mat-cell *matCellDef="let empleado"> {{empleado.puesto}} </td>
+      </ng-container>
+
+      <!-- Departamento Column -->
+      <ng-container matColumnDef="departamento">
+        <th mat-header-cell *matHeaderCellDef> Departamento </th>
+        <td mat-cell *matCellDef="let empleado"> {{empleado.departamento}} </td>
+      </ng-container>
+
+      <!-- Estado Column -->
+      <ng-container matColumnDef="estado">
+        <th mat-header-cell *matHeaderCellDef> Estado </th>
+        <td mat-cell *matCellDef="let empleado" 
+            [ngClass]="empleado.estado === 'Activo' ? 'active-status' : 'inactive-status'"> 
+          {{empleado.estado}} 
+        </td>
+      </ng-container>
+
+      <!-- Actions Column -->
+      <ng-container matColumnDef="actions">
+        <th mat-header-cell *matHeaderCellDef></th>
+        <td mat-cell *matCellDef="let empleado">
+          <button mat-icon-button [matMenuTriggerFor]="menu">
+            <mat-icon>more_vert</mat-icon>
+          </button>
+          <mat-menu #menu="matMenu">
+            <button mat-menu-item (click)="editEmployee(empleado)">
+              <mat-icon>edit</mat-icon>
+              <span>Editar</span>
+            </button>
+            <button mat-menu-item (click)="deleteEmployee($event, empleado.id)">
+              <mat-icon color="warn">delete</mat-icon>
+              <span>Eliminar</span>
+            </button>
+          </mat-menu>
+        </td>
+      </ng-container>
+  
+      <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+      <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
+      
+      <!-- Fila para cuando no hay datos -->
+      <tr class="mat-row" *matNoDataRow>
+        <td class="mat-cell empty-state" [attr.colspan]="displayedColumns.length">
+          No hay empleados que coincidan con el filtro.
+        </td>
+      </tr>
+    </table>
+  </div>
+
+  <!-- Vista de tarjetas para móviles -->
+  <div class="mobile-cards" *ngIf="!loading">
+    <div *ngIf="dataSource.filteredData.length === 0" class="empty-state">
+      No hay empleados que coincidan con el filtro.
+    </div>
+    
+    <div class="mobile-card" *ngFor="let empleado of dataSource.filteredData | slice: getMobileStartIndex(): getMobileEndIndex()">
+      <div class="mobile-card-header">
+        <div class="mobile-card-title">{{empleado.nombre}}</div>
+        <div class="mobile-card-status" [ngClass]="empleado.estado === 'Activo' ? 'active' : 'inactive'">
+          {{empleado.estado}}
+        </div>
+      </div>
+      
+      <div class="mobile-card-content">
+        <div class="mobile-card-row" *ngIf="empleado.puesto">
+          <div class="mobile-card-label">Puesto:</div>
+          <div class="mobile-card-value">{{empleado.puesto}}</div>
+        </div>
+        
+        <div class="mobile-card-row" *ngIf="empleado.departamento">
+          <div class="mobile-card-label">Departamento:</div>
+          <div class="mobile-card-value">{{empleado.departamento}}</div>
+        </div>
+        
+        <div class="mobile-card-row" *ngIf="empleado.rfc">
+          <div class="mobile-card-label">RFC:</div>
+          <div class="mobile-card-value">{{empleado.rfc}}</div>
+        </div>
+        
+        <div class="mobile-card-row" *ngIf="empleado.email">
+          <div class="mobile-card-label">Email:</div>
+          <div class="mobile-card-value">{{empleado.email}}</div>
+        </div>
+        
+        <div class="mobile-card-row" *ngIf="empleado.telefono">
+          <div class="mobile-card-label">Teléfono:</div>
+          <div class="mobile-card-value">{{empleado.telefono}}</div>
+        </div>
+      </div>
+      
+      <div class="mobile-card-actions">
+        <button mat-icon-button [matMenuTriggerFor]="mobileMenu">
+          <mat-icon>more_vert</mat-icon>
+        </button>
+        <mat-menu #mobileMenu="matMenu">
+          <button mat-menu-item (click)="editEmployee(empleado)">
+            <mat-icon>edit</mat-icon>
+            <span>Editar</span>
+          </button>
+          <button mat-menu-item (click)="deleteEmployee($event, empleado.id)">
+            <mat-icon color="warn">delete</mat-icon>
+            <span>Eliminar</span>
+          </button>
+        </mat-menu>
+      </div>
+    </div>
+    
+    <!-- Paginador mobile simplificado -->
+    <div class="mobile-paginator" *ngIf="dataSource.filteredData.length > mobilePaginator.pageSize">
+      <div class="mobile-paginator-info">
+        Mostrando {{getMobileStartIndex() + 1}} - {{getMobileEndIndex()}} de {{dataSource.filteredData.length}}
+      </div>
+      <div class="mobile-paginator-actions">
+        <button mat-icon-button [disabled]="mobilePaginator.pageIndex === 0" (click)="previousMobilePage()">
+          <mat-icon>navigate_before</mat-icon>
+        </button>
+        <button mat-icon-button [disabled]="isLastMobilePage()" (click)="nextMobilePage()">
+          <mat-icon>navigate_next</mat-icon>
+        </button>
+      </div>
+    </div>
+  </div>
+</div>

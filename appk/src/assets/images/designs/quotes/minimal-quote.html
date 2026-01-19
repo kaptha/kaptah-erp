@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cotización - Minimal Quote</title>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <div class="logo-container">
+                <!-- Logo con múltiples fallbacks -->
+                <img src="[[LOGO_URL]]" alt="Logo" class="logo-img" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
+                
+                <!-- Logo de respaldo (textual) -->
+                <div class="fallback-logo">
+                    <div class="logo-circle">C</div>
+                    <div class="logo-text">[[NOMBRE_EMPRESA]]</div>
+                </div>
+            </div>      
+            <div class="company-info">
+                <div class="quote-title">Cotización</div>
+                <div class="quote-date">[[FECHA_COTIZACION]]</div>
+                <div class="quote-email">[[EMAIL_EMPRESA]]</div>
+                <div class="quote-phone">[[TELEFONO_EMPRESA]]</div>
+            </div>
+        </div>
+        
+        <div class="content">
+            <div class="client-section">Cotización para:</div>
+            
+            <div class="form-row">
+                <div class="form-group">
+                    <div class="form-label">Cliente:</div>
+                    <div class="form-input">[[NOMBRE_CLIENTE]]</div>
+                </div>
+                <div class="form-group">
+                    <div class="form-label">RFC:</div>
+                    <div class="form-input">[[RFC_CLIENTE]]</div>
+                </div>
+            </div>
+            
+            <div class="form-row">
+                <div class="form-group">
+                    <div class="form-label">Teléfono:</div>
+                    <div class="form-input">[[TELEFONO_CLIENTE]]</div>
+                </div>
+                <div class="form-group">
+                    <div class="form-label">Email:</div>
+                    <div class="form-input">[[EMAIL_CLIENTE]]</div>
+                </div>
+            </div>
+            
+            <div class="project-section">Descripción de proyecto:</div>
+            
+            <div class="project-box">
+                <div class="project-box-title">Observaciones</div>
+                <div>[[DESCRIPCION_PROYECTO]]</div>
+            </div>
+            
+            <div class="separator"></div>
+            
+            <table class="services-table">
+                <thead>
+                    <tr>
+                        <th>Cantidad</th>
+                        <th>Descripción</th>
+                        <th>Precio U</th>
+                        <th>Total</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    [[FILAS_ITEMS]]
+                </tbody>
+            </table>
+            
+            <div class="validity-text">
+                Esta cotización es válida para los próximos [[DIAS_VALIDEZ]] días
+            </div>
+            
+            <table class="totals-table">
+                <tr>
+                    <td>Subtotal</td>
+                    <td>[[SUBTOTAL]]</td>
+                </tr>
+                <tr>
+                    <td>IVA ([[PORCENTAJE_IVA]]%)</td>
+                    <td>[[MONTO_IVA]]</td>
+                </tr>
+                <tr>
+                    <td>Total</td>
+                    <td>[[TOTAL]]</td>
+                </tr>
+            </table>
+        </div>
+        
+        <div class="terms-section">
+            <div class="terms-title">Términos:</div>
+            <div class="terms-text">[[OBSERVACIONES]]</div>
+        </div>
+    </div>
+</body>
+</html>

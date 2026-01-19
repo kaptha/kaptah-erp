@@ -1,0 +1,141 @@
+<div class="design-selector-container">
+  <h2>Personaliza tus documentos</h2>
+  
+  <mat-tab-group mat-align-tabs="start" (selectedTabChange)="onTabChange($event)">
+    <mat-tab label="Facturas">
+      <div class="tab-content">
+        <h3>Selecciona un diseño para tus facturas</h3>
+        
+        <div class="designs-grid">
+          <mat-card *ngFor="let design of getDesignsForCurrentType()" 
+                    class="design-card" 
+                    [ngClass]="{'selected': isDesignSelected(design.id)}"
+                    (click)="selectDesign(design.id)">
+            
+            <mat-card-header>
+              <mat-card-title>{{ design.name }}</mat-card-title>
+              <mat-card-subtitle *ngIf="design.isDefault">Predeterminado</mat-card-subtitle>
+            </mat-card-header>
+            
+            <img mat-card-image 
+                [src]="design.previewImage" 
+                [alt]="design.name + ' preview'"
+                (error)="handleImageError($event, design)">
+            
+            <mat-card-content>
+              <p>{{ design.description }}</p>
+            </mat-card-content>
+            
+            <mat-card-actions align="end">
+              <button mat-button color="primary" (click)="selectDesign(design.id); $event.stopPropagation()">
+                <mat-icon>check_circle</mat-icon>
+                {{ isDesignSelected(design.id) ? 'SELECCIONADO' : 'SELECCIONAR' }}
+              </button>
+            </mat-card-actions>
+          </mat-card>
+        </div>
+      </div>
+    </mat-tab>
+    
+    <mat-tab label="Notas de Remisión">
+      <div class="tab-content">
+        <h3>Selecciona un diseño para tus notas de remisión</h3>
+        
+        <div class="designs-grid">
+          <mat-card *ngFor="let design of getDesignsForCurrentType()" 
+                    class="design-card" 
+                    [ngClass]="{'selected': isDesignSelected(design.id)}"
+                    (click)="selectDesign(design.id)">
+            
+            <mat-card-header>
+              <mat-card-title>{{ design.name }}</mat-card-title>
+              <mat-card-subtitle *ngIf="design.isDefault">Predeterminado</mat-card-subtitle>
+            </mat-card-header>
+            
+            <img mat-card-image 
+                [src]="design.previewImage" 
+                [alt]="design.name + ' preview'"
+                (error)="handleImageError($event, design)">
+            
+            <mat-card-content>
+              <p>{{ design.description }}</p>
+            </mat-card-content>
+            
+            <mat-card-actions align="end">
+              <button mat-button color="primary" (click)="selectDesign(design.id); $event.stopPropagation()">
+                <mat-icon>check_circle</mat-icon>
+                {{ isDesignSelected(design.id) ? 'SELECCIONADO' : 'SELECCIONAR' }}
+              </button>
+            </mat-card-actions>
+          </mat-card>
+        </div>
+      </div>
+    </mat-tab>
+    
+    <mat-tab label="Cotizaciones">
+      <div class="tab-content">
+        <h3>Selecciona un diseño para tus cotizaciones</h3>
+        
+        <div class="designs-grid">
+          <mat-card *ngFor="let design of getDesignsForCurrentType()" 
+                    class="design-card" 
+                    [ngClass]="{'selected': isDesignSelected(design.id)}"
+                    (click)="selectDesign(design.id)">
+            
+            <mat-card-header>
+              <mat-card-title>{{ design.name }}</mat-card-title>
+              <mat-card-subtitle *ngIf="design.isDefault">Predeterminado</mat-card-subtitle>
+            </mat-card-header>
+            
+            <img mat-card-image 
+                [src]="design.previewImage" 
+                [alt]="design.name + ' preview'"
+                (error)="handleImageError($event, design)">
+            
+            <mat-card-content>
+              <p>{{ design.description }}</p>
+            </mat-card-content>
+            
+            <mat-card-actions align="end">
+              <button mat-button color="primary" (click)="selectDesign(design.id); $event.stopPropagation()">
+                <mat-icon>check_circle</mat-icon>
+                {{ isDesignSelected(design.id) ? 'SELECCIONADO' : 'SELECCIONAR' }}
+              </button>
+            </mat-card-actions>
+          </mat-card>
+        </div>
+      </div>
+    </mat-tab>
+
+    <!-- ⭐ NUEVO TAB PARA CFDIs -->
+  <mat-tab label="CFDIs">
+    <div class="designs-grid">
+      <div *ngFor="let design of getDesignsForCurrentType()" 
+           class="design-card"
+           [class.selected]="isDesignSelected(design.id)"
+           (click)="selectDesign(design.id)">
+        
+        <div class="design-preview">
+          <img [src]="design.previewImage" 
+               [alt]="design.name"
+               (error)="handleImageError($event, design)">
+          
+          <div class="selected-overlay" *ngIf="isDesignSelected(design.id)">
+            <mat-icon>check_circle</mat-icon>
+          </div>
+        </div>
+        
+        <div class="design-info">
+          <h3>{{ design.name }}</h3>
+          <p>{{ design.description }}</p>
+        </div>
+      </div>
+    </div>
+  </mat-tab>
+  </mat-tab-group>
+  
+  <div class="selected-design-preview" *ngIf="getCurrentSelectedDesign()">
+    <h3>Diseño seleccionado: {{ getCurrentSelectedDesign()?.name }}</h3>
+    <p>{{ getCurrentSelectedDesign()?.description }}</p>
+  </div>
+</div>

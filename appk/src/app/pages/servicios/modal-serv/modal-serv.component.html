@@ -1,0 +1,70 @@
+<h2 mat-dialog-title>{{isEdit ? 'Editar' : 'Nuevo'}} Servicio</h2>
+<mat-dialog-content>
+  <form [formGroup]="servicioForm">
+    <mat-form-field appearance="outline">
+  <mat-label>Categoría</mat-label>
+  <mat-select formControlName="categoria">
+  <mat-option *ngFor="let cat of categorias" [value]="toNumber(cat.id)">
+    {{cat.name}}
+  </mat-option>
+</mat-select>
+</mat-form-field>
+
+    <mat-form-field appearance="outline">
+      <mat-label>Nombre del servicio</mat-label>
+      <input matInput formControlName="nombre">
+    </mat-form-field>
+    
+<mat-form-field appearance="outline">
+  <mat-label>Clave SAT</mat-label>
+  <input matInput [matAutocomplete]="autoSat" formControlName="claveSat">
+  <mat-autocomplete #autoSat="matAutocomplete" [displayWith]="displayFn" (optionSelected)="onSelectionChanged($event, 'claveSat')">
+    <mat-option *ngFor="let clave of clavesSatFiltradas | async" [value]="clave">
+      {{clave.c_ClaveProdServ}} - {{clave.descripcion}}
+    </mat-option>
+  </mat-autocomplete>
+</mat-form-field>
+      
+
+<mat-form-field appearance="outline">
+      <mat-label>Descripción del servicio</mat-label>
+      <textarea matInput formControlName="descripcion"></textarea>
+</mat-form-field>
+
+  <mat-form-field appearance="outline">
+  <mat-label>Unidad SAT</mat-label>
+  <input matInput [matAutocomplete]="autoUnidad" formControlName="unidadSat">
+  <mat-autocomplete #autoUnidad="matAutocomplete" [displayWith]="displayFn" (optionSelected)="onSelectionChanged($event, 'unidadSat')">
+    <mat-option *ngFor="let unidad of unidadesSatFiltradas | async" [value]="unidad">
+      {{unidad.clave_unidad}} - {{unidad.nombre}}
+    </mat-option>
+  </mat-autocomplete>
+</mat-form-field>
+
+  <mat-form-field appearance="outline">
+  <mat-label>Precio público</mat-label>
+  <input matInput type="number" formControlName="precioPublico" min="0">
+  <span matPrefix>$&nbsp;</span>
+</mat-form-field>
+
+    <mat-form-field appearance="outline">
+  <mat-label>Moneda</mat-label>
+  <input matInput [matAutocomplete]="autoMoneda" formControlName="moneda">
+  <mat-autocomplete #autoMoneda="matAutocomplete" [displayWith]="displayFn" (optionSelected)="onSelectionChanged($event, 'moneda')">
+    <mat-option *ngFor="let moneda of monedasFiltradas | async" [value]="moneda">
+      {{moneda.c_moneda}} - {{moneda.descripcion}}
+    </mat-option>
+  </mat-autocomplete>
+</mat-form-field>
+
+  </form>
+</mat-dialog-content>
+<mat-dialog-actions align="end">
+  <button mat-button mat-dialog-close class="btn-danger">Cancelar</button>
+  <button mat-raised-button 
+        class="btn-primary" 
+        (click)="guardarServicio()" 
+        [disabled]="!servicioForm.valid">
+  {{isEdit ? 'Actualizar' : 'Agregar'}}
+</button>
+</mat-dialog-actions>

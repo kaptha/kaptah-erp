@@ -1,0 +1,464 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Nota de Remisión - Minimal</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Arial', 'Helvetica', sans-serif;
+      background-color: #f5f5f5;
+      color: #000;
+      line-height: 1.4;
+    }
+
+    .main-wrapper {
+      width: 100%;
+      max-width: 210mm;
+      min-height: 297mm;
+      margin: 0 auto;
+      background: #ffffff;
+      position: relative;
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* HEADER */
+    .header {
+      background-color: #0a0a2e;
+      color: #ffffff;
+      padding: 20px 35px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      position: relative;
+    }
+
+    .logo-section {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .logo {
+      height: 60px;
+      width: auto;
+    }
+
+    .company-info {
+      text-align: center;
+      color: #ffffff;
+    }
+
+    .company-name {
+      font-size: 13px;
+      font-weight: 700;
+      margin: 0;
+      line-height: 1.3;
+    }
+
+    .company-rfc {
+      font-size: 11px;
+      font-weight: 400;
+      margin: 0;
+      margin-top: 2px;
+      opacity: 0.9;
+    }
+
+    .header h1 {
+      font-size: 32px;
+      font-weight: 700;
+      letter-spacing: 2px;
+      margin: 0;
+      flex: 1;
+      text-align: right;
+      color: #ffffff;
+    }
+
+    /* SECCIÓN DE INFORMACIÓN */
+    .info-section {
+      padding: 20px 35px 15px;
+      background-color: #f5f5f5;
+    }
+
+    .info-row {
+      display: flex;
+      gap: 0;
+      margin-bottom: 0;
+      border: 2px solid #0a0a2e;
+      background-color: #ffffff;
+      min-height: 40px;
+    }
+
+    .info-cell {
+      flex: 1;
+      padding: 8px 12px;
+      display: flex;
+      align-items: center;
+      border-right: 2px solid #0a0a2e;
+      font-size: 11px;
+    }
+
+    .info-cell:last-child {
+      border-right: none;
+    }
+
+    .info-cell strong {
+      font-weight: 700;
+      margin-right: 6px;
+      color: #000;
+    }
+
+    .info-cell.header-cell {
+      background-color: #0a0a2e;
+      color: #ffffff;
+      font-weight: 700;
+      text-align: center;
+      justify-content: center;
+    }
+
+    .info-cell.wide {
+      flex: 2;
+    }
+
+    .info-cell.fecha-cell {
+      flex: 0.8;
+      justify-content: center;
+      text-align: center;
+      font-weight: 700;
+    }
+
+    /* TABLA DE PRODUCTOS */
+    .tabla {
+      width: calc(100% - 70px);
+      margin: 18px auto 15px;
+      border-collapse: collapse;
+      background: white;
+      border: 2px solid #0a0a2e;
+    }
+
+    .tabla thead {
+      background-color: #0a0a2e;
+      color: white;
+    }
+
+    .tabla thead th {
+      padding: 10px 12px;
+      text-align: left;
+      font-weight: 700;
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      border-right: 2px solid #ffffff;
+    }
+
+    .tabla thead th:last-child {
+      border-right: none;
+    }
+
+    .tabla tbody td {
+      padding: 9px 12px;
+      border: 1px solid #0a0a2e;
+      font-size: 11px;
+      color: #333;
+    }
+
+    .tabla tbody tr {
+      background-color: #ffffff;
+    }
+
+    .tabla tbody tr:nth-child(even) {
+      background-color: #f9f9f9;
+    }
+
+    /* TOTALES EN LA TABLA */
+    .tabla tfoot td {
+      padding: 9px 12px;
+      border: 2px solid #0a0a2e;
+      font-weight: 700;
+      background-color: #e8e8e8;
+      font-size: 11px;
+    }
+
+    .tabla tfoot tr:last-child td {
+      background-color: #0a0a2e;
+      color: #ffffff;
+      font-size: 12px;
+    }
+
+    .tabla td:last-child,
+    .tabla th:last-child {
+      text-align: right;
+    }
+
+    /* SECCIÓN OBSERVACIONES Y QR */
+    .bottom-section {
+      display: flex;
+      gap: 20px;
+      width: calc(100% - 70px);
+      margin: 18px auto 20px;
+    }
+
+    .observaciones-box {
+      flex: 1.5;
+      border: 2px solid #0a0a2e;
+      padding: 15px;
+      background-color: #f9f9f9;
+    }
+
+    .observaciones-title {
+      font-size: 11px;
+      font-weight: 700;
+      text-transform: uppercase;
+      margin-bottom: 10px;
+      color: #0a0a2e;
+      letter-spacing: 0.5px;
+    }
+
+    .observaciones-content {
+      font-size: 10px;
+      color: #333;
+      line-height: 1.5;
+      white-space: pre-wrap;
+      min-height: 80px;
+    }
+
+    .qr-box {
+      flex: 1;
+      border: 2px solid #0a0a2e;
+      padding: 15px;
+      text-align: center;
+      background-color: #ffffff;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+    }
+
+    .qr-title {
+      font-size: 10px;
+      color: #0a0a2e;
+      margin-bottom: 10px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .qr-code-img {
+      width: 110px;
+      height: 110px;
+      display: block;
+      margin: 0 auto 8px;
+      border: 2px solid #0a0a2e;
+      padding: 3px;
+      background: white;
+    }
+
+    .qr-info {
+      font-size: 8px;
+      color: #666;
+      margin-top: 6px;
+    }
+
+    .qr-footer-text {
+      font-size: 7px;
+      color: #999;
+      margin-top: 3px;
+    }
+
+    /* FOOTER */
+    footer {
+      background-color: #0a0a2e;
+      color: #ffffff;
+      padding: 18px 35px;
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: 25px;
+      margin-top: auto;
+    }
+
+    .footer-section {
+      flex: 1;
+      text-align: center;
+    }
+
+    .footer-section strong {
+      display: block;
+      font-size: 12px;
+      font-weight: 700;
+      margin-bottom: 6px;
+      letter-spacing: 0.5px;
+    }
+
+    .footer-section p {
+      margin: 2px 0;
+      font-size: 10px;
+      line-height: 1.4;
+    }
+
+    /* MEDIA QUERIES PARA IMPRESIÓN */
+    @media print {
+      .main-wrapper {
+        width: 100%;
+        max-width: none;
+        min-height: auto;
+        page-break-after: avoid;
+      }
+      
+      body {
+        margin: 0;
+        padding: 0;
+        background-color: white;
+      }
+      
+      .header, .info-section, .tabla, .bottom-section, footer {
+        page-break-inside: avoid;
+      }
+
+      .header, footer {
+        print-color-adjust: exact;
+        -webkit-print-color-adjust: exact;
+      }
+
+      @page {
+        margin: 0;
+        size: A4 portrait;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="main-wrapper">
+    <!-- HEADER -->
+    <header class="header">
+      <div class="logo-section">
+        <img src="{{logo}}" alt="Logo" class="logo" />
+        <div class="company-info">
+          <p class="company-name">{{sucursal_nombre}}</p>
+          <p class="company-rfc">{{empresa_rfc}}</p>
+        </div>
+      </div>
+      <h1>{{tipo_documento}}</h1>
+    </header>
+
+    <!-- SECCIÓN DE INFORMACIÓN -->
+    <section class="info-section">
+      <!-- Primera fila: Número, Datos Fiscales, Fecha -->
+      <div class="info-row">
+        <div class="info-cell">
+          <strong>NÚMERO:</strong> <span>{{folio}}</span>
+        </div>
+        <div class="info-cell wide">
+          <strong>DATOS FISCALES:</strong> <span>{{rfc}}</span>
+        </div>
+        <div class="info-cell header-cell fecha-cell">
+          FECHA
+        </div>
+      </div>
+
+      <!-- Segunda fila: Cliente (vacío para fecha) -->
+      <div class="info-row">
+        <div class="info-cell" style="flex: 2.8;">
+          <strong>CLIENTE:</strong> <span>{{cliente}}</span>
+        </div>
+        <div class="info-cell fecha-cell">
+          {{fecha}}
+        </div>
+      </div>
+
+      <!-- Tercera fila: Domicilio -->
+      <div class="info-row">
+        <div class="info-cell" style="flex: 1;">
+          <strong>DOMICILIO:</strong> <span>{{direccion}}</span>
+        </div>
+      </div>
+
+      <!-- Cuarta fila: Ciudad/Estado y Teléfono -->
+      <div class="info-row">
+        <div class="info-cell" style="flex: 2;">
+          <strong>CIUDAD O ESTADO:</strong> <span>{{ciudad}}</span>
+        </div>
+        <div class="info-cell">
+          <strong>TEL.:</strong> <span>{{telefono}}</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- TABLA DE PRODUCTOS -->
+    <table class="tabla">
+      <thead>
+        <tr>
+          <th>CANTIDAD</th>
+          <th>DESCRIPCIÓN</th>
+          <th>VALOR UNITARIO</th>
+          <th>IMPORTE</th>
+        </tr>
+      </thead>
+      <tbody>
+        {{items}}
+      </tbody>
+      <tfoot>
+        <tr>
+          <td colspan="3"><strong>SUBTOTAL</strong></td>
+          <td>${{subtotal}}</td>
+        </tr>
+        <tr>
+          <td colspan="3"><strong>IMPUESTO</strong></td>
+          <td>${{impuestos}}</td>
+        </tr>
+        <tr>
+          <td colspan="3"><strong>TOTAL</strong></td>
+          <td>${{total}}</td>
+        </tr>
+      </tfoot>
+    </table>
+
+    <!-- SECCIÓN OBSERVACIONES Y QR -->
+    <section class="bottom-section">
+      <!-- Observaciones -->
+      <div class="observaciones-box">
+        <div class="observaciones-title">📝 Observaciones</div>
+        <div class="observaciones-content">{{observaciones}}</div>
+      </div>
+
+      <!-- Código QR -->
+      <div class="qr-box">
+        <p class="qr-title">Escanea para verificar</p>
+        <img 
+          src="{{qr_code}}" 
+          alt="Código QR de verificación"
+          class="qr-code-img"
+        />
+        <p class="qr-info">Folio: {{qr_folio}}</p>
+        <p class="qr-info">Fecha: {{qr_fecha}}</p>
+        <p class="qr-footer-text">Verificación en línea disponible</p>
+      </div>
+    </section>
+
+    <!-- FOOTER -->
+    <footer>
+      <div class="footer-section">
+        <strong>DIRECCIÓN</strong>
+        <p>{{sucursal_calle}},</p>
+        <p>{{sucursal_ciudad}}, C.P. {{sucursal_codigoPostal}}</p>
+      </div>
+      <div class="footer-section">
+        <strong>TELÉFONO</strong>
+        <p>{{sucursal_telefono}}</p>
+      </div>
+      <div class="footer-section">
+        <strong>CORREO</strong>
+        <p>{{sucursal_email}}</p>
+      </div>
+    </footer>
+  </div>
+</body>
+</html>

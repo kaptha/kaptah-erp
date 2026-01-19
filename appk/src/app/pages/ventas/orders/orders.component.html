@@ -1,0 +1,224 @@
+<div class="orders-container">
+  <h2 class="page-title">Órdenes de Venta</h2>
+  
+  <div class="breadcrumb">
+    <a routerLink="/dashboard">Dashboard</a> / <a routerLink="/ventas">Ventas</a> / Órdenes
+  </div>
+
+  <!-- Filtro para móvil -->
+  <div class="mobile-filter-section">
+    <mat-form-field appearance="outline" class="search-field">
+      <mat-label>Buscar órdenes</mat-label>
+      <input matInput (keyup)="applyFilter($event)" placeholder="Buscar por folio, cliente...">
+      <mat-icon matSuffix>search</mat-icon>
+    </mat-form-field>
+  </div>
+
+  <!-- Acciones principales y búsqueda -->
+  <div class="actions-container">
+    <button mat-raised-button class="btn-primary" (click)="agregarOrden()">
+      <mat-icon>add</mat-icon> Nueva Orden
+    </button>
+    
+    <!-- Filtro para pantallas grandes -->
+    <mat-form-field appearance="outline" class="search-field" [style.display]="isMobile ? 'none' : 'block'">
+      <mat-label>Buscar órdenes</mat-label>
+      <input matInput (keyup)="applyFilter($event)" placeholder="Buscar por folio, cliente...">
+      <mat-icon matSuffix>search</mat-icon>
+    </mat-form-field>
+    
+    <div class="actions-right">
+      <button mat-raised-button [matMenuTriggerFor]="exportMenu" class="btn-white">
+        <mat-icon>file_download</mat-icon> Exportar
+      </button>
+      <mat-menu #exportMenu="matMenu">
+        <button mat-menu-item (click)="exportarOrdenes('csv')">
+          <mat-icon>description</mat-icon>
+          <span>Exportar como CSV</span>
+        </button>
+        <button mat-menu-item (click)="exportarOrdenes('xlsx')">
+          <mat-icon>table_chart</mat-icon>
+          <span>Exportar como Excel</span>
+        </button>
+      </mat-menu>
+      
+      <button mat-icon-button color="primary" (click)="loadSalesOrders()" matTooltip="Refrescar">
+        <mat-icon>refresh</mat-icon>
+      </button>
+    </div>
+  </div>
+  
+  <!-- Indicador de carga -->
+  <div class="loading-container" *ngIf="loading">
+    <mat-spinner></mat-spinner>
+  </div>
+
+  <!-- Tabla para pantallas grandes -->
+  <div class="table-container mat-elevation-z8" *ngIf="!loading">
+    <table mat-table [dataSource]="dataSource" class="mat-elevation-z8" matSort>
+      <!-- ✨ NUEVO: Columna de Folio en lugar de ID -->
+      <ng-container matColumnDef="folio">
+        <th mat-header-cell *matHeaderCellDef mat-sort-header> Folio </th>
+        <td mat-cell *matCellDef="let order"> 
+          <span class="folio-badge">{{order.folio}}</span>
+        </td>
+      </ng-container>
+
+      <!-- Cliente Column -->
+      <ng-container matColumnDef="customerName">
+        <th mat-header-cell *matHeaderCellDef mat-sort-header> Cliente </th>
+        <td mat-cell *matCellDef="let order"> {{order.customerName}} </td>
+      </ng-container>
+
+      <!-- Total Column -->
+      <ng-container matColumnDef="total">
+        <th mat-header-cell *matHeaderCellDef mat-sort-header> Total </th>
+        <td mat-cell *matCellDef="let order"> {{order.total | currency}} </td>
+      </ng-container>
+
+      <!-- Estado Column -->
+      <ng-container matColumnDef="status">
+        <th mat-header-cell *matHeaderCellDef mat-sort-header> Estado </th>
+        <td mat-cell *matCellDef="let order"> 
+          <span class="status-chip" [ngClass]="getStatusClass(order.status)">
+            {{getStatusText(order.status)}}
+          </span>
+        </td>
+      </ng-container>
+
+      <!-- Fecha Column -->
+      <ng-container matColumnDef="createdAt">
+        <th mat-header-cell *matHeaderCellDef mat-sort-header> Fecha </th>
+        <td mat-cell *matCellDef="let order"> {{order.createdAt | date:'dd/MM/yyyy HH:mm'}} </td>
+      </ng-container>
+
+      <!-- Acciones Column -->
+      <ng-container matColumnDef="acciones">
+        <th mat-header-cell *matHeaderCellDef></th>
+        <td mat-cell *matCellDef="let order">
+          <button mat-icon-button [matMenuTriggerFor]="menu">
+            <mat-icon>more_vert</mat-icon>
+          </button>
+          <mat-menu #menu="matMenu">
+            <button 
+              mat-menu-item 
+              *ngIf="order.status === 'PENDING'"
+              (click)="aprobarOrden(order)">
+              <mat-icon>check_circle</mat-icon>
+              <span>Aprobar</span>
+            </button>
+            <button mat-menu-item (click)="verDetalle(order)">
+              <mat-icon>visibility</mat-icon>
+              <span>Ver detalle</span>
+            </button>
+             <button mat-menu-item (click)="enviarPorEmail(order)">
+              <mat-icon color="primary">email</mat-icon>
+              <span>Enviar por Email</span>
+            </button>
+            <button mat-menu-item (click)="editarOrden(order)">
+              <mat-icon>edit</mat-icon>
+              <span>Editar</span>
+            </button>
+            <button mat-menu-item (click)="descargarPDF(order.id)">
+              <mat-icon>picture_as_pdf</mat-icon>
+              <span>Descargar PDF</span>
+            </button>
+            <button mat-menu-item (click)="eliminarOrden(order)">
+              <mat-icon color="warn">delete</mat-icon>
+              <span>Eliminar</span>
+            </button>
+          </mat-menu>
+        </td>
+      </ng-container>
+  
+      <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+      <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
+      
+      <!-- Fila para cuando no hay datos -->
+      <tr class="mat-row" *matNoDataRow>
+        <td class="mat-cell empty-state" [attr.colspan]="displayedColumns.length">
+          No hay órdenes que coincidan con el filtro.
+        </td>
+      </tr>
+    </table>
+    
+    <mat-paginator [pageSizeOptions]="[5, 10, 25, 100]"></mat-paginator>
+  </div>
+
+  <!-- Vista de tarjetas para móviles -->
+  <div class="mobile-cards" *ngIf="!loading">
+    <div *ngIf="dataSource.filteredData.length === 0" class="empty-state">
+      No hay órdenes que coincidan con el filtro.
+    </div>
+    
+    <div class="mobile-card" *ngFor="let order of dataSource.filteredData | slice: getMobileStartIndex(): getMobileEndIndex()">
+      <div class="mobile-card-header">
+        <!-- ✨ NUEVO: Mostrar folio en lugar de ID -->
+        <div class="mobile-card-title">{{order.folio}}</div>
+        <div class="mobile-card-status" [ngClass]="getStatusClassMobile(order.status)">
+          {{getStatusText(order.status)}}
+        </div>
+      </div>
+      
+      <div class="mobile-card-content">
+        <div class="mobile-card-row">
+          <div class="mobile-card-label">Cliente:</div>
+          <div class="mobile-card-value">{{order.customerName}}</div>
+        </div>
+        
+        <div class="mobile-card-row">
+          <div class="mobile-card-label">Total:</div>
+          <div class="mobile-card-value">{{order.total | currency}}</div>
+        </div>
+        
+        <div class="mobile-card-row">
+          <div class="mobile-card-label">Fecha:</div>
+          <div class="mobile-card-value">{{order.createdAt | date:'dd/MM/yyyy HH:mm'}}</div>
+        </div>
+      </div>
+      
+      <div class="mobile-card-actions">
+        <button mat-icon-button [matMenuTriggerFor]="mobileMenu">
+          <mat-icon>more_vert</mat-icon>
+        </button>
+        <mat-menu #mobileMenu="matMenu">
+          <button mat-menu-item (click)="verDetalle(order)">
+            <mat-icon>visibility</mat-icon>
+            <span>Ver detalle</span>
+          </button>
+           <button mat-menu-item (click)="enviarPorEmail(order)">
+            <mat-icon color="primary">email</mat-icon>
+            <span>Enviar por Email</span>
+          </button>
+          <button mat-menu-item (click)="editarOrden(order)">
+            <mat-icon>edit</mat-icon>
+            <span>Editar</span>
+          </button>
+          <button mat-menu-item (click)="descargarPDF(order.id)">
+            <mat-icon>picture_as_pdf</mat-icon>
+            <span>Descargar PDF</span>
+          </button>
+          <button mat-menu-item (click)="eliminarOrden(order)">
+            <mat-icon color="warn">delete</mat-icon>
+            <span>Eliminar</span>
+          </button>
+        </mat-menu>
+      </div>
+    </div>
+    
+    <!-- Paginador mobile simplificado -->
+    <div class="mobile-paginator" *ngIf="dataSource.filteredData.length > mobilePaginator.pageSize">
+      <div class="mobile-paginator-info">
+        Mostrando {{getMobileStartIndex() + 1}} - {{getMobileEndIndex()}} de {{dataSource.filteredData.length}}
+      </div>
+      <div class="mobile-paginator-actions">
+        <button mat-icon-button [disabled]="mobilePaginator.pageIndex === 0" (click)="previousMobilePage()">
+          <mat-icon>navigate_before</mat-icon>
+        </button>
+        <button mat-icon-button [disabled]="isLastMobilePage()" (click)="nextMobilePage()">
+          <mat-icon>navigate_next</mat-icon>
+        </button>
+      </div>
+    </div>
+  </div>
+</div>

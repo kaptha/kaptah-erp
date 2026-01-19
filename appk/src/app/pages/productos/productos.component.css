@@ -1,0 +1,335 @@
+.breadcrumb {
+  margin-bottom: 20px;
+  font-size: 14px;
+  white-space: nowrap;
+  overflow-x: auto;
+  padding-bottom: 5px;
+}
+
+.breadcrumb a {
+  color: #8e24aa;
+  text-decoration: none;
+}
+
+.breadcrumb a:hover {
+  text-decoration: underline;
+}
+
+h2 {
+  margin-bottom: 10px;
+  color: #333;
+  font-size: 24px;
+}
+
+.actions {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.actions button {
+  white-space: nowrap;
+}
+
+.spacer {
+  flex: 1 1 auto;
+}
+
+/* Contenedor para la tabla con scroll horizontal */
+.table-container {
+  width: 100%;
+  overflow-x: auto;
+  margin-bottom: 20px;
+  position: relative;
+}
+
+mat-table {
+  width: 100%;
+  min-width: 800px; /* Garantiza un mínimo ancho para la tabla */
+}
+
+/* Estilos para las columnas específicas */
+.mat-column-sku {
+  width: 100px;
+  min-width: 80px;
+}
+
+.mat-column-current_stock {
+  width: 80px;
+  text-align: center;
+}
+
+.mat-column-price {
+  width: 100px;
+  text-align: right;
+}
+
+.mat-column-active {
+  width: 80px;
+  text-align: center;
+}
+
+.mat-column-acciones {
+  width: 60px;
+  text-align: right;
+}
+
+/* Estilos para cabeceras de tabla */
+.mat-header-cell {
+  font-weight: bold;
+  color: rgba(0, 0, 0, 0.7);
+  background-color: #f5f5f5;
+}
+
+/* Estilos para filas */
+.mat-row:hover {
+  background-color: rgba(142, 36, 170, 0.05);
+}
+
+/* Estilos para iconos de estado */
+.active {
+  color: #4caf50;
+}
+
+.inactive {
+  color: #f44336;
+}
+
+/* Estilos para advertencia de stock */
+.stock-warning {
+  color: #f44336;
+  font-weight: bold;
+}
+
+/* Estado vacío */
+.empty-state {
+  padding: 30px;
+  text-align: center;
+  color: #666;
+  font-style: italic;
+}
+
+/* Paginador responsive */
+.mat-paginator {
+  background: transparent;
+}
+
+/* Tarjetas para vista móvil */
+.mobile-cards {
+  display: none;
+}
+
+.mobile-card {
+  display: flex;
+  flex-direction: column;
+  margin-bottom: 16px;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  overflow: hidden;
+  background-color: white;
+}
+
+.mobile-card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background-color: #f5f5f5;
+  padding: 12px 16px;
+}
+
+.mobile-card-title {
+  font-weight: 500;
+  color: #333;
+  font-size: 16px;
+}
+
+.mobile-card-sku {
+  font-size: 14px;
+  color: #666;
+}
+
+.mobile-card-content {
+  padding: 16px;
+}
+
+.mobile-card-row {
+  display: flex;
+  justify-content: space-between;
+  padding: 8px 0;
+  border-bottom: 1px solid #eee;
+}
+
+.mobile-card-row:last-child {
+  border-bottom: none;
+}
+
+.mobile-card-label {
+  font-weight: 500;
+  color: #666;
+}
+
+.mobile-card-value {
+  text-align: right;
+}
+
+.mobile-card-actions {
+  display: flex;
+  justify-content: flex-end;
+  padding: 8px 16px;
+  background-color: #fafafa;
+  gap: 8px;
+}
+
+.mobile-card-status {
+  display: flex;
+  align-items: center;
+}
+
+.mobile-card-status.active .mat-icon {
+  color: #4caf50;
+}
+
+.mobile-card-status.inactive .mat-icon {
+  color: #f44336;
+}
+
+.mobile-filter-section {
+  display: none;
+  margin-bottom: 16px;
+}
+
+/* Media queries para responsividad */
+@media screen and (max-width: 1024px) {
+  h2 {
+    font-size: 22px;
+  }
+  
+  .actions {
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+  
+  .actions > * {
+    margin: 4px;
+  }
+}
+
+@media screen and (max-width: 768px) {
+  h2 {
+    font-size: 20px;
+  }
+  
+  .actions {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  
+  .actions > * {
+    width: 100%;
+    margin: 4px 0;
+  }
+  
+  .spacer {
+    display: none;
+  }
+  
+  .mat-form-field {
+    width: 100%;
+  }
+  
+  .mobile-filter-section {
+    display: block;
+  }
+}
+
+/* Vista alternativa para móviles */
+@media screen and (max-width: 600px) {
+  .table-container, 
+  .mat-table, 
+  .mat-paginator {
+    display: none;
+  }
+  
+  .mobile-cards {
+    display: block;
+  }
+}
+/* Estilos para el paginador móvil */
+.mobile-paginator {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px 16px;
+  background-color: #f5f5f5;
+  border-radius: 8px;
+  margin-top: 16px;
+  margin-bottom: 20px;
+}
+
+.mobile-paginator-info {
+  font-size: 14px;
+  color: #666;
+}
+
+.mobile-paginator-actions {
+  display: flex;
+  gap: 8px;
+}
+
+.mobile-paginator-actions button[disabled] {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.mobile-paginator-actions button mat-icon {
+  color: #8e24aa;
+}
+
+/* Mejoras adicionales para móviles */
+@media screen and (max-width: 600px) {
+  .productos-container {
+    padding: 0 10px;
+  }
+  
+  h2 {
+    font-size: 18px;
+    margin-top: 10px;
+  }
+  
+  .breadcrumb {
+    font-size: 12px;
+    margin-bottom: 10px;
+  }
+  
+  .mobile-filter-section mat-form-field {
+    margin-bottom: 10px;
+  }
+  
+  .actions {
+    margin-bottom: 10px;
+  }
+  
+  .actions button {
+    font-size: 14px;
+  }
+  
+  .mobile-card-header {
+    padding: 10px 12px;
+  }
+  
+  .mobile-card-content {
+    padding: 12px;
+  }
+  
+  .mobile-card-actions {
+    padding: 6px 12px;
+  }
+  
+  .mobile-paginator {
+    padding: 8px 12px;
+    font-size: 12px;
+  }
+}

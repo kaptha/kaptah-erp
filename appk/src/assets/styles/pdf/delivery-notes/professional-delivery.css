@@ -1,0 +1,328 @@
+/* professional-delivery.css - Diseño profesional final */
+
+/* Configuración base */
+@page {
+    size: A4;
+    margin: 8mm;
+}
+
+body {
+    font-family: 'Times New Roman', Times, serif;
+    margin: 0;
+    padding: 0;
+    color: #6e5145;
+    background-color: #f9f2f2;
+    line-height: 1.4;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+}
+
+.container {
+    width: 100%;
+    max-width: 190mm;
+    height: auto;
+    max-height: 250mm;
+    margin: 0 auto;
+    padding: 6mm;
+    box-sizing: border-box;
+    background: #f9f2f2;
+    border: none !important;
+    border-radius: 0 !important;
+    page-break-after: avoid;
+    page-break-inside: avoid;
+}
+
+/* Título principal */
+.title-container {
+    text-align: center;
+    margin-bottom: 15px;
+}
+
+.document-title {
+    display: inline-block;
+    background-color: #e8d1cd;
+    color: #6e5145;
+    font-size: 1.6rem;
+    font-weight: bold;
+    padding: 6px 20px;
+    border-radius: 20px;
+    margin: 0;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+}
+
+/* Tabla principal */
+.main-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-bottom: 15px;
+    border: 2px solid #a68b80;
+}
+
+.main-table td,
+.main-table th {
+    border: 1px solid #a68b80;
+    padding: 8px;
+    font-size: 12px;
+}
+
+.main-table th {
+    background-color: #e8d1cd;
+    color: #6e5145;
+    text-align: center;
+    font-weight: bold;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+}
+
+.label {
+    font-weight: bold;
+    color: #6e5145;
+}
+
+/* Tabla de productos */
+.products-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-bottom: 15px;
+    border: 2px solid #a68b80;
+}
+
+.products-table th {
+    background-color: #e8d1cd;
+    border: 1px solid #a68b80;
+    color: #6e5145;
+    padding: 10px;
+    text-align: center;
+    font-weight: bold;
+    font-size: 12px;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+}
+
+.products-table td {
+    border: 1px solid #a68b80;
+    padding: 8px;
+    text-align: center;
+    font-size: 11px;
+    min-height: 25px;
+}
+
+.products-table th:nth-child(2),
+.products-table td:nth-child(2) {
+    text-align: left;
+}
+
+.products-table th:nth-child(3),
+.products-table td:nth-child(3),
+.products-table th:nth-child(4),
+.products-table td:nth-child(4) {
+    text-align: right;
+}
+
+/* Fila de logo y totales */
+.totals-logo-row td {
+    background-color: #e8d1cd;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+}
+
+/* Logo container */
+.logo-container {
+    display: flex;
+    align-items: center;
+    padding: 8px;
+}
+
+.logo {
+    width: 45px;
+    height: 45px;
+    background-color: #6e5145;
+    border-radius: 50%;
+    margin-right: 12px;
+    position: relative;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    color: #e8d1cd;
+    font-size: 1.2rem;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+    flex-shrink: 0;
+}
+
+.logo-img {
+    width: 100%;
+    height: 100%;
+    border-radius: 50%;
+    object-fit: contain;
+}
+
+.logo-text {
+    font-size: 1.2rem;
+    color: #e8d1cd;
+    display: none; /* Mostrar solo si falla la imagen */
+}
+
+.logo::before {
+    content: "★";
+    position: absolute;
+    top: 3px;
+    right: 3px;
+    font-size: 10px;
+    color: #e8d1cd;
+}
+
+.company-name {
+    font-size: 1.1rem;
+    font-weight: bold;
+    margin-bottom: 3px;
+    color: #6e5145;
+}
+
+.logo-text-desc {
+    font-size: 1rem;
+    font-style: italic;
+    color: #6e5145;
+}
+
+.totals-labels {
+    font-weight: bold;
+    text-align: right;
+    padding-right: 12px;
+    background-color: #e8d1cd;
+    color: #6e5145;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+}
+
+/* Observaciones */
+.observations-section {
+    margin: 15px 0;
+}
+
+.observations-title {
+    font-weight: bold;
+    margin-bottom: 8px;
+    color: #6e5145;
+    font-size: 14px;
+}
+
+.observations-box {
+    border: 2px solid #a68b80;
+    padding: 12px;
+    min-height: 60px;
+    background-color: #fff;
+    color: #6e5145;
+    font-size: 12px;
+    line-height: 1.4;
+}
+
+/* Footer */
+.footer {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 20px;
+    flex-wrap: wrap;
+    gap: 10px;
+}
+
+.footer > div {
+    flex: 1;
+    text-align: center;
+    min-width: 120px;
+}
+
+.contact-item {
+    background-color: #e8d1cd;
+    padding: 4px 12px;
+    border-radius: 15px;
+    font-weight: bold;
+    margin-bottom: 8px;
+    display: inline-block;
+    color: #6e5145;
+    font-size: 11px;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+}
+
+.contact-text {
+    display: block;
+    text-align: center;
+    margin-top: 3px;
+    color: #6e5145;
+    font-size: 10px;
+    line-height: 1.2;
+}
+
+/* Manejo de imagen del logo */
+.logo-img:not([src]),
+.logo-img[src=""],
+.logo-img[src="#"] {
+    display: none;
+}
+
+.logo-img:not([src]) + .logo-text,
+.logo-img[src=""] + .logo-text,
+.logo-img[src="#"] + .logo-text {
+    display: block !important;
+}
+
+/* Script para manejo de errores de imagen */
+.logo-img {
+    display: block;
+}
+
+/* Ajustes para impresión */
+@media print {
+    body, .container {
+        margin: 0;
+        padding: 0;
+        width: 100%;
+    }
+
+    .container {
+        padding: 8mm;
+        height: 275mm !important;
+        max-height: 275mm !important;
+        page-break-after: avoid !important;
+        page-break-inside: avoid !important;
+        background-color: #f9f2f2 !important;
+    }
+
+    .document-title,
+    .main-table th,
+    .products-table th,
+    .totals-logo-row td,
+    .totals-labels,
+    .logo,
+    .contact-item {
+        -webkit-print-color-adjust: exact !important;
+        print-color-adjust: exact !important;
+        color-adjust: exact !important;
+    }
+
+    .title-container,
+    .main-table,
+    .products-table,
+    .observations-section,
+    .footer {
+        page-break-inside: avoid !important;
+        break-inside: avoid !important;
+    }
+
+    .footer {
+        display: flex !important;
+        flex-wrap: wrap !important;
+    }
+    
+    .logo-container {
+        display: flex !important;
+        align-items: center !important;
+    }
+
+    .main-table,
+    .products-table {
+        break-inside: avoid !important;
+    }
+}

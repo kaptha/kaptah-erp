@@ -1,0 +1,547 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Cotización - Professional</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Arial', 'Helvetica', sans-serif;
+      background-color: #f5f5f5;
+      color: #333;
+      line-height: 1.5;
+      position: relative;
+      overflow-x: hidden;
+    }
+
+    .container {
+      width: 100%;
+      max-width: 210mm;
+      
+      margin: 0 auto;
+      background: #ffffff;
+      position: relative;
+    }
+
+    /* ONDA DECORATIVA SUPERIOR */
+    .wave-top {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 150px;
+      z-index: 0;
+      overflow: hidden;
+    }
+
+    .wave-layer-1 {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 150%;
+      height: 140px;
+      background: #1e3a5f;
+      border-radius: 0 0 50% 50%;
+      transform: translateX(-15%);
+    }
+
+    .wave-layer-2 {
+      position: absolute;
+      top: 15px;
+      left: 0;
+      width: 140%;
+      height: 125px;
+      background: #2c4d6d;
+      border-radius: 0 0 50% 50%;
+      transform: translateX(-10%);
+      opacity: 0.8;
+    }
+
+    .wave-layer-3 {
+      position: absolute;
+      top: 30px;
+      left: 0;
+      width: 130%;
+      height: 110px;
+      background: #3d5f7d;
+      border-radius: 0 0 50% 50%;
+      transform: translateX(-5%);
+      opacity: 0.6;
+    }
+
+    /* ONDA DECORATIVA INFERIOR */
+    .wave-bottom {
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      width: 100%;
+      height: 120px;
+      z-index: 0;
+      overflow: hidden;
+    }
+
+    .wave-bottom-layer-1 {
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      width: 150%;
+      height: 110px;
+      background: #1e3a5f;
+      border-radius: 50% 50% 0 0;
+      transform: translateX(-15%);
+    }
+
+    .wave-bottom-layer-2 {
+      position: absolute;
+      bottom: 15px;
+      left: 0;
+      width: 140%;
+      height: 95px;
+      background: #4d6b8a;
+      border-radius: 50% 50% 0 0;
+      transform: translateX(-10%);
+      opacity: 0.8;
+    }
+
+    .wave-bottom-layer-3 {
+      position: absolute;
+      bottom: 30px;
+      left: 0;
+      width: 130%;
+      height: 80px;
+      background: #6b85a3;
+      border-radius: 50% 50% 0 0;
+      transform: translateX(-5%);
+      opacity: 0.6;
+    }
+
+    /* CONTENIDO PRINCIPAL */
+    .content {
+      position: relative;
+      z-index: 2;
+      padding: 40px 40px 40px;
+    }
+
+    /* HEADER CON LOGO */
+    .header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      margin-bottom: 25px;
+    }
+
+    .logo-section {
+      display: flex;
+      align-items: center;
+      gap: 15px;
+    }
+
+    .logo-icon {
+      width: 80px;
+      height: 80px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .logo-img {
+      max-width: 80px;
+      max-height: 80px;
+      object-fit: contain;
+    }
+
+    .company-text h1 {
+      font-size: 22px;
+      font-weight: 700;
+      color: #1e3a5f;
+      margin-bottom: 4px;
+    }
+
+    .company-text h2 {
+      font-size: 14px;
+      font-weight: 400;
+      color: #8f9199;
+    }
+
+    .document-info {
+      text-align: right;
+    }
+
+    .document-info h1 {
+      font-size: 24px;
+      font-weight: 700;
+      color: #1e3a5f;
+      margin-bottom: 6px;
+    }
+
+    .document-info p {
+      font-size: 11px;
+      color: #333;
+      margin: 2px 0;
+    }
+
+    .document-info .estado {
+      display: inline-block;
+      padding: 4px 12px;
+      background: linear-gradient(135deg, #4d6b8a 0%, #3d5f7d 100%);
+      color: white;
+      border-radius: 15px;
+      font-size: 10px;
+      font-weight: 700;
+      text-transform: uppercase;
+      margin-top: 6px;
+    }
+
+    /* INFORMACIÓN EN GRID */
+    .info-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 20px;
+      margin: 20px 0;
+    }
+
+    .info-box {
+      background-color: #f8f9fa;
+      padding: 15px;
+      border-left: 4px solid #1e3a5f;
+    }
+
+    .info-box h3 {
+      font-size: 15px;
+      font-weight: 700;
+      color: #1e3a5f;
+      margin-bottom: 10px;
+    }
+
+    .info-box p {
+      font-size: 11px;
+      color: #555;
+      margin: 4px 0;
+    }
+
+    /* OBSERVACIONES */
+    .observaciones-section {
+      margin: 15px 0;
+    }
+
+    .observaciones-section h3 {
+      font-size: 14px;
+      font-weight: 700;
+      color: #1e3a5f;
+      margin-bottom: 8px;
+    }
+
+    .observaciones-box {
+      background-color: #e8f4f8;
+      border-left: 4px solid #4d6b8a;
+      padding: 12px;
+    }
+
+    .observaciones-box p {
+      font-size: 11px;
+      line-height: 1.5;
+      color: #555;
+    }
+
+    /* TABLA */
+    .tabla {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 15px 0;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+
+    .tabla thead {
+      background: linear-gradient(135deg, #4d6b8a 0%, #3d5f7d 100%);
+      color: white;
+    }
+
+    .tabla thead th {
+      padding: 12px 10px;
+      text-align: left;
+      font-weight: 700;
+      font-size: 12px;
+    }
+
+    .tabla thead th:first-child {
+      width: 8%;
+      text-align: center;
+    }
+
+    .tabla thead th:nth-child(2) {
+      width: 42%;
+    }
+
+    .tabla thead th:nth-child(3),
+    .tabla thead th:nth-child(4),
+    .tabla thead th:nth-child(5) {
+      width: 16%;
+      text-align: right;
+    }
+
+    .tabla tbody td {
+      padding: 10px;
+      font-size: 11px;
+      color: #555;
+    }
+
+    .tabla tbody td:first-child {
+      text-align: center;
+      font-weight: 700;
+    }
+
+    .tabla tbody td:nth-child(3),
+    .tabla tbody td:nth-child(4),
+    .tabla tbody td:nth-child(5) {
+      text-align: right;
+    }
+
+    .tabla tbody tr:nth-child(odd) {
+      background-color: #ffffff;
+    }
+
+    .tabla tbody tr:nth-child(even) {
+      background-color: #d4dce6;
+    }
+
+    /* TOTALES */
+    .totales-section {
+      display: flex;
+      flex-direction: column;
+      align-items: flex-end;
+      margin: 15px 0 20px 0;
+    }
+
+    .total-row {
+      display: flex;
+      justify-content: space-between;
+      min-width: 320px;
+      padding: 8px 18px;
+      font-size: 13px;
+      margin: 2px 0;
+    }
+
+    .total-row .label {
+      font-weight: 700;
+      text-transform: uppercase;
+      color: #333;
+    }
+
+    .total-row .value {
+      font-weight: 700;
+      color: #333;
+    }
+
+    .total-row.final {
+      background: linear-gradient(135deg, #4d6b8a 0%, #3d5f7d 100%);
+      color: white;
+      margin-top: 6px;
+      font-size: 16px;
+      padding: 12px 18px;
+    }
+
+    .total-row.final .label,
+    .total-row.final .value {
+      color: white;
+    }
+
+    /* TÉRMINOS Y CONDICIONES */
+    .terms-section {
+      margin: 20px 0;
+      max-width: 600px;
+      margin-bottom: 100px;
+    }
+
+    .terms-section h3 {
+      font-size: 14px;
+      font-weight: 700;
+      color: #1e3a5f;
+      margin-bottom: 8px;
+    }
+
+    .terms-section p {
+      font-size: 10px;
+      line-height: 1.5;
+      color: #555;
+      margin-bottom: 8px;
+    }
+
+    /* FOOTER CON CONTACTO */
+    .footer {
+      position: absolute;
+      bottom: 25px;
+      left: 0;
+      right: 0;
+      padding: 20px 40px;
+      display: flex;
+      justify-content: space-around;
+      align-items: center;
+      z-index: 3;
+    }
+
+    .footer-item {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      color: white;
+      font-size: 12px;
+    }
+
+    .footer-icon {
+      width: 35px;
+      height: 35px;
+      background: white;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 16px;
+      color: #1e3a5f;
+      flex-shrink: 0;
+      font-weight: 700;
+    }
+
+    /* MEDIA QUERIES */
+    @media print {
+      body {
+        background: white;
+      }
+
+      .container {
+        width: 100%;
+        max-width: none;
+        page-break-after: avoid;
+      }
+      
+      .header, .info-grid, .tabla, .totales-section, .terms-section {
+        page-break-inside: avoid;
+      }
+
+      .wave-top, .wave-bottom, .footer {
+        print-color-adjust: exact;
+        -webkit-print-color-adjust: exact;
+      }
+    }
+  </style>
+</head>
+<body>
+  <!-- ONDA SUPERIOR -->
+  <div class="wave-top">
+    <div class="wave-layer-1"></div>
+    <div class="wave-layer-2"></div>
+    <div class="wave-layer-3"></div>
+  </div>
+
+  <!-- ONDA INFERIOR -->
+  <div class="wave-bottom">
+    <div class="wave-bottom-layer-1"></div>
+    <div class="wave-bottom-layer-2"></div>
+    <div class="wave-bottom-layer-3"></div>
+  </div>
+
+  <div class="container">
+    <div class="content">
+      <!-- HEADER -->
+      <div class="header">
+        <div class="logo-section">
+          <div class="logo-icon">
+            <img src="{{logo}}" alt="Logo" class="logo-img">
+          </div>
+          <div class="company-text">
+            <h1>{{sucursal_nombre}}</h1>
+            <h2>{{empresa_rfc}}</h2>
+          </div>
+        </div>
+        <div class="document-info">
+          <h1>{{tipo_documento}}</h1>
+          <p><strong>Folio:</strong> {{folio}}</p>
+          <p><strong>Fecha:</strong> {{fecha}}</p>
+          <p><strong>Válida hasta:</strong> {{fecha_validez}}</p>
+          <div class="estado">{{estado}}</div>
+        </div>
+      </div>
+
+      <!-- INFORMACIÓN EN GRID -->
+      <div class="info-grid">
+        <!-- INFORMACIÓN DEL CLIENTE -->
+        <div class="info-box">
+          <h3>Cotización para:</h3>
+          <p><strong>Cliente:</strong> {{cliente}}</p>
+          <p><strong>RFC:</strong> {{rfc}}</p>
+          <p><strong>Teléfono:</strong> {{telefono}}</p>
+          <p><strong>Dirección:</strong> {{direccion}}</p>
+        </div>
+
+        <!-- INFORMACIÓN DE LA EMPRESA -->
+        <div class="info-box">
+          <h3>Información de la Empresa</h3>
+          <p><strong>Dirección:</strong> {{sucursal_calle}}</p>
+          <p><strong>Colonia:</strong> {{sucursal_ciudad}}</p>
+          <p><strong>Código Postal:</strong> {{sucursal_codigoPostal}}</p>
+          <p><strong>Teléfono:</strong> {{sucursal_telefono}}</p>
+          <p><strong>Email:</strong> {{sucursal_email}}</p>
+        </div>
+      </div>
+
+      <!-- OBSERVACIONES -->
+      <div class="observaciones-section">
+        <h3>Observaciones:</h3>
+        <div class="observaciones-box">
+          <p>{{observaciones}}</p>
+        </div>
+      </div>
+
+      <!-- TABLA -->
+      <table class="tabla">
+        <thead>
+          <tr>
+            <th>No.</th>
+            <th>Descripción</th>
+            <th>Precio U.</th>
+            <th>Cantidad</th>
+            <th>Importe</th>
+          </tr>
+        </thead>
+        <tbody>
+          {{items}}
+        </tbody>
+      </table>
+
+      <!-- TOTALES -->
+      <div class="totales-section">
+        <div class="total-row">
+          <span class="label">Subtotal:</span>
+          <span class="value">${{subtotal}}</span>
+        </div>
+        <div class="total-row">
+          <span class="label">Impuestos:</span>
+          <span class="value">${{impuestos}}</span>
+        </div>
+        <div class="total-row final">
+          <span class="label">Total:</span>
+          <span class="value">${{total}}</span>
+        </div>
+      </div>
+
+      <!-- TÉRMINOS Y CONDICIONES -->
+      <div class="terms-section">
+        <h3>Términos y Condiciones:</h3>
+        <p>
+          {{terminos_condiciones}}
+        </p>
+      </div>
+    </div>
+
+    <!-- FOOTER -->
+    <div class="footer">
+      
+    </div>
+  </div>
+</body>
+</html>

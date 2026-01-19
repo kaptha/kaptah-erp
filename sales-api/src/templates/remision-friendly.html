@@ -1,0 +1,612 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Nota de Remisión - Friendly</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Arial', 'Helvetica', sans-serif;
+      background-color: #fef9f0;
+      color: #0066cc;
+      line-height: 1.5;
+      position: relative;
+      overflow-x: hidden;
+    }
+
+    .container {
+      width: 100%;
+      max-width: 210mm;
+      min-height: 297mm;
+      margin: 0 auto;
+      background: #fef9f0;
+      padding: 30px 40px;
+      position: relative;
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* DECORACIÓN DE BURBUJAS */
+    .bubble {
+      position: absolute;
+      border-radius: 50%;
+      opacity: 0.3;
+      z-index: 0;
+    }
+
+    .bubble-1 {
+      width: 150px;
+      height: 150px;
+      background-color: #a8e6f7;
+      bottom: 100px;
+      left: -30px;
+    }
+
+    .bubble-2 {
+      width: 100px;
+      height: 100px;
+      background-color: #a8e6f7;
+      bottom: 200px;
+      left: 70px;
+    }
+
+    .bubble-3 {
+      width: 170px;
+      height: 170px;
+      background-color: #a8e6f7;
+      top: 200px;
+      right: -40px;
+    }
+
+    .bubble-4 {
+      width: 80px;
+      height: 80px;
+      background-color: #a8e6f7;
+      top: 300px;
+      right: 110px;
+    }
+
+    /* HEADER */
+    .header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 25px;
+      position: relative;
+      z-index: 2;
+    }
+
+    .logo-section {
+      flex: 0 0 160px;
+      text-align: center;
+    }
+
+    .logo-img {
+      width: 130px;
+      height: 130px;
+      object-fit: contain;
+      border-radius: 10px;
+      margin-bottom: 10px;
+    }
+
+    .company-info {
+      text-align: center;
+    }
+
+    .company-name {
+      font-size: 16px;
+      font-weight: 700;
+      color: #0066cc;
+      margin-bottom: 4px;
+      line-height: 1.2;
+    }
+
+    .company-rfc {
+      font-size: 12px;
+      font-weight: 600;
+      color: #ff9966;
+    }
+
+    .title-section {
+      flex: 1;
+      text-align: center;
+      padding: 0 25px;
+    }
+
+    .title-section h1 {
+      font-size: 40px;
+      font-weight: 900;
+      color: #0066cc;
+      letter-spacing: 2px;
+      line-height: 1.1;
+      text-transform: uppercase;
+    }
+
+    .fecha-section {
+      flex: 0 0 180px;
+      display: flex;
+      justify-content: flex-end;
+    }
+
+    .fecha-pill {
+      background-color: #ff9966;
+      border-radius: 50px;
+      padding: 12px 25px;
+      text-align: center;
+      min-width: 160px;
+    }
+
+    .fecha-label {
+      font-size: 12px;
+      font-weight: 700;
+      color: #ffffff;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      margin-bottom: 5px;
+    }
+
+    .fecha-value {
+      font-size: 14px;
+      font-weight: 700;
+      color: #ffffff;
+      background-color: rgba(255, 255, 255, 0.3);
+      border-radius: 8px;
+      padding: 6px 12px;
+      margin-top: 6px;
+    }
+
+    /* SECCIÓN INFO CLIENTE */
+    .info-cliente {
+      margin-bottom: 25px;
+      position: relative;
+      z-index: 2;
+    }
+
+    .info-row {
+      display: flex;
+      align-items: center;
+      margin-bottom: 12px;
+    }
+
+    .info-label {
+      font-size: 14px;
+      font-weight: 900;
+      color: #0066cc;
+      text-transform: uppercase;
+      min-width: 130px;
+      letter-spacing: 0.5px;
+    }
+
+    .info-underline {
+      flex: 1;
+      border-bottom: 3px solid #ff9966;
+      padding-bottom: 6px;
+      font-size: 13px;
+      color: #0066cc;
+      font-weight: 500;
+    }
+
+    .info-split {
+      display: flex;
+      gap: 25px;
+    }
+
+    .info-split-item {
+      flex: 1;
+      display: flex;
+      align-items: center;
+    }
+
+    /* TABLA */
+    .tabla-container {
+      margin-bottom: 20px;
+      position: relative;
+      z-index: 2;
+    }
+
+    .tabla {
+      width: 100%;
+      border-collapse: collapse;
+    }
+
+    .tabla thead {
+      background-color: #7dd3f0;
+      border-radius: 25px;
+    }
+
+    .tabla thead th {
+      padding: 12px 18px;
+      text-align: center;
+      font-weight: 900;
+      font-size: 12px;
+      color: #0066cc;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .tabla thead th:first-child {
+      border-top-left-radius: 25px;
+      border-bottom-left-radius: 25px;
+      text-align: center;
+      width: 10%;
+    }
+
+    .tabla thead th:nth-child(2) {
+      text-align: left;
+      width: 50%;
+    }
+
+    .tabla thead th:last-child {
+      border-top-right-radius: 25px;
+      border-bottom-right-radius: 25px;
+      width: 20%;
+    }
+
+    .tabla tbody td {
+      padding: 12px 18px;
+      border-bottom: 2px solid #0066cc;
+      font-size: 12px;
+      color: #0066cc;
+      background-color: transparent;
+    }
+
+    .tabla tbody td:first-child {
+      text-align: center;
+      font-weight: 700;
+    }
+
+    .tabla tbody td:nth-child(2) {
+      text-align: left;
+      font-weight: 500;
+    }
+
+    .tabla tbody td:nth-child(3),
+    .tabla tbody td:nth-child(4) {
+      text-align: center;
+      font-weight: 600;
+    }
+
+    .tabla tbody tr:last-child td {
+      border-bottom: none;
+    }
+
+    /* SECCIÓN INFERIOR */
+    .bottom-section {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-end;
+      margin-bottom: 20px;
+      position: relative;
+      z-index: 2;
+    }
+
+    .observaciones {
+      flex: 1;
+      padding-right: 35px;
+    }
+
+    .observaciones-title {
+      font-size: 14px;
+      font-weight: 900;
+      color: #0066cc;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      margin-bottom: 10px;
+    }
+
+    .observaciones-content {
+      font-size: 11px;
+      color: #0066cc;
+      font-weight: 400;
+      line-height: 1.5;
+      white-space: pre-wrap;
+      min-height: 80px;
+    }
+
+    .totales {
+      flex: 0 0 300px;
+    }
+
+    .subtotal-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 8px;
+    }
+
+    .subtotal-label {
+      font-size: 13px;
+      font-weight: 700;
+      color: #0066cc;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .subtotal-value {
+      font-size: 13px;
+      font-weight: 700;
+      color: #0066cc;
+    }
+
+    .impuestos-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 12px;
+    }
+
+    .impuestos-label {
+      font-size: 13px;
+      font-weight: 900;
+      color: #0066cc;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .impuestos-value {
+      font-size: 13px;
+      font-weight: 700;
+      color: #0066cc;
+    }
+
+    .total-pill {
+      background-color: #ff9966;
+      border-radius: 50px;
+      padding: 14px 30px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .total-label {
+      font-size: 16px;
+      font-weight: 900;
+      color: #ffffff;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+
+    .total-value {
+      font-size: 18px;
+      font-weight: 900;
+      color: #ffffff;
+    }
+
+    /* SECCIÓN QR */
+    .qr-section {
+      text-align: center;
+      padding: 18px 0;
+      border-top: 2px solid #a8e6f7;
+      margin-bottom: 20px;
+      position: relative;
+      z-index: 2;
+    }
+
+    .qr-title {
+      font-size: 11px;
+      color: #0066cc;
+      margin-bottom: 12px;
+      font-weight: 600;
+      text-transform: uppercase;
+    }
+
+    .qr-code-img {
+      width: 110px;
+      height: 110px;
+      display: inline-block;
+      margin: 0 auto 8px;
+      border: 3px solid #ff9966;
+      border-radius: 10px;
+      padding: 5px;
+      background: white;
+    }
+
+    .qr-info {
+      font-size: 9px;
+      color: #0066cc;
+      margin-top: 6px;
+      font-weight: 600;
+    }
+
+    .qr-footer-text {
+      font-size: 8px;
+      color: #ff9966;
+      margin-top: 3px;
+      font-weight: 600;
+    }
+
+    /* AGRADECIMIENTO */
+    .gracias {
+      text-align: center;
+      font-size: 24px;
+      font-weight: 700;
+      color: #ff9966;
+      margin-bottom: 18px;
+      position: relative;
+      z-index: 2;
+    }
+
+    /* FOOTER */
+    .footer {
+      background-color: #7dd3f0;
+      border-radius: 25px;
+      padding: 15px 30px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      position: relative;
+      z-index: 2;
+      margin-top: auto;
+    }
+
+    .footer-item {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .footer-icon {
+      font-size: 20px;
+      color: #0066cc;
+    }
+
+    .footer-text {
+      font-size: 12px;
+      font-weight: 700;
+      color: #0066cc;
+      line-height: 1.3;
+    }
+
+    /* MEDIA QUERIES PARA IMPRESIÓN */
+    @media print {
+      body {
+        background-color: #ffffff;
+      }
+
+      .container {
+        width: 100%;
+        max-width: none;
+        min-height: auto;
+        padding: 20px 30px;
+        background-color: #fef9f0;
+      }
+
+      .bubble {
+        opacity: 0.2;
+      }
+
+      @page {
+        margin: 0;
+        size: A4 portrait;
+        print-color-adjust: exact;
+        -webkit-print-color-adjust: exact;
+      }
+    }
+  </style>
+</head>
+<body>
+  <!-- BURBUJAS DECORATIVAS -->
+  <div class="bubble bubble-1"></div>
+  <div class="bubble bubble-2"></div>
+  <div class="bubble bubble-3"></div>
+  <div class="bubble bubble-4"></div>
+
+  <div class="container">
+    <!-- HEADER -->
+    <header class="header">
+      <div class="logo-section">
+        <img src="{{logo}}" class="logo-img" alt="Logo de la empresa" />
+        <div class="company-info">
+          <div class="company-name">{{empresa_nombre}}</div>
+          <div class="company-rfc">{{empresa_rfc}}</div>
+        </div>
+      </div>
+
+      <div class="title-section">
+        <h1>{{tipo_documento}}</h1>
+      </div>
+
+      <div class="fecha-section">
+        <div class="fecha-pill">
+          <div class="fecha-label">Fecha</div>
+          <div class="fecha-value">{{fecha}}</div>
+        </div>
+      </div>
+    </header>
+
+    <!-- INFO CLIENTE -->
+    <section class="info-cliente">
+      <div class="info-row">
+        <div class="info-label">Nombre</div>
+        <div class="info-underline">{{cliente}}</div>
+      </div>
+      <div class="info-row info-split">
+        <div class="info-split-item">
+          <div class="info-label">Dirección</div>
+          <div class="info-underline">{{direccion}}</div>
+        </div>
+        <div class="info-split-item">
+          <div class="info-label">Teléfono</div>
+          <div class="info-underline">{{telefono}}</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- TABLA -->
+    <div class="tabla-container">
+      <table class="tabla">
+        <thead>
+          <tr>
+            <th>Cant.</th>
+            <th>Descripción</th>
+            <th>Precio Unit.</th>
+            <th>Subtotal</th>
+          </tr>
+        </thead>
+        <tbody>
+          {{items}}
+        </tbody>
+      </table>
+    </div>
+
+    <!-- OBSERVACIONES Y TOTALES -->
+    <section class="bottom-section">
+      <div class="observaciones">
+        <div class="observaciones-title">📝 Observaciones</div>
+        <div class="observaciones-content">{{observaciones}}</div>
+      </div>
+      <div class="totales">
+        <div class="subtotal-row">
+          <div class="subtotal-label">Subtotal</div>
+          <div class="subtotal-value">${{subtotal}}</div>
+        </div>
+        <div class="impuestos-row">
+          <div class="impuestos-label">Impuestos</div>
+          <div class="impuestos-value">${{impuestos}}</div>
+        </div>
+        <div class="total-pill">
+          <div class="total-label">Total</div>
+          <div class="total-value">${{total}}</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- AGRADECIMIENTO -->
+    <div class="gracias">Gracias por elegirnos</div>
+
+    <!-- SECCIÓN QR -->
+    <section class="qr-section">
+      <p class="qr-title">Escanea para verificar este documento</p>
+      <img 
+        src="{{qr_code}}" 
+        alt="Código QR de verificación"
+        class="qr-code-img"
+      />
+      <p class="qr-info">Folio: {{qr_folio}} | Fecha: {{qr_fecha}}</p>
+      <p class="qr-footer-text">Verificación en línea disponible</p>
+    </section>
+
+    <!-- FOOTER -->
+    <footer class="footer">
+      <div class="footer-item">
+        <div class="footer-icon">📞</div>
+        <div class="footer-text">{{sucursal_telefono}}</div>
+      </div>
+      <div class="footer-item">
+        <div class="footer-icon">📍</div>
+        <div class="footer-text">{{sucursal_calle}}, {{sucursal_ciudad}}, C.P. {{sucursal_codigoPostal}}</div>
+      </div>
+      <div class="footer-item">
+        <div class="footer-icon">🌐</div>
+        <div class="footer-text">{{sucursal_email}}</div>
+      </div>
+    </footer>
+  </div>
+</body>
+</html>

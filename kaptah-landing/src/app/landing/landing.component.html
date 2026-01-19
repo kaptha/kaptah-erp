@@ -1,0 +1,489 @@
+<app-navbar></app-navbar>
+
+<!-- ===== HERO ===== -->
+<section class="hero">
+  <!-- DECORACIÓN ANIMADA -->
+  <div class="hero-decor">
+    <span class="blob blob-1"></span>
+    <span class="blob blob-2"></span>
+    <span class="blob blob-3"></span>
+
+    <span class="particle p1"></span>
+    <span class="particle p2"></span>
+    <span class="particle p3"></span>
+    <span class="particle p4"></span>
+  </div>
+
+  <!-- CONTENIDO PRINCIPAL -->
+  <div class="hero-content">
+    <div class="hero-pill">
+      <span class="dot"></span>
+      Plataforma de facturación inteligente para México
+    </div>
+
+    <h1>Simplifica tu facturación.<br> Potencia tu negocio.</h1>
+
+    <p>
+      Kaptah centraliza tus CFDI, cuentas por cobrar y pagar, y reportes en una sola
+      plataforma moderna, segura y diseñada para crecer contigo.
+    </p>
+
+    <div class="hero-buttons">
+      <button mat-raised-button color="primary">Comenzar ahora</button>
+      <button mat-stroked-button color="accent">Ver demo</button>
+    </div>
+
+    <div class="hero-note">
+      <mat-icon>check_circle</mat-icon>
+      <span>Compatible con CFDI 4.0 y descarga masiva del SAT.</span>
+    </div>
+  </div>
+</section>
+
+
+<!-- ===== BENEFICIOS ===== -->
+<section class="benefits">
+  <h2>Todo lo que necesitas en una sola plataforma</h2>
+  <div class="benefits-grid">
+    <mat-card class="benefit">
+      <mat-icon>description</mat-icon>
+      <h3>Facturación electrónica</h3>
+      <p>Emite y timbra CFDI 4.0 con plantillas personalizadas y cumplimiento SAT.</p>
+    </mat-card>
+
+    <mat-card class="benefit">
+      <mat-icon>cloud_download</mat-icon>
+      <h3>Descarga masiva de XML</h3>
+      <p>Conecta tu cuenta SAT y descarga todas tus facturas automáticamente.</p>
+    </mat-card>
+
+    <mat-card class="benefit">
+      <mat-icon>account_balance_wallet</mat-icon>
+      <h3>Cuentas por cobrar y pagar</h3>
+      <p>Control total de tus finanzas en tiempo real.</p>
+    </mat-card>
+
+    <mat-card class="benefit">
+      <mat-icon>insights</mat-icon>
+      <h3>Reportes inteligentes</h3>
+      <p>Convierte tus datos en decisiones con dashboards visuales.</p>
+    </mat-card>
+  </div>
+</section>
+<!-- ===== PRICING SECTION ===== -->
+<section id="pricing" class="pricing-section">
+  <h2 class="pricing-title">Planes y Precios</h2>
+  <p class="pricing-subtitle">
+    Elige el plan que mejor se adapte a tu tipo de negocio.
+  </p>
+
+  <!-- TABS FREELANCER / EMPRESA -->
+  <div class="pricing-tabs">
+    <!-- SLIDER -->
+  <div class="tab-slider" [style.left]="activeTab === 'freelancer' ? '0%' : '50%'"></div>
+    <button 
+      class="tab-btn" 
+    [class.active]="activeTab === 'freelancer'"
+    (click)="switchTab('freelancer')">
+    <mat-icon class="tab-icon">person</mat-icon>
+    Freelancer
+    </button>
+
+    <button 
+      class="tab-btn"
+    [class.active]="activeTab === 'empresa'"
+    (click)="switchTab('empresa')">
+    <mat-icon class="tab-icon">business</mat-icon>
+    Empresa
+    </button>
+  </div>
+
+  <!-- ============================= -->
+  <!--      FREELANCER PLANS        -->
+  <!-- ============================= -->
+  <div class="pricing-cards fade-animation reveal" *ngIf="activeTab === 'freelancer'">
+
+    <!-- BASIC -->
+    <div class="pricing-card reveal">
+      <span class="tag basic">Básico</span>
+      <mat-icon class="plan-icon">star_border</mat-icon>
+      <h3 class="price">$99 MXN</h3>
+      <p class="per">por mes</p>
+
+      <ul class="features">
+        <li><span>✔</span> 50 timbres mensuales</li>
+        <li><span>✔</span> Descarga de XML</li>
+        <li><span>✔</span> Dashboard básico</li>
+        <li><span>✔</span> Soporte por correo</li>
+      </ul>
+
+      <button mat-raised-button class="btn-primary">Comprar ahora</button>
+    </div>
+
+    <!-- PRO FREELANCER -->
+    <div class="pricing-card featured">
+      <span class="tag pro">Pro</span>
+      <mat-icon class="plan-icon">rocket_launch</mat-icon>
+      <h3 class="price">$149 MXN</h3>
+      <p class="per">por mes</p>
+
+      <ul class="features">
+        <li><span>✔</span> 150 timbres mensuales</li>
+        <li><span>✔</span> Descarga masiva SAT</li>
+        <li><span>✔</span> Cuentas por cobrar</li>
+        <li><span>✔</span> Soporte premium</li>
+      </ul>
+
+      <button mat-raised-button class="btn-primary big">Comprar ahora</button>
+    </div>
+
+  </div>
+
+  <!-- ============================= -->
+  <!--          EMPRESA PLANS       -->
+  <!-- ============================= -->
+  <div class="pricing-cards fade-animation reveal" *ngIf="activeTab === 'empresa'">
+
+    <!-- NEGOCIO -->
+    <div class="pricing-card">
+      <span class="tag basic">Negocio</span>
+      <mat-icon class="plan-icon">apartment</mat-icon>
+      <h3 class="price">$249 MXN</h3>
+      <p class="per">por mes</p>
+
+      <ul class="features">
+        <li><span>✔</span> 300 timbres mensuales</li>
+        <li><span>✔</span> Descarga SAT ilimitada</li>
+        <li><span>✔</span> Roles de usuario</li>
+        <li><span>✔</span> Reportes avanzados</li>
+      </ul>
+
+      <button mat-raised-button class="btn-primary">Comprar ahora</button>
+    </div>
+
+    <!-- PRO+ -->
+    <div class="pricing-card featured">
+      <span class="tag pro">Pro+</span>
+      <mat-icon class="plan-icon">workspace_premium</mat-icon>
+      <h3 class="price">$399 MXN</h3>
+      <p class="per">por mes</p>
+
+      <ul class="features">
+        <li><span>✔</span> 1000 timbres mensuales</li>
+        <li><span>✔</span> API completa</li>
+        <li><span>✔</span> Integraciones ERP</li>
+        <li><span>✔</span> Soporte preferente</li>
+      </ul>
+
+      <button mat-raised-button class="btn-primary big">Comprar ahora</button>
+    </div>
+
+    <!-- ENTERPRISE -->
+    <div class="pricing-card">
+      <span class="tag enterprise">Enterprise</span>
+      <mat-icon class="plan-icon">verified</mat-icon>
+      <h3 class="price">$999 MXN</h3>
+      <p class="per">por mes</p>
+
+      <ul class="features">
+        <li><span>✔</span> Timbres ilimitados</li>
+        <li><span>✔</span> Dashboard BI avanzado</li>
+        <li><span>✔</span> Integración contable</li>
+        <li><span>✔</span> Soporte dedicado 24/7</li>
+      </ul>
+
+      <button mat-raised-button class="btn-primary">Comprar ahora</button>
+    </div>
+
+  </div>
+
+</section>
+
+
+
+<!-- ===== POR QUÉ ELEGIRNOS ===== -->
+<section class="why">
+  <h2>¿Por qué elegir Kaptah?</h2>
+  <ul>
+    <li><mat-icon>check_circle</mat-icon> Interfaz intuitiva y moderna</li>
+    <li><mat-icon>check_circle</mat-icon> Seguridad con Firebase Auth</li>
+    <li><mat-icon>check_circle</mat-icon> Arquitectura en microservicios</li>
+    <li><mat-icon>check_circle</mat-icon> Soporte humano y rápido</li>
+  </ul>
+</section>
+<section id="faq" class="faq-section">
+  <h2 class="faq-title">Preguntas Frecuentes</h2>
+  <p class="faq-subtitle">Resolvemos tus dudas más comunes.</p>
+
+  <mat-accordion class="faq-accordion">
+
+    <mat-expansion-panel>
+      <mat-expansion-panel-header>
+        <mat-panel-title>¿Puedo cambiar de plan en cualquier momento?</mat-panel-title>
+      </mat-expansion-panel-header>
+      <p>Sí. Puedes mejorar o bajar tu plan en cualquier momento desde tu cuenta.</p>
+    </mat-expansion-panel>
+
+    <mat-expansion-panel>
+      <mat-expansion-panel-header>
+        <mat-panel-title>¿Cómo funciona la descarga masiva del SAT?</mat-panel-title>
+      </mat-expansion-panel-header>
+      <p>Conectas tu e.firma y Kaptah sincroniza automáticamente tus CFDIs emitidos y recibidos.</p>
+    </mat-expansion-panel>
+
+    <mat-expansion-panel>
+      <mat-expansion-panel-header>
+        <mat-panel-title>¿Qué métodos de pago aceptan?</mat-panel-title>
+      </mat-expansion-panel-header>
+      <p>Tarjeta de crédito/débito y pago anual con descuento.</p>
+    </mat-expansion-panel>
+
+    <mat-expansion-panel>
+      <mat-expansion-panel-header>
+        <mat-panel-title>¿Puedo cancelar mi suscripción?</mat-panel-title>
+      </mat-expansion-panel-header>
+      <p>Sí, puedes cancelar cuando quieras desde tu panel de configuración.</p>
+    </mat-expansion-panel>
+
+  </mat-accordion>
+</section>
+
+<!-- ===== CTA FINAL ===== -->
+<section id="cta-final" class="cta-final reveal">
+  <div class="cta-content">
+    <h2 class="cta-title">Transforma tu forma de facturar con Kaptah</h2>
+    <p class="cta-subtitle">
+      Empieza hoy mismo y descubre la plataforma más eficiente para controlar tus CFDI, tus pagos y el futuro financiero de tu empresa.
+    </p>
+
+    <button mat-raised-button class="cta-button">
+      <mat-icon>rocket_launch</mat-icon>
+      Comenzar ahora
+    </button>
+  </div>
+</section>
+<section id="trusted" class="trusted-section reveal">
+  <h2 class="trusted-title">Confiado por empresas en todo México</h2>
+  <p class="trusted-subtitle">
+    Organizaciones de todos los tamaños usan Kaptah para optimizar su facturación.
+  </p>
+
+  <div class="trusted-logos">
+
+    <div class="logo-item">
+      <img src="assets/logos/empresa1.svg" alt="Empresa 1">
+    </div>
+
+    <div class="logo-item">
+      <img src="assets/logos/empresa2.svg" alt="Empresa 2">
+    </div>
+
+    <div class="logo-item">
+      <img src="assets/logos/empresa3.svg" alt="Empresa 3">
+    </div>
+
+    <div class="logo-item">
+      <img src="assets/logos/empresa4.svg" alt="Empresa 4">
+    </div>
+
+    <div class="logo-item">
+      <img src="assets/logos/empresa5.svg" alt="Empresa 5">
+    </div>
+
+  </div>
+</section>
+
+
+<section id="testimonials" class="testimonials-section">
+  <h2 class="testimonials-title">Lo que dicen nuestros usuarios</h2>
+  <p class="testimonials-subtitle">Opiniones reales de clientes que ya usan Kaptah.</p>
+
+  <div class="testimonials-grid">
+
+    <!-- TESTIMONIO 1 -->
+    <div class="testimonial-card reveal">
+      <div class="avatar-box">
+        <img src="https://i.pravatar.cc/100?img=12" alt="Usuario" class="avatar"/>
+      </div>
+      <h3 class="name">María López</h3>
+      <p class="role">Contadora Independiente</p>
+      <div class="stars">★★★★★</div>
+      <p class="comment">
+        “Kaptah me ahorra horas cada semana. La descarga masiva del SAT es increíblemente rápida.”
+      </p>
+    </div>
+
+    <!-- TESTIMONIO 2 -->
+    <div class="testimonial-card reveal">
+      <div class="avatar-box">
+        <img src="https://i.pravatar.cc/100?img=32" alt="Usuario" class="avatar"/>
+      </div>
+      <h3 class="name">Carlos Méndez</h3>
+      <p class="role">Dueño de PyME</p>
+      <div class="stars">★★★★★</div>
+      <p class="comment">
+        “Los reportes y el control de pagos me permiten ver claramente mis ingresos cada mes.”
+      </p>
+    </div>
+
+    <!-- TESTIMONIO 3 -->
+    <div class="testimonial-card reveal">
+      <div class="avatar-box">
+        <img src="https://i.pravatar.cc/100?img=47" alt="Usuario" class="avatar"/>
+      </div>
+      <h3 class="name">Ana Rodríguez</h3>
+      <p class="role">Administradora</p>
+      <div class="stars">★★★★★</div>
+      <p class="comment">
+        “La plataforma es muy intuitiva. Emitir facturas y timbrarlas es rapidísimo.”
+      </p>
+    </div>
+
+  </div>
+</section>
+
+<section id="contact" class="contact-section reveal">
+  <h2 class="contact-title">Contacto</h2>
+  <p class="contact-subtitle">
+    Cuéntanos qué necesitas y te respondemos lo antes posible.
+  </p>
+
+  <div class="contact-grid">
+
+    <!-- INFO / CTA -->
+    <div class="contact-info">
+      <div class="contact-card">
+        <h3>Hablemos de Kaptah</h3>
+        <p>
+          Podemos ayudarte a implementar Kaptah en tu operación: facturación, cotizaciones, cuentas por cobrar/pagar,
+          reportes y automatización de correos.
+        </p>
+
+        <div class="contact-items">
+          <div class="contact-item">
+            <mat-icon>mail</mat-icon>
+            <span>{{contactEmail}}</span>
+          </div>
+          <div class="contact-item">
+            <mat-icon>call</mat-icon>
+            <span>{{contactPhone}}</span>
+          </div>
+          <div class="contact-item">
+            <mat-icon>schedule</mat-icon>
+            <span>Lun–Vie · 9:00–18:00 (MX)</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- FORM -->
+    <div class="contact-form">
+      <div class="contact-card">
+        <form [formGroup]="contactForm" (ngSubmit)="submitContact()">
+
+          <div class="form-row">
+            <mat-form-field appearance="fill" class="full">
+              <mat-label>Nombre</mat-label>
+              <input matInput formControlName="name" placeholder="Tu nombre">
+              <mat-error *ngIf="contactForm.get('name')?.invalid && contactForm.get('name')?.touched">
+                Escribe tu nombre.
+              </mat-error>
+            </mat-form-field>
+
+            <mat-form-field appearance="fill" class="full">
+              <mat-label>Email</mat-label>
+              <input matInput formControlName="email" placeholder="tu@email.com">
+              <mat-error *ngIf="contactForm.get('email')?.invalid && contactForm.get('email')?.touched">
+                Escribe un email válido.
+              </mat-error>
+            </mat-form-field>
+
+            <mat-form-field appearance="fill" class="full">
+              <mat-label>Teléfono (opcional)</mat-label>
+              <input matInput formControlName="phone" placeholder="+52 ...">
+            </mat-form-field>
+
+            <mat-form-field appearance="fill" class="full">
+              <mat-label>Asunto</mat-label>
+              <input matInput formControlName="subject" placeholder="Ej: Quiero una demo">
+              <mat-error *ngIf="contactForm.get('subject')?.invalid && contactForm.get('subject')?.touched">
+                Escribe un asunto.
+              </mat-error>
+            </mat-form-field>
+
+            <mat-form-field appearance="fill" class="full">
+              <mat-label>Mensaje</mat-label>
+              <textarea matInput rows="5" formControlName="message" placeholder="Cuéntanos tu necesidad..."></textarea>
+              <mat-error *ngIf="contactForm.get('message')?.invalid && contactForm.get('message')?.touched">
+                Escribe tu mensaje.
+              </mat-error>
+            </mat-form-field>
+          </div>
+
+          <button mat-raised-button class="btn-primary big" type="submit" [disabled]="contactForm.invalid || sending">
+            <mat-icon>send</mat-icon>
+            {{ sending ? 'Enviando...' : 'Enviar mensaje' }}
+          </button>
+
+          <p class="form-note" *ngIf="sentOk">
+            Mensaje enviado. En breve te contactaremos.
+          </p>
+        </form>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+
+<!-- ===== FOOTER ===== -->
+<footer class="footer-section reveal">
+  <div class="footer-container">
+
+    <!-- LOGO Y DESCRIPCIÓN -->
+    <div class="footer-brand">
+      <img src="assets/logo-kaptah-white.svg" alt="Kaptah" class="footer-logo">
+      <p class="footer-desc">
+        La plataforma más moderna para gestionar tu facturación electrónica, pagos y reportes en un solo lugar.
+      </p>
+
+      <div class="social-links">
+        <a href="#"><mat-icon>facebook</mat-icon></a>
+        <a href="#"><mat-icon>linkedin</mat-icon></a>
+        <a href="#"><mat-icon>mail</mat-icon></a>
+      </div>
+    </div>
+
+    <!-- LINKS -->
+    <div class="footer-links">
+
+      <div class="col">
+        <h4>Producto</h4>
+        <a href="#pricing">Planes</a>
+        <a href="#features">Características</a>
+        <a href="#testimonials">Testimonios</a>
+      </div>
+
+      <div class="col">
+        <h4>Empresa</h4>
+        <a href="#">Nosotros</a>
+        <a href="#">Blog</a>
+        <a href="#contact">Contacto</a>
+      </div>
+
+      <div class="col">
+        <h4>Legal</h4>
+        <a href="#">Términos y condiciones</a>
+        <a href="#">Aviso de privacidad</a>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- COPYRIGHT -->
+  <div class="footer-bottom">
+    © 2025 Kaptah — Todos los derechos reservados.
+  </div>
+</footer>
+
+

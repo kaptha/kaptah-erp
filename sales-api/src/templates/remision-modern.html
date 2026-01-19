@@ -1,0 +1,459 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Nota de Remisión - Modern</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Segoe UI', 'Helvetica Neue', Arial, sans-serif;
+      background-color: #ffffff;
+      color: #333;
+      line-height: 1.4;
+    }
+
+    .main-wrapper {
+      width: 100%;
+      max-width: 210mm;
+      min-height: 297mm;
+      margin: 0 auto;
+      background: #ffffff;
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* HEADER CON ONDA */
+    .header {
+      position: relative;
+      background: linear-gradient(135deg, #1e3a8a 0%, #3b82f6 100%);
+      padding: 20px 40px 40px;
+      color: white;
+      overflow: hidden;
+    }
+
+    .header-content {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      position: relative;
+      z-index: 2;
+      gap: 15px;
+    }
+
+    .logo {
+      width: 90px;
+      height: auto;
+      background: white;
+      padding: 10px;
+      border-radius: 6px;
+    }
+
+    .header-right {
+      text-align: right;
+    }
+
+    .header-right h1 {
+      font-size: 22px;
+      font-weight: 700;
+      margin-bottom: 6px;
+      letter-spacing: 1px;
+    }
+
+    .header-right p {
+      font-size: 12px;
+      margin: 2px 0;
+    }
+
+    /* ONDA SUPERIOR */
+    .wave-top {
+      position: absolute;
+      bottom: -2px;
+      left: 0;
+      width: 100%;
+      height: 40px;
+      z-index: 1;
+    }
+
+    /* SECCIÓN INFORMACIÓN (CLIENTE + EMPRESA) */
+    .info-section {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 15px;
+      padding: 15px 40px;
+      margin: 0;
+    }
+
+    .info-box {
+      background: linear-gradient(to right, #e0f2fe 0%, #f0f9ff 100%);
+      padding: 12px;
+      border-left: 4px solid #3b82f6;
+      border-radius: 4px;
+    }
+
+    .info-box h3 {
+      font-size: 12px;
+      font-weight: 700;
+      color: #1e3a8a;
+      margin-bottom: 8px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .info-box p {
+      margin: 4px 0;
+      font-size: 11px;
+      color: #1e293b;
+      line-height: 1.4;
+    }
+
+    .empresa-grid {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 6px;
+    }
+
+    .empresa-item {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 11px;
+      color: #334155;
+    }
+
+    .empresa-icon {
+      width: 18px;
+      height: 18px;
+      background: #3b82f6;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      font-size: 9px;
+      flex-shrink: 0;
+    }
+
+    /* TABLA */
+    .tabla {
+      width: calc(100% - 80px);
+      margin: 15px auto 12px;
+      border-collapse: collapse;
+      background: white;
+      overflow: hidden;
+      border-radius: 6px;
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+    }
+
+    .tabla thead {
+      background: linear-gradient(135deg, #dbeafe 0%, #bfdbfe 100%);
+    }
+
+    .tabla thead th {
+      padding: 8px 10px;
+      text-align: left;
+      font-weight: 700;
+      font-size: 12px;
+      color: #1e3a8a;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .tabla tbody td {
+      padding: 8px 10px;
+      border-bottom: 1px solid #e2e8f0;
+      font-size: 12px;
+      color: #334155;
+    }
+
+    .tabla tbody tr:nth-child(even) {
+      background-color: #f8fafc;
+    }
+
+    .tabla tbody tr:nth-child(odd) {
+      background-color: #ffffff;
+    }
+
+    .tabla th:last-child,
+    .tabla td:last-child {
+      text-align: right;
+    }
+
+    /* TOTALES */
+    .totales {
+      width: calc(100% - 80px);
+      margin: 10px auto 15px;
+      text-align: right;
+      padding: 10px 0;
+      border-top: 3px solid #3b82f6;
+    }
+
+    .totales p {
+      margin: 6px 0;
+      font-size: 14px;
+      color: #1e293b;
+    }
+
+    .totales p strong {
+      display: inline-block;
+      min-width: 100px;
+      color: #1e3a8a;
+      font-weight: 700;
+    }
+
+    /* SECCIÓN INFERIOR: OBSERVACIONES + QR */
+    .bottom-section {
+      display: grid;
+      grid-template-columns: 1.8fr 1fr;
+      gap: 15px;
+      width: calc(100% - 80px);
+      margin: 15px auto 20px;
+    }
+
+    .observaciones-box {
+      background: #f8fafc;
+      padding: 15px;
+      border-radius: 6px;
+      border-left: 4px solid #3b82f6;
+      min-height: 140px;
+    }
+
+    .observaciones-box h3 {
+      font-size: 12px;
+      font-weight: 700;
+      color: #1e3a8a;
+      margin-bottom: 10px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .observaciones-content {
+      font-size: 11px;
+      color: #475569;
+      line-height: 1.6;
+      white-space: pre-wrap;
+    }
+
+    .qr-box {
+      background: linear-gradient(to bottom, #f0f9ff 0%, #e0f2fe 100%);
+      padding: 15px;
+      border-radius: 6px;
+      text-align: center;
+      border: 2px solid #3b82f6;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+    }
+
+    .qr-box p {
+      font-size: 10px;
+      color: #1e3a8a;
+      margin-bottom: 10px;
+      font-weight: 600;
+      text-transform: uppercase;
+    }
+
+    .qr-box img {
+      width: 110px;
+      height: 110px;
+      display: block;
+      margin: 0 auto 8px;
+      background: white;
+      padding: 6px;
+      border-radius: 4px;
+    }
+
+    .qr-info {
+      font-size: 9px;
+      color: #64748b;
+      margin-top: 4px;
+    }
+
+    .qr-footer {
+      font-size: 8px;
+      color: #94a3b8;
+      margin-top: 3px;
+    }
+
+    /* FOOTER CON ONDA */
+    footer {
+      margin-top: auto;
+      background: linear-gradient(135deg, #3b82f6 0%, #1e3a8a 100%);
+      padding: 35px 0 15px;
+      text-align: center;
+      color: white;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .wave-bottom {
+      position: absolute;
+      top: -2px;
+      left: 0;
+      width: 100%;
+      height: 40px;
+      z-index: 1;
+      transform: rotate(180deg);
+    }
+
+    footer p {
+      position: relative;
+      z-index: 2;
+      font-size: 16px;
+      font-weight: 600;
+      letter-spacing: 0.5px;
+    }
+
+    /* RESPONSIVE */
+    @media print {
+      .main-wrapper {
+        width: 100%;
+        max-width: none;
+        min-height: auto;
+      }
+      
+      body {
+        margin: 0;
+        padding: 0;
+      }
+      
+      .header, .info-section, .tabla, .totales, .bottom-section, footer {
+        page-break-inside: avoid;
+      }
+
+      .header, footer {
+        print-color-adjust: exact;
+        -webkit-print-color-adjust: exact;
+      }
+
+      footer {
+        position: relative;
+        margin-top: 20px;
+      }
+
+      @page {
+        margin: 0;
+        size: A4 portrait;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="main-wrapper">
+    <!-- HEADER -->
+    <header class="header">
+      <div class="header-content">
+        <img src="{{logo}}" class="logo" alt="Logo" />
+        <div class="header-right">
+          <h1>{{tipo_documento}}</h1>
+          <p><strong>Fecha:</strong> {{fecha}}</p>
+          <p><strong>No. de recibo:</strong> {{folio}}</p>
+        </div>
+      </div>
+      
+      <!-- Onda superior -->
+      <svg class="wave-top" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1440 320" preserveAspectRatio="none">
+        <path fill="#ffffff" d="M0,96L48,112C96,128,192,160,288,160C384,160,480,128,576,122.7C672,117,768,139,864,154.7C960,171,1056,181,1152,165.3C1248,149,1344,107,1392,85.3L1440,64L1440,320L1392,320C1344,320,1248,320,1152,320C1056,320,960,320,864,320C768,320,672,320,576,320C480,320,384,320,288,320C192,320,96,320,48,320L0,320Z"></path>
+      </svg>
+    </header>
+
+    <!-- SECCIÓN DE INFORMACIÓN: CLIENTE + EMPRESA -->
+    <section class="info-section">
+      <!-- Cliente -->
+      <div class="info-box">
+        <h3>📋 Vendido a:</h3>
+        <p><strong>{{cliente}}</strong></p>
+        <p>{{direccion}}</p>
+        <p><strong>RFC:</strong> {{rfc}}</p>
+      </div>
+
+      <!-- Empresa -->
+      <div class="info-box">
+        <h3>🏢 Información de la Empresa</h3>
+        <div class="empresa-grid">
+          <div class="empresa-item">
+            <div class="empresa-icon">📍</div>
+            <span>{{sucursal_calle}}, {{sucursal_ciudad}}</span>
+          </div>
+          <div class="empresa-item">
+            <div class="empresa-icon">📮</div>
+            <span>C.P. {{sucursal_codigoPostal}}</span>
+          </div>
+          <div class="empresa-item">
+            <div class="empresa-icon">📞</div>
+            <span>{{sucursal_telefono}}</span>
+          </div>
+          <div class="empresa-item">
+            <div class="empresa-icon">✉</div>
+            <span>{{sucursal_email}}</span>
+          </div>
+          <div class="empresa-item">
+            <strong>{{sucursal_nombre}}</strong>
+          </div>
+          <div class="empresa-item">
+            <strong>RFC: {{empresa_rfc}}</strong>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- TABLA DE PRODUCTOS -->
+    <table class="tabla">
+      <thead>
+        <tr>
+          <th>Cantidad</th>
+          <th>Concepto</th>
+          <th>Precio</th>
+          <th>Total</th>
+        </tr>
+      </thead>
+      <tbody>
+        {{items}}
+      </tbody>
+    </table>
+
+    <!-- TOTALES -->
+    <section class="totales">
+      <p><strong>SUBTOTAL:</strong> ${{subtotal}}</p>
+      <p><strong>IMPUESTOS:</strong> {{impuestos}}</p>
+      <p><strong>TOTAL:</strong> ${{total}}</p>
+    </section>
+
+    <!-- SECCIÓN INFERIOR: OBSERVACIONES + QR -->
+    <section class="bottom-section">
+      <!-- Observaciones -->
+      <div class="observaciones-box">
+        <h3>📝 Observaciones</h3>
+        <div class="observaciones-content">{{observaciones}}</div>
+      </div>
+
+      <!-- Código QR -->
+      <div class="qr-box">
+        <p>Escanea para verificar</p>
+        <img 
+          src="{{qr_code}}" 
+          alt="Código QR de verificación"
+        />
+        <p class="qr-info">Folio: {{qr_folio}}</p>
+        <p class="qr-info">Fecha: {{qr_fecha}}</p>
+        <p class="qr-footer">Verificación en línea</p>
+      </div>
+    </section>
+
+    <!-- FOOTER -->
+    <footer>
+      <!-- Onda inferior -->
+      <svg class="wave-bottom" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1440 320" preserveAspectRatio="none">
+        <path fill="#ffffff" d="M0,96L48,112C96,128,192,160,288,160C384,160,480,128,576,122.7C672,117,768,139,864,154.7C960,171,1056,181,1152,165.3C1248,149,1344,107,1392,85.3L1440,64L1440,320L1392,320C1344,320,1248,320,1152,320C1056,320,960,320,864,320C768,320,672,320,576,320C480,320,384,320,288,320C192,320,96,320,48,320L0,320Z"></path>
+      </svg>
+      <p>Gracias por su compra.</p>
+    </footer>
+  </div>
+</body>
+</html>

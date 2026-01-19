@@ -1,0 +1,686 @@
+/* Estilos base */
+.delivery-container {
+  padding: 16px;
+  width: 100%;
+}
+
+.page-title {
+  margin-bottom: 16px;
+  color: #333;
+  font-size: 24px;
+}
+
+.breadcrumb {
+  margin-bottom: 20px;
+  font-size: 14px;
+  white-space: nowrap;
+  overflow-x: auto;
+  padding-bottom: 5px;
+}
+
+.breadcrumb a {
+  color: #8e24aa;
+  text-decoration: none;
+}
+
+.breadcrumb a:hover {
+  text-decoration: underline;
+}
+
+/* Sección de acciones y filtros */
+.actions-container {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.search-field {
+  flex: 1;
+  min-width: 200px;
+  max-width: 500px;
+}
+
+.actions-right {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+}
+
+.spacer {
+  flex: 1 1 auto;
+}
+
+/* Contenedor de la tabla */
+.table-container {
+  width: 100%;
+  overflow-x: auto;
+  margin-bottom: 20px;
+  position: relative;
+}
+
+/* Estilos de la tabla */
+table.mat-table {
+  width: 100%;
+  min-width: 800px; /* Ancho mínimo para garantizar legibilidad */
+}
+
+.mat-column-id {
+  min-width: 100px;
+}
+
+.mat-column-salesOrderId {
+  min-width: 120px;
+}
+
+.mat-column-deliveryDate {
+  min-width: 150px;
+}
+
+.mat-column-status {
+  min-width: 130px;
+}
+
+.mat-column-sucursal {
+  min-width: 120px;
+}
+
+.mat-column-acciones {
+  width: 100px;
+  text-align: right;
+}
+
+/* Estilos para cabeceras y celdas */
+.mat-header-cell {
+  font-weight: bold;
+  color: rgba(0, 0, 0, 0.7);
+  background-color: #f5f5f5;
+}
+
+.mat-row:hover {
+  background-color: rgba(142, 36, 170, 0.05);
+}
+
+/* Estados de guías */
+.status-chip {
+  border-radius: 16px;
+  padding: 4px 12px;
+  font-size: 12px;
+  font-weight: 500;
+  text-align: center;
+  display: inline-block;
+}
+
+.status-delivered {
+  background-color: rgba(76, 175, 80, 0.1);
+  color: #4caf50;
+}
+
+.status-pending {
+  background-color: rgba(33, 150, 243, 0.1);
+  color: #2196f3;
+}
+
+.status-transit {
+  background-color: rgba(255, 152, 0, 0.1);
+  color: #ff9800;
+}
+
+.status-cancelled {
+  background-color: rgba(244, 67, 54, 0.1);
+  color: #f44336;
+}
+
+/* ✨ NUEVO: Estilos para chip de sucursal */
+.sucursal-chip {
+  display: inline-flex;
+  align-items: center;
+  padding: 4px 12px;
+  background-color: rgba(142, 36, 170, 0.1);
+  border-radius: 16px;
+  font-size: 12px;
+  font-weight: 500;
+  color: #8e24aa;
+  gap: 4px;
+}
+
+.sucursal-chip mat-icon {
+  font-size: 16px;
+  width: 16px;
+  height: 16px;
+}
+
+.no-sucursal {
+  color: #999;
+  font-style: italic;
+  font-size: 12px;
+}
+
+/* Estado vacío y carga */
+.empty-state {
+  padding: 30px;
+  text-align: center;
+  color: #666;
+  font-style: italic;
+}
+
+.loading-container {
+  display: flex;
+  justify-content: center;
+  padding: 30px;
+}
+
+/* Tarjetas para vista móvil */
+.mobile-cards {
+  display: none;
+}
+
+.mobile-card {
+  display: flex;
+  flex-direction: column;
+  margin-bottom: 16px;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  overflow: hidden;
+  background-color: white;
+}
+
+.mobile-card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background-color: #f5f5f5;
+  padding: 12px 16px;
+}
+
+.mobile-card-title {
+  font-weight: 500;
+  color: #333;
+  font-size: 16px;
+}
+
+.mobile-card-subtitle {
+  font-size: 14px;
+  color: #666;
+  padding: 4px 8px;
+  background-color: #eeeeee;
+  border-radius: 4px;
+}
+
+.mobile-card-status {
+  padding: 2px 8px;
+  border-radius: 4px;
+  font-weight: bold;
+  font-size: 12px;
+}
+
+.mobile-card-status.delivered {
+  background-color: rgba(76, 175, 80, 0.1);
+  color: #4caf50;
+}
+
+.mobile-card-status.pending {
+  background-color: rgba(33, 150, 243, 0.1);
+  color: #2196f3;
+}
+
+.mobile-card-status.transit {
+  background-color: rgba(255, 152, 0, 0.1);
+  color: #ff9800;
+}
+
+.mobile-card-status.cancelled {
+  background-color: rgba(244, 67, 54, 0.1);
+  color: #f44336;
+}
+
+.mobile-card-content {
+  padding: 16px;
+}
+
+.mobile-card-row {
+  display: flex;
+  justify-content: space-between;
+  padding: 8px 0;
+  border-bottom: 1px solid #eee;
+}
+
+.mobile-card-row:last-child {
+  border-bottom: none;
+}
+
+.mobile-card-label {
+  font-weight: 500;
+  color: #666;
+}
+
+.mobile-card-value {
+  text-align: right;
+  flex: 1;
+  margin-left: 16px;
+  word-break: break-word;
+}
+
+/* ✨ NUEVO: Estilos para sucursal en tarjeta móvil */
+.mobile-card-sucursal {
+  display: inline-flex;
+  align-items: center;
+  padding: 2px 8px;
+  background-color: rgba(142, 36, 170, 0.1);
+  border-radius: 12px;
+  font-size: 11px;
+  font-weight: 500;
+  color: #8e24aa;
+  gap: 3px;
+}
+
+.mobile-card-sucursal mat-icon {
+  font-size: 14px;
+  width: 14px;
+  height: 14px;
+}
+
+.mobile-card-actions {
+  display: flex;
+  justify-content: flex-end;
+  padding: 8px 16px;
+  background-color: #fafafa;
+  gap: 8px;
+}
+
+.mobile-filter-section {
+  display: none;
+  margin-bottom: 16px;
+}
+
+/* Paginador móvil */
+.mobile-paginator {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px 16px;
+  background-color: #f5f5f5;
+  border-radius: 8px;
+  margin-top: 16px;
+  margin-bottom: 20px;
+}
+
+.mobile-paginator-info {
+  font-size: 14px;
+  color: #666;
+}
+
+.mobile-paginator-actions {
+  display: flex;
+  gap: 8px;
+}
+
+/* Botón de acciones rápidas */
+.action-button {
+  margin-right: 8px;
+  transition: all 0.2s ease;
+}
+
+.action-button:hover {
+  transform: scale(1.1);
+}
+
+/* ✨ NUEVO: Filtros avanzados */
+.filters-section {
+  background-color: #f9f9f9;
+  padding: 16px;
+  border-radius: 8px;
+  margin-bottom: 20px;
+  display: flex;
+  gap: 16px;
+  flex-wrap: wrap;
+  align-items: flex-end;
+}
+
+.filter-field {
+  flex: 1;
+  min-width: 200px;
+}
+
+.filter-actions {
+  display: flex;
+  gap: 8px;
+  align-items: flex-end;
+}
+
+/* ✨ NUEVO: Badge de estadísticas */
+.stats-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 4px 12px;
+  background-color: rgba(33, 150, 243, 0.1);
+  border-radius: 12px;
+  font-size: 12px;
+  font-weight: 500;
+  color: #2196f3;
+  margin-left: 8px;
+}
+
+/* ✨ NUEVO: Tooltips personalizados */
+.custom-tooltip {
+  background-color: rgba(0, 0, 0, 0.9);
+  color: white;
+  padding: 8px 12px;
+  border-radius: 4px;
+  font-size: 12px;
+  max-width: 200px;
+}
+
+/* Media queries */
+@media screen and (max-width: 1024px) {
+  .page-title {
+    font-size: 22px;
+  }
+  
+  .actions-container {
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+  
+  .search-field {
+    flex: 0 0 100%;
+    max-width: 100%;
+  }
+
+  .filters-section {
+    padding: 12px;
+  }
+
+  .filter-field {
+    min-width: 150px;
+  }
+}
+
+@media screen and (max-width: 768px) {
+  .page-title {
+    font-size: 20px;
+  }
+  
+  .actions-container {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  
+  .actions-right {
+    width: 100%;
+    justify-content: space-between;
+  }
+  
+  .mobile-filter-section {
+    display: block;
+  }
+
+  .filters-section {
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  .filter-field {
+    width: 100%;
+  }
+
+  .filter-actions {
+    width: 100%;
+    justify-content: stretch;
+  }
+
+  .filter-actions button {
+    flex: 1;
+  }
+}
+
+/* Vista alternativa para móviles */
+@media screen and (max-width: 600px) {
+  .table-container, 
+  .mat-table {
+    display: none;
+  }
+  
+  .mobile-cards {
+    display: block;
+  }
+  
+  .delivery-container {
+    padding: 10px;
+  }
+  
+  .page-title {
+    font-size: 18px;
+    margin-top: 10px;
+    margin-bottom: 10px;
+  }
+  
+  .breadcrumb {
+    font-size: 12px;
+    margin-bottom: 10px;
+  }
+  
+  .actions-container {
+    margin-bottom: 10px;
+  }
+  
+  .mobile-card-header {
+    padding: 10px 12px;
+  }
+  
+  .mobile-card-content {
+    padding: 12px;
+  }
+  
+  .mobile-card-actions {
+    padding: 6px 12px;
+  }
+
+  .stats-badge {
+    display: block;
+    margin-left: 0;
+    margin-top: 8px;
+    text-align: center;
+  }
+}
+
+/* Fix para spinner de carga */
+.loading-spinner {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 100px;
+  width: 100%;
+  margin: 20px 0;
+}
+
+/* ✨ NUEVO: Animaciones */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.mobile-card {
+  animation: fadeIn 0.3s ease-in-out;
+}
+
+.mat-row {
+  transition: background-color 0.2s ease;
+}
+
+/* ✨ NUEVO: Estilos para estados de items */
+.items-count {
+  display: inline-flex;
+  align-items: center;
+  padding: 2px 8px;
+  background-color: rgba(96, 125, 139, 0.1);
+  border-radius: 12px;
+  font-size: 11px;
+  font-weight: 500;
+  color: #607d8b;
+  margin-left: 4px;
+}
+
+/* ✨ NUEVO: Indicadores de acciones rápidas */
+.quick-actions {
+  display: flex;
+  gap: 4px;
+}
+
+.quick-action-icon {
+  opacity: 0.6;
+  transition: opacity 0.2s ease;
+}
+
+.quick-action-icon:hover {
+  opacity: 1;
+}
+
+/* ✨ NUEVO: Estilos para exportación */
+.export-menu {
+  margin-left: 8px;
+}
+
+.export-option {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 16px;
+}
+
+.export-option mat-icon {
+  color: #8e24aa;
+}
+
+/* ✨ NUEVO: Skeleton loading para mejor UX */
+.skeleton-loader {
+  background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+  background-size: 200% 100%;
+  animation: loading 1.5s infinite;
+  border-radius: 4px;
+  height: 20px;
+  margin: 8px 0;
+}
+
+@keyframes loading {
+  0% {
+    background-position: 200% 0;
+  }
+  100% {
+    background-position: -200% 0;
+  }
+}
+
+/* ✨ NUEVO: Estilos para dropdowns de sucursal */
+.sucursal-dropdown {
+  min-width: 200px;
+}
+
+.sucursal-option {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.sucursal-option-icon {
+  color: #8e24aa;
+  font-size: 18px;
+}
+
+.sucursal-option-text {
+  display: flex;
+  flex-direction: column;
+}
+
+.sucursal-option-name {
+  font-weight: 500;
+  font-size: 14px;
+}
+
+.sucursal-option-detail {
+  font-size: 11px;
+  color: #666;
+}
+
+/* ✨ NUEVO: Responsive mejoras para tablets */
+@media screen and (min-width: 601px) and (max-width: 1024px) {
+  .mat-column-id,
+  .mat-column-salesOrderId {
+    max-width: 100px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .mat-column-deliveryDate {
+    min-width: 120px;
+  }
+
+  table.mat-table {
+    min-width: 700px;
+  }
+}
+
+/* ✨ NUEVO: Print styles para reportes */
+@media print {
+  .actions-container,
+  .mobile-paginator,
+  .mat-paginator,
+  .mat-column-acciones {
+    display: none !important;
+  }
+
+  .delivery-container {
+    padding: 0;
+  }
+
+  .table-container {
+    overflow: visible;
+  }
+
+  table.mat-table {
+    min-width: 100%;
+  }
+
+  .mat-row {
+    page-break-inside: avoid;
+  }
+}
+
+/* ✨ NUEVO: Dark mode support (opcional) */
+@media (prefers-color-scheme: dark) {
+  .delivery-container {
+    background-color: #1e1e1e;
+    color: #e0e0e0;
+  }
+
+  .page-title {
+    color: #e0e0e0;
+  }
+
+  .mat-header-cell {
+    background-color: #2c2c2c;
+    color: rgba(255, 255, 255, 0.7);
+  }
+
+  .mobile-card {
+    background-color: #2c2c2c;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+  }
+
+  .mobile-card-header {
+    background-color: #3c3c3c;
+  }
+
+  .mobile-card-title {
+    color: #e0e0e0;
+  }
+}

@@ -1,0 +1,53 @@
+<h2 mat-dialog-title>Crear impuesto</h2>
+<form [formGroup]="impuestoForm" (ngSubmit)="onSubmit()">
+    <mat-dialog-content>
+        <mat-form-field appearance="fill">
+            <mat-label>Alias impuesto</mat-label>
+            <input matInput formControlName="alias">
+        </mat-form-field>
+        <mat-form-field appearance="fill">
+            <mat-label>Uso</mat-label>
+            <mat-select formControlName="uso">
+                <mat-option value="Factura">Factura</mat-option>
+                <mat-option value="Nomina">Nomina</mat-option>
+                <mat-option value="Recepcion de Pago">Recepcion de Pago</mat-option>
+                <mat-option value="Nota de Credito">Nota de Credito</mat-option>
+                <mat-option value="Nota de Cargo">Nota de Cargo</mat-option>
+                <mat-option value="Recibo de Donativo">Recibo de Donativo</mat-option>
+                <mat-option value="Recibo de Honorarios">Recibo de Honorarios</mat-option>
+                <mat-option value="Recibo de Arrendamiento">Recibo de Arrendamiento</mat-option>
+            </mat-select>
+        </mat-form-field>
+        <mat-form-field appearance="fill">
+            <mat-label>Tipo de impuesto</mat-label>
+            <mat-select formControlName="tipo_impuesto">
+                <mat-option value="Traslado">Traslado</mat-option>
+                <mat-option value="Retencion">Retencion</mat-option>
+            </mat-select>
+        </mat-form-field>
+        <mat-form-field appearance="fill">
+            <mat-label>Ambito</mat-label>
+            <mat-select formControlName="impuesto">
+                <mat-option value="Federal">Federal</mat-option>
+                <mat-option value="Local">Local</mat-option>
+            </mat-select>
+        </mat-form-field>
+        <mat-form-field appearance="fill">
+            <mat-label>Valor</mat-label>
+            <input matInput type="number" step="0.01" formControlName="tasa">
+        </mat-form-field>
+        <mat-form-field appearance="fill">
+            <mat-label>Factor</mat-label>
+            <mat-select formControlName="valor_cuota">
+                <mat-option value="Tasa">Tasa</mat-option>
+                <mat-option value="Cuota">Cuota</mat-option>
+                <mat-option value="Exento">Exento</mat-option>
+            </mat-select>
+        </mat-form-field>        
+    </mat-dialog-content>
+    <mat-dialog-actions align="end">
+        <button mat-button mat-dialog-close type="button" class="btn-danger">Cancelar</button>
+        <button mat-button type="submit" class="btn-primary" [disabled]="!impuestoForm.valid">Crear impuesto</button>
+    </mat-dialog-actions>
+</form>
+

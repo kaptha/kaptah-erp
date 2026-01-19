@@ -1,0 +1,363 @@
+/* Contenedor principal */
+.carta-porte-modal-container {
+  max-width: 1100px;
+}
+
+/* Pestañas */
+.tab-container {
+  display: flex;
+  margin-bottom: 20px;
+  border-bottom: 1px solid #e0e0e0;
+  flex-wrap: wrap;
+}
+
+.tab-container button {
+  padding: 10px 20px;
+  border-radius: 0;
+  margin-right: 4px;
+  font-weight: 500;
+  margin-bottom: -1px;
+}
+
+.active-tab {
+  color: #8e24aa;
+  border-bottom: 2px solid #8e24aa;
+}
+
+/* Título del diálogo */
+.mat-dialog-title {
+  margin-bottom: 20px;
+  color: #333;
+  font-size: 20px;
+  font-weight: 500;
+}
+
+/* Contenido del diálogo */
+.mat-dialog-content {
+  max-height: 75vh;
+  overflow-y: auto;
+}
+
+/* Secciones */
+.section-title {
+  font-size: 16px;
+  font-weight: 500;
+  margin-top: 24px;
+  margin-bottom: 16px;
+  color: #555;
+  padding-bottom: 8px;
+  border-bottom: 1px solid #eee;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.subsection-title {
+  font-size: 14px;
+  font-weight: 500;
+  margin-top: 16px;
+  margin-bottom: 12px;
+  color: #666;
+  padding-left: 8px;
+  border-left: 3px solid #8e24aa;
+}
+
+.info-icon {
+  font-size: 18px;
+  width: 18px;
+  height: 18px;
+  color: #999;
+  cursor: help;
+}
+
+/* Filas de formulario */
+.form-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16px;
+  margin-bottom: 16px;
+}
+
+.form-row:last-child {
+  margin-bottom: 0;
+}
+
+.form-row mat-form-field {
+  flex: 1;
+  min-width: 200px;
+}
+
+.full-width {
+  width: 100%;
+}
+
+/* Contenedor de ubicaciones */
+.ubicacion-container {
+  background-color: #f8f8f8;
+  border: 1px solid #e0e0e0;
+  border-radius: 8px;
+  padding: 16px;
+  margin-bottom: 20px;
+  position: relative;
+}
+
+.ubicacion-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16px;
+  padding-bottom: 12px;
+  border-bottom: 2px solid #e0e0e0;
+}
+
+.ubicacion-title {
+  font-weight: 500;
+  color: #333;
+  font-size: 16px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.ubicacion-title mat-icon {
+  color: #8e24aa;
+}
+
+/* Contenedor de mercancías */
+.mercancia-container {
+  background-color: #f5f9ff;
+  border: 1px solid #d6e4ff;
+  border-radius: 8px;
+  padding: 16px;
+  margin-bottom: 20px;
+}
+
+.mercancia-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16px;
+  padding-bottom: 12px;
+  border-bottom: 2px solid #d6e4ff;
+}
+
+.mercancia-title {
+  font-weight: 500;
+  color: #333;
+  font-size: 16px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.mercancia-title mat-icon {
+  color: #3f51b5;
+}
+
+/* Cantidad Transporta */
+.cantidad-transporta-row {
+  background-color: white;
+  border: 1px solid #e0e0e0;
+  border-radius: 6px;
+  padding: 12px;
+  margin-bottom: 12px;
+}
+
+/* Contenedor de carros ferroviarios */
+.carro-container {
+  background-color: #fff9f5;
+  border: 1px solid #ffe4cc;
+  border-radius: 8px;
+  padding: 16px;
+  margin-bottom: 16px;
+}
+
+.carro-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 12px;
+  padding-bottom: 8px;
+  border-bottom: 1px solid #ffe4cc;
+  font-weight: 500;
+  color: #333;
+}
+
+/* Botones para agregar elementos */
+.add-button-container {
+  display: flex;
+  justify-content: center;
+  margin: 24px 0;
+}
+
+/* Overlay de carga */
+.loading-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background-color: rgba(255, 255, 255, 0.8);
+  z-index: 10;
+}
+
+/* Acciones del diálogo */
+.mat-dialog-actions {
+  padding: 16px 24px;
+  margin: 0;
+  border-top: 1px solid #e0e0e0;
+}
+
+/* Estilos para tabs responsivos */
+@media (max-width: 768px) {
+  .tab-container {
+    overflow-x: auto;
+  }
+  
+  .tab-container button {
+    flex-shrink: 0;
+  }
+  
+  .form-row {
+    flex-direction: column;
+    gap: 0;
+  }
+  
+  .form-row mat-form-field {
+    width: 100%;
+    min-width: unset;
+  }
+  
+  .ubicacion-container,
+  .mercancia-container,
+  .carro-container {
+    padding: 12px;
+  }
+  
+  .mat-dialog-content {
+    max-height: 80vh;
+  }
+  
+  .carta-porte-modal-container {
+    max-width: 100%;
+  }
+}
+
+/* Estados de validación */
+mat-form-field.ng-invalid.ng-touched {
+  animation: shake 0.3s;
+}
+
+@keyframes shake {
+  0%, 100% { transform: translateX(0); }
+  25% { transform: translateX(-5px); }
+  75% { transform: translateX(5px); }
+}
+
+/* Hints y mensajes de ayuda */
+mat-hint {
+  font-size: 12px;
+  color: #666;
+}
+
+/* Mejorar visualización de select con búsqueda */
+.mat-select-search-inner {
+  padding: 8px;
+}
+
+/* Estilos adicionales para mejor UX */
+.mat-dialog-content::-webkit-scrollbar {
+  width: 8px;
+}
+
+.mat-dialog-content::-webkit-scrollbar-track {
+  background: #f1f1f1;
+}
+
+.mat-dialog-content::-webkit-scrollbar-thumb {
+  background: #888;
+  border-radius: 4px;
+}
+
+.mat-dialog-content::-webkit-scrollbar-thumb:hover {
+  background: #555;
+}
+
+/* Indicadores visuales para tabs activos */
+.tab-container button:hover:not(.active-tab) {
+  background-color: #f5f5f5;
+}
+
+/* Espaciado mejorado para botones de acción */
+.mat-dialog-actions button {
+  margin-left: 8px;
+}
+
+.mat-dialog-actions button:first-child {
+  margin-left: 0;
+}
+
+/* Tarjetas informativas */
+.info-card {
+  background-color: #f5f9ff;
+  border-left: 4px solid #8e24aa;
+  padding: 16px;
+  margin: 16px 0;
+  border-radius: 4px;
+}
+
+.info-card .info-row {
+  display: flex;
+  justify-content: space-between;
+  padding: 8px 0;
+  border-bottom: 1px solid #e0e0e0;
+}
+
+.info-card .info-row:last-child {
+  border-bottom: none;
+}
+
+.info-card .info-label {
+  font-weight: 600;
+  color: #666;
+  min-width: 140px;
+}
+
+.info-card .info-value {
+  color: #333;
+  text-align: right;
+  flex: 1;
+}
+
+/* Mejoras para campos deshabilitados/readonly */
+mat-form-field input[readonly] {
+  color: #666;
+  cursor: not-allowed;
+}
+
+/* Estilos para badges y etiquetas */
+.badge {
+  display: inline-block;
+  padding: 4px 8px;
+  border-radius: 12px;
+  font-size: 12px;
+  font-weight: 500;
+}
+
+.badge-primary {
+  background-color: #e8eaf6;
+  color: #3f51b5;
+}
+
+.badge-success {
+  background-color: #e8f5e9;
+  color: #4caf50;
+}
+
+.badge-warning {
+  background-color: #fff9e6;
+  color: #ff9800;
+}

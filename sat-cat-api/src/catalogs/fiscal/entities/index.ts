@@ -1,0 +1,12 @@
+export { TipoPercepcion } from './tipo-percepcion.entity';
+export { TipoDeduccion } from './tipo-deduccion.entity';
+export { TipoOtroPago } from './tipo-otro-pago.entity';
+export { TipoNomina } from './tipo-nomina.entity';
+export { TipoContrato } from './tipo-contrato.entity';
+export { TipoJornada } from './tipo-jornada.entity';
+export { TipoRegimen } from './tipo-regimen.entity';
+export { PeriodicidadPago } from './periodicidad-pago.entity';
+export { Banco } from './banco.entity';
+export { RiesgoPuesto } from './riesgo-puesto.entity';
+export { TipoIncapacidad } from './tipo-incapacidad.entity';
+export { OrigenRecurso } from './origen-recurso.entity';

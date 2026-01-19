@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>Remisión {{folio}}</title>
+</head>
+<body style="margin:0;padding:0;background:#F5F6FA;font-family:Arial,Helvetica,sans-serif;">
+<table width="100%" cellspacing="0" cellpadding="0" style="padding:40px 0;background:#F5F6FA;">
+  <tr><td align="center">
+    <table width="650" cellpadding="0" cellspacing="0" style="background:white;border-radius:16px;padding:40px;">
+      
+      <!-- Header con logo -->
+      <tr><td align="center">
+        <img src="https://TU-DOMINIO/logo-kaptah.png" width="120" style="margin-bottom:20px;">
+      </td></tr>
+
+      <!-- Título -->
+      <tr><td style="font-size:28px;font-weight:bold;color:#10B981;text-align:center;padding-bottom:10px;">
+        📦 Remisión {{folio}}
+      </td></tr>
+
+      <!-- Mensaje -->
+      <tr><td style="padding:15px 0;font-size:15px;color:#666;text-align:center;line-height:22px;">
+        Tu pedido ha sido enviado
+      </td></tr>
+
+      <!-- Datos del cliente y envío -->
+      <tr><td style="padding:25px 0 15px 0;">
+        <table width="100%" cellpadding="12" cellspacing="0">
+          <tr>
+            <td style="width:50%;vertical-align:top;background:#F8F9FC;border-radius:8px;padding:15px;">
+              <div style="font-size:12px;color:#888;margin-bottom:8px;font-weight:600;">DESTINATARIO</div>
+              <div style="font-size:15px;font-weight:bold;color:#333;margin-bottom:5px;">{{clientName}}</div>
+              {{#if deliveryAddress}}
+              <div style="font-size:13px;color:#666;line-height:18px;">{{deliveryAddress}}</div>
+              {{/if}}
+              {{#if contactPhone}}
+              <div style="font-size:13px;color:#666;margin-top:5px;">📞 {{contactPhone}}</div>
+              {{/if}}
+            </td>
+            <td style="width:10%;"></td>
+            <td style="width:40%;vertical-align:top;background:#F0FDF4;border-radius:8px;padding:15px;">
+              <div style="font-size:12px;color:#888;margin-bottom:8px;font-weight:600;">FECHA DE ENVÍO</div>
+              <div style="font-size:15px;font-weight:bold;color:#333;margin-bottom:5px;">{{date}}</div>
+              {{#if estimatedDelivery}}
+              <div style="font-size:13px;color:#10B981;margin-top:5px;">
+                🚚 Entrega estimada: {{estimatedDelivery}}
+              </div>
+              {{/if}}
+            </td>
+          </tr>
+        </table>
+      </td></tr>
+
+      <!-- Línea divisoria -->
+      <tr><td style="padding:10px 0;"><div style="border-top:2px solid #E5E7EB;"></div></td></tr>
+
+      <!-- Items enviados -->
+      <tr><td style="padding:20px 0;">
+        <div style="font-size:14px;color:#888;margin-bottom:15px;font-weight:600;">PRODUCTOS ENVIADOS:</div>
+        <table width="100%" cellpadding="10" cellspacing="0">
+          <thead>
+            <tr style="background:#F8F9FC;">
+              <th style="text-align:left;font-size:12px;color:#888;font-weight:600;padding:12px;">PRODUCTO</th>
+              <th style="text-align:center;font-size:12px;color:#888;font-weight:600;padding:12px;">CANTIDAD</th>
+              {{#if showPrices}}
+              <th style="text-align:right;font-size:12px;color:#888;font-weight:600;padding:12px;">PRECIO</th>
+              {{/if}}
+            </tr>
+          </thead>
+          <tbody>
+            {{#each items}}
+            <tr>
+              <td style="font-size:14px;color:#333;padding:12px;border-bottom:1px solid #F0F0F0;">
+                {{this.description}}
+                {{#if this.sku}}
+                <div style="font-size:12px;color:#888;margin-top:3px;">SKU: {{this.sku}}</div>
+                {{/if}}
+              </td>
+              <td style="font-size:14px;color:#333;text-align:center;padding:12px;border-bottom:1px solid #F0F0F0;">
+                <span style="background:#10B981;color:white;padding:4px 12px;border-radius:12px;font-weight:600;">
+                  {{this.quantity}}
+                </span>
+              </td>
+              {{#if ../showPrices}}
+              <td style="font-size:14px;color:#333;text-align:right;padding:12px;border-bottom:1px solid #F0F0F0;font-weight:600;">{{../currency}} {{this.unitPrice}}</td>
+              {{/if}}
+            </tr>
+            {{/each}}
+          </tbody>
+        </table>
+      </td></tr>
+
+      <!-- Tracking number si existe -->
+      {{#if trackingNumber}}
+      <tr><td align="center" style="padding:20px;background:#FEF3C7;border-radius:8px;margin:15px 0;">
+        <div style="font-size:12px;color:#92400E;margin-bottom:5px;font-weight:600;">NÚMERO DE RASTREO</div>
+        <div style="font-size:18px;font-weight:bold;color:#92400E;letter-spacing:1px;">{{trackingNumber}}</div>
+      </td></tr>
+      {{/if}}
+
+      <!-- Botón de seguimiento -->
+      {{#if trackingUrl}}
+      <tr><td align="center" style="padding:25px 0;">
+        <a href="{{trackingUrl}}"
+          style="background:#10B981;color:white;text-decoration:none;padding:14px 35px;
+          border-radius:50px;font-weight:bold;display:inline-block;font-size:15px;">
+          🚚 Rastrear envío
+        </a>
+      </td></tr>
+      {{/if}}
+
+      <!-- Notas adicionales -->
+      {{#if notes}}
+      <tr><td style="padding:20px;background:#F8F9FC;border-radius:8px;">
+        <div style="font-size:12px;color:#888;margin-bottom:5px;font-weight:600;">NOTAS IMPORTANTES:</div>
+        <div style="font-size:14px;color:#666;line-height:20px;">{{notes}}</div>
+      </td></tr>
+      {{/if}}
+
+      <!-- Mensaje final -->
+      <tr><td style="padding:25px 0 10px 0;font-size:14px;color:#666;text-align:center;line-height:22px;">
+        ¡Gracias por tu compra! Si tienes alguna pregunta sobre tu envío,<br>no dudes en contactarnos.
+      </td></tr>
+
+    </table>
+    
+    <!-- Footer -->
+    <p style="font-size:12px;color:#999;margin-top:20px;text-align:center;">
+      Este es un correo automático. Conserva este documento para tu control.<br>
+      © 2025 Kaptah. Todos los derechos reservados.
+    </p>
+  </td></tr>
+</table>
+</body>
+</html>

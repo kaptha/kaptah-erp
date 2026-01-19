@@ -1,0 +1,131 @@
+<div class="body-reg">
+  <span class="blob blob-1"></span>
+  <span class="blob blob-2"></span>
+
+  <span class="particle p1"></span>
+  <span class="particle p2"></span>
+  <span class="particle p3"></span>
+  <span class="particle p4"></span>
+
+  <mat-card>
+    <mat-card-title>Registro</mat-card-title>
+    <mat-card-content>
+      <form [formGroup]="registroForm" (ngSubmit)="onSubmit()">
+        <mat-form-field appearance="fill">
+          <mat-label>Nombre completo</mat-label>
+          <input matInput type="text" formControlName="nombre" required>
+          <mat-icon matPrefix>person</mat-icon>
+          <mat-error *ngIf="registroForm.get('nombre')?.invalid && registroForm.get('nombre')?.touched">
+            Nombre completo es requerido
+          </mat-error>
+        </mat-form-field>
+  
+        <mat-form-field appearance="fill">
+          <mat-label>Correo electrónico</mat-label>
+          <input matInput type="email" formControlName="email" required>
+          <mat-icon matPrefix>email</mat-icon>
+          <mat-error *ngIf="registroForm.get('email')?.errors?.['required'] && registroForm.get('email')?.touched">
+            Correo electrónico es requerido
+          </mat-error>
+          <mat-error *ngIf="registroForm.get('email')?.errors?.['email'] && registroForm.get('email')?.touched">
+            Correo electrónico no es válido
+          </mat-error>
+        </mat-form-field>
+  
+        <mat-form-field appearance="fill">
+          <mat-label>RFC</mat-label>
+          <input matInput type="text" formControlName="rfc" (input)="convertToUpper($event)" required>
+          <mat-icon matPrefix>assignment_ind</mat-icon>
+          <mat-error *ngIf="registroForm.get('rfc')?.errors?.['required'] && registroForm.get('rfc')?.touched">
+            RFC es requerido
+          </mat-error>
+          <mat-error *ngIf="registroForm.get('rfc')?.errors?.['pattern'] && registroForm.get('rfc')?.touched">
+            RFC no es válido
+          </mat-error>
+          <mat-hint>El tipo de persona se detectará automáticamente</mat-hint>
+        </mat-form-field>
+  
+        <mat-form-field appearance="fill">
+          <mat-label>Teléfono</mat-label>
+          <input matInput type="text" formControlName="phone" required>
+          <mat-icon matPrefix>phone</mat-icon>
+          <mat-error *ngIf="registroForm.get('phone')?.errors?.['required'] && registroForm.get('phone')?.touched">
+            Teléfono es requerido
+          </mat-error>
+          <mat-error *ngIf="registroForm.get('phone')?.errors?.['pattern'] && registroForm.get('phone')?.touched">
+            Teléfono debe tener 10 dígitos
+          </mat-error>
+        </mat-form-field>
+
+        <mat-form-field appearance="fill">
+          <mat-label>Tipo de Persona</mat-label>
+          <mat-select formControlName="tipoPersona" required>
+            <mat-option value="fisica">
+              <mat-icon>person</mat-icon> Persona Física
+            </mat-option>
+            <mat-option value="moral">
+              <mat-icon>business</mat-icon> Persona Moral
+            </mat-option>
+          </mat-select>
+          <mat-icon matPrefix>badge</mat-icon>
+          <mat-error *ngIf="registroForm.get('tipoPersona')?.hasError('required') && registroForm.get('tipoPersona')?.touched">
+            Tipo de persona es requerido
+          </mat-error>
+          <mat-hint>Se detecta automáticamente según el RFC</mat-hint>
+        </mat-form-field>
+  
+        <mat-form-field appearance="fill">
+          <mat-label>Régimen fiscal</mat-label>
+          <mat-select formControlName="fiscalRegime" required>
+            <mat-option *ngFor="let regimen of regimenesFiscalesFiltrados" [value]="regimen.clave">
+              {{ regimen.clave }} - {{ regimen.descripcion }}
+            </mat-option>
+          </mat-select>
+          <mat-icon matPrefix>receipt</mat-icon>
+          <mat-error *ngIf="registroForm.get('fiscalRegime')?.invalid && registroForm.get('fiscalRegime')?.touched">
+            Régimen fiscal es requerido
+          </mat-error>
+          <mat-hint>Los regímenes se filtran según el tipo de persona</mat-hint>
+        </mat-form-field>
+  
+        <mat-form-field appearance="fill">
+          <mat-label>Contraseña</mat-label>
+          <input matInput [type]="hidePassword ? 'password' : 'text'" formControlName="password" required>
+          <mat-icon matPrefix>lock</mat-icon>
+          <button mat-icon-button matSuffix (click)="hidePassword = !hidePassword" [attr.aria-label]="'Toggle password visibility'" type="button">
+            <mat-icon>{{hidePassword ? 'visibility_off' : 'visibility'}}</mat-icon>
+          </button>
+          <mat-error *ngIf="registroForm.get('password')?.errors?.['required'] && registroForm.get('password')?.touched">
+            Contraseña es requerida
+          </mat-error>
+          <mat-error *ngIf="registroForm.get('password')?.errors?.['minlength'] && registroForm.get('password')?.touched">
+            Contraseña debe tener al menos 8 caracteres
+          </mat-error>
+          <mat-error *ngIf="registroForm.get('password')?.errors?.['pattern'] && registroForm.get('password')?.touched">
+            Contraseña debe incluir al menos una minúscula y un carácter especial
+          </mat-error>
+        </mat-form-field>
+  
+        <mat-checkbox formControlName="terms" color="primary">
+          Acepto los <span class="terms-link" (click)="openTermsDialog()">términos y condiciones</span>
+        </mat-checkbox>
+        <mat-error *ngIf="registroForm.get('terms')?.invalid && registroForm.get('terms')?.touched" class="checkbox-error">
+          Debes aceptar los términos y condiciones
+        </mat-error>
+  
+        <div class="register-actions">
+          <button mat-flat-button class="btn-register" type="submit" [disabled]="registroForm.invalid || isLoading">
+            <span *ngIf="!isLoading">Registrarse</span>
+            <mat-spinner *ngIf="isLoading" diameter="24"></mat-spinner>
+          </button>
+          
+          <div class="social-divider">o continúa con</div>
+        </div>
+        
+        <a routerLink="/login" class="link-to-login">¿Ya tienes una cuenta? Inicia sesión</a>
+      </form>
+    </mat-card-content>
+  </mat-card>
+</div>
+
+  

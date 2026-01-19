@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>Orden de Venta</title>
+</head>
+<body style="margin:0;padding:0;background:#F5F6FA;font-family:Arial,Helvetica,sans-serif;">
+<table width="100%" cellspacing="0" cellpadding="0" style="padding:40px 0;background:#F5F6FA;">
+  <tr><td align="center">
+    <table width="700" cellpadding="0" cellspacing="0" style="background:white;border-radius:16px;padding:40px;">
+      
+      <!-- Header con logo -->
+      <tr><td align="center">
+        <img src="https://via.placeholder.com/120x40/7F3FF0/FFFFFF?text=KAPTAH" width="120" style="margin-bottom:20px;">
+      </td></tr>
+
+      <!-- Título -->
+      <tr><td style="font-size:32px;font-weight:bold;color:#333;text-align:center;padding-bottom:10px;">
+        Orden de Venta
+      </td></tr>
+
+      <tr><td style="font-size:18px;color:#7F3FF0;font-weight:600;text-align:center;padding-bottom:20px;">
+        {{orderNumber}}
+      </td></tr>
+
+      <!-- Estado -->
+      <tr><td align="center" style="padding-bottom:20px;">
+        <span style="display:inline-block;padding:8px 20px;background:#4CAF50;color:white;border-radius:20px;font-size:14px;font-weight:600;">
+          {{status}}
+        </span>
+      </td></tr>
+
+      <!-- Mensaje personalizado -->
+      {{#if customMessage}}
+      <tr><td style="padding:15px 20px;font-size:15px;color:#666;text-align:center;line-height:22px;background:#E3F2FD;border-radius:8px;margin:15px 0;border-left:4px solid #2196F3;">
+        {{customMessage}}
+      </td></tr>
+      {{/if}}
+
+      <!-- Información del cliente y orden -->
+      <tr><td style="padding:25px 0 15px 0;">
+        <table width="100%" cellpadding="8" cellspacing="0">
+          <tr>
+            <td style="width:50%;vertical-align:top;">
+              <div style="font-size:12px;color:#888;margin-bottom:5px;text-transform:uppercase;font-weight:600;">Cliente</div>
+              <div style="font-size:16px;font-weight:bold;color:#333;">{{customerName}}</div>
+              <div style="font-size:13px;color:#666;margin-top:4px;">RFC: {{customerRfc}}</div>
+              {{#if customerAddress}}
+              <div style="font-size:13px;color:#666;margin-top:4px;">{{customerAddress}}</div>
+              {{/if}}
+            </td>
+            <td style="width:50%;vertical-align:top;text-align:right;">
+              <div style="font-size:12px;color:#888;margin-bottom:5px;text-transform:uppercase;font-weight:600;">Fecha de Orden</div>
+              <div style="font-size:16px;font-weight:bold;color:#333;">{{orderDate}}</div>
+              <div style="font-size:12px;color:#888;margin-top:10px;text-transform:uppercase;font-weight:600;">Entrega Estimada</div>
+              <div style="font-size:14px;color:#666;">{{deliveryDate}}</div>
+            </td>
+          </tr>
+        </table>
+      </td></tr>
+
+      <!-- Línea divisoria -->
+      <tr><td style="padding:0;"><div style="border-top:2px solid #E5E7EB;"></div></td></tr>
+
+      <!-- Tabla de productos -->
+      <tr><td style="padding:20px 0;">
+        <div style="font-size:16px;font-weight:600;color:#333;margin-bottom:15px;">Productos:</div>
+        <table width="100%" cellpadding="12" cellspacing="0" style="border-collapse:collapse;">
+          <thead>
+            <tr style="background:#F8F9FC;">
+              <th style="text-align:left;font-size:12px;color:#666;font-weight:600;padding:12px;border-bottom:2px solid #E5E7EB;">DESCRIPCIÓN</th>
+              <th style="text-align:center;font-size:12px;color:#666;font-weight:600;padding:12px;border-bottom:2px solid #E5E7EB;">CANT.</th>
+              <th style="text-align:right;font-size:12px;color:#666;font-weight:600;padding:12px;border-bottom:2px solid #E5E7EB;">PRECIO UNIT.</th>
+              <th style="text-align:right;font-size:12px;color:#666;font-weight:600;padding:12px;border-bottom:2px solid #E5E7EB;">SUBTOTAL</th>
+            </tr>
+          </thead>
+          <tbody>
+            {{#each items}}
+            <tr style="border-bottom:1px solid #F0F0F0;">
+              <td style="padding:12px;font-size:14px;color:#333;font-weight:500;">
+                {{this.description}}
+              </td>
+              <td style="text-align:center;padding:12px;font-size:14px;color:#666;">
+                {{this.quantity}}
+              </td>
+              <td style="text-align:right;padding:12px;font-size:14px;color:#666;">
+                ${{this.unitPrice}}
+              </td>
+              <td style="text-align:right;padding:12px;font-size:15px;font-weight:600;color:#333;">
+                ${{this.subtotal}}
+              </td>
+            </tr>
+            {{/each}}
+          </tbody>
+        </table>
+      </td></tr>
+
+      <!-- Totales -->
+      <tr><td style="padding:20px 0;">
+        <table width="100%" cellpadding="0" cellspacing="0">
+          <tr>
+            <td style="width:60%;"></td>
+            <td style="width:40%;">
+              <table width="100%" cellpadding="8" cellspacing="0">
+                <tr>
+                  <td style="font-size:14px;color:#666;text-align:right;">Subtotal:</td>
+                  <td style="font-size:16px;font-weight:600;color:#333;text-align:right;">
+                    ${{subtotal}} {{currency}}
+                  </td>
+                </tr>
+                <tr>
+                  <td style="font-size:14px;color:#666;text-align:right;">IVA ({{tax}} %):</td>
+                  <td style="font-size:16px;font-weight:600;color:#333;text-align:right;">
+                    ${{tax}} {{currency}}
+                  </td>
+                </tr>
+                <tr style="border-top:2px solid #E5E7EB;">
+                  <td style="font-size:16px;color:#333;font-weight:600;text-align:right;padding-top:12px;">TOTAL:</td>
+                  <td style="font-size:20px;font-weight:bold;color:#7F3FF0;text-align:right;padding-top:12px;">
+                    ${{total}} {{currency}}
+                  </td>
+                </tr>
+              </table>
+            </td>
+          </tr>
+        </table>
+      </td></tr>
+
+      <!-- Notas -->
+      {{#if notes}}
+      <tr><td style="padding:20px;background:#FFF9E6;border-radius:8px;border-left:4px solid #FFC107;margin-top:15px;">
+        <div style="font-size:14px;color:#856404;line-height:20px;">
+          <strong>📝 Notas:</strong><br>
+          {{notes}}
+        </div>
+      </td></tr>
+      {{/if}}
+
+      <!-- Mensaje de agradecimiento -->
+      <tr><td style="padding:30px 0 10px 0;font-size:14px;color:#666;text-align:center;line-height:22px;">
+        Gracias por su preferencia.<br>
+        Cualquier duda, estamos a sus órdenes.
+      </td></tr>
+
+    </table>
+    
+    <!-- Footer -->
+    <p style="font-size:12px;color:#999;margin-top:20px;text-align:center;line-height:18px;">
+      Este es un correo automático. Si tiene dudas, contáctenos.<br>
+      © 2025 Kaptah. Todos los derechos reservados.
+    </p>
+  </td></tr>
+</table>
+</body>
+</html>

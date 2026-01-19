@@ -1,0 +1,193 @@
+<div class="proveedores-container">
+  <h2 class="page-title">Proveedores</h2>
+  
+  <div class="breadcrumb">
+    <a routerLink="/dashboard">Dashboard</a> / Gestión de proveedores
+  </div>
+
+  <!-- Filtro para móvil -->
+  <div class="mobile-filter-section">
+    <mat-form-field appearance="outline" class="search-field">
+      <mat-label>Buscar proveedores</mat-label>
+      <input matInput (keyup)="applyFilter($event)" placeholder="Buscar por nombre, RFC, email...">
+      <mat-icon matSuffix>search</mat-icon>
+    </mat-form-field>
+  </div>
+
+  <!-- Acciones principales y búsqueda -->
+  <div class="actions-container">
+    <button mat-raised-button class="btn-primary" (click)="agregarProveedor()">
+      <mat-icon>add</mat-icon> Agregar proveedor
+    </button>
+    
+    <!-- Filtro para pantallas grandes -->
+    <mat-form-field appearance="outline" class="search-field" [style.display]="isMobile ? 'none' : 'block'">
+      <mat-label>Buscar proveedores</mat-label>
+      <input matInput (keyup)="applyFilter($event)" placeholder="Buscar por nombre, RFC, email...">
+      <mat-icon matSuffix>search</mat-icon>
+    </mat-form-field>
+    
+    <div class="actions-right">
+      <button mat-raised-button [matMenuTriggerFor]="exportMenu" class="btn-white">
+        <mat-icon>file_download</mat-icon> Exportar
+      </button>
+      <mat-menu #exportMenu="matMenu">
+        <button mat-menu-item (click)="exportar('csv')">
+          <mat-icon>description</mat-icon>
+          <span>Exportar como CSV</span>
+        </button>
+        <button mat-menu-item (click)="exportar('xlsx')">
+          <mat-icon>table_chart</mat-icon>
+          <span>Exportar como Excel</span>
+        </button>
+      </mat-menu>
+      
+      <button mat-icon-button color="primary" (click)="loadProveedores()" matTooltip="Refrescar">
+        <mat-icon>refresh</mat-icon>
+      </button>
+    </div>
+  </div>
+  
+  <!-- Indicador de carga -->
+  <div class="loading-container" *ngIf="loading">
+    <mat-spinner></mat-spinner>
+  </div>
+
+  <!-- Tabla para pantallas grandes -->
+  <div class="table-container mat-elevation-z8" *ngIf="!loading">
+    <table mat-table [dataSource]="dataSource" class="mat-elevation-z8">
+      <!-- Razón Social Column -->
+      <ng-container matColumnDef="razon_social">
+        <th mat-header-cell *matHeaderCellDef> Razón Social </th>
+        <td mat-cell *matCellDef="let proveedor"> {{proveedor.razon_social}} </td>
+      </ng-container>
+  
+      <!-- RFC Column -->
+      <ng-container matColumnDef="rfc">
+        <th mat-header-cell *matHeaderCellDef> RFC </th>
+        <td mat-cell *matCellDef="let proveedor"> {{proveedor.rfc}} </td>
+      </ng-container>
+  
+      <!-- Email Column -->
+      <ng-container matColumnDef="email">
+        <th mat-header-cell *matHeaderCellDef> Email </th>
+        <td mat-cell *matCellDef="let proveedor"> {{proveedor.email}} </td>
+      </ng-container>
+  
+      <!-- Teléfono Column -->
+      <ng-container matColumnDef="telefono">
+        <th mat-header-cell *matHeaderCellDef> Teléfono </th>
+        <td mat-cell *matCellDef="let proveedor"> {{proveedor.telefono}} </td>
+      </ng-container>
+      
+      <!-- Código Postal Column -->
+      <ng-container matColumnDef="Cpostal">
+        <th mat-header-cell *matHeaderCellDef> Código Postal </th>
+        <td mat-cell *matCellDef="let proveedor"> {{proveedor.Cpostal}} </td>
+      </ng-container>
+
+      <!-- Colonia Column -->
+      <ng-container matColumnDef="colonia">
+        <th mat-header-cell *matHeaderCellDef> Colonia </th>
+        <td mat-cell *matCellDef="let proveedor"> {{proveedor.colonia}} </td>
+      </ng-container>
+
+      <!-- Actions Column -->
+      <ng-container matColumnDef="actions">
+        <th mat-header-cell *matHeaderCellDef></th>
+        <td mat-cell *matCellDef="let proveedor">
+          <button mat-icon-button [matMenuTriggerFor]="menu">
+            <mat-icon>more_vert</mat-icon>
+          </button>
+          <mat-menu #menu="matMenu">
+            <button mat-menu-item (click)="editProveedor(proveedor)">
+              <mat-icon>edit</mat-icon>
+              <span>Editar</span>
+            </button>
+            <button mat-menu-item (click)="deleteProveedor($event, proveedor.ID)">
+              <mat-icon color="warn">delete</mat-icon>
+              <span>Eliminar</span>
+            </button>
+          </mat-menu>
+        </td>
+      </ng-container>
+  
+      <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+      <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
+      
+      <!-- Fila para cuando no hay datos -->
+      <tr class="mat-row" *matNoDataRow>
+        <td class="mat-cell empty-state" [attr.colspan]="displayedColumns.length">
+          No hay proveedores que coincidan con el filtro.
+        </td>
+      </tr>
+    </table>
+  </div>
+
+  <!-- Vista de tarjetas para móviles -->
+  <div class="mobile-cards" *ngIf="!loading">
+    <div *ngIf="dataSource.filteredData.length === 0" class="empty-state">
+      No hay proveedores que coincidan con el filtro.
+    </div>
+    
+    <div class="mobile-card" *ngFor="let proveedor of dataSource.filteredData | slice: getMobileStartIndex(): getMobileEndIndex()">
+      <div class="mobile-card-header">
+        <div class="mobile-card-title">{{proveedor.razon_social}}</div>
+        <div class="mobile-card-subtitle">{{proveedor.rfc}}</div>
+      </div>
+      
+      <div class="mobile-card-content">
+        <div class="mobile-card-row" *ngIf="proveedor.email">
+          <div class="mobile-card-label">Email:</div>
+          <div class="mobile-card-value">{{proveedor.email}}</div>
+        </div>
+        
+        <div class="mobile-card-row" *ngIf="proveedor.telefono">
+          <div class="mobile-card-label">Teléfono:</div>
+          <div class="mobile-card-value">{{proveedor.telefono}}</div>
+        </div>
+        
+        <div class="mobile-card-row" *ngIf="proveedor.Cpostal">
+          <div class="mobile-card-label">Código Postal:</div>
+          <div class="mobile-card-value">{{proveedor.Cpostal}}</div>
+        </div>
+        
+        <div class="mobile-card-row" *ngIf="proveedor.colonia">
+          <div class="mobile-card-label">Colonia:</div>
+          <div class="mobile-card-value">{{proveedor.colonia}}</div>
+        </div>
+      </div>
+      
+      <div class="mobile-card-actions">
+        <button mat-icon-button [matMenuTriggerFor]="mobileMenu">
+          <mat-icon>more_vert</mat-icon>
+        </button>
+        <mat-menu #mobileMenu="matMenu">
+          <button mat-menu-item (click)="editProveedor(proveedor)">
+            <mat-icon>edit</mat-icon>
+            <span>Editar</span>
+          </button>
+          <button mat-menu-item (click)="deleteProveedor($event, proveedor.ID)">
+            <mat-icon color="warn">delete</mat-icon>
+            <span>Eliminar</span>
+          </button>
+        </mat-menu>
+      </div>
+    </div>
+    
+    <!-- Paginador mobile simplificado -->
+    <div class="mobile-paginator" *ngIf="dataSource.filteredData.length > mobilePaginator.pageSize">
+      <div class="mobile-paginator-info">
+        Mostrando {{getMobileStartIndex() + 1}} - {{getMobileEndIndex()}} de {{dataSource.filteredData.length}}
+      </div>
+      <div class="mobile-paginator-actions">
+        <button mat-icon-button [disabled]="mobilePaginator.pageIndex === 0" (click)="previousMobilePage()">
+          <mat-icon>navigate_before</mat-icon>
+        </button>
+        <button mat-icon-button [disabled]="isLastMobilePage()" (click)="nextMobilePage()">
+          <mat-icon>navigate_next</mat-icon>
+        </button>
+      </div>
+    </div>
+  </div>
+</div>

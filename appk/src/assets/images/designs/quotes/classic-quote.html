@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cotización - Classic Quote</title>
+</head>
+<body>
+    <div class="container">
+        <!-- Encabezado -->
+        <div class="header">
+            <div class="header-left">
+                <h1 class="company-name">[[NOMBRE_EMPRESA]]</h1>
+            </div>
+            <div class="header-right">
+                <img src="[[LOGO_URL]]" alt="Logo" class="logo-img" onerror="this.style.display='none'; this.nextElementSibling.style.display='block';">
+                <div class="logo-text">LOGO</div>
+            </div>
+        </div>
+        
+        <!-- Sección de título y descripción -->
+        <div class="title-section">
+            <div class="date">Fecha: [[FECHA_COTIZACION]]</div>
+            <div class="title-right">
+                <h2 class="quote-title">Cotización</h2>
+                <p class="quote-description">[[DESCRIPCION_COTIZACION]]</p>
+            </div>
+        </div>
+        
+        <!-- Sección de cliente y proyecto -->
+        <div class="client-project">
+            <div class="client-info">
+                <span class="info-label">CLIENTE</span>
+                <div class="client-details">
+                    <div>[[NOMBRE_CLIENTE]]</div>
+                    <div>[[DIRECCION_CLIENTE]]</div>
+                    <div>RFC: [[RFC_CLIENTE]]</div>
+                    <div>Tel: [[TELEFONO_CLIENTE]]</div>
+                </div>
+                
+                <div class="folio">
+                    <span class="info-label">FOLIO</span>
+                    <div>[[FOLIO_COTIZACION]]</div>
+                </div>
+            </div>
+            <div class="project-info">
+                <div class="project-title">
+                    PROYECTO: [[NOMBRE_PROYECTO]]
+                </div>
+            </div>
+        </div>
+        
+        <!-- Tabla de elementos -->
+        <table class="items-table">
+            <thead>
+                <tr>
+                    <th class="number">NO</th>
+                    <th class="description">DESCRIPCIÓN</th>
+                    <th class="price">PRECIO</th>
+                    <th class="quantity">CANTIDAD</th>
+                    <th class="total">TOTAL</th>
+                </tr>
+            </thead>
+            <tbody>
+                <!-- Filas de productos/servicios que se repetirán según los ítems -->
+                [[FILAS_ITEMS]]
+                <!-- Fin de las filas repetibles -->
+            </tbody>
+        </table>
+        
+        <!-- Sección de totales -->
+        <div class="totals-section">
+            <div class="grand-total">
+                TOTAL A PAGAR:<br>
+                [[TOTAL]]
+            </div>
+            <table class="totals-table">
+                <tr>
+                    <td>SUBTOTAL</td>
+                    <td>[[SUBTOTAL]]</td>
+                </tr>
+                <tr>
+                    <td>IVA ([[PORCENTAJE_IVA]]%)</td>
+                    <td>[[MONTO_IVA]]</td>
+                </tr>
+                <tr>
+                    <td>TOTAL</td>
+                    <td>[[TOTAL]]</td>
+                </tr>
+            </table>
+        </div>
+        
+        <!-- Sección de observaciones -->
+        <div class="observations-section">
+            <div class="observations-title">OBSERVACIONES:</div>
+            <div class="observations-box">
+                [[OBSERVACIONES]]
+            </div>
+        </div>
+    </div>
+</body>
+</html>

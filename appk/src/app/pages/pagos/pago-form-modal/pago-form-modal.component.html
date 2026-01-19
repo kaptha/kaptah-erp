@@ -1,0 +1,386 @@
+<div class="dialog-header">
+  <h2 mat-dialog-title>
+    <mat-icon color="accent" class="dialog-icon">payment</mat-icon>
+    {{ data?.id ? 'Editar' : 'Nueva' }} Cuenta por Pagar
+  </h2>
+  <button mat-icon-button mat-dialog-close>
+    <mat-icon>close</mat-icon>
+  </button>
+</div>
+
+<mat-dialog-content>
+  <form [formGroup]="pagoForm" class="pago-form">
+    
+    <!-- ✅ Selector de Proveedor -->
+    <div class="form-section">
+      <h3 class="section-title">
+        <mat-icon>business_center</mat-icon>
+        Seleccionar Proveedor
+      </h3>
+      
+      <div class="form-row">
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label>Buscar Proveedor</mat-label>
+          <mat-select formControlName="selectedProviderId" (selectionChange)="onProviderSelect($event)">
+            <mat-option>
+              <ngx-mat-select-search 
+                [formControl]="providerFilterCtrl"
+                placeholderLabel="Buscar proveedor por nombre o RFC..."
+                noEntriesFoundLabel="No se encontraron proveedores">
+              </ngx-mat-select-search>
+            </mat-option>
+            <mat-option *ngFor="let provider of filteredProviders | async" [value]="provider.ID">
+              <div class="provider-option">
+                <div class="provider-name">{{provider.nombre}}</div>
+                <div class="provider-rfc">{{provider.rfc}}</div>
+              </div>
+            </mat-option>
+          </mat-select>
+          <mat-icon matSuffix>search</mat-icon>
+          <mat-hint *ngIf="!providersLoaded">Cargando proveedores...</mat-hint>
+          <mat-error *ngIf="hasFieldError('selectedProviderId')">
+            Seleccione un proveedor de la lista
+          </mat-error>
+        </mat-form-field>
+      </div>
+
+      <!-- ✅ Información del proveedor seleccionado -->
+      <div *ngIf="selectedProvider" class="provider-info">
+        <div class="info-card payable">
+          <h4>Proveedor Seleccionado</h4>
+          <div class="info-row">
+            <span class="label">Nombre:</span>
+            <span class="value">{{selectedProvider.nombre}}</span>
+          </div>
+          <div class="info-row">
+            <span class="label">RFC:</span>
+            <span class="value">{{selectedProvider.rfc}}</span>
+          </div>
+          <div class="info-row" *ngIf="selectedProvider.email">
+            <span class="label">Email:</span>
+            <span class="value">{{selectedProvider.email}}</span>
+          </div>
+          <div class="info-row" *ngIf="selectedProvider.telefono">
+            <span class="label">Teléfono:</span>
+            <span class="value">{{selectedProvider.telefono}}</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Información del Proveedor (campos editables) -->
+    <div class="form-section">
+      <h3 class="section-title">
+        <mat-icon>business</mat-icon>
+        Información del Proveedor
+        <small *ngIf="selectedProvider">(Auto-completado)</small>
+      </h3>
+      
+      <div class="form-row">
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label>Nombre del Proveedor</mat-label>
+          <input matInput formControlName="providerName" placeholder="Nombre completo o razón social">
+          <mat-icon matSuffix>business</mat-icon>
+          <mat-error *ngIf="hasFieldError('providerName')">
+            {{getFieldError('providerName')}}
+          </mat-error>
+        </mat-form-field>
+      </div>
+
+      <div class="form-row">
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label>RFC del Proveedor</mat-label>
+          <input matInput formControlName="providerRfc" placeholder="RFC del proveedor" 
+                 style="text-transform: uppercase;">
+          <mat-icon matSuffix>assignment_ind</mat-icon>
+          <mat-error *ngIf="hasFieldError('providerRfc')">
+            {{getFieldError('providerRfc')}}
+          </mat-error>
+        </mat-form-field>
+      </div>
+    </div>
+
+    <!-- Información del Documento -->
+    <div class="form-section">
+      <h3 class="section-title">
+        <mat-icon>receipt</mat-icon>
+        Información del Documento
+      </h3>
+
+      <div class="form-row">
+        <div class="form-col">
+          <mat-form-field appearance="outline" class="full-width">
+            <mat-label>Tipo de Documento</mat-label>
+            <mat-select formControlName="documentType">
+              <mat-option *ngFor="let type of documentTypes" [value]="type.value">
+                {{type.label}}
+              </mat-option>
+            </mat-select>
+            <mat-icon matSuffix>article</mat-icon>
+          </mat-form-field>
+        </div>
+
+        <!-- ✅ Selector de CFDIs cuando el tipo es CFDI -->
+        <div class="form-col" *ngIf="showCfdiSelector">
+          <mat-form-field appearance="outline" class="full-width">
+            <mat-label>Seleccionar CFDI</mat-label>
+            <mat-select formControlName="documentId" 
+                        [disabled]="!cfdisLoaded"
+                        (selectionChange)="onCfdiSelect($event.value)">
+              <mat-option value="">-- Seleccionar CFDI --</mat-option>
+              <mat-option *ngFor="let cfdi of filteredCfdis" [value]="cfdi.id">
+                <div class="cfdi-option">
+                  <div class="cfdi-folio">{{getCfdiFolio(cfdi)}}</div>
+                  <div class="cfdi-details">
+                    Total: {{cfdi.total | currency:'MXN':'symbol-narrow':'1.2-2'}} - 
+                    {{cfdi.fecha | date:'dd/MM/yyyy'}}
+                  </div>
+                </div>
+              </mat-option>
+            </mat-select>
+            <mat-icon matSuffix>receipt_long</mat-icon>
+            
+            <mat-hint *ngIf="!cfdisLoaded">
+              Cargando facturas...
+            </mat-hint>
+            <mat-hint *ngIf="cfdisLoaded && filteredCfdis.length === 0">
+              ⚠️ No hay CFDIs para este proveedor
+            </mat-hint>
+            <mat-hint *ngIf="cfdisLoaded && filteredCfdis.length > 0">
+              {{filteredCfdis.length}} factura(s) disponible(s)
+            </mat-hint>
+          </mat-form-field>
+        </div>
+
+        <!-- ✅ Campo de texto para otros tipos de documento -->
+        <div class="form-col" *ngIf="showDocumentIdInput">
+          <mat-form-field appearance="outline" class="full-width">
+            <mat-label>Número de Documento</mat-label>
+            <input matInput formControlName="documentNumber" placeholder="Número o folio">
+            <mat-icon matSuffix>tag</mat-icon>
+          </mat-form-field>
+        </div>
+      </div>
+
+      <!-- ✅ Información del CFDI seleccionado -->
+      <div *ngIf="selectedCfdi" class="cfdi-info">
+        <div class="info-card cfdi-payable">
+          <h4>CFDI Seleccionado</h4>
+          <div class="info-row">
+            <span class="label">Folio:</span>
+            <span class="value">{{getCfdiFolio(selectedCfdi)}}</span>
+          </div>
+          <div class="info-row">
+            <span class="label">UUID:</span>
+            <span class="value uuid">{{selectedCfdi.folio_fiscal}}</span>
+          </div>
+          <div class="info-row">
+            <span class="label">Emisor:</span>
+            <span class="value">{{selectedCfdi.nombre_emisor}}</span>
+          </div>
+          <div class="info-row">
+            <span class="label">RFC Emisor:</span>
+            <span class="value">{{selectedCfdi.rfc_emisor}}</span>
+          </div>
+          <div class="info-row">
+            <span class="label">Fecha:</span>
+            <span class="value">{{selectedCfdi.fecha | date:'dd/MM/yyyy HH:mm'}}</span>
+          </div>
+          <div class="info-row">
+            <span class="label">Método de pago:</span>
+            <span class="value">{{selectedCfdi.metodo_pago}}</span>
+          </div>
+          <div class="info-row">
+            <span class="label">Forma de pago:</span>
+            <span class="value">{{selectedCfdi.forma_pago}}</span>
+          </div>
+          <div class="info-row">
+            <span class="label">Moneda:</span>
+            <span class="value">{{selectedCfdi.moneda}}</span>
+          </div>
+          <div class="info-row">
+            <span class="label">Subtotal:</span>
+            <span class="value">{{selectedCfdi.sub_total | currency:'MXN':'symbol-narrow':'1.2-2'}}</span>
+          </div>
+          <div class="info-row" *ngIf="selectedCfdi.descuento && selectedCfdi.descuento > 0">
+            <span class="label">Descuento:</span>
+            <span class="value">{{selectedCfdi.descuento | currency:'MXN':'symbol-narrow':'1.2-2'}}</span>
+          </div>
+          <div class="info-row" *ngIf="selectedCfdi.iva_trasladado && selectedCfdi.iva_trasladado > 0">
+            <span class="label">IVA Trasladado:</span>
+            <span class="value">{{selectedCfdi.iva_trasladado | currency:'MXN':'symbol-narrow':'1.2-2'}}</span>
+          </div>
+          <div class="info-row">
+            <span class="label">Total:</span>
+            <span class="value amount-payable">{{selectedCfdi.total | currency:'MXN':'symbol-narrow':'1.2-2'}}</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="form-row">
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label>Concepto</mat-label>
+          <mat-select formControlName="concept">
+            <mat-option *ngFor="let concept of conceptOptions" [value]="concept" 
+                       (click)="onConceptSelect(concept)">
+              {{concept}}
+            </mat-option>
+          </mat-select>
+          <mat-icon matSuffix>subject</mat-icon>
+          <mat-error *ngIf="hasFieldError('concept')">
+            {{getFieldError('concept')}}
+          </mat-error>
+        </mat-form-field>
+      </div>
+
+      <!-- Campo de texto personalizado si selecciona "Otro" -->
+      <div class="form-row" *ngIf="pagoForm.get('concept')?.value === 'Otro'">
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label>Concepto Personalizado</mat-label>
+          <input matInput formControlName="concept" placeholder="Describe el concepto del pago">
+          <mat-icon matSuffix>edit</mat-icon>
+        </mat-form-field>
+      </div>
+
+      <!-- Campo de referencia -->
+      <div class="form-row">
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label>Referencia</mat-label>
+          <input matInput formControlName="documentReference" placeholder="Referencia adicional">
+          <mat-icon matSuffix>link</mat-icon>
+        </mat-form-field>
+      </div>
+    </div>
+
+    <!-- Información Financiera y Fechas -->
+    <div class="form-section">
+      <h3 class="section-title">
+        <mat-icon>account_balance_wallet</mat-icon>
+        Información Financiera
+      </h3>
+
+      <div class="form-row">
+        <div class="form-col">
+          <mat-form-field appearance="outline" class="full-width">
+            <mat-label>Monto Total</mat-label>
+            <input matInput type="number" formControlName="totalAmount" 
+                   placeholder="0.00" min="0" step="0.01">
+            <span matPrefix>$&nbsp;</span>
+            <mat-icon matSuffix>money</mat-icon>
+            <mat-error *ngIf="hasFieldError('totalAmount')">
+              {{getFieldError('totalAmount')}}
+            </mat-error>
+          </mat-form-field>
+        </div>
+
+        <div class="form-col">
+          <mat-form-field appearance="outline" class="full-width">
+            <mat-label>Días de Crédito</mat-label>
+            <mat-select formControlName="creditDays">
+              <mat-option *ngFor="let option of creditDaysOptions" [value]="option.value">
+                {{option.label}}
+              </mat-option>
+            </mat-select>
+            <mat-icon matSuffix>schedule</mat-icon>
+            <mat-error *ngIf="hasFieldError('creditDays')">
+              {{getFieldError('creditDays')}}
+            </mat-error>
+          </mat-form-field>
+        </div>
+      </div>
+
+      <div class="form-row">
+        <div class="form-col">
+          <mat-form-field appearance="outline" class="full-width">
+            <mat-label>Fecha de Emisión</mat-label>
+            <input matInput [matDatepicker]="issuePicker" formControlName="issueDate">
+            <mat-datepicker-toggle matSuffix [for]="issuePicker"></mat-datepicker-toggle>
+            <mat-datepicker #issuePicker></mat-datepicker>
+            <mat-error *ngIf="hasFieldError('issueDate')">
+              {{getFieldError('issueDate')}}
+            </mat-error>
+          </mat-form-field>
+        </div>
+
+        <div class="form-col">
+          <mat-form-field appearance="outline" class="full-width">
+            <mat-label>Fecha de Vencimiento</mat-label>
+            <input matInput [matDatepicker]="duePicker" formControlName="dueDate">
+            <mat-datepicker-toggle matSuffix [for]="duePicker"></mat-datepicker-toggle>
+            <mat-datepicker #duePicker></mat-datepicker>
+            <mat-error *ngIf="hasFieldError('dueDate')">
+              {{getFieldError('dueDate')}}
+            </mat-error>
+          </mat-form-field>
+        </div>
+      </div>
+    </div>
+
+    <!-- Notas Adicionales -->
+    <div class="form-section">
+      <h3 class="section-title">
+        <mat-icon>note</mat-icon>
+        Notas Adicionales
+      </h3>
+
+      <div class="form-row">
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label>Notas o Comentarios</mat-label>
+          <textarea matInput formControlName="notes" rows="3" 
+                    placeholder="Información adicional sobre esta cuenta por pagar"></textarea>
+          <mat-icon matSuffix>note_add</mat-icon>
+        </mat-form-field>
+      </div>
+    </div>
+
+    <!-- Resumen de la Cuenta -->
+    <div class="form-summary" *ngIf="pagoForm.get('totalAmount')?.value > 0">
+      <div class="summary-card payable">
+        <h4>Resumen de la Cuenta por Pagar</h4>
+        <div class="summary-row">
+          <span>Proveedor:</span>
+          <span>{{pagoForm.get('providerName')?.value || 'Sin especificar'}}</span>
+        </div>
+        <div class="summary-row">
+          <span>RFC:</span>
+          <span>{{pagoForm.get('providerRfc')?.value || 'Sin especificar'}}</span>
+        </div>
+        <div class="summary-row">
+          <span>Concepto:</span>
+          <span>{{pagoForm.get('concept')?.value || 'Sin especificar'}}</span>
+        </div>
+        <div class="summary-row">
+          <span>Monto:</span>
+          <span class="amount payable">{{pagoForm.get('totalAmount')?.value | currency:'MXN':'symbol-narrow':'1.2-2'}}</span>
+        </div>
+        <div class="summary-row">
+          <span>Emisión:</span>
+          <span>{{pagoForm.get('issueDate')?.value | date:'dd/MM/yyyy'}}</span>
+        </div>
+        <div class="summary-row">
+          <span>Vencimiento:</span>
+          <span>{{pagoForm.get('dueDate')?.value | date:'dd/MM/yyyy'}}</span>
+        </div>
+        <div class="summary-row">
+          <span>Días de crédito:</span>
+          <span>{{pagoForm.get('creditDays')?.value}} días</span>
+        </div>
+      </div>
+    </div>
+
+  </form>
+</mat-dialog-content>
+
+<mat-dialog-actions align="end" class="dialog-actions">
+  <button mat-button (click)="onClose()" [disabled]="loading" class="btn-danger">
+    <mat-icon>close</mat-icon>
+    Cancelar
+  </button>
+  
+  <button mat-raised-button color="accent" class="btn-primary" (click)="onSubmit()" 
+          [disabled]="!pagoForm.valid || loading">
+    <mat-icon *ngIf="!loading">{{data?.id ? 'update' : 'save'}}</mat-icon>
+    <mat-spinner diameter="20" *ngIf="loading"></mat-spinner>
+    {{data?.id ? 'Actualizar' : 'Guardar'}}
+  </button>
+</mat-dialog-actions>

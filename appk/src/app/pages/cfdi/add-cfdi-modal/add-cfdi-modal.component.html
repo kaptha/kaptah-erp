@@ -1,0 +1,464 @@
+<div class="cfdi-modal-container">
+  <h2 mat-dialog-title>{{ isEditing ? 'Editar CFDI' : 'Crear CFDI de Ingreso' }}</h2>
+  
+  <mat-dialog-content>
+    <form [formGroup]="cfdiForm">
+      <!-- Loader -->
+      <div class="loading-overlay" *ngIf="loading">
+        <mat-spinner></mat-spinner>
+      </div>
+      
+      <!-- Pestañas -->
+      <div class="tab-container">
+        <button mat-button [class.active-tab]="activeTab === 'General'" (click)="changeTab('General')">General</button>
+        <button mat-button [class.active-tab]="activeTab === 'Partida'" (click)="changeTab('Partida')">Partida</button>
+      </div>
+      
+      <!-- Contenido de la pestaña General -->
+      <div class="tab-content" *ngIf="activeTab === 'General'">
+        <div class="section-title">Datos generales</div>
+        
+        <div class="form-row">
+          <mat-form-field appearance="outline">
+            <mat-label>Sucursal</mat-label>
+            <mat-select formControlName="sucursal" (selectionChange)="onSucursalSelect($event)">
+              <mat-option [value]="null">Matriz</mat-option>
+              <mat-option *ngFor="let sucursal of sucursales" [value]="sucursal.id">
+                {{ sucursal.alias }} - {{ sucursal.direccion }}
+              </mat-option>
+            </mat-select>
+            <mat-hint *ngIf="loadingSucursales">Cargando sucursales...</mat-hint>
+            <mat-hint *ngIf="!loadingSucursales && sucursales.length === 0">
+              No hay sucursales disponibles
+            </mat-hint>
+          </mat-form-field>
+          
+          <mat-form-field appearance="outline">
+            <mat-label>Serie</mat-label>
+            <input matInput formControlName="serie" required>
+            <mat-error *ngIf="isInvalid('serie')">Campo requerido</mat-error>
+          </mat-form-field>
+
+          <mat-form-field appearance="outline">
+            <mat-label>Folio</mat-label>
+            <input matInput formControlName="folio" type="number">
+            <mat-hint>Dejar vacío para generar automático</mat-hint>
+          </mat-form-field>
+        </div>
+        
+        <!-- Información de la sucursal seleccionada -->
+        <div *ngIf="selectedSucursal" class="sucursal-info-card">
+          <mat-card class="info-card">
+            <mat-card-header>
+              <mat-card-title>
+                <mat-icon>store</mat-icon>
+                Información de la Sucursal
+              </mat-card-title>
+            </mat-card-header>
+            <mat-card-content>
+              <div class="info-row">
+                <span class="info-label">Alias:</span>
+                <span class="info-value">{{ selectedSucursal.alias }}</span>
+              </div>
+              <div class="info-row">
+                <span class="info-label">Teléfono:</span>
+                <span class="info-value">{{ selectedSucursal.telefono }}</span>
+              </div>
+              <div class="info-row">
+                <span class="info-label">Dirección:</span>
+                <span class="info-value">{{ selectedSucursal.direccion }}</span>
+              </div>
+              <div class="info-row">
+                <span class="info-label">Colonia:</span>
+                <span class="info-value">{{ selectedSucursal.colonia }}</span>
+              </div>
+              <div class="info-row">
+                <span class="info-label">Código Postal:</span>
+                <span class="info-value">{{ selectedSucursal.codigoPostal }}</span>
+              </div>
+            </mat-card-content>
+          </mat-card>
+        </div>
+        
+        <div class="form-row">
+          <mat-form-field appearance="outline">
+            <mat-label>Tipo de pago</mat-label>
+            <mat-select formControlName="metodoPago" required>
+              <mat-option *ngFor="let metodo of metodosPago" [value]="metodo.codigo">
+                {{ metodo.nombre }}
+              </mat-option>
+            </mat-select>
+            <mat-error *ngIf="isInvalid('metodoPago')">Campo requerido</mat-error>
+          </mat-form-field>
+          
+          <mat-form-field appearance="outline">
+            <mat-label>Forma de pago</mat-label>
+            <mat-select formControlName="formaPago" required>
+              <mat-option *ngFor="let forma of formasPago" [value]="forma.codigo">
+                {{ forma.nombre }} 
+              </mat-option>
+            </mat-select>
+            <mat-error *ngIf="isInvalid('formaPago')">Campo requerido</mat-error>
+          </mat-form-field>
+          
+          <mat-form-field appearance="outline">
+            <mat-label>Fecha</mat-label>
+            <input matInput [matDatepicker]="picker" formControlName="fecha" required>
+            <mat-datepicker-toggle matSuffix [for]="picker"></mat-datepicker-toggle>
+            <mat-datepicker #picker></mat-datepicker>
+            <mat-error *ngIf="isInvalid('fecha')">Campo requerido</mat-error>
+          </mat-form-field>
+        </div>
+        
+        <div class="form-row">
+          <mat-form-field appearance="outline">
+            <mat-label>Moneda</mat-label>
+            <mat-select formControlName="moneda" required>
+              <mat-option value="MXN">MXN - Peso Mexicano</mat-option>
+              <mat-option value="USD">USD - Dólar Americano</mat-option>
+              <mat-option value="EUR">EUR - Euro</mat-option>
+            </mat-select>
+            <mat-error *ngIf="isInvalid('moneda')">Campo requerido</mat-error>
+          </mat-form-field>
+          
+          <mat-form-field appearance="outline">
+            <mat-label>Tipo de Cambio</mat-label>
+            <input matInput type="number" formControlName="tipoCambio" required step="0.0001">
+            <mat-hint>1 para MXN, tipo de cambio para otras monedas</mat-hint>
+            <mat-error *ngIf="isInvalid('tipoCambio')">Campo requerido</mat-error>
+          </mat-form-field>
+          
+          <mat-form-field appearance="outline">
+            <mat-label>Exportación</mat-label>
+            <mat-select formControlName="exportacion" required>
+              <mat-option value="01">01 - No aplica</mat-option>
+              <mat-option value="02">02 - Definitiva</mat-option>
+              <mat-option value="03">03 - Temporal</mat-option>
+            </mat-select>
+            <mat-error *ngIf="isInvalid('exportacion')">Campo requerido</mat-error>
+          </mat-form-field>
+        </div>
+        
+        
+        <div class="section-title">Datos cliente receptor</div>
+        
+        <div class="form-row">
+          <mat-form-field appearance="outline" class="full-width">
+            <mat-label>Cliente</mat-label>
+            <mat-select formControlName="clienteId" (selectionChange)="onClienteSelect($event)" required>
+              <mat-option>
+                <ngx-mat-select-search 
+                  [formControl]="clienteFilterCtrl"
+                  placeholderLabel="Buscar cliente..."
+                  noEntriesFoundLabel="No se encontraron clientes">
+                </ngx-mat-select-search>
+              </mat-option>
+              <mat-option *ngFor="let cliente of filteredClientes | async" [value]="cliente.ID">
+                {{ cliente.nombre }} - {{ cliente.Rfc }}
+              </mat-option>
+            </mat-select>
+            <mat-error *ngIf="isInvalid('clienteId')">Selecciona un cliente</mat-error>
+          </mat-form-field>
+        </div>
+        
+        <!-- Información del cliente seleccionado -->
+        <div *ngIf="selectedCliente" class="cliente-info">
+          <div class="info-row">
+            <span class="info-label">RFC:</span>
+            <span class="info-value">{{ selectedCliente.Rfc || 'Sin RFC' }}</span>
+          </div>
+          <div class="info-row">
+            <span class="info-label">Dirección:</span>
+            <span class="info-value">
+              {{ selectedCliente.Colonia || 'Sin dirección' }}
+              {{ selectedCliente.Cpostal ? 'CP: ' + selectedCliente.Cpostal : '' }}
+            </span>
+          </div>
+          <div class="info-row">
+            <span class="info-label">Régimen fiscal:</span>
+            <mat-form-field appearance="outline" class="full-width">
+              <mat-select formControlName="regimenFiscalReceptor" required>
+                <mat-option *ngFor="let regimen of regimenesFiscales" [value]="regimen.clave">
+                  {{ regimen.clave }} - {{ regimen.descripcion }}
+                </mat-option>
+              </mat-select>
+              <mat-error *ngIf="isInvalid('regimenFiscalReceptor')">Selecciona un régimen fiscal</mat-error>
+            </mat-form-field>
+          </div>
+          <!-- ✅ NUEVO: Campo de Uso CFDI -->
+          <div class="info-row">
+            <span class="info-label">Uso de CFDI:</span>
+            <mat-form-field appearance="outline" class="full-width">
+              <mat-select formControlName="usoCfdi" required>
+                <mat-option *ngFor="let uso of usoCfdiDisponibles" [value]="uso.codigo">
+                  {{ uso.nombre }}
+                </mat-option>
+              </mat-select>
+              <mat-hint *ngIf="selectedCliente.Rfc?.length === 12">Persona Moral - Mostrando usos aplicables</mat-hint>
+              <mat-hint *ngIf="selectedCliente.Rfc?.length === 13">Persona Física - Mostrando usos aplicables</mat-hint>
+              <mat-error *ngIf="isInvalid('usoCfdi')">Selecciona un uso de CFDI</mat-error>
+            </mat-form-field>
+          </div>
+        </div>
+      </div>
+      
+      <!-- Contenido de la pestaña Partida -->
+      <div class="tab-content" *ngIf="activeTab === 'Partida'">
+        <div class="section-title">Conceptos</div>
+        
+        <div formArrayName="conceptos">
+          <div *ngFor="let concepto of conceptos.controls; let i=index" [formGroupName]="i" class="concepto-container">
+            <div class="concepto-header">
+              <span class="concepto-title">Concepto {{ i + 1 }}</span>
+              <button type="button" mat-icon-button color="warn" (click)="removeConcepto(i)" *ngIf="conceptos.length > 1">
+                <mat-icon>delete</mat-icon>
+              </button>
+            </div>
+            
+            <div class="form-row">
+  <!-- ✅ NUEVO: Selector de tipo (Producto o Servicio) -->
+  <mat-form-field appearance="outline" style="width: 200px; margin-right: 10px;">
+    <mat-label>Tipo</mat-label>
+    <mat-select formControlName="tipoConcepto" 
+                (selectionChange)="onTipoConceptoChange(i)">
+      <mat-option value="producto">Producto</mat-option>
+      <mat-option value="servicio">Servicio</mat-option>
+    </mat-select>
+  </mat-form-field>
+
+  <!-- Dropdown de Producto/Servicio (ahora dinámico) -->
+  <mat-form-field appearance="outline" style="flex: 1;">
+    <mat-label>
+      {{ conceptos.at(i).get('tipoConcepto')?.value === 'servicio' ? 'Servicio' : 'Producto/Servicio' }}*
+    </mat-label>
+    <mat-select formControlName="productoId" 
+                (selectionChange)="onConceptoSelect($event, i)" 
+                required>
+      <mat-option>
+        <ngx-mat-select-search 
+          [formControl]="conceptoFilterCtrl"
+          [placeholderLabel]="conceptos.at(i).get('tipoConcepto')?.value === 'servicio' ? 'Buscar servicio...' : 'Buscar producto...'"
+          noEntriesFoundLabel="No se encontraron resultados">
+        </ngx-mat-select-search>
+      </mat-option>
+      <!-- ✅ Ahora muestra productos O servicios según la selección -->
+      <mat-option *ngFor="let item of getConceptoItems(i)" [value]="item.id">
+        {{ item.name }} - {{ item.description }}
+      </mat-option>
+    </mat-select>
+    <mat-error *ngIf="isConceptoInvalid(i, 'productoId')">
+      Selecciona un {{ conceptos.at(i).get('tipoConcepto')?.value === 'servicio' ? 'servicio' : 'producto' }}
+    </mat-error>
+  </mat-form-field>
+</div>
+            
+            <div class="form-row">
+              <mat-form-field appearance="outline">
+                <mat-label>Clave Prod/Serv SAT</mat-label>
+                <input matInput formControlName="claveProdServ" required>
+                <mat-error *ngIf="isConceptoInvalid(i, 'claveProdServ')">Campo requerido</mat-error>
+              </mat-form-field>
+              
+              <mat-form-field appearance="outline">
+                <mat-label>Cantidad</mat-label>
+                <input matInput type="number" min="0.01" step="0.01" formControlName="cantidad" (input)="calcularImporteConcepto(i)" required>
+                <mat-error *ngIf="isConceptoInvalid(i, 'cantidad')">Cantidad inválida</mat-error>
+              </mat-form-field>
+              
+              <mat-form-field appearance="outline">
+                <mat-label>Clave Unidad SAT</mat-label>
+                <mat-select formControlName="claveUnidad" required>
+                  <mat-option *ngFor="let unidad of unidadesSAT" [value]="unidad.clave">
+                    {{ unidad.clave }} - {{ unidad.descripcion }}
+                  </mat-option>
+                </mat-select>
+                <mat-error *ngIf="isConceptoInvalid(i, 'claveUnidad')">Campo requerido</mat-error>
+              </mat-form-field>
+              
+              <mat-form-field appearance="outline">
+                <mat-label>Objeto Impuesto</mat-label>
+                <mat-select formControlName="objetoImp" required>
+                  <mat-option *ngFor="let objeto of objetosImpuesto" [value]="objeto.clave">
+                    {{ objeto.clave }} - {{ objeto.descripcion }}
+                  </mat-option>
+                </mat-select>
+                <mat-error *ngIf="isConceptoInvalid(i, 'objetoImp')">Campo requerido</mat-error>
+              </mat-form-field>
+            </div>
+            
+            <div class="form-row">
+              <mat-form-field appearance="outline" class="full-width">
+                <mat-label>Descripción</mat-label>
+                <textarea matInput formControlName="descripcion" required></textarea>
+                <mat-error *ngIf="isConceptoInvalid(i, 'descripcion')">Campo requerido</mat-error>
+              </mat-form-field>
+            </div>
+            
+            <div class="form-row">
+              <mat-form-field appearance="outline">
+                <mat-label>Valor unitario</mat-label>
+                <input matInput type="number" min="0" step="0.01" formControlName="valorUnitario" (input)="calcularImporteConcepto(i)" required>
+                <span matPrefix>$&nbsp;</span>
+                <mat-error *ngIf="isConceptoInvalid(i, 'valorUnitario')">Campo requerido</mat-error>
+              </mat-form-field>
+              
+              <mat-form-field appearance="outline">
+                <mat-label>Importe</mat-label>
+                <input matInput type="number" formControlName="importe" readonly>
+                <span matPrefix>$&nbsp;</span>
+              </mat-form-field>
+              
+              <mat-form-field appearance="outline">
+                <mat-label>Descuento</mat-label>
+                <input matInput type="number" min="0" step="0.01" formControlName="descuento" (input)="calcularImporteConcepto(i)">
+                <span matPrefix>$&nbsp;</span>
+              </mat-form-field>
+            </div>
+            
+            <!-- ✨ NUEVO: Impuestos del concepto - Separado en Traslados y Retenciones -->
+            <div class="impuestos-concepto-container">
+  <div class="tax-header">
+    <strong>Impuestos aplicables:</strong>
+    <div class="totales-impuestos">
+      <span>Base: ${{(concepto.get('importe')?.value - concepto.get('descuento')?.value) | number:'1.2-2'}}</span>
+      <span>Total impuestos: ${{concepto.get('impuestosTotal')?.value | number:'1.2-2'}}</span>
+      <span><strong>Total: ${{concepto.get('total')?.value | number:'1.2-2'}}</strong></span>
+    </div>
+  </div>
+  
+  <div formGroupName="impuestos">
+    <!-- Traslados -->
+    <div formArrayName="traslados" class="item-taxes">
+      <div class="tax-section-title">
+        <mat-icon>arrow_upward</mat-icon>
+        <span>Impuestos Trasladados</span>
+      </div>
+      
+      <div class="taxes-grid" *ngIf="getTraslados(i).length > 0">
+        <div *ngFor="let traslado of getTraslados(i).controls; let t=index" [formGroupName]="t" class="tax-item traslado" [class.selected]="traslado.get('selected')?.value">
+          <mat-checkbox formControlName="selected" (change)="onImpuestoSelectionChange(i)" color="primary">
+            <div class="tax-content">
+              <!-- ✅ Mostrar alias (nombre amigable) -->
+              <span class="tax-name">{{traslado.get('alias')?.value}}</span>
+              
+              <!-- ✅ CAMBIO: Mostrar nombre original + código SAT -->
+              <span class="tax-description">
+                {{traslado.get('impuestoOriginal')?.value || 'Impuesto'}}
+                (Código SAT: {{traslado.get('impuesto')?.value}})
+              </span>
+              
+              <span class="tax-rate">{{(traslado.get('tasa')?.value * 100) | number:'1.2-2'}}%</span>
+              <span class="tax-amount" *ngIf="traslado.get('selected')?.value">
+                +${{traslado.get('importe')?.value | number:'1.2-2'}}
+              </span>
+            </div>
+          </mat-checkbox>
+        </div>
+      </div>
+      
+      <p *ngIf="getTraslados(i).length === 0" class="no-taxes-message">
+        No hay impuestos trasladados configurados
+      </p>
+    </div>
+    
+    <!-- Retenciones -->
+    <div formArrayName="retenciones" class="item-taxes">
+      <div class="tax-section-title">
+        <mat-icon>arrow_downward</mat-icon>
+        <span>Impuestos Retenidos</span>
+      </div>
+      
+      <div class="taxes-grid" *ngIf="getRetenciones(i).length > 0">
+        <div *ngFor="let retencion of getRetenciones(i).controls; let r=index" [formGroupName]="r" class="tax-item retencion" [class.selected]="retencion.get('selected')?.value">
+          <mat-checkbox formControlName="selected" (change)="onImpuestoSelectionChange(i)" color="accent">
+            <div class="tax-content">
+              <!-- ✅ Mostrar alias (nombre amigable) -->
+              <span class="tax-name">{{retencion.get('alias')?.value}}</span>
+              
+              <!-- ✅ CAMBIO: Mostrar nombre original + código SAT -->
+              <span class="tax-description">
+                {{retencion.get('impuestoOriginal')?.value || 'Impuesto'}}
+                (Código SAT: {{retencion.get('impuesto')?.value}})
+              </span>
+              
+              <span class="tax-rate">{{(retencion.get('tasa')?.value * 100) | number:'1.2-2'}}%</span>
+              <span class="tax-amount" *ngIf="retencion.get('selected')?.value">
+                -${{retencion.get('importe')?.value | number:'1.2-2'}}
+              </span>
+            </div>
+          </mat-checkbox>
+        </div>
+      </div>
+      
+      <p *ngIf="getRetenciones(i).length === 0" class="no-taxes-message">
+        No hay impuestos retenidos configurados
+      </p>
+    </div>
+  </div>
+</div>
+          </div>
+          
+          <!-- Botón agregar concepto -->
+          <div class="add-button">
+            <button type="button" mat-raised-button color="primary" (click)="addConcepto()">
+              <mat-icon>add</mat-icon> Agregar concepto
+            </button>
+          </div>
+        </div>
+        
+        <!-- Totales -->
+        <div class="totals-container">
+          <div class="total-row">
+            <span class="total-label">Subtotal:</span>
+            <span class="total-value">${{cfdiForm.get('subtotal')?.value | number:'1.2-2'}}</span>
+          </div>
+          <div class="total-row" *ngIf="cfdiForm.get('descuento')?.value > 0">
+            <span class="total-label">Descuento:</span>
+            <span class="total-value">${{cfdiForm.get('descuento')?.value | number:'1.2-2'}}</span>
+          </div>
+          <div class="total-row">
+            <span class="total-label">Impuestos trasladados:</span>
+            <span class="total-value">${{cfdiForm.get('impuestos')?.value | number:'1.2-2'}}</span>
+          </div>
+          <div class="total-row grand-total">
+            <span class="total-label">Total:</span>
+            <span class="total-value">${{cfdiForm.get('total')?.value | number:'1.2-2'}}</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- ✅ Certificado FUERA de los tabs pero DENTRO del mat-dialog-content -->
+      <mat-divider></mat-divider>
+      
+      <div class="certificado-section">
+        <h3>Certificado Digital</h3>
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label>Contraseña de certificado CSD</mat-label>
+          <input 
+            matInput 
+            type="password" 
+            formControlName="csdPassword"
+            placeholder="Ingresa la contraseña de tu certificado"
+            required
+          />
+          <mat-icon matSuffix>lock</mat-icon>
+          <mat-error *ngIf="cfdiForm.get('csdPassword')?.hasError('required')">
+            La contraseña del certificado es requerida
+          </mat-error>
+        </mat-form-field>
+        
+        <mat-hint class="password-hint">
+          Esta contraseña se usa para firmar digitalmente el CFDI y no se guarda en el sistema
+        </mat-hint>
+      </div>
+    </form>
+  </mat-dialog-content>
+
+  
+  <mat-dialog-actions align="end">
+    <button mat-button (click)="onCancel()" [disabled]="loading">Cancelar</button>
+    <button mat-raised-button color="primary" (click)="onSubmit()" [disabled]="loading || cfdiForm.invalid">
+      {{ isEditing ? 'Actualizar' : 'Crear CFDI' }}
+    </button>
+  </mat-dialog-actions>
+</div>

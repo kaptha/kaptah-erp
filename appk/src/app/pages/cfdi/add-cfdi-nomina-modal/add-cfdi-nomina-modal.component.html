@@ -1,0 +1,599 @@
+<div class="cfdi-modal-container">
+  <h2 mat-dialog-title>{{ isEditing ? 'Editar CFDI de Nómina' : 'Crear CFDI de Nómina' }}</h2>
+  
+  <mat-dialog-content>
+    <!-- Loader -->
+    <div class="loading-overlay" *ngIf="loading">
+      <mat-spinner></mat-spinner>
+    </div>
+    
+    <!-- Pestañas principales -->
+    <div class="tab-container">
+      <button mat-button [class.active-tab]="activeTab === 'General'" (click)="changeTab('General')">General</button>
+      <button mat-button [class.active-tab]="activeTab === 'DatosEmpleado'" (click)="changeTab('DatosEmpleado')">Datos Empleado</button>
+      <button mat-button [class.active-tab]="activeTab === 'Partida'" (click)="changeTab('Partida')">Partida</button>
+    </div>
+    
+    <!-- Contenido de la pestaña General -->
+    <div class="tab-content" *ngIf="activeTab === 'General'" [formGroup]="cfdiForm">
+      <div class="section-title">Datos generales</div>
+      
+      <div class="form-row">
+        <mat-form-field appearance="outline">
+          <mat-label>Sucursal</mat-label>
+          <mat-select formControlName="sucursal" (selectionChange)="onSucursalSelect($event)">
+            <mat-option [value]="null">Matriz</mat-option>
+            <mat-option *ngFor="let sucursal of sucursales" [value]="sucursal.id">
+              {{ sucursal.alias }} - {{ sucursal.direccion }}
+            </mat-option>
+          </mat-select>
+          <mat-hint *ngIf="loadingSucursales">Cargando sucursales...</mat-hint>
+          <mat-hint *ngIf="!loadingSucursales && sucursales.length === 0">
+            No hay sucursales disponibles
+          </mat-hint>
+        </mat-form-field>
+        
+        <mat-form-field appearance="outline">
+          <mat-label>Serie</mat-label>
+          <input matInput formControlName="serie" required>
+          <mat-error *ngIf="isInvalid('serie')">Campo requerido</mat-error>
+        </mat-form-field>
+      </div>
+      
+      <!-- ✨ NUEVO: Información de la sucursal seleccionada -->
+      <div *ngIf="selectedSucursal" class="sucursal-info-card">
+        <mat-card class="info-card">
+          <mat-card-header>
+            <mat-card-title>
+              <mat-icon>store</mat-icon>
+              Información de la Sucursal
+            </mat-card-title>
+          </mat-card-header>
+          <mat-card-content>
+            <div class="info-row">
+              <span class="info-label">Alias:</span>
+              <span class="info-value">{{ selectedSucursal.alias }}</span>
+            </div>
+            <div class="info-row">
+              <span class="info-label">Teléfono:</span>
+              <span class="info-value">{{ selectedSucursal.telefono }}</span>
+            </div>
+            <div class="info-row">
+              <span class="info-label">Dirección:</span>
+              <span class="info-value">{{ selectedSucursal.direccion }}</span>
+            </div>
+            <div class="info-row">
+              <span class="info-label">Colonia:</span>
+              <span class="info-value">{{ selectedSucursal.colonia }}</span>
+            </div>
+            <div class="info-row">
+              <span class="info-label">Código Postal:</span>
+              <span class="info-value">{{ selectedSucursal.codigoPostal }}</span>
+            </div>
+          </mat-card-content>
+        </mat-card>
+      </div>
+      
+      <div class="form-row">
+        <mat-form-field appearance="outline">
+          <mat-label>Fecha</mat-label>
+          <input matInput [matDatepicker]="picker" formControlName="fecha" required>
+          <mat-datepicker-toggle matSuffix [for]="picker"></mat-datepicker-toggle>
+          <mat-datepicker #picker></mat-datepicker>
+          <mat-error *ngIf="isInvalid('fecha')">Campo requerido</mat-error>
+        </mat-form-field>
+        
+        <mat-form-field appearance="outline">
+          <mat-label>Tipo de nómina</mat-label>
+          <mat-select formControlName="tipoNomina" required>
+            <mat-option *ngFor="let tipo of tiposNomina" [value]="tipo.clave">
+              {{ tipo.clave }} - {{ tipo.descripcion }}
+            </mat-option>
+          </mat-select>
+          <mat-error *ngIf="isInvalid('tipoNomina')">Campo requerido</mat-error>
+        </mat-form-field>
+      </div>
+      
+      <div class="form-row">
+        <mat-form-field appearance="outline">
+          <mat-label>Moneda</mat-label>
+          <mat-select formControlName="moneda" required>
+            <mat-option value="MXN">MXN - Peso Mexicano</mat-option>
+          </mat-select>
+          <mat-error *ngIf="isInvalid('moneda')">Campo requerido</mat-error>
+        </mat-form-field>
+        
+        <mat-form-field appearance="outline">
+          <mat-label>Registro Patronal</mat-label>
+          <input matInput formControlName="registroPatronal" required>
+          <mat-error *ngIf="isInvalid('registroPatronal')">Campo requerido</mat-error>
+        </mat-form-field>
+      </div>
+      
+      <div class="section-title">Periodo de pago</div>
+      
+      <div class="form-row">
+        <mat-form-field appearance="outline">
+          <mat-label>Fecha de pago</mat-label>
+          <input matInput [matDatepicker]="pickerPago" formControlName="fechaPago" required>
+          <mat-datepicker-toggle matSuffix [for]="pickerPago"></mat-datepicker-toggle>
+          <mat-datepicker #pickerPago></mat-datepicker>
+          <mat-error *ngIf="isInvalid('fechaPago')">Campo requerido</mat-error>
+        </mat-form-field>
+        
+        <mat-form-field appearance="outline">
+          <mat-label>Fecha inicial</mat-label>
+          <input matInput [matDatepicker]="pickerInicial" formControlName="fechaInicialPago">
+          <mat-datepicker-toggle matSuffix [for]="pickerInicial"></mat-datepicker-toggle>
+          <mat-datepicker #pickerInicial></mat-datepicker>
+        </mat-form-field>
+        
+        <mat-form-field appearance="outline">
+          <mat-label>Fecha final</mat-label>
+          <input matInput [matDatepicker]="pickerFinal" formControlName="fechaFinalPago">
+          <mat-datepicker-toggle matSuffix [for]="pickerFinal"></mat-datepicker-toggle>
+          <mat-datepicker #pickerFinal></mat-datepicker>
+        </mat-form-field>
+        
+        <mat-form-field appearance="outline">
+          <mat-label>Días pagados</mat-label>
+          <input matInput type="number" min="0" step="1" formControlName="diasPagados" required>
+          <mat-error *ngIf="isInvalid('diasPagados')">Campo requerido</mat-error>
+        </mat-form-field>
+      </div>
+      
+      <div class="section-title">Observaciones (opcional)</div>
+      
+      <div class="form-row">
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label>Observaciones</mat-label>
+          <textarea matInput formControlName="observaciones" rows="3"></textarea>
+        </mat-form-field>
+      </div>
+    </div>
+    
+    <!-- Contenido de la pestaña Datos Empleado -->
+    <div class="tab-content" *ngIf="activeTab === 'DatosEmpleado'" [formGroup]="nominaForm">
+      <div formGroupName="empleado">
+        <div class="section-title">Datos del empleado</div>
+
+    
+        
+        <!-- ✨ SELECTOR DE EMPLEADO -->
+        <div class="form-row">
+          <mat-form-field appearance="outline" class="full-width">
+            <mat-label>Empleado</mat-label>
+            <mat-select formControlName="empleado" required (selectionChange)="onEmpleadoSelect($event.value)">
+              <mat-option>
+                <ngx-mat-select-search 
+                  [formControl]="empleadoFilterCtrl"
+                  placeholderLabel="Buscar empleado..."
+                  noEntriesFoundLabel="No se encontraron empleados">
+                </ngx-mat-select-search>
+              </mat-option>
+              <mat-option *ngFor="let emp of filteredEmpleados | async" [value]="emp.id">
+                {{ emp.nombre }} {{ emp.apellidoPaterno }} {{ emp.apellidoMaterno }}
+              </mat-option>
+            </mat-select>
+            <mat-error *ngIf="nominaForm.get('empleado.empleado')?.hasError('required')">
+              Selecciona un empleado
+            </mat-error>
+          </mat-form-field>
+        </div>
+        
+        <!-- ✨ NUEVO: Tarjeta de información del empleado seleccionado -->
+        <div *ngIf="selectedEmpleado" class="employee-info-card">
+          <mat-card class="info-card">
+            <mat-card-header>
+              <mat-card-title>
+                <mat-icon>person</mat-icon>
+                Información del Empleado
+              </mat-card-title>
+            </mat-card-header>
+            <mat-card-content>
+              <div class="info-row">
+                <span class="info-label">Nombre:</span>
+                <span class="info-value">{{ selectedEmpleado.nombre }}</span>
+              </div>
+              <div class="info-row">
+                <span class="info-label">RFC:</span>
+                <span class="info-value">{{ selectedEmpleado.rfc }}</span>
+              </div>
+              <div class="info-row" *ngIf="selectedEmpleado.curp">
+                <span class="info-label">CURP:</span>
+                <span class="info-value">{{ selectedEmpleado.curp }}</span>
+              </div>
+              <div class="info-row" *ngIf="selectedEmpleado.numeroEmpleado">
+                <span class="info-label">No. Empleado:</span>
+                <span class="info-value">{{ selectedEmpleado.numeroEmpleado }}</span>
+              </div>
+              <div class="info-row" *ngIf="selectedEmpleado.puesto">
+                <span class="info-label">Puesto:</span>
+                <span class="info-value">{{ selectedEmpleado.puesto }}</span>
+              </div>
+              <div class="info-row" *ngIf="selectedEmpleado.departamento">
+                <span class="info-label">Departamento:</span>
+                <span class="info-value">{{ selectedEmpleado.departamento }}</span>
+              </div>
+            </mat-card-content>
+          </mat-card>
+        </div>
+        
+        <!-- FORMULARIO DEL EMPLEADO -->
+        <div *ngIf="selectedEmpleado">
+          <div class="form-row">
+            <mat-form-field appearance="outline">
+              <mat-label>Número de empleado</mat-label>
+              <input matInput formControlName="numeroEmpleado" required>
+              <mat-error *ngIf="nominaForm.get('empleado.numeroEmpleado')?.hasError('required')">Campo requerido</mat-error>
+            </mat-form-field>
+            
+            <mat-form-field appearance="outline">
+              <mat-label>RFC</mat-label>
+              <input matInput formControlName="rfc" required>
+              <mat-error *ngIf="nominaForm.get('empleado.rfc')?.hasError('required')">Campo requerido</mat-error>
+            </mat-form-field>
+            
+            <mat-form-field appearance="outline">
+              <mat-label>CURP</mat-label>
+              <input matInput formControlName="curp" required>
+              <mat-error *ngIf="nominaForm.get('empleado.curp')?.hasError('required')">Campo requerido</mat-error>
+            </mat-form-field>
+          </div>
+          
+          <div class="form-row">
+            <mat-form-field appearance="outline" class="full-width">
+              <mat-label>Nombre</mat-label>
+              <input matInput formControlName="nombre" required>
+              <mat-error *ngIf="nominaForm.get('empleado.nombre')?.hasError('required')">Campo requerido</mat-error>
+            </mat-form-field>
+          </div>
+          
+          <div class="form-row">
+            <mat-form-field appearance="outline">
+              <mat-label>Departamento</mat-label>
+              <input matInput formControlName="departamento">
+            </mat-form-field>
+            
+            <mat-form-field appearance="outline">
+              <mat-label>Puesto</mat-label>
+              <input matInput formControlName="puesto">
+            </mat-form-field>
+            
+            <mat-form-field appearance="outline">
+              <mat-label>NSS</mat-label>
+              <input matInput formControlName="numSeguridadSocial">
+            </mat-form-field>
+          </div>
+          
+          <div class="form-row">
+            <mat-form-field appearance="outline">
+              <mat-label>Fecha inicio relación laboral</mat-label>
+              <input matInput [matDatepicker]="pickerRelacion" formControlName="fechaInicioRelacionLaboral">
+              <mat-datepicker-toggle matSuffix [for]="pickerRelacion"></mat-datepicker-toggle>
+              <mat-datepicker #pickerRelacion></mat-datepicker>
+            </mat-form-field>
+            
+            <mat-form-field appearance="outline">
+              <mat-label>Antigüedad</mat-label>
+              <input matInput formControlName="antiguedad">
+            </mat-form-field>
+          </div>
+          
+          <div class="form-row">
+            <mat-form-field appearance="outline">
+              <mat-label>Banco</mat-label>
+              <mat-select formControlName="banco">
+                <mat-option *ngFor="let banco of bancos" [value]="banco.clave">
+                  {{ banco.clave }} - {{ banco.descripcion }}
+                </mat-option>
+              </mat-select>
+            </mat-form-field>
+            
+            <mat-form-field appearance="outline">
+              <mat-label>CLABE</mat-label>
+              <input matInput formControlName="clabe">
+            </mat-form-field>
+          </div>
+          
+          <div class="form-row">
+            <mat-form-field appearance="outline">
+              <mat-label>Tipo de contrato</mat-label>
+              <mat-select formControlName="tipoContrato" required>
+                <mat-option *ngFor="let contrato of tiposContrato" [value]="contrato.clave">
+                  {{ contrato.clave }} - {{ contrato.descripcion }}
+                </mat-option>
+              </mat-select>
+              <mat-error *ngIf="nominaForm.get('empleado.tipoContrato')?.hasError('required')">Campo requerido</mat-error>
+            </mat-form-field>
+            
+            <mat-form-field appearance="outline">
+              <mat-label>Tipo de jornada</mat-label>
+              <mat-select formControlName="tipoJornada" required>
+                <mat-option *ngFor="let jornada of tiposJornada" [value]="jornada.clave">
+                  {{ jornada.clave }} - {{ jornada.descripcion }}
+                </mat-option>
+              </mat-select>
+              <mat-error *ngIf="nominaForm.get('empleado.tipoJornada')?.hasError('required')">Campo requerido</mat-error>
+            </mat-form-field>
+          </div>
+          
+          <div class="form-row">
+            <mat-form-field appearance="outline">
+              <mat-label>Régimen de contratación</mat-label>
+              <mat-select formControlName="regimenContratacion" required>
+                <mat-option *ngFor="let regimen of regimenesContratacion" [value]="regimen.clave">
+                  {{ regimen.clave }} - {{ regimen.descripcion }}
+                </mat-option>
+              </mat-select>
+              <mat-error *ngIf="nominaForm.get('empleado.regimenContratacion')?.hasError('required')">Campo requerido</mat-error>
+            </mat-form-field>
+            
+            <mat-form-field appearance="outline">
+              <mat-label>Riesgo del puesto</mat-label>
+              <mat-select formControlName="riesgoPuesto">
+                <mat-option *ngFor="let riesgo of riesgosPuesto" [value]="riesgo.clave">
+                  {{ riesgo.clave }} - {{ riesgo.descripcion }}
+                </mat-option>
+              </mat-select>
+            </mat-form-field>
+          </div>
+          
+          <div class="form-row">
+            <mat-form-field appearance="outline">
+              <mat-label>Salario base de cotización</mat-label>
+              <input matInput type="number" min="0" step="0.01" formControlName="salarioBaseCotizacion">
+            </mat-form-field>
+            
+            <mat-form-field appearance="outline">
+              <mat-label>Salario diario integrado</mat-label>
+              <input matInput type="number" min="0" step="0.01" formControlName="salarioDiarioIntegrado">
+            </mat-form-field>
+          </div>
+          
+          <div class="section-title">Certificado Digital</div>
+          <mat-form-field appearance="outline" class="full-width">
+            <mat-label>Contraseña de certificado CSD</mat-label>
+            <input 
+              matInput 
+              type="password" 
+              formControlName="contrasenaCertificado"
+              required
+              placeholder="Ingresa la contraseña del certificado">
+            <mat-icon matSuffix>lock</mat-icon>
+            <mat-hint>Esta contraseña se usa para firmar digitalmente el CFDI y no se guarda en el sistema</mat-hint>
+            <mat-error *ngIf="nominaForm.get('empleado.contrasenaCertificado')?.hasError('required')">
+              La contraseña del certificado es requerida
+            </mat-error>
+          </mat-form-field>
+        </div>
+      </div>
+    </div>
+    
+    <!-- Contenido de la pestaña Partida -->
+    <div class="tab-content" *ngIf="activeTab === 'Partida'" [formGroup]="cfdiForm">
+      <!-- Subpestañas para Percepciones, Deducciones y Otros Pagos -->
+      <div class="subtab-container">
+        <button mat-button [class.active-tab]="activePartidaTab === 'Percepciones'" (click)="changePartidaTab('Percepciones')">Percepciones</button>
+        <button mat-button [class.active-tab]="activePartidaTab === 'Deducciones'" (click)="changePartidaTab('Deducciones')">Deducciones</button>
+        <button mat-button [class.active-tab]="activePartidaTab === 'OtrosPagos'" (click)="changePartidaTab('OtrosPagos')">Otros Pagos</button>
+      </div>
+      
+      <!-- Contenido de la subpestaña Percepciones -->
+      <div class="subtab-content" *ngIf="activePartidaTab === 'Percepciones'">
+        <div formArrayName="percepciones">
+          <div *ngFor="let percepcion of percepciones.controls; let i = index" [formGroupName]="i" class="partida-container">
+            <div class="partida-header">
+              <span class="partida-title">Percepción {{ i + 1 }}</span>
+              <button type="button" mat-icon-button color="warn" (click)="removePercepcion(i)" matTooltip="Eliminar percepción">
+                <mat-icon>delete</mat-icon>
+              </button>
+            </div>
+            
+            <div class="form-row">
+              <mat-form-field appearance="outline">
+                <mat-label>Tipo de percepción</mat-label>
+                <mat-select formControlName="tipo" required>
+                  <mat-option *ngFor="let tipo of tiposPercepcion" [value]="tipo.clave">
+                    {{ tipo.clave }} - {{ tipo.descripcion }}
+                  </mat-option>
+                </mat-select>
+              </mat-form-field>
+              
+              <mat-form-field appearance="outline">
+                <mat-label>Clave</mat-label>
+                <input matInput formControlName="clave" required>
+              </mat-form-field>
+            </div>
+            
+            <div class="form-row">
+              <mat-form-field appearance="outline" class="full-width">
+                <mat-label>Concepto</mat-label>
+                <input matInput formControlName="concepto" required>
+              </mat-form-field>
+            </div>
+            
+            <div class="form-row">
+              <mat-form-field appearance="outline">
+                <mat-label>Importe gravado</mat-label>
+                <input matInput type="number" min="0" step="0.01" formControlName="importeGravado" required>
+                <span matPrefix>$&nbsp;</span>
+              </mat-form-field>
+              
+              <mat-form-field appearance="outline">
+                <mat-label>Importe exento</mat-label>
+                <input matInput type="number" min="0" step="0.01" formControlName="importeExento" required>
+                <span matPrefix>$&nbsp;</span>
+              </mat-form-field>
+            </div>
+          </div>
+          
+          <div class="add-button">
+            <button type="button" mat-stroked-button color="primary" (click)="addPercepcion()">
+              <mat-icon>add</mat-icon> Agregar percepción
+            </button>
+          </div>
+        </div>
+      </div>
+      
+      <!-- Contenido de la subpestaña Deducciones -->
+      <div class="subtab-content" *ngIf="activePartidaTab === 'Deducciones'">
+        <div formArrayName="deducciones">
+          <div *ngFor="let deduccion of deducciones.controls; let i = index" [formGroupName]="i" class="partida-container">
+      <div class="partida-header">
+        <span class="partida-title">Deducción {{ i + 1 }}</span>
+        <button type="button" mat-icon-button color="warn" (click)="removeDeduccion(i)" matTooltip="Eliminar deducción">
+          <mat-icon>delete</mat-icon>
+        </button>
+      </div>
+      
+      <div class="form-row">
+        <mat-form-field appearance="outline">
+          <mat-label>Tipo de deducción</mat-label>
+          <mat-select formControlName="tipo" required (selectionChange)="onDeduccionTipoChange($event.value, i)">
+            <mat-option *ngFor="let tipo of tiposDeduccion" [value]="tipo.clave">
+              {{ tipo.clave }} - {{ tipo.descripcion }}
+            </mat-option>
+          </mat-select>
+        </mat-form-field>
+        
+        <mat-form-field appearance="outline">
+          <mat-label>Clave</mat-label>
+          <input matInput formControlName="clave" required>
+        </mat-form-field>
+      </div>
+      
+      <div class="form-row">
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label>Concepto</mat-label>
+          <input matInput formControlName="concepto" required>
+        </mat-form-field>
+      </div>
+      
+      <div class="form-row">
+        <mat-form-field appearance="outline">
+          <mat-label>Importe gravado</mat-label>
+          <input matInput type="number" min="0" step="0.01" formControlName="importeGravado" required (input)="calcularTotales()">
+          <span matPrefix>$&nbsp;</span>
+        </mat-form-field>
+        
+        <mat-form-field appearance="outline">
+          <mat-label>Importe exento</mat-label>
+          <input matInput type="number" min="0" step="0.01" formControlName="importeExento" required (input)="calcularTotales()">
+          <span matPrefix>$&nbsp;</span>
+        </mat-form-field>
+      </div>
+    </div>
+    
+    <div class="add-button">
+      <button type="button" mat-stroked-button color="primary" (click)="addDeduccion()">
+        <mat-icon>add</mat-icon> Agregar deducción
+      </button>
+    </div>
+  </div>
+      </div>
+      
+      <!-- Contenido de la subpestaña Otros Pagos -->
+      <div class="subtab-content" *ngIf="activePartidaTab === 'OtrosPagos'">
+  <div formArrayName="otrosPagos">
+    <div *ngFor="let otroPago of otrosPagos.controls; let i = index" [formGroupName]="i" class="partida-container">
+      <div class="partida-header">
+        <span class="partida-title">Otro Pago {{ i + 1 }}</span>
+        <button type="button" mat-icon-button color="warn" (click)="removeOtroPago(i)" matTooltip="Eliminar otro pago">
+          <mat-icon>delete</mat-icon>
+        </button>
+      </div>
+      
+      <div class="form-row">
+        <mat-form-field appearance="outline">
+          <mat-label>Tipo de otro pago</mat-label>
+          <mat-select formControlName="tipo" required (selectionChange)="onOtroPagoTipoChange($event.value, i)">
+            <mat-option *ngFor="let tipo of tiposOtroPago" [value]="tipo.clave">
+              {{ tipo.clave }} - {{ tipo.descripcion }}
+            </mat-option>
+          </mat-select>
+        </mat-form-field>
+        
+        <mat-form-field appearance="outline">
+          <mat-label>Clave</mat-label>
+          <input matInput formControlName="clave" required>
+        </mat-form-field>
+      </div>
+      
+      <div class="form-row">
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label>Concepto</mat-label>
+          <input matInput formControlName="concepto" required>
+        </mat-form-field>
+      </div>
+      
+      <div class="form-row">
+        <mat-form-field appearance="outline">
+          <mat-label>Importe</mat-label>
+          <input matInput type="number" min="0" step="0.01" formControlName="importe" required>
+          <span matPrefix>$&nbsp;</span>
+        </mat-form-field>
+      </div>
+    </div>
+    
+    <div class="add-button">
+      <button type="button" mat-stroked-button color="primary" (click)="addOtroPago()">
+        <mat-icon>add</mat-icon> Agregar otro pago
+      </button>
+    </div>
+  </div>
+      </div>
+      
+      <!-- Totales -->
+      <div class="totals-container">
+        <div class="total-row">
+          <span class="total-label">Total percepciones:</span>
+          <span class="total-value">${{cfdiForm.get('totalPercepciones')?.value | number:'1.2-2'}}</span>
+        </div>
+        <div class="total-row">
+          <span class="total-label">Total deducciones:</span>
+          <span class="total-value">${{cfdiForm.get('totalDeducciones')?.value | number:'1.2-2'}}</span>
+        </div>
+        <div class="total-row">
+          <span class="total-label">Total otros pagos:</span>
+          <span class="total-value">${{cfdiForm.get('totalOtrosPagos')?.value | number:'1.2-2'}}</span>
+        </div>
+        <div class="total-row grand-total">
+          <span class="total-label">Total a pagar:</span>
+          <span class="total-value">${{cfdiForm.get('total')?.value | number:'1.2-2'}}</span>
+        </div>
+      </div>
+    </div>
+    
+    <mat-divider></mat-divider>
+    
+    <div class="certificado-section" [formGroup]="cfdiForm">
+      <h3>Certificado Digital (Global)</h3>
+      <mat-form-field appearance="outline" class="full-width">
+        <mat-label>Contraseña de certificado CSD</mat-label>
+        <input 
+          matInput 
+          type="password" 
+          formControlName="csdPassword"
+          placeholder="Ingresa la contraseña de tu certificado"
+          required
+        />
+        <mat-icon matSuffix>lock</mat-icon>
+        <mat-error *ngIf="cfdiForm.get('csdPassword')?.hasError('required')">
+          La contraseña del certificado es requerida
+        </mat-error>
+      </mat-form-field>
+      
+      <mat-hint class="password-hint">
+        Esta contraseña se usa para firmar digitalmente el CFDI y no se guarda en el sistema
+      </mat-hint>
+    </div>
+  </mat-dialog-content>
+  
+  <mat-dialog-actions align="end">
+    <button mat-button (click)="onCancel()" [disabled]="loading">Cancelar</button>
+    <button mat-raised-button color="primary" (click)="onSubmit()" [disabled]="loading || cfdiForm.invalid">
+      {{ isEditing ? 'Actualizar' : 'Crear CFDI' }}
+    </button>
+  </mat-dialog-actions>
+</div>

@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cotización - Creative Quote</title>
+</head>
+<body>
+    <div class="container">
+        <!-- Elementos decorativos flotantes -->
+        <div class="floating-shapes">
+            <div class="shape-top-left"></div>
+            <div class="shape-top-right"></div>
+            <div class="shape-bottom-left"></div>
+            <div class="shape-bottom-right"></div>
+        </div>
+        
+        <!-- Encabezado con logo hexagonal -->
+        <div class="header">
+            <div class="logo-section">
+                <div class="logo-hexagon">
+                    <img src="[[LOGO_URL]]" alt="Logo" class="logo-img" onerror="this.style.display='none'; this.nextElementSibling.style.display='block';">
+                    <div class="logo-letter">N</div>
+                </div>
+                <div class="company-info">
+                    <div class="company-name">[[NOMBRE_EMPRESA]]</div>
+                    <div class="company-subtitle">EMPRESA</div>
+                </div>
+            </div>
+            <div class="document-title">
+                COTIZACIÓN
+            </div>
+        </div>
+        
+        <!-- Información del cliente y cotización -->
+        <div class="client-quote-info">
+            <div class="client-section">
+                <div class="section-label">Cotización para:</div>
+                <div class="client-name">[[NOMBRE_CLIENTE]]</div>
+                <div class="client-details">
+                    <div>[[DIRECCION_CLIENTE]]</div>
+                    <div>RFC: [[RFC_CLIENTE]]</div>
+                    <div>Tel: [[TELEFONO_CLIENTE]]</div>
+                </div>
+            </div>
+            <div class="quote-section">
+                <div class="quote-detail">
+                    <span class="quote-label">Cotización No:</span>
+                    <span class="quote-value">[[FOLIO_COTIZACION]]</span>
+                </div>
+                <div class="quote-detail">
+                    <span class="quote-label">Fecha:</span>
+                    <span class="quote-value">[[FECHA_COTIZACION]]</span>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Tabla de productos/servicios -->
+        <table class="items-table">
+            <thead>
+                <tr>
+                    <th class="col-number"></th>
+                    <th class="col-description">Descripción del Artículo</th>
+                    <th class="col-price">Precio</th>
+                    <th class="col-quantity">Cant.</th>
+                    <th class="col-total">Total</th>
+                </tr>
+            </thead>
+            <tbody>
+                <!-- Filas de productos/servicios que se repetirán según los ítems -->
+                [[FILAS_ITEMS]]
+                <!-- Fin de las filas repetibles -->
+            </tbody>
+        </table>
+        
+        <!-- Sección de términos y totales -->
+        <div class="terms-totals-section">
+            <div class="terms-section">
+                <div class="terms-title">Términos y Condiciones:</div>
+                <div class="terms-content">
+                    [[OBSERVACIONES]]
+                </div>
+            </div>
+            <div class="totals-section">
+                <div class="total-row">
+                    <span class="total-label">Subtotal:</span>
+                    <span class="total-value">[[SUBTOTAL]]</span>
+                </div>
+                <div class="total-row">
+                    <span class="total-label">IVA ([[PORCENTAJE_IVA]]%):</span>
+                    <span class="total-value">[[MONTO_IVA]]</span>
+                </div>
+                <div class="total-row grand-total">
+                    <span class="total-label">Total:</span>
+                    <span class="total-value">[[TOTAL]]</span>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

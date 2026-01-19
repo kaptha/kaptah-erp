@@ -1,0 +1,491 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Nota de Remisión - Classic</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Georgia', 'Times New Roman', serif;
+      background-color: #f5f5f5;
+      color: #000;
+      line-height: 1.4;
+      padding: 15px;
+    }
+
+    .container {
+      width: 100%;
+      max-width: 210mm;
+      min-height: 297mm;
+      margin: 0 auto;
+      background: #ffffff;
+      padding: 20px 25px;
+      border: 3px solid #000;
+      border-radius: 25px;
+      position: relative;
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* HEADER SECTION */
+    .header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      margin-bottom: 10px;
+      margin-top: 35px; /* Espacio para la fecha */
+    }
+
+    .logo-section {
+      flex: 0 0 180px;
+      text-align: center;
+    }
+
+    .logo-box {
+      width: 120px;
+      height: 120px;
+      background-color: transparent;
+      border-radius: 15px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      margin: 0 auto 8px;
+    }
+
+    .logo {
+      max-width: 100px;
+      max-height: 100px;
+      object-fit: contain;
+    }
+
+    .logo-text {
+      font-size: 13px;
+      font-weight: 700;
+      color: #000;
+      margin-top: 6px;
+      line-height: 1.2;
+    }
+
+    .folio {
+      font-size: 14px;
+      font-weight: 700;
+      color: #000;
+      margin-top: 5px;
+    }
+
+    .title-section {
+      flex: 1;
+      text-align: center;
+      padding: 0 15px;
+      padding-right: 120px; /* Añadido espacio a la derecha para separar de la fecha */
+    }
+
+    .title-section h1 {
+      font-size: 24px;
+      font-weight: 700;
+      margin-bottom: 8px;
+      letter-spacing: 1px;
+    }
+
+    .fecha-box {
+      position: absolute;
+      top: 20px;
+      right: 25px;
+      border: 2px solid #000;
+      padding: 6px 10px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 11px;
+      font-weight: 700;
+      z-index: 10;
+    }
+
+    .fecha-box .fecha-label {
+      margin-right: 4px;
+    }
+
+    .fecha-box .fecha-fields {
+      display: flex;
+      gap: 4px;
+    }
+
+    .fecha-box .fecha-field {
+      width: 28px;
+      height: 22px;
+      border: 1px solid #000;
+      background: #fff;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 10px;
+    }
+
+    /* INFORMACIÓN DE CONTACTO */
+    .contact-info {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 6px 25px;
+      font-size: 10px;
+      margin-bottom: 15px;
+      padding: 0 8px;
+    }
+
+    .contact-item {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .contact-icon {
+      font-size: 12px;
+      width: 14px;
+      text-align: center;
+    }
+
+    /* CAMPOS DE CLIENTE */
+    .client-fields {
+      margin: 12px 0;
+    }
+
+    .field-row {
+      display: flex;
+      gap: 25px;
+      margin-bottom: 10px;
+    }
+
+    .field {
+      flex: 1;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .field label {
+      font-weight: 700;
+      font-size: 11px;
+      white-space: nowrap;
+      text-transform: uppercase;
+    }
+
+    .field-line {
+      flex: 1;
+      border-bottom: 1px solid #000;
+      height: 18px;
+      padding-left: 5px;
+      font-size: 10px;
+    }
+
+    /* TABLA */
+    .tabla {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 12px 0;
+      border: 2px solid #000;
+    }
+
+    .tabla thead th {
+      padding: 8px 6px;
+      text-align: center;
+      font-weight: 700;
+      font-size: 11px;
+      border: 1px solid #000;
+      background-color: #f0f0f0;
+      text-transform: uppercase;
+    }
+
+    .tabla tbody td {
+      padding: 10px 6px;
+      border: 1px solid #000;
+      font-size: 10px;
+      text-align: center;
+      min-height: 35px;
+    }
+
+    .tabla tbody tr {
+      height: 35px;
+    }
+
+    /* SECCIÓN INFERIOR */
+    .bottom-section {
+      display: flex;
+      gap: 15px;
+      margin-top: 12px;
+      margin-bottom: 15px;
+    }
+
+    .observaciones {
+      flex: 1.5;
+      border: 2px solid #000;
+      padding: 10px;
+      min-height: 80px;
+    }
+
+    .observaciones h3 {
+      font-size: 11px;
+      font-weight: 700;
+      margin-bottom: 8px;
+      text-transform: uppercase;
+    }
+
+    .observaciones-text {
+      font-size: 9px;
+      line-height: 1.3;
+      text-align: justify;
+      color: #333;
+      white-space: pre-wrap;
+    }
+
+    .totales-firma {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .subtotal-box {
+      border: 2px solid #000;
+      padding: 8px 10px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-weight: 600;
+      font-size: 11px;
+    }
+
+    .impuestos-box {
+      border: 2px solid #000;
+      padding: 8px 10px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-weight: 600;
+      font-size: 11px;
+    }
+
+    .total-box {
+      border: 2px solid #000;
+      padding: 10px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-weight: 700;
+      font-size: 12px;
+    }
+
+    .firma-box {
+      border: 2px solid #000;
+      padding: 25px 10px 8px;
+      text-align: center;
+      font-size: 10px;
+      font-weight: 700;
+      text-transform: uppercase;
+      position: relative;
+    }
+
+    .firma-line {
+      position: absolute;
+      top: 25px;
+      left: 15px;
+      right: 15px;
+      border-top: 1px solid #000;
+    }
+
+    /* SECCIÓN QR */
+    .qr-section {
+      text-align: center;
+      padding: 12px 0;
+      border-top: 1px solid #ccc;
+      margin-bottom: 10px;
+    }
+
+    .qr-title {
+      font-size: 10px;
+      color: #666;
+      margin-bottom: 8px;
+      font-weight: 600;
+      text-transform: uppercase;
+    }
+
+    .qr-code-img {
+      width: 100px;
+      height: 100px;
+      display: inline-block;
+      margin: 5px auto;
+      border: 2px solid #000;
+      padding: 3px;
+    }
+
+    .qr-info {
+      font-size: 8px;
+      color: #999;
+      margin-top: 5px;
+    }
+
+    .qr-footer-text {
+      font-size: 7px;
+      color: #bbb;
+      margin-top: 3px;
+    }
+
+    /* MEDIA QUERIES */
+    @media print {
+      body {
+        padding: 0;
+        background: white;
+      }
+
+      .container {
+        width: 100%;
+        max-width: none;
+        min-height: auto;
+        page-break-after: avoid;
+        border-radius: 0;
+        padding: 15px 20px;
+      }
+      
+      .header, .contact-info, .client-fields, .tabla, .bottom-section, .qr-section {
+        page-break-inside: avoid;
+      }
+
+      @page {
+        margin: 0;
+        size: A4 portrait;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <!-- FECHA EN ESQUINA -->
+    <div class="fecha-box">
+      <span class="fecha-label">FECHA</span>
+      <div class="fecha-fields">
+        <div class="fecha-field">{{dia}}</div>
+        <div class="fecha-field">{{mes}}</div>
+        <div class="fecha-field">{{anio}}</div>
+      </div>
+    </div>
+
+    <!-- HEADER -->
+    <div class="header">
+      <div class="logo-section">
+        <div class="logo-box">
+          <img src="{{logo}}" class="logo" alt="Logo" />
+        </div>
+        <span class="logo-text">{{sucursal_nombre}}<br>{{empresa_rfc}}</span>
+        <div class="folio">#{{folio}}</div>
+      </div>
+
+      <div class="title-section">
+        <h1>{{tipo_documento}}</h1>        
+      </div>
+    </div>
+
+    <!-- INFORMACIÓN DE CONTACTO -->
+    <div class="contact-info">
+      <div class="contact-item">
+        <span class="contact-icon">📍</span>
+        <span><strong>Dirección:</strong> {{sucursal_calle}}, {{sucursal_ciudad}}</span>
+      </div>
+      <div class="contact-item">
+        <span class="contact-icon">📮</span>
+        <span><strong>C.P.:</strong> {{sucursal_codigoPostal}}</span>
+      </div>
+      <div class="contact-item">
+        <span class="contact-icon">✉</span>
+        <span>{{sucursal_email}}</span>
+      </div>
+      <div class="contact-item">
+        <span class="contact-icon">📞</span>
+        <span>{{sucursal_telefono}}</span>
+      </div>
+    </div>
+
+    <!-- CAMPOS DE CLIENTE -->
+    <div class="client-fields">
+      <div class="field-row">
+        <div class="field" style="flex: 2;">
+          <label>NOMBRE</label>
+          <div class="field-line">{{cliente}}</div>
+        </div>
+        <div class="field" style="flex: 1;">
+          <label>TELÉFONO</label>
+          <div class="field-line">{{telefono}}</div>
+        </div>
+      </div>
+      <div class="field-row">
+        <div class="field">
+          <label>DIRECCIÓN</label>
+          <div class="field-line">{{direccion}}</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- TABLA -->
+    <table class="tabla">
+      <thead>
+        <tr>
+          <th style="width: 15%;">Cantidad</th>
+          <th style="width: 45%;">Descripción</th>
+          <th style="width: 20%;">Precio<br>Unitario</th>
+          <th style="width: 20%;">Total</th>
+        </tr>
+      </thead>
+      <tbody>
+        {{items}}
+        <!-- Filas vacías para llenar -->
+        <tr><td>&nbsp;</td><td></td><td></td><td></td></tr>
+        <tr><td>&nbsp;</td><td></td><td></td><td></td></tr>
+        <tr><td>&nbsp;</td><td></td><td></td><td></td></tr>
+      </tbody>
+    </table>
+
+    <!-- SECCIÓN INFERIOR -->
+    <div class="bottom-section">
+      <div class="observaciones">
+        <h3>📝 OBSERVACIONES</h3>
+        <p class="observaciones-text">{{observaciones}}</p>
+      </div>
+      
+      <div class="totales-firma">
+        <div class="subtotal-box">
+          <span>SUBTOTAL</span>
+          <span>${{subtotal}}</span>
+        </div>
+        <div class="impuestos-box">
+          <span>IMPUESTOS</span>
+          <span>${{impuestos}}</span>
+        </div>
+        <div class="total-box">
+          <span>TOTAL</span>
+          <span>${{total}}</span>
+        </div>
+        <div class="firma-box">
+          <div class="firma-line"></div>
+          FIRMA CLIENTE
+        </div>
+      </div>
+    </div>
+
+    <!-- SECCIÓN QR -->
+    <section class="qr-section">
+      <p class="qr-title">Escanea para verificar este documento</p>
+      <img 
+        src="{{qr_code}}" 
+        alt="Código QR de verificación"
+        class="qr-code-img"
+      />
+      <p class="qr-info">Folio: {{qr_folio}} | Fecha: {{qr_fecha}}</p>
+      <p class="qr-footer-text">Verificación en línea disponible</p>
+    </section>
+  </div>
+</body>
+</html>

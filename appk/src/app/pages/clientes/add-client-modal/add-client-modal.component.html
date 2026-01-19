@@ -1,0 +1,135 @@
+<div class="dialog-header">
+  <h2 mat-dialog-title>{{ isEditMode ? 'Editar' : 'Agregar' }} Cliente</h2>
+  <button mat-icon-button mat-dialog-close>
+    <mat-icon>close</mat-icon>
+  </button>
+</div>
+<mat-dialog-content>
+  <form [formGroup]="clientForm" (ngSubmit)="onSubmit()">
+    
+    <!-- Nombre -->
+    <mat-form-field appearance="outline" class="full-width">
+      <mat-label>Nombre o Razón Social</mat-label>
+      <input matInput formControlName="nombre">
+      <mat-error *ngIf="clientForm.get('nombre')?.invalid && clientForm.get('nombre')?.touched">
+        Nombre es requerido y debe tener al menos 2 caracteres
+      </mat-error>
+    </mat-form-field>
+    
+    <!-- Tipo de Persona -->
+    <mat-form-field appearance="outline" class="full-width">
+      <mat-label>Tipo de Persona</mat-label>
+      <mat-select formControlName="tipoPersona">
+        <mat-option *ngFor="let tipo of tiposPersona" [value]="tipo.value">
+          {{ tipo.label }}
+        </mat-option>
+      </mat-select>
+      <mat-error *ngIf="tipoPersona?.invalid && tipoPersona?.touched">
+        Tipo de persona es requerido
+      </mat-error>
+    </mat-form-field>
+    
+    <!-- RFC -->
+    <mat-form-field appearance="outline" class="full-width">
+      <mat-label>R.F.C.</mat-label>
+      <input matInput formControlName="Rfc" [maxlength]="13">
+      <mat-hint>{{ tipoPersona?.value === 'fisica' ? '13 caracteres para persona física' : '12 caracteres para persona moral' }}</mat-hint>
+      <mat-error *ngIf="clientForm.get('Rfc')?.invalid && clientForm.get('Rfc')?.touched">
+        RFC inválido ({{ tipoPersona?.value === 'fisica' ? '13 caracteres' : '12-13 caracteres' }})
+      </mat-error>
+    </mat-form-field>
+    
+    <!-- Régimen Fiscal -->
+    <mat-form-field appearance="outline" class="full-width">
+      <mat-label>Régimen Fiscal</mat-label>
+      <mat-select formControlName="RegFiscal">
+        <mat-option *ngFor="let regimen of regimenesFiltrados" [value]="regimen.clave">
+          {{ regimen.descripcion }}
+        </mat-option>
+      </mat-select>
+      <mat-error *ngIf="RegFiscal?.invalid && RegFiscal?.touched">
+        Régimen Fiscal es requerido
+      </mat-error>
+      <mat-hint *ngIf="!tipoPersona?.value">Primero selecciona el tipo de persona</mat-hint>
+    </mat-form-field>
+    
+    <!-- Email -->
+    <mat-form-field appearance="outline" class="full-width">
+      <mat-label>Correo electrónico principal</mat-label>
+      <input matInput type="email" formControlName="email">
+      <mat-error *ngIf="email?.invalid && email?.touched">
+        Correo electrónico inválido
+      </mat-error>
+    </mat-form-field>
+    
+    <!-- Teléfono -->
+    <mat-form-field appearance="outline" class="full-width">
+      <mat-label>Teléfono principal</mat-label>
+      <input matInput type="tel" formControlName="Telefono">
+      <mat-error *ngIf="Telefono?.invalid && Telefono?.touched">
+        Teléfono inválido (debe tener 10 dígitos)
+      </mat-error>
+    </mat-form-field>
+    
+    <!-- Dirección -->
+    <mat-form-field appearance="outline" class="full-width">
+      <mat-label>Dirección (Calle y número)</mat-label>
+      <input matInput formControlName="Direccion" placeholder="Ej: Av. Juárez #123">
+      <mat-error *ngIf="Direccion?.invalid && Direccion?.touched">
+        Dirección es requerida
+      </mat-error>
+    </mat-form-field>
+    
+    <!-- Ciudad -->
+    <mat-form-field appearance="outline" class="full-width">
+      <mat-label>Ciudad</mat-label>
+      <input matInput formControlName="Ciudad" placeholder="Ej: León">
+      <mat-error *ngIf="Ciudad?.invalid && Ciudad?.touched">
+        Ciudad es requerida
+      </mat-error>
+    </mat-form-field>
+    
+    <!-- Código Postal -->
+    <mat-form-field appearance="outline" class="full-width">
+      <mat-label>Código postal</mat-label>
+      <input 
+        type="text" 
+        matInput 
+        formControlName="Cpostal"
+        [matAutocomplete]="autoCP"
+        placeholder="Escribe al menos 3 dígitos">
+      <mat-autocomplete 
+        #autoCP="matAutocomplete" 
+        [displayWith]="displayFn"
+        (optionSelected)="onCodigoPostalSeleccionado($event)">
+        <mat-option *ngFor="let cp of opcionesFiltradas | async" [value]="cp">
+          {{ cp }}
+        </mat-option>
+      </mat-autocomplete>
+      <mat-error *ngIf="Cpostal?.invalid && Cpostal?.touched">
+        Código postal es requerido
+      </mat-error>
+    </mat-form-field>
+    
+    <!-- Colonia -->
+    <mat-form-field appearance="outline" class="full-width">
+      <mat-label>Colonia</mat-label>
+      <mat-select formControlName="Colonia">
+        <mat-option *ngFor="let colonia of colonias" [value]="colonia">
+          {{ colonia }}
+        </mat-option>
+      </mat-select>
+      <mat-error *ngIf="Colonia?.invalid && Colonia?.touched">
+        Colonia es requerida
+      </mat-error>
+      <mat-hint *ngIf="colonias.length === 0">Primero selecciona un código postal</mat-hint>
+    </mat-form-field>
+    
+  </form>
+</mat-dialog-content>
+<mat-dialog-actions align="end">
+  <button mat-button (click)="onCancel()" class="btn-danger">Cancelar</button>
+  <button mat-raised-button color="primary" (click)="onSubmit()" [disabled]="!clientForm.valid">
+    {{ isEditMode ? 'Actualizar' : 'Agregar' }}
+  </button>
+</mat-dialog-actions>

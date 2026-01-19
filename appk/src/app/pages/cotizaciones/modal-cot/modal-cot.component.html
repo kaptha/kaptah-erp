@@ -1,0 +1,204 @@
+<h2 mat-dialog-title>{{title}}</h2>
+<mat-dialog-content>
+  <form [formGroup]="cotizacionForm">
+    <!-- Selector de Cliente -->
+    <mat-form-field appearance="outline" class="w-full">
+      <mat-label>Cliente</mat-label>
+      <mat-select formControlName="clienteId" (selectionChange)="onClienteSelect($event)">
+        <mat-option>
+          <ngx-mat-select-search 
+            [formControl]="clienteFilterCtrl"
+            placeholderLabel="Buscar cliente..."
+            noEntriesFoundLabel="No se encontraron clientes">
+          </ngx-mat-select-search>
+        </mat-option>
+        <mat-option *ngFor="let cliente of filteredClientes | async" [value]="cliente.ID">
+            {{cliente.nombre}} - {{cliente.Rfc}}
+        </mat-option>
+      </mat-select>
+      <mat-error *ngIf="cotizacionForm.get('clienteId')?.hasError('required')">
+        Seleccione un cliente
+      </mat-error>
+    </mat-form-field>
+
+    <!-- Información del cliente seleccionado -->
+    <div *ngIf="clienteSeleccionado" class="customer-info mb-4">
+      <p><strong>RFC:</strong> {{clienteSeleccionado.Rfc}}</p>
+      <p><strong>Dirección:</strong> {{clienteSeleccionado.Colonia}} CP: {{clienteSeleccionado.Cpostal}}</p>
+    </div>
+
+    <!-- ✨ NUEVO: Selector de Sucursal -->
+    <mat-form-field appearance="outline" class="w-full mb-4">
+      <mat-label>Sucursal</mat-label>
+      <mat-select 
+        formControlName="sucursalId"
+        (selectionChange)="onSucursalSelect($event)">
+        <mat-option [value]="null">
+          <em>Sin sucursal</em>
+        </mat-option>
+        <mat-option *ngFor="let sucursal of sucursales" [value]="sucursal.id">
+          <div class="sucursal-option">
+            <mat-icon class="sucursal-icon">business</mat-icon>
+            <div class="sucursal-info">
+              <span class="sucursal-name">{{ sucursal.alias }}</span>
+              <span class="sucursal-detail">{{ sucursal.direccion }}</span>
+            </div>
+          </div>
+        </mat-option>
+      </mat-select>
+      <mat-hint>Selecciona la sucursal asociada (opcional)</mat-hint>
+    </mat-form-field>
+
+    <!-- Información de la sucursal seleccionada -->
+    <div *ngIf="selectedSucursal" class="sucursal-info-box mb-4">
+      <div class="sucursal-info-header">
+        <mat-icon>business</mat-icon>
+        <strong>{{ selectedSucursal.alias }}</strong>
+      </div>
+      <p><strong>Dirección:</strong> {{ selectedSucursal.direccion }}</p>
+      <p><strong>Colonia:</strong> {{ selectedSucursal.colonia }} | <strong>CP:</strong> {{ selectedSucursal.codigoPostal }}</p>
+      <p><strong>Teléfono:</strong> {{ selectedSucursal.telefono }}</p>
+    </div>
+
+    <div class="row">
+      <mat-form-field appearance="outline" class="col-md-4">
+        <mat-label>Fecha de validez</mat-label>
+        <input matInput [matDatepicker]="picker" formControlName="fechaValidez">
+        <mat-datepicker-toggle matSuffix [for]="picker"></mat-datepicker-toggle>
+        <mat-datepicker #picker></mat-datepicker>
+      </mat-form-field>
+
+      <mat-form-field appearance="outline" class="col-md-4">
+        <mat-label>Estado</mat-label>
+        <mat-select formControlName="estado">
+          <mat-option value="pendiente">Pendiente</mat-option>
+          <mat-option value="aprobada">Aprobada</mat-option>
+          <mat-option value="rechazada">Rechazada</mat-option>
+        </mat-select>
+      </mat-form-field>
+
+      <mat-form-field appearance="outline" class="col-md-4">
+        <mat-label>Moneda</mat-label>
+        <mat-select formControlName="moneda">
+          <mat-option value="MXN">Peso Mexicano (MXN)</mat-option>
+          <mat-option value="USD">Dólar Estadounidense (USD)</mat-option>
+          <mat-option value="EUR">Euro (EUR)</mat-option>
+        </mat-select>
+      </mat-form-field>
+    </div>
+
+    <!-- Lista de Productos/Servicios -->
+    <div formArrayName="items" class="items-container">
+      <h3>Productos/Servicios</h3>
+      
+      <div *ngFor="let item of items.controls; let i=index" [formGroupName]="i" class="item-row mb-4">
+        <div class="item-header">
+          <!-- Selector de tipo -->
+          <mat-form-field appearance="outline">
+            <mat-label>Tipo</mat-label>
+            <mat-select formControlName="tipo" (selectionChange)="onTipoChange(i)">
+              <mat-option value="producto">Producto</mat-option>
+              <mat-option value="servicio">Servicio</mat-option>
+            </mat-select>
+          </mat-form-field>
+
+          <!-- Selector de Producto/Servicio -->
+          <mat-form-field appearance="outline">
+            <mat-label>{{item.get('tipo')?.value === 'producto' ? 'Producto' : 'Servicio'}}</mat-label>
+            <mat-select [formControlName]="item.get('tipo')?.value === 'producto' ? 'productoId' : 'servicioId'" (selectionChange)="onItemSelect($event, i)">
+              <mat-option>
+                <ngx-mat-select-search 
+                  [formControl]="itemFilterCtrl"
+                  placeholderLabel="Buscar..."
+                  noEntriesFoundLabel="No se encontraron resultados">
+                </ngx-mat-select-search>
+              </mat-option>
+              <mat-option *ngFor="let prod of filteredItems[i] | async" [value]="prod.id">
+                {{prod.name}} - ${{prod.price}}
+              </mat-option>
+            </mat-select>
+          </mat-form-field>
+
+          <!-- Descripción -->
+          <mat-form-field appearance="outline">
+            <mat-label>Descripción</mat-label>
+            <input matInput formControlName="descripcion">
+          </mat-form-field>
+
+          <!-- Cantidad -->
+          <mat-form-field appearance="outline">
+            <mat-label>Cantidad</mat-label>
+            <input matInput type="number" min="1" formControlName="cantidad" 
+                   (change)="calcularItemTotal(i)">
+          </mat-form-field>
+
+          <!-- Precio unitario -->
+          <mat-form-field appearance="outline">
+            <mat-label>Precio unitario</mat-label>
+            <input matInput type="number" formControlName="precio_unitario" 
+                   (change)="calcularItemTotal(i)">
+          </mat-form-field>
+
+          <!-- Botón eliminar -->
+          <button mat-icon-button color="warn" (click)="removeItem(i)" 
+                  *ngIf="items.length > 1" type="button">
+            <mat-icon>delete</mat-icon>
+          </button>
+        </div>
+
+        <!-- Impuestos -->
+        <div class="item-taxes" formArrayName="impuestos">
+          <div class="tax-header">
+            <strong>Impuestos aplicables:</strong>
+            <div class="item-subtotal">
+              <span>Subtotal: ${{item.get('subtotal')?.value | number:'1.2-2'}}</span>
+              <span>Total impuestos: ${{item.get('impuestosTotal')?.value | number:'1.2-2'}}</span>
+              <span><strong>Total: ${{item.get('total')?.value | number:'1.2-2'}}</strong></span>
+            </div>
+          </div>
+          
+          <div class="taxes-grid">
+            <div *ngFor="let impuesto of impuestos[i].controls; let t=index" [formGroupName]="t" class="tax-item" [class.selected]="impuesto.get('selected')?.value">
+              <mat-checkbox formControlName="selected" (change)="onImpuestoSelectionChange(i)" color="primary">
+                <div class="tax-content">
+                  <span class="tax-name">{{impuesto.get('alias')?.value}}</span> 
+                  <span class="tax-description">({{impuesto.get('tipo_impuesto')?.value}} - {{impuesto.get('impuesto')?.value}})</span>
+                  <span class="tax-rate">{{(impuesto.get('tasa')?.value * 100) | number:'1.2-2'}}%</span>
+                </div>
+              </mat-checkbox>
+            </div>
+          </div>
+          
+          <p *ngIf="impuestosList.length === 0" class="no-taxes-message">
+            No hay impuestos configurados.
+          </p>
+        </div>
+      </div>
+
+      <button mat-stroked-button color="primary" (click)="addItem()" type="button" class="mt-3">
+        <mat-icon>add</mat-icon> Agregar producto/servicio
+      </button>
+    </div>
+
+    <!-- Observaciones -->
+    <mat-form-field appearance="outline" class="w-full mt-4">
+      <mat-label>Observaciones</mat-label>
+      <textarea matInput formControlName="observaciones" rows="3"></textarea>
+    </mat-form-field>
+
+    <!-- Totales -->
+    <div class="totals-container mt-4">
+      <p><strong>Subtotal general:</strong> ${{cotizacionForm.get('subtotal')?.value | number:'1.2-2'}}</p>
+      <p><strong>Total impuestos:</strong> ${{cotizacionForm.get('impuestos')?.value | number:'1.2-2'}}</p>
+      <p><strong>Total:</strong> ${{cotizacionForm.get('total')?.value | number:'1.2-2'}}</p>
+    </div>
+  </form>
+</mat-dialog-content>
+
+<mat-dialog-actions align="end">
+  <button mat-button (click)="onCancel()" class="btn-danger">Cancelar</button>
+  <button mat-raised-button class="btn-primary" (click)="guardarCotizacion()" 
+          [disabled]="!isValid() || viewOnly">
+    {{isEdit ? 'Actualizar' : 'Guardar'}}
+  </button>
+</mat-dialog-actions>

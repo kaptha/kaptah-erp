@@ -1,0 +1,58 @@
+<mat-toolbar 
+  class="navbar" 
+  [class.scrolled]="scrolled">
+
+  <div class="navbar-container">
+
+    <!-- LOGO -->
+    <div class="logo-container">
+      <img 
+        [src]="scrolled ? 'assets/logo-kaptah.svg' : 'assets/logo-kaptah-white.svg'" 
+        alt="Kaptah" 
+        class="logo" />
+    </div>
+
+    <!-- DESKTOP LINKS -->
+    <nav class="nav-links">
+      <a href="#benefits">Características</a>
+      <a href="#pricing">Planes</a>
+      <a href="#testimonials">Testimonios</a>
+      <a href="#contact">Contacto</a>
+    </nav>
+
+    <!-- DESKTOP CTA -->
+    <div class="actions">
+      <button mat-button class="login-btn">Iniciar sesión</button>
+      <button mat-raised-button class="cta-btn">Probar gratis</button>
+    </div>
+
+    <!-- MOBILE MENU BUTTON -->
+    <button class="mobile-menu-btn" (click)="toggleMenu()">
+      <span [class.open]="menuOpen"></span>
+      <span [class.open]="menuOpen"></span>
+      <span [class.open]="menuOpen"></span>
+    </button>
+
+  </div>
+
+</mat-toolbar>
+
+<!-- MOBILE MENU DRAWER -->
+<div class="mobile-menu" [class.open]="menuOpen">
+  <div class="mobile-menu-content">
+
+    <a href="#benefits" (click)="closeMenu()">Características</a>
+    <a href="#pricing" (click)="closeMenu()">Planes</a>
+    <a href="#testimonials" (click)="closeMenu()">Testimonios</a>
+    <a href="#contact" (click)="closeMenu()">Contacto</a>
+
+    <button mat-button class="mobile-login" (click)="closeMenu()">Iniciar sesión</button>
+    <button mat-raised-button class="mobile-cta" (click)="closeMenu()">Probar gratis</button>
+  </div>
+</div>
+
+<!-- BACKDROP -->
+<div class="backdrop" [class.open]="menuOpen" (click)="closeMenu()"></div>
+
+
+

@@ -1,0 +1,268 @@
+<div class="pagos-container">
+  <h2 class="page-title">Gestión de Pagos</h2>
+  
+  <div class="breadcrumb">
+    <a routerLink="/dashboard">Dashboard</a> / Gestión de pagos
+  </div>
+
+  <!-- Resumen de pagos -->
+  <div class="summary-container">
+    <div class="summary-title">Resumen de pagos</div>
+    <div class="summary-content">
+      <div class="summary-item total">
+        <div class="summary-item-value">{{resumen.totalPorPagar | currency:'USD':'symbol':'1.2-2'}}</div>
+        <div class="summary-item-label">Total por pagar</div>
+      </div>
+      <div class="summary-item pending">
+        <div class="summary-item-value">{{resumen.pendientes | currency:'USD':'symbol':'1.2-2'}}</div>
+        <div class="summary-item-label">Pendientes</div>
+      </div>
+      <div class="summary-item overdue">
+        <div class="summary-item-value">{{resumen.vencidos | currency:'USD':'symbol':'1.2-2'}}</div>
+        <div class="summary-item-label">Vencidos</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ✅ Filtros adicionales MEJORADOS -->
+  <div class="filters-row">
+    <mat-form-field appearance="outline" class="date-filter">
+      <mat-label>Rango de fechas</mat-label>
+      <mat-date-range-input [rangePicker]="picker">
+        <input matStartDate placeholder="Fecha inicio" [formControl]="dateRangeStart">
+        <input matEndDate placeholder="Fecha fin" [formControl]="dateRangeEnd">
+      </mat-date-range-input>
+      <mat-datepicker-toggle matSuffix [for]="picker"></mat-datepicker-toggle>
+      <mat-date-range-picker #picker></mat-date-range-picker>
+    </mat-form-field>
+    
+    <mat-form-field appearance="outline" class="status-filter">
+      <mat-label>Estado</mat-label>
+      <mat-select [formControl]="statusFilter">
+        <mat-option value="all">Todos</mat-option>
+        <mat-option value="pending">Pendientes</mat-option>
+        <mat-option value="paid">Pagados</mat-option>
+        <mat-option value="overdue">Vencidos</mat-option>
+      </mat-select>
+    </mat-form-field>
+
+    <!-- ✅ NUEVO: Botón para limpiar filtros -->
+    <button mat-raised-button (click)="clearFilters()" class="btn-clear-filters">
+      <mat-icon>filter_alt_off</mat-icon>
+      Limpiar filtros
+    </button>
+  </div>
+
+  <!-- Filtro para móvil -->
+  <div class="mobile-filter-section">
+    <mat-form-field appearance="outline" class="search-field">
+      <mat-label>Buscar pagos</mat-label>
+      <input matInput [formControl]="searchFilter" placeholder="Buscar por proveedor, RFC...">
+      <mat-icon matSuffix>search</mat-icon>
+    </mat-form-field>
+  </div>
+
+  <!-- Acciones principales y búsqueda -->
+  <div class="actions-container">
+    <button mat-raised-button class="btn-primary" (click)="openPagoDialog()">
+      <mat-icon>add</mat-icon> Nuevo pago
+    </button>
+    
+    <!-- Filtro para pantallas grandes -->
+    <mat-form-field appearance="outline" class="search-field" [style.display]="isMobile ? 'none' : 'block'">
+      <mat-label>Buscar pagos</mat-label>
+      <input matInput [formControl]="searchFilter" placeholder="Buscar por proveedor, RFC...">
+      <mat-icon matSuffix>search</mat-icon>
+    </mat-form-field>
+    
+    <div class="actions-right">
+      <button mat-raised-button [matMenuTriggerFor]="exportMenu" class="btn-white">
+        <mat-icon>file_download</mat-icon> Exportar
+      </button>
+
+      <mat-menu #exportMenu="matMenu">
+        <button mat-menu-item (click)="exportPagos('csv')">
+          <mat-icon>description</mat-icon>
+          <span>Exportar como CSV</span>
+        </button>
+        <button mat-menu-item (click)="exportPagos('xlsx')">
+          <mat-icon>table_chart</mat-icon>
+          <span>Exportar como Excel</span>
+        </button>
+      </mat-menu>
+
+      <button mat-icon-button color="primary" (click)="loadPagos()" matTooltip="Refrescar">
+        <mat-icon>refresh</mat-icon>
+      </button>
+    </div>
+  </div>
+  
+  <!-- Indicador de carga -->
+  <div class="loading-container" *ngIf="loading">
+    <mat-spinner></mat-spinner>
+  </div>
+
+  <!-- Tabla para pantallas grandes -->
+  <div class="table-container mat-elevation-z8" *ngIf="!loading">
+    <table mat-table [dataSource]="dataSource" class="mat-elevation-z8">
+      <!-- RFC Proveedor Column -->
+      <ng-container matColumnDef="rfcProveedor">
+        <th mat-header-cell *matHeaderCellDef> RFC Proveedor </th>
+        <td mat-cell *matCellDef="let pago"> {{pago.rfcProveedor}} </td>
+      </ng-container>
+  
+      <!-- Razón Social Column -->
+      <ng-container matColumnDef="razonSocial">
+        <th mat-header-cell *matHeaderCellDef> Nombre o razón social </th>
+        <td mat-cell *matCellDef="let pago"> {{pago.razonSocial}} </td>
+      </ng-container>
+  
+      <!-- Fecha Column -->
+      <ng-container matColumnDef="fecha">
+        <th mat-header-cell *matHeaderCellDef> Fecha </th>
+        <td mat-cell *matCellDef="let pago"> {{pago.fecha | date:'dd/MM/yyyy'}} </td>
+      </ng-container>
+  
+      <!-- Vencimiento Column -->
+      <ng-container matColumnDef="vencimiento">
+        <th mat-header-cell *matHeaderCellDef> Vencimiento </th>
+        <td mat-cell *matCellDef="let pago"> 
+          {{pago.vencimiento | date:'dd/MM/yyyy'}}
+          <span class="status-chip" 
+                [ngClass]="{'pendiente': isEstadoPendiente(pago), 
+                           'pagado': isEstadoPagado(pago), 
+                           'vencido': isEstadoVencido(pago)}">
+            {{getEstadoTexto(pago)}}
+          </span>
+        </td>
+      </ng-container>
+      
+      <!-- Descripción Column -->
+      <ng-container matColumnDef="descripcion">
+        <th mat-header-cell *matHeaderCellDef> Descripción </th>
+        <td mat-cell *matCellDef="let pago"> {{pago.descripcion}} </td>
+      </ng-container>
+      
+      <!-- Monto Column -->
+      <ng-container matColumnDef="monto">
+        <th mat-header-cell *matHeaderCellDef> Monto </th>
+        <td mat-cell *matCellDef="let pago" class="amount"> {{pago.monto | currency}} </td>
+      </ng-container>
+
+      <!-- Actions Column -->
+      <ng-container matColumnDef="actions">
+        <th mat-header-cell *matHeaderCellDef></th>
+        <td mat-cell *matCellDef="let pago">
+          <button mat-icon-button [matMenuTriggerFor]="menu">
+            <mat-icon>more_vert</mat-icon>
+          </button>
+          <mat-menu #menu="matMenu">
+            <button mat-menu-item (click)="marcarPagado(pago)" *ngIf="!isEstadoPagado(pago)">
+              <mat-icon>payments</mat-icon>
+              <span>Marcar como pagado</span>
+            </button>
+            <button mat-menu-item (click)="editPago(pago)">
+              <mat-icon>edit</mat-icon>
+              <span>Editar</span>
+            </button>
+            <button mat-menu-item (click)="deletePago($event, pago.id)">
+              <mat-icon color="warn">delete</mat-icon>
+              <span>Eliminar</span>
+            </button>
+          </mat-menu>
+        </td>
+      </ng-container>
+  
+      <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+      <tr mat-row *matRowDef="let row; columns: displayedColumns;"
+          [ngClass]="{'overdue': isEstadoVencido(row)}"></tr>
+      
+      <!-- Fila para cuando no hay datos -->
+      <tr class="mat-row" *matNoDataRow>
+        <td class="mat-cell empty-state" [attr.colspan]="displayedColumns.length">
+          No hay pagos que coincidan con el filtro.
+        </td>
+      </tr>
+    </table>
+  </div>
+
+  <!-- Vista de tarjetas para móviles -->
+  <div class="mobile-cards" *ngIf="!loading">
+    <div *ngIf="dataSource.data.length === 0" class="empty-state">
+      No hay pagos que coincidan con el filtro.
+    </div>
+    
+    <div class="mobile-card" *ngFor="let pago of dataSource.data | slice: getMobileStartIndex(): getMobileEndIndex()"
+         [ngClass]="{'overdue': isEstadoVencido(pago)}">
+      <div class="mobile-card-header">
+        <div class="mobile-card-title">{{pago.razonSocial}}</div>
+        <div class="mobile-card-subtitle">{{pago.rfcProveedor}}</div>
+      </div>
+      
+      <div class="mobile-card-content">
+        <div class="mobile-card-row">
+          <div class="mobile-card-label">Fecha:</div>
+          <div class="mobile-card-value">{{pago.fecha | date:'dd/MM/yyyy'}}</div>
+        </div>
+        
+        <div class="mobile-card-row">
+          <div class="mobile-card-label">Vencimiento:</div>
+          <div class="mobile-card-value">
+            {{pago.vencimiento | date:'dd/MM/yyyy'}}
+            <span class="status-chip" 
+                  [ngClass]="{'pendiente': isEstadoPendiente(pago), 
+                             'pagado': isEstadoPagado(pago), 
+                             'vencido': isEstadoVencido(pago)}">
+              {{getEstadoTexto(pago)}}
+            </span>
+          </div>
+        </div>
+        
+        <div class="mobile-card-row">
+          <div class="mobile-card-label">Descripción:</div>
+          <div class="mobile-card-value">{{pago.descripcion || 'Sin descripción'}}</div>
+        </div>
+        
+        <div class="mobile-card-row">
+          <div class="mobile-card-label">Monto:</div>
+          <div class="mobile-card-value amount">{{pago.monto | currency}}</div>
+        </div>
+      </div>
+      
+      <div class="mobile-card-actions">
+        <button mat-icon-button [matMenuTriggerFor]="mobileMenu">
+          <mat-icon>more_vert</mat-icon>
+        </button>
+        <mat-menu #mobileMenu="matMenu">
+          <button mat-menu-item (click)="marcarPagado(pago)" *ngIf="!isEstadoPagado(pago)">
+            <mat-icon>payments</mat-icon>
+            <span>Marcar como pagado</span>
+          </button>
+          <button mat-menu-item (click)="editPago(pago)">
+            <mat-icon>edit</mat-icon>
+            <span>Editar</span>
+          </button>
+          <button mat-menu-item (click)="deletePago($event, pago.id)">
+            <mat-icon color="warn">delete</mat-icon>
+            <span>Eliminar</span>
+          </button>
+        </mat-menu>
+      </div>
+    </div>
+    
+    <!-- Paginador mobile simplificado -->
+    <div class="mobile-paginator" *ngIf="dataSource.data.length > mobilePaginator.pageSize">
+      <div class="mobile-paginator-info">
+        Mostrando {{getMobileStartIndex() + 1}} - {{getMobileEndIndex()}} de {{dataSource.data.length}}
+      </div>
+      <div class="mobile-paginator-actions">
+        <button mat-icon-button [disabled]="mobilePaginator.pageIndex === 0" (click)="previousMobilePage()">
+          <mat-icon>navigate_before</mat-icon>
+        </button>
+        <button mat-icon-button [disabled]="isLastMobilePage()" (click)="nextMobilePage()">
+          <mat-icon>navigate_next</mat-icon>
+        </button>
+      </div>
+    </div>
+  </div>
+</div>

@@ -1,0 +1,8 @@
+export enum MovementType {
+  SALE = 'SALE',
+  PURCHASE = 'PURCHASE',
+  ADJUSTMENT = 'ADJUSTMENT',
+  RETURN = 'RETURN',
+  TRANSFER = 'TRANSFER',
+  INITIAL = 'INITIAL',
+}

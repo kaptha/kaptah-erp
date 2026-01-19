@@ -1,0 +1,220 @@
+<div class="dialog-header">
+  <h2 mat-dialog-title>{{data.titulo}}</h2>
+  <button mat-icon-button mat-dialog-close>
+    <mat-icon>close</mat-icon>
+  </button>
+</div>
+
+<mat-dialog-content>
+  <form [formGroup]="proveedorForm">
+    <mat-tab-group>
+      <!-- Pestaña de Información Básica -->
+      <mat-tab label="Información Básica">
+        <div class="form-section">
+          <mat-form-field appearance="outline">
+            <mat-label>Nombre</mat-label>
+            <input matInput formControlName="nombre">
+            <mat-error *ngIf="nombre?.errors?.['required']">El nombre es requerido</mat-error>
+            <mat-error *ngIf="nombre?.errors?.['minlength']">Mínimo 2 caracteres</mat-error>
+          </mat-form-field>
+
+          <mat-form-field appearance="outline">
+            <mat-label>Razón Social</mat-label>
+            <input matInput formControlName="razon_social">
+            <mat-error *ngIf="razon_social?.errors?.['required']">La razón social es requerida</mat-error>
+            <mat-error *ngIf="razon_social?.errors?.['minlength']">Mínimo 2 caracteres</mat-error>
+          </mat-form-field>
+
+          <mat-form-field appearance="outline">
+            <mat-label>Email</mat-label>
+            <input matInput formControlName="email" type="email">
+            <mat-error *ngIf="email?.errors?.['required']">El email es requerido</mat-error>
+            <mat-error *ngIf="email?.errors?.['email']">Email inválido</mat-error>
+          </mat-form-field>
+
+          <mat-form-field appearance="outline">
+            <mat-label>Teléfono</mat-label>
+            <input matInput formControlName="telefono">
+            <mat-error *ngIf="telefono?.errors?.['required']">El teléfono es requerido</mat-error>
+            <mat-error *ngIf="telefono?.errors?.['pattern']">Solo números permitidos</mat-error>
+            <mat-error *ngIf="telefono?.errors?.['minlength']">Mínimo 10 dígitos</mat-error>
+          </mat-form-field>
+        </div>
+      </mat-tab>
+
+      <!-- Pestaña de Información Fiscal -->
+      <mat-tab label="Información Fiscal">
+        <div class="form-section">
+          <!-- Tipo de Persona -->
+          <mat-form-field appearance="outline">
+            <mat-label>Tipo de Persona</mat-label>
+            <mat-select formControlName="tipo_contribuyente">
+              <mat-option *ngFor="let tipo of tiposPersona" [value]="tipo.value">
+                {{ tipo.label }}
+              </mat-option>
+            </mat-select>
+            <mat-error *ngIf="tipo_contribuyente?.errors?.['required']">Tipo de persona es requerido</mat-error>
+          </mat-form-field>
+
+          <!-- RFC -->
+          <mat-form-field appearance="outline">
+            <mat-label>RFC</mat-label>
+            <input matInput formControlName="rfc" [maxlength]="13" style="text-transform: uppercase;">
+            <mat-hint>{{ tipo_contribuyente?.value === 'fisica' ? '13 caracteres para persona física' : '12 caracteres para persona moral' }}</mat-hint>
+            <mat-error *ngIf="rfc?.errors?.['required']">El RFC es requerido</mat-error>
+            <mat-error *ngIf="rfc?.errors?.['minlength'] || rfc?.errors?.['maxlength']">
+              RFC inválido ({{ tipo_contribuyente?.value === 'fisica' ? '13 caracteres' : '12-13 caracteres' }})
+            </mat-error>
+          </mat-form-field>
+
+          <!-- Régimen Fiscal -->
+          <mat-form-field appearance="outline" class="full-width">
+            <mat-label>Régimen Fiscal</mat-label>
+            <mat-select formControlName="regimen_fiscal">
+              <mat-option *ngFor="let regimen of regimenesFiltrados" [value]="regimen.clave">
+                {{ regimen.descripcion }}
+              </mat-option>
+            </mat-select>
+            <mat-error *ngIf="regimen_fiscal?.errors?.['required']">El régimen fiscal es requerido</mat-error>
+            <mat-hint *ngIf="!tipo_contribuyente?.value">Primero selecciona el tipo de persona</mat-hint>
+          </mat-form-field>
+        </div>
+      </mat-tab>
+
+      <!-- Pestaña de Dirección -->
+      <mat-tab label="Dirección">
+        <div class="form-section">
+          <mat-form-field appearance="outline">
+            <mat-label>Código Postal</mat-label>
+            <input matInput 
+                   formControlName="Cpostal" 
+                   [matAutocomplete]="auto">
+            <mat-autocomplete #auto="matAutocomplete" 
+                              [displayWith]="displayFn"
+                              (optionSelected)="onCodigoPostalSeleccionado($event)">
+              <mat-option *ngFor="let option of opcionesFiltradas | async" [value]="option">
+                {{option}}
+              </mat-option>
+            </mat-autocomplete>
+            <mat-error *ngIf="proveedorForm.get('Cpostal')?.errors?.['required']">El código postal es requerido</mat-error>
+          </mat-form-field>
+
+          <mat-form-field appearance="outline">
+            <mat-label>Colonia</mat-label>
+            <mat-select formControlName="colonia">
+              <mat-option *ngFor="let colonia of colonias" [value]="colonia">
+                {{colonia}}
+              </mat-option>
+            </mat-select>
+            <mat-error *ngIf="proveedorForm.get('colonia')?.errors?.['required']">La colonia es requerida</mat-error>
+            <mat-hint *ngIf="colonias.length === 0">Primero selecciona un código postal</mat-hint>
+          </mat-form-field>
+
+          <mat-form-field appearance="outline">
+            <mat-label>Calle</mat-label>
+            <input matInput formControlName="calle">
+            <mat-error *ngIf="calle?.errors?.['required']">La calle es requerida</mat-error>
+          </mat-form-field>
+
+          <div class="numero-container">
+            <mat-form-field appearance="outline">
+              <mat-label>Número Exterior</mat-label>
+              <input matInput formControlName="numero_ext">
+              <mat-error *ngIf="numero_ext?.errors?.['required']">El número exterior es requerido</mat-error>
+            </mat-form-field>
+
+            <mat-form-field appearance="outline">
+              <mat-label>Número Interior</mat-label>
+              <input matInput formControlName="numero_int">
+            </mat-form-field>
+          </div>
+
+          <mat-form-field appearance="outline">
+            <mat-label>Estado</mat-label>
+            <input matInput formControlName="estado" readonly>
+            <mat-error *ngIf="proveedorForm.get('estado')?.errors?.['required']">El estado es requerido</mat-error>
+          </mat-form-field>
+
+          <mat-form-field appearance="outline">
+            <mat-label>Municipio</mat-label>
+            <input matInput formControlName="municipio" readonly>
+            <mat-error *ngIf="proveedorForm.get('municipio')?.errors?.['required']">El municipio es requerido</mat-error>
+          </mat-form-field>
+        </div>
+      </mat-tab>
+
+      <!-- Pestaña de Información Bancaria -->
+      <mat-tab label="Información Bancaria">
+        <div class="form-section">
+          <mat-form-field appearance="outline">
+            <mat-label>Banco</mat-label>
+            <mat-select formControlName="banco">
+              <mat-option *ngFor="let banco of bancos" [value]="banco">
+                {{banco}}
+              </mat-option>
+            </mat-select>
+            <mat-error *ngIf="banco?.errors?.['required']">El banco es requerido</mat-error>
+          </mat-form-field>
+
+          <mat-form-field appearance="outline">
+            <mat-label>Cuenta Bancaria</mat-label>
+            <input matInput formControlName="cuenta_bancaria">
+            <mat-error *ngIf="cuenta_bancaria?.errors?.['required']">La cuenta bancaria es requerida</mat-error>
+            <mat-error *ngIf="cuenta_bancaria?.errors?.['minlength']">Mínimo 10 caracteres</mat-error>
+          </mat-form-field>
+
+          <mat-form-field appearance="outline">
+            <mat-label>Tipo de Cuenta</mat-label>
+            <mat-select formControlName="tipo_cuenta">
+              <mat-option *ngFor="let tipo of tiposCuenta" [value]="tipo.toLowerCase()">
+                {{tipo}}
+              </mat-option>
+            </mat-select>
+            <mat-error *ngIf="proveedorForm.get('tipo_cuenta')?.errors?.['required']">El tipo de cuenta es requerido</mat-error>
+          </mat-form-field>
+
+          <mat-form-field appearance="outline">
+            <mat-label>CLABE</mat-label>
+            <input matInput formControlName="clabe" maxlength="18">
+            <mat-error *ngIf="clabe?.errors?.['minlength'] || clabe?.errors?.['maxlength']">La CLABE debe tener 18 dígitos</mat-error>
+          </mat-form-field>
+
+          <mat-form-field appearance="outline" class="full-width">
+            <mat-label>Beneficiario</mat-label>
+            <input matInput formControlName="beneficiario">
+            <mat-error *ngIf="proveedorForm.get('beneficiario')?.errors?.['required']">El beneficiario es requerido</mat-error>
+          </mat-form-field>
+        </div>
+      </mat-tab>
+
+      <!-- Pestaña de Información Comercial -->
+      <mat-tab label="Información Comercial">
+        <div class="form-section">
+          <mat-form-field appearance="outline">
+            <mat-label>Límite de Crédito</mat-label>
+            <input matInput type="number" formControlName="limite_credito">
+            <mat-error *ngIf="limite_credito?.errors?.['required']">El límite de crédito es requerido</mat-error>
+            <mat-error *ngIf="limite_credito?.errors?.['min']">El valor debe ser positivo</mat-error>
+          </mat-form-field>
+
+          <mat-form-field appearance="outline">
+            <mat-label>Días de Crédito</mat-label>
+            <input matInput type="number" formControlName="dias_credito">
+            <mat-error *ngIf="dias_credito?.errors?.['required']">Los días de crédito son requeridos</mat-error>
+            <mat-error *ngIf="dias_credito?.errors?.['min']">El valor debe ser positivo</mat-error>
+          </mat-form-field>
+
+          <mat-form-field appearance="outline" class="full-width">
+            <mat-label>Notas</mat-label>
+            <textarea matInput formControlName="notas" rows="3"></textarea>
+          </mat-form-field>
+        </div>
+      </mat-tab>
+    </mat-tab-group>
+  </form>
+</mat-dialog-content>
+
+<mat-dialog-actions>
+  <button mat-button mat-dialog-close class="btn-danger">Cancelar</button>
+  <button mat-raised-button class="btn-primary" (click)="guardarProveedor()" [disabled]="proveedorForm.invalid">Guardar</button>
+</mat-dialog-actions>

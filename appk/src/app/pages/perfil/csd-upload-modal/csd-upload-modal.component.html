@@ -1,0 +1,69 @@
+<div class="custom-modal-container">
+  <div class="custom-modal-header">
+    <h2>{{ modalTitle }}</h2>
+  </div>
+  
+  <div class="custom-modal-content">
+    <form [formGroup]="form">
+      <!-- Sección de archivos -->
+      <div class="custom-file-section">
+        <div class="custom-file-group">
+          <label>Archivo KEY</label>
+          <div class="custom-file-input">
+            <input type="file" #keyFileInput hidden (change)="onKeyFileSelected($event)" accept=".key">
+            <button type="button" class="custom-file-button" (click)="keyFileInput.click()">
+              Seleccionar archivo
+            </button>
+            <span class="custom-file-name">{{ keyFileName || 'Ningún archivo seleccionado' }}</span>
+          </div>
+        </div>
+        
+        <div class="custom-file-group">
+          <label>Archivo CER</label>
+          <div class="custom-file-input">
+            <input type="file" #cerFileInput hidden (change)="onCerFileSelected($event)" accept=".cer">
+            <button type="button" class="custom-file-button" (click)="cerFileInput.click()">
+              Seleccionar archivo
+            </button>
+            <span class="custom-file-name">{{ cerFileName || 'Ningún archivo seleccionado' }}</span>
+          </div>
+        </div>
+      </div>
+      
+      <!-- Sección de campos de formulario -->
+      <div class="custom-form-section">
+        <div class="custom-form-group">
+          <label>Contraseña</label>
+          <input type="password" formControlName="password" class="custom-input" placeholder="Ingrese su contraseña">
+        </div>
+        
+        <div class="custom-form-group">
+          <label>Número de Certificado</label>
+          <input type="text" formControlName="certificateNumber" class="custom-input" readonly>
+        </div>
+        
+        <div class="custom-form-group">
+          <label>Número de Serie</label>
+          <input type="text" formControlName="serialNumber" class="custom-input" readonly>
+        </div>
+        
+        <div class="custom-form-group">
+          <label>Serial del Emisor</label>
+          <input type="text" formControlName="issuerSerial" class="custom-input" readonly>
+        </div>
+      </div>
+    </form>
+  </div>
+  
+  <div class="custom-modal-footer">
+    <button class="btn-danger" (click)="onCancel()">
+      Cancelar
+    </button>
+    <button 
+      class="btn-primary" 
+      (click)="onSave()"
+      [disabled]="!form.valid || !keyFile || !cerFile || isLoading">
+      {{ isLoading ? 'Guardando...' : 'Guardar' }}
+    </button>
+  </div>
+</div>

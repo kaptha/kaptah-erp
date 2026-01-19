@@ -1,0 +1,30 @@
+<div class="document-preview-container">
+  <div class="preview-header">
+    <h2>Vista previa del documento</h2>
+    
+    <div class="preview-actions">
+      <button mat-raised-button color="primary" (click)="printDocument()" [disabled]="isLoading">
+        <mat-icon>print</mat-icon> Imprimir
+      </button>
+      
+      <button mat-raised-button color="accent" (click)="downloadAsPdf()" [disabled]="isLoading">
+        <mat-icon>picture_as_pdf</mat-icon> Descargar PDF
+      </button>
+      
+      <button mat-icon-button (click)="close()">
+        <mat-icon>close</mat-icon>
+      </button>
+    </div>
+  </div>
+  
+  <div class="preview-content">
+    <div class="loading-container" *ngIf="isLoading">
+      <mat-spinner></mat-spinner>
+      <p>Generando documento...</p>
+    </div>
+    
+    <div class="document-iframe-container" *ngIf="!isLoading">
+      <iframe #documentIframe class="document-iframe" [srcdoc]="documentHtml"></iframe>
+    </div>
+  </div>
+</div>

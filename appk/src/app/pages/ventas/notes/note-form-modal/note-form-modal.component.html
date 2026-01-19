@@ -1,0 +1,236 @@
+<h2 mat-dialog-title>{{data ? 'Editar' : 'Nueva'}} Nota de Venta</h2>
+<mat-dialog-content>
+  <form [formGroup]="noteForm">
+    <!-- Selector de Cliente -->
+    <mat-form-field appearance="outline" class="w-full">
+      <mat-label>Cliente</mat-label>
+      <mat-select formControlName="customerId" (selectionChange)="onCustomerSelect($event)">
+        <mat-option>
+          <ngx-mat-select-search 
+            [formControl]="customerFilterCtrl"
+            placeholderLabel="Buscar cliente..."
+            noEntriesFoundLabel="No se encontraron clientes">
+          </ngx-mat-select-search>
+        </mat-option>
+        <mat-option *ngFor="let customer of filteredCustomers | async" [value]="customer.ID">
+            {{customer.nombre}} - {{customer.Rfc}}
+        </mat-option>
+      </mat-select>
+      <mat-error *ngIf="noteForm.get('customerId')?.hasError('required')">
+        Seleccione un cliente
+      </mat-error>
+    </mat-form-field>
+
+    <!-- Selector de Sucursal -->
+    <mat-form-field appearance="outline" class="full-width">
+      <mat-label>Sucursal (Opcional)</mat-label>
+      <mat-select formControlName="sucursalId" (selectionChange)="onSucursalSelect($event)">
+        <mat-option [value]="null">Ninguna</mat-option>
+        <mat-option *ngFor="let sucursal of sucursales" [value]="sucursal.id">
+          {{ sucursal.alias }} - {{ sucursal.direccion }}
+        </mat-option>
+      </mat-select>
+      <mat-hint *ngIf="loadingSucursales">Cargando sucursales...</mat-hint>
+      <mat-hint *ngIf="!loadingSucursales && sucursales.length === 0">
+        No hay sucursales disponibles
+      </mat-hint>
+    </mat-form-field>
+
+    <!-- ✨ NUEVO: Información del cliente seleccionado -->
+    <div *ngIf="selectedCustomer" class="customer-info-card">
+      <mat-card class="info-card">
+        <mat-card-header>
+          <mat-card-title>
+            <mat-icon>person</mat-icon>
+            Información del Cliente
+          </mat-card-title>
+        </mat-card-header>
+        <mat-card-content>
+          <div class="info-row">
+            <strong>Nombre:</strong>
+            <span>{{ selectedCustomer.nombre }}</span>
+          </div>
+          <div class="info-row">
+            <strong>RFC:</strong>
+            <span>{{ selectedCustomer.Rfc }}</span>
+          </div>
+          <div class="info-row" *ngIf="selectedCustomer.Colonia">
+            <strong>Colonia:</strong>
+            <span>{{ selectedCustomer.Colonia }}</span>
+          </div>
+          <div class="info-row" *ngIf="selectedCustomer.Cpostal">
+            <strong>Código Postal:</strong>
+            <span>{{ selectedCustomer.Cpostal }}</span>
+          </div>
+        </mat-card-content>
+      </mat-card>
+    </div>
+
+    <!-- ✨ NUEVO: Información de la sucursal seleccionada -->
+    <div *ngIf="selectedSucursal" class="sucursal-info-card">
+      <mat-card class="info-card">
+        <mat-card-header>
+          <mat-card-title>
+            <mat-icon>store</mat-icon>
+            Información de la Sucursal
+          </mat-card-title>
+        </mat-card-header>
+        <mat-card-content>
+          <div class="info-row">
+            <strong>Alias:</strong>
+            <span>{{ selectedSucursal.alias }}</span>
+          </div>
+          <div class="info-row">
+            <strong>Teléfono:</strong>
+            <span>{{ selectedSucursal.telefono }}</span>
+          </div>
+          <div class="info-row">
+            <strong>Dirección:</strong>
+            <span>{{ selectedSucursal.direccion }}</span>
+          </div>
+          <div class="info-row">
+            <strong>Colonia:</strong>
+            <span>{{ selectedSucursal.colonia }}</span>
+          </div>
+          <div class="info-row">
+            <strong>Código Postal:</strong>
+            <span>{{ selectedSucursal.codigoPostal }}</span>
+          </div>
+        </mat-card-content>
+      </mat-card>
+    </div>
+
+    <!-- Campos ocultos para mantener la información -->
+    <input type="hidden" formControlName="customerName">
+    <input type="hidden" formControlName="customerRfc">
+    <input type="hidden" formControlName="customerAddress">
+
+    <div class="row">
+      <mat-form-field appearance="outline" class="col-md-6">
+        <mat-label>Método de Pago</mat-label>
+        <mat-select formControlName="paymentMethod">
+          <mat-option value="CASH">Efectivo</mat-option>
+          <mat-option value="CARD">Tarjeta</mat-option>
+          <mat-option value="TRANSFER">Transferencia</mat-option>
+        </mat-select>
+      </mat-form-field>
+
+      <mat-form-field appearance="outline" class="col-md-6">
+        <mat-label>Fecha</mat-label>
+        <input matInput [matDatepicker]="picker" formControlName="saleDate">
+        <mat-datepicker-toggle matSuffix [for]="picker"></mat-datepicker-toggle>
+        <mat-datepicker #picker></mat-datepicker>
+      </mat-form-field>
+    </div>
+
+    <!-- Lista de Productos/Servicios -->
+    <div formArrayName="items" class="items-container">
+      <h3>Productos/Servicios</h3>
+      
+      <div *ngFor="let item of items.controls; let i=index" [formGroupName]="i" class="item-row mb-4">
+        <div class="item-header">
+          <!-- Selector de tipo (Producto/Servicio) -->
+          <mat-form-field appearance="outline">
+            <mat-label>Tipo</mat-label>
+            <mat-select formControlName="type" (selectionChange)="onTypeChange(i)">
+              <mat-option value="product">Producto</mat-option>
+              <mat-option value="service">Servicio</mat-option>
+            </mat-select>
+          </mat-form-field>
+
+          <!-- Selector de Producto/Servicio -->
+          <mat-form-field appearance="outline">
+            <mat-label>{{item.get('type')?.value === 'product' ? 'Producto' : 'Servicio'}}</mat-label>
+            <mat-select formControlName="itemId" (selectionChange)="onItemSelect($event, i)">
+              <mat-option>
+                <ngx-mat-select-search 
+                  [formControl]="itemFilterCtrl"
+                  placeholderLabel="Buscar..."
+                  noEntriesFoundLabel="No se encontraron resultados">
+                </ngx-mat-select-search>
+              </mat-option>
+              <mat-option *ngFor="let product of filteredItems[i] | async" [value]="product.id">
+                {{product.name}} - ${{product.price}}
+              </mat-option>
+            </mat-select>
+          </mat-form-field>
+
+          <!-- Descripción -->
+          <mat-form-field appearance="outline">
+            <mat-label>Descripción</mat-label>
+            <input matInput formControlName="description">
+          </mat-form-field>
+
+          <!-- Cantidad -->
+          <mat-form-field appearance="outline">
+            <mat-label>Cantidad</mat-label>
+            <input matInput type="number" min="1" formControlName="quantity" 
+                   (change)="calculateItemTotal(i)">
+          </mat-form-field>
+
+          <!-- Precio unitario -->
+          <mat-form-field appearance="outline">
+            <mat-label>Precio unitario</mat-label>
+            <input matInput type="number" formControlName="unitPrice" 
+                   (change)="calculateItemTotal(i)">
+          </mat-form-field>
+
+          <!-- Botón eliminar item -->
+          <button mat-icon-button color="warn" (click)="removeItem(i)" 
+                  *ngIf="items.length > 1" type="button">
+            <mat-icon>delete</mat-icon>
+          </button>
+        </div>
+
+        <!-- Impuestos por ítem -->
+        <div class="item-taxes" formArrayName="taxes" *ngIf="!isFromOrder">
+          <div class="tax-header">
+            <strong>Impuestos aplicables:</strong>
+            <div class="item-subtotal">
+              <span>Subtotal: ${{item.get('subtotal')?.value | number:'1.2-2'}}</span>
+              <span>Total impuestos: ${{item.get('taxesTotal')?.value | number:'1.2-2'}}</span>
+              <span><strong>Total: ${{item.get('total')?.value | number:'1.2-2'}}</strong></span>
+            </div>
+          </div>
+          
+          <div class="taxes-grid">
+            <div *ngFor="let tax of taxes[i].controls; let t=index" [formGroupName]="t" class="tax-item" [class.selected]="tax.get('selected')?.value">
+              <mat-checkbox formControlName="selected" (change)="onTaxSelectionChange(i)" color="primary">
+                <div class="tax-content">
+                  <span class="tax-name">{{taxesList[t] ? taxesList[t].alias : ''}}</span> 
+                  <span class="tax-description">({{taxesList[t] ? taxesList[t].tipo_impuesto : ''}} - {{taxesList[t] ? taxesList[t].impuesto : ''}})</span>
+                  <span class="tax-rate">{{taxesList[t] ? (taxesList[t].tasa * 100) : 0}}%</span>
+                </div>
+              </mat-checkbox>
+            </div>
+          </div>
+          
+          <!-- Mensaje si no hay impuestos -->
+          <p *ngIf="taxesList.length === 0" class="no-taxes-message">
+            No hay impuestos configurados. Puedes agregarlos en la sección de Impuestos.
+          </p>
+        </div>
+      </div>
+
+      <!-- Botón agregar item -->
+      <button mat-stroked-button color="primary" (click)="addItem()" type="button" class="mt-3">
+        <mat-icon>add</mat-icon> Agregar producto/servicio
+      </button>
+    </div>
+
+    <!-- Totales generales -->
+    <div class="totals-container mt-4">
+      <p><strong>Subtotal general:</strong> ${{noteForm.get('subtotal')?.value | number:'1.2-2'}}</p>
+      <p><strong>Total impuestos:</strong> ${{noteForm.get('taxesTotal')?.value | number:'1.2-2'}}</p>
+      <p><strong>Total:</strong> ${{noteForm.get('total')?.value | number:'1.2-2'}}</p>
+    </div>
+  </form>
+</mat-dialog-content>
+
+<mat-dialog-actions align="end">
+  <button mat-button (click)="onClose()" class="btn-danger">Cancelar</button>
+  <button mat-raised-button class="btn-primary" (click)="onSubmit()" 
+          [disabled]="!noteForm.valid">
+    {{data ? 'Actualizar' : 'Guardar'}}
+  </button>
+</mat-dialog-actions>

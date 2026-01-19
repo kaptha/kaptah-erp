@@ -1,0 +1,370 @@
+@use 'sass:color';
+
+// Variables
+$primary-color: #8e24aa;
+$secondary-color: #333333;
+$light-gray-color: #bdbdbd;
+$danger-color: #f44336;
+$success-color: #4caf50;
+$warning-color: #ffeb3b;
+
+// Estilos Base
+body {
+  background-color: $secondary-color;
+  color: $light-gray-color;
+  font-family: 'Roboto', sans-serif;
+}
+
+// Títulos y textos
+h1, h2, h3, h4, h5, h6 {
+  color: $primary-color !important;
+}
+
+p {
+  color: $light-gray-color !important;
+}
+
+// Botones Personalizados
+.btn-primary,
+.mat-raised-button.btn-primary,
+.mat-button.btn-primary,
+.mat-flat-button.btn-primary,
+.mat-stroked-button.btn-primary {
+  background-color: $primary-color !important;
+  color: white !important;
+  border-radius: 50px !important;
+  border: none !important;
+  padding: 0 20px !important;
+  text-transform: uppercase !important;
+  font-weight: bold !important;
+  cursor: pointer !important;
+  line-height: 36px !important;
+
+  &:hover {
+    background-color: color.adjust($primary-color, $lightness: -10%) !important;
+  }
+}
+
+.btn-white,
+.mat-raised-button.btn-white,
+.mat-button.btn-white,
+.mat-flat-button.btn-white,
+.mat-stroked-button.btn-white {
+  background-color: white !important;
+  color: $primary-color !important;
+  border-radius: 50px !important;
+  border: 2px solid $primary-color !important;
+  padding: 0 20px !important;
+  text-transform: uppercase !important;
+  font-weight: bold !important;
+  cursor: pointer !important;
+  line-height: 36px !important;
+  &:hover {
+    background-color: color.adjust(white, $lightness: -5%) !important;
+    border-color: color.adjust($primary-color, $lightness: -10%) !important;
+  }
+}
+
+.btn-danger {
+  background-color: $danger-color !important;
+  color: white !important;
+  border-radius: 50px !important;
+  border: none;
+  padding: 10px 20px;
+  text-transform: uppercase;
+  font-weight: bold;
+  cursor: pointer;
+
+  &:hover {
+    background-color: color.adjust($danger-color, $lightness: -10%) !important;
+  }
+}
+
+.btn-success {
+  background-color: $success-color;
+  color: white;
+  border-radius: 50px;
+  border: none;
+  padding: 10px 20px;
+  text-transform: uppercase;
+  font-weight: bold;
+  cursor: pointer;
+
+  &:hover {
+    background-color: color.adjust($success-color, $lightness: -10%);
+  }
+}
+
+.btn-warning {
+  background-color: $warning-color;
+  color: black;
+  border-radius: 50px;
+  border: none;
+  padding: 10px 20px;
+  text-transform: uppercase;
+  font-weight: bold;
+  cursor: pointer;
+
+  &:hover {
+    background-color: color.adjust($warning-color, $lightness: -10%);
+  }
+}
+
+// Estilos para Material Icons
+.mat-button-wrapper {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+}
+
+.mat-icon {
+  margin-right: 8px !important;
+}
+
+// Estilos de Formularios Material
+.mat-form-field {
+  width: 100% !important;
+}
+
+.mat-form-field-wrapper {
+  padding-bottom: 0 !important;
+}
+
+.mat-form-field-flex {
+  background-color: transparent !important;
+  padding: 0 !important;
+}
+
+.mat-form-field-outline {
+  background-color: transparent !important;
+}
+
+.mat-input-element {
+  color: $light-gray-color !important;
+}
+
+// Estilos de Diálogo Personalizados
+.custom-dialog-container {
+  .mat-mdc-dialog-container {
+    padding: 0 !important;
+  }
+
+  .mdc-dialog__surface {
+    min-width: 600px !important;
+    max-width: 800px !important;
+    width: 90% !important;
+    overflow: hidden !important;
+    @media (max-width: 768px) {
+      min-width: 90% !important;
+    }
+  }
+
+  .cdk-overlay-pane {
+    max-width: 90vw !important;
+  }
+
+  .mat-mdc-dialog-content {
+    margin: 0 !important;
+    padding: 24px !important;
+    max-height: none !important;
+    overflow: visible !important;
+  }
+
+  .mat-mdc-dialog-title {
+    padding: 20px 20px 0 20px !important;
+    margin: 0 !important;
+    color: $primary-color !important;
+    font-size: 24px !important;
+    font-weight: bold !important;
+  }
+
+  .mat-mdc-dialog-actions {
+    padding: 20px !important;
+    display: flex !important;
+    justify-content: flex-end !important;
+    gap: 8px !important;
+    margin: 0 !important;
+    border-top: 1px solid rgba(0, 0, 0, 0.12);
+  }
+
+  // Estilos para las filas del formulario
+  .form-row {
+    display: flex;
+    gap: 16px;
+    margin-bottom: 16px;
+
+    @media (max-width: 768px) {
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    mat-form-field {
+      flex: 1;
+      min-width: 0;
+    }
+
+    // Campos numéricos más estrechos
+    &.numbers-row {
+      mat-form-field {
+        flex: 0 0 calc(33.33% - 11px);
+        @media (max-width: 768px) {
+          flex: 1;
+        }
+      }
+    }
+
+    // Campos de precio más estrechos
+    &.price-row {
+      mat-form-field {
+        &:not(:last-child) {
+          flex: 0 0 180px;
+        }
+      }
+    }
+  }
+
+  // Sobrescribe los estilos de Material Design
+  .mat-mdc-form-field {
+    width: 100%;
+  }
+
+  textarea.mat-mdc-input-element {
+    min-height: 60px !important;
+    resize: vertical;
+  }
+}
+
+// Media Queries
+@media (max-width: 768px) {
+  .mat-mdc-dialog-actions button {
+    flex: 1;
+  }
+}
+
+// Estilos de Diálogo Personalizados
+.custom-dialog {
+  .mat-mdc-dialog-container {
+    padding: 0 !important;
+  }
+
+  .mdc-dialog__surface {
+    min-width: 800px !important;
+    max-width: 90vw !important;
+    width: 90% !important;
+    overflow: hidden !important;
+    background-color: white !important;
+    
+    @media (max-width: 768px) {
+      min-width: 90% !important;
+    }
+  }
+
+  .mat-mdc-dialog-content {
+    padding: 20px !important;
+    margin: 0 !important;
+    max-height: none !important;
+    overflow: visible !important;
+  }
+
+  .mat-mdc-dialog-title {
+    margin: 0 !important;
+    padding: 20px 20px 0 20px !important;
+    color: $primary-color !important;
+    font-size: 20px !important;
+    font-weight: 500 !important;
+  }
+
+  .mat-mdc-dialog-actions {
+    padding: 20px !important;
+    margin: 0 !important;
+    border-top: 1px solid rgba(0, 0, 0, 0.12) !important;
+    display: flex !important;
+    justify-content: flex-end !important;
+    gap: 8px !important;
+  }
+
+  // Estilos para el formulario
+  form {
+    display: flex !important;
+    flex-direction: column !important;
+    gap: 16px !important;
+  }
+
+  .form-row {
+    display: flex !important;
+    gap: 16px !important;
+    margin-bottom: 0 !important;
+
+    mat-form-field {
+      flex: 1 !important;
+      min-width: 0 !important;
+    }
+  }
+
+  // Campos numéricos
+  .numbers-row mat-form-field {
+    flex: 0 0 calc(33.33% - 11px) !important;
+  }
+
+  // Campos de precio
+  .price-row mat-form-field {
+    flex: 0 0 180px !important;
+
+    &:last-child {
+      flex: 1 !important;
+    }
+  }
+
+  // Estilos específicos de Material
+  .mat-mdc-form-field {
+    width: 100% !important;
+    
+    &-wrapper {
+      padding-bottom: 0 !important;
+      margin: 0 !important;
+    }
+
+    &-flex {
+      background-color: white !important;
+      padding: 0 12px !important;
+    }
+
+    &-infix {
+      padding: 8px 0 !important;
+      min-height: 40px !important;
+    }
+  }
+
+  .mat-mdc-form-field-appearance-outline {
+    .mat-mdc-form-field-wrapper {
+      margin: 0 !important;
+    }
+
+    .mat-mdc-form-field-outline {
+      background-color: white !important;
+    }
+  }
+
+  textarea.mat-mdc-input-element {
+    min-height: 60px !important;
+    resize: vertical !important;
+  }
+
+  // Media queries para responsividad
+  @media (max-width: 768px) {
+    .form-row {
+      flex-direction: column !important;
+      gap: 8px !important;
+    }
+
+    .numbers-row mat-form-field,
+    .price-row mat-form-field {
+      flex: 1 !important;
+      width: 100% !important;
+    }
+
+    .mat-mdc-dialog-actions button {
+      flex: 1 !important;
+    }
+  }
+}

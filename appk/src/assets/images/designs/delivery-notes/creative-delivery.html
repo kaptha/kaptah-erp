@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Nota de Remisión - Creative Delivery</title>
+</head>
+<body>
+    <div class="container">
+        <!-- Elementos decorativos -->
+        <div class="geometric-top-left"></div>
+        <div class="geometric-bottom-right"></div>
+
+        <!-- Logo -->
+        <div class="logo-container">
+            <img class="logo" src="[[LOGO_URL]]" alt="Logo de la empresa">
+            <div class="logo-text" style="display: none;">[[NOMBRE_EMPRESA]]</div>
+        </div>
+
+        <!-- Encabezado -->
+        <div class="header">
+            <h1 class="remission-title">ORDEN DE VENTA</h1>
+            <div class="remission-subtitle">Folio #[[NUMERO_FOLIO]]</div>
+            <div class="remission-date">[[FECHA_REMISION]]</div>
+        </div>
+
+        <!-- Información del cliente -->
+        <div class="client-info">
+            <div class="info-row">
+                <div class="info-label">Cliente:</div>
+                <div class="info-value">[[NOMBRE_CLIENTE]]</div>
+            </div>
+            <div class="info-row">
+                <div class="info-label">RFC:</div>
+                <div class="info-value">[[RFC_CLIENTE]]</div>
+            </div>
+            <div class="info-row">
+                <div class="info-label">Teléfono:</div>
+                <div class="info-value">[[TELEFONO_CLIENTE]]</div>
+            </div>
+            <div class="info-row">
+                <div class="info-label">Dirección:</div>
+                <div class="info-value">[[DIRECCION_CLIENTE]]</div>
+            </div>
+        </div>
+
+        <!-- Tabla de productos -->
+        <table class="products-table">
+            <thead>
+                <tr>
+                    <th>Cantidad</th>
+                    <th>Producto / Servicio</th>
+                    <th>Precio unitario</th>
+                    <th>Total</th>
+                </tr>
+            </thead>
+            <tbody>
+                <!-- Filas de productos que se repetirán según los ítems -->
+                [[FILAS_PRODUCTOS]]
+            </tbody>
+        </table>
+
+        <!-- Sección de información de pago y totales -->
+        <div class="payment-totals">
+            <div class="payment-info">
+                <div class="payment-title">INFORMACIÓN DE PAGO:</div>
+                <div class="payment-detail">[[FORMA_PAGO]]</div>
+            </div>
+            <div class="totals-container">
+                <div class="total-row">
+                    <div class="total-label">SUBTOTAL:</div>
+                    <div class="total-value">[[SUBTOTAL]]</div>
+                </div>
+                <div class="total-row">
+                    <div class="total-label">IVA ([[PORCENTAJE_IVA]]%):</div>
+                    <div class="total-value">[[MONTO_IVA]]</div>
+                </div>
+                <div class="total-row grand-total">
+                    <div class="total-label">TOTAL:</div>
+                    <div class="total-value">[[TOTAL]]</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Sección de observaciones -->
+        <div class="observations-section">
+            <div class="observations-title">OBSERVACIONES:</div>
+            <div class="observations-box">
+                [[OBSERVACIONES]]
+            </div>
+        </div>
+
+        <!-- Datos de contacto -->
+        <div class="contact-section">
+            <div class="contact-title">DATOS DE CONTACTO</div>
+            <div class="contact-info">Email: [[EMAIL_EMPRESA]]</div>
+            <div class="contact-info">Teléfono: [[TELEFONO_EMPRESA]]</div>
+            <div class="contact-info">Dirección: [[DIRECCION_EMPRESA]]</div>
+        </div>
+    </div>
+</body>
+</html>
+
+
+

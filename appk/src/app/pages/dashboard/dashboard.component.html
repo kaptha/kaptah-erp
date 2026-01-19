@@ -1,0 +1,167 @@
+<div class="cfdi-dashboard-container">
+  
+  <!-- Header with actions -->
+  <div class="dashboard-header">
+    <h1>Dashboard CFDI</h1>
+    <div class="header-actions">
+      <button mat-raised-button color="primary" (click)="importarXmls()" [disabled]="isLoading">
+        <mat-icon>upload</mat-icon>
+        Importar XMLs
+      </button>
+      <button mat-raised-button color="accent" (click)="procesarXmls()" [disabled]="isLoading || isProcessing">
+        <mat-icon>analytics</mat-icon>
+        {{ isProcessing ? 'Procesando...' : 'Procesar Datos' }}
+      </button>
+    </div>
+  </div>
+
+  <!-- Date filters -->
+  <mat-card class="filters-card">
+    <mat-card-content>
+      <div class="date-filters">
+        <mat-form-field appearance="outline">
+          <mat-label>Fecha Inicio</mat-label>
+          <input matInput type="date" [(ngModel)]="fechaInicio" (change)="onFechaChange()">
+        </mat-form-field>
+        
+        <mat-form-field appearance="outline">
+          <mat-label>Fecha Fin</mat-label>
+          <input matInput type="date" [(ngModel)]="fechaFin" (change)="onFechaChange()">
+        </mat-form-field>
+        
+        <button mat-button (click)="loadDashboardData()">
+          <mat-icon>refresh</mat-icon>
+          Actualizar
+        </button>
+      </div>
+    </mat-card-content>
+  </mat-card>
+
+  <!-- Loading spinner -->
+  <div class="loading-spinner" *ngIf="isLoading">
+    <mat-spinner></mat-spinner>
+    <p>Cargando datos financieros...</p>
+  </div>
+
+  <!-- KPI Cards -->
+  <div class="kpi-cards" *ngIf="!isLoading">
+    <mat-card *ngFor="let kpi of kpiCards" class="kpi-card">
+      <mat-card-content>
+        <h3>{{ kpi.title }}</h3>
+        <div class="kpi-value">{{ kpi.value }}</div>
+        <div class="kpi-change" [class.positive]="kpi.isPositive" [class.negative]="!kpi.isPositive">
+          <mat-icon>{{ kpi.isPositive ? 'trending_up' : 'trending_down' }}</mat-icon>
+          {{ kpi.change }}
+        </div>
+      </mat-card-content>
+    </mat-card>
+  </div>
+
+  <!-- Charts Section -->
+  <div class="charts-container" *ngIf="!isLoading">
+    
+    <!-- Pie Chart - Tipos de Comprobante -->
+    <mat-card class="chart-card">
+      <mat-card-header>
+        <mat-card-title>
+          <mat-icon>pie_chart</mat-icon>
+          Distribución por Tipo
+        </mat-card-title>
+      </mat-card-header>
+      <mat-card-content>
+        <ngx-charts-pie-chart
+          [results]="pieChartData"
+          [legend]="true"
+          [labels]="true"
+          [doughnut]="true"
+          [arcWidth]="0.4"
+          [view]="[400, 300]">
+        </ngx-charts-pie-chart>
+      </mat-card-content>
+    </mat-card>
+
+    <!-- Top Proveedores Table -->
+    <mat-card class="chart-card">
+      <mat-card-header>
+        <mat-card-title>
+          <mat-icon>business</mat-icon>
+          Top Proveedores
+        </mat-card-title>
+      </mat-card-header>
+      <mat-card-content>
+        <div class="table-container">
+          <table mat-table [dataSource]="topProveedores" class="providers-table">
+            
+            <!-- RFC Column -->
+            <ng-container matColumnDef="rfc">
+              <th mat-header-cell *matHeaderCellDef>RFC</th>
+              <td mat-cell *matCellDef="let provider">{{ provider.rfc }}</td>
+            </ng-container>
+
+            <!-- Nombre Column -->
+            <ng-container matColumnDef="nombre">
+              <th mat-header-cell *matHeaderCellDef>Nombre</th>
+              <td mat-cell *matCellDef="let provider">{{ provider.nombre || 'N/A' }}</td>
+            </ng-container>
+
+            <!-- Facturas Column -->
+            <ng-container matColumnDef="facturas">
+              <th mat-header-cell *matHeaderCellDef>Facturas</th>
+              <td mat-cell *matCellDef="let provider">{{ provider.cantidad_facturas }}</td>
+            </ng-container>
+
+            <!-- Total Column -->
+            <ng-container matColumnDef="total">
+              <th mat-header-cell *matHeaderCellDef>Total Gastado</th>
+              <td mat-cell *matCellDef="let provider">
+                <strong>{{ formatCurrency(provider.total_gastado) }}</strong>
+              </td>
+            </ng-container>
+
+            <tr mat-header-row *matHeaderRowDef="['rfc', 'nombre', 'facturas', 'total']"></tr>
+            <tr mat-row *matRowDef="let row; columns: ['rfc', 'nombre', 'facturas', 'total']"></tr>
+          </table>
+        </div>
+        
+        <!-- Empty state -->
+        <div class="empty-state" *ngIf="topProveedores.length === 0">
+          <mat-icon>business_center</mat-icon>
+          <p>No hay datos de proveedores disponibles</p>
+          <small>Importa y procesa XMLs para ver esta información</small>
+        </div>
+      </mat-card-content>
+    </mat-card>
+  </div>
+
+  <!-- Resumen IVA -->
+  <mat-card class="iva-summary" *ngIf="!isLoading">
+    <mat-card-header>
+      <mat-card-title>
+        <mat-icon>receipt</mat-icon>
+        Resumen Financiero
+      </mat-card-title>
+    </mat-card-header>
+    <mat-card-content>
+      <div class="iva-grid">
+        <div class="iva-item">
+          <label>Total Ingresos:</label>
+          <span class="amount positive">{{ kpiCards[1].value }}</span>
+          <small>{{ kpiCards[1].change }}</small>
+        </div>
+        <div class="iva-item">
+          <label>Total Egresos:</label>
+          <span class="amount negative">{{ kpiCards[2].value }}</span>
+          <small>{{ kpiCards[2].change }}</small>
+        </div>
+        <div class="iva-item total">
+          <label>IVA Neto:</label>
+          <span class="amount" [class.positive]="kpiCards[3].isPositive" [class.negative]="!kpiCards[3].isPositive">
+            {{ kpiCards[3].value }}
+          </span>
+          <small>{{ kpiCards[3].change }}</small>
+        </div>
+      </div>
+    </mat-card-content>
+  </mat-card>
+
+</div>

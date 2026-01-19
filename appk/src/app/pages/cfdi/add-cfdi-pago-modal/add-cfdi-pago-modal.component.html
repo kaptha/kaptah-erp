@@ -1,0 +1,219 @@
+<div class="cfdi-modal-container">
+  <h2 mat-dialog-title>{{ isEditing ? 'Editar CFDI de Recepción de Pago' : 'Crear CFDI de Recepción de Pago' }}</h2>
+  
+  <mat-dialog-content>
+    <form [formGroup]="cfdiForm">
+      <!-- Loader -->
+      <div class="loading-overlay" *ngIf="loading">
+        <mat-spinner></mat-spinner>
+      </div>
+      
+      <!-- Pestañas principales -->
+      <div class="tab-container">
+        <button mat-button [class.active-tab]="activeTab === 'General'" (click)="changeTab('General')">General</button>
+        <button mat-button [class.active-tab]="activeTab === 'Pagos'" (click)="changeTab('Pagos')">Pagos</button>
+      </div>
+      
+      <!-- Contenido de la pestaña General -->
+      <div class="tab-content" *ngIf="activeTab === 'General'">
+        <div class="section-title">Datos generales</div>
+        
+        <div class="form-row">
+          <mat-form-field appearance="outline">
+            <mat-label>Sucursal</mat-label>
+            <mat-select formControlName="sucursal" required>
+              <mat-option *ngFor="let sucursal of sucursales" [value]="sucursal.nombre">
+                {{ sucursal.nombre }}
+              </mat-option>
+            </mat-select>
+            <mat-error *ngIf="isInvalid('sucursal')">Selecciona una sucursal</mat-error>
+          </mat-form-field>
+          
+          <mat-form-field appearance="outline">
+            <mat-label>Tipo de documento</mat-label>
+            <mat-select formControlName="tipoDocumento" required>
+              <mat-option value="Recepción de pago">Recepción de pago</mat-option>
+            </mat-select>
+          </mat-form-field>
+          
+          <mat-form-field appearance="outline">
+            <mat-label>Régimen Fiscal</mat-label>
+            <mat-select formControlName="regimenFiscal" required>
+              <mat-option value="P. Física con actividad empres. y prof.">P. Física con actividad empres. y prof.</mat-option>
+            </mat-select>
+          </mat-form-field>
+        </div>
+        
+        <div class="form-row">
+          <mat-form-field appearance="outline">
+            <mat-label>Fecha</mat-label>
+            <input matInput [matDatepicker]="picker" formControlName="fecha" required>
+            <mat-datepicker-toggle matSuffix [for]="picker"></mat-datepicker-toggle>
+            <mat-datepicker #picker></mat-datepicker>
+            <mat-error *ngIf="isInvalid('fecha')">Campo requerido</mat-error>
+          </mat-form-field>
+          
+          <mat-form-field appearance="outline">
+            <mat-label>Serie</mat-label>
+            <input matInput formControlName="serie" required>
+            <mat-error *ngIf="isInvalid('serie')">Campo requerido</mat-error>
+          </mat-form-field>
+        </div>
+        
+        <div class="section-title">Datos cliente receptor</div>
+        
+        <div class="form-row">
+          <mat-form-field appearance="outline" class="full-width">
+            <mat-label>Cliente</mat-label>
+            <mat-select formControlName="clienteId" (selectionChange)="onClienteSelect($event)" required>
+              <mat-option>
+                <ngx-mat-select-search 
+                  [formControl]="clienteFilterCtrl"
+                  placeholderLabel="Buscar cliente..."
+                  noEntriesFoundLabel="No se encontraron clientes">
+                </ngx-mat-select-search>
+              </mat-option>
+              <mat-option *ngFor="let cliente of filteredClientes | async" [value]="cliente.ID">
+                {{ cliente.nombre }} - {{ cliente.Rfc }}
+              </mat-option>
+            </mat-select>
+            <mat-error *ngIf="isInvalid('clienteId')">Selecciona un cliente</mat-error>
+          </mat-form-field>
+        </div>
+        
+        <!-- Información del cliente seleccionado -->
+        <div *ngIf="selectedCliente" class="cliente-info">
+          <div class="info-row">
+            <span class="info-label">RFC:</span>
+            <span class="info-value">{{ selectedCliente.Rfc || 'Sin RFC' }}</span>
+          </div>
+          <div class="info-row">
+            <span class="info-label">Dirección:</span>
+            <span class="info-value">
+              {{ selectedCliente.Colonia || 'Sin dirección' }}
+              {{ selectedCliente.Cpostal ? 'CP: ' + selectedCliente.Cpostal : '' }}
+            </span>
+          </div>
+        </div>
+      </div>
+      
+      <!-- Contenido de la pestaña Pagos -->
+      <div class="tab-content" *ngIf="activeTab === 'Pagos'">
+        <div formArrayName="pagos">
+          <div *ngFor="let pago of pagos.controls; let i = index" [formGroupName]="i" class="pago-container">
+            <div class="pago-header">
+              <span class="pago-title">Pago {{ i + 1 }}</span>
+              <button type="button" mat-icon-button color="warn" (click)="removePago(i)" *ngIf="pagos.length > 1" matTooltip="Eliminar pago">
+                <mat-icon>delete</mat-icon>
+              </button>
+            </div>
+            
+            <div class="form-row">
+              <mat-form-field appearance="outline">
+                <mat-label>Forma de pago</mat-label>
+                <mat-select formControlName="formaPago" required>
+                  <mat-option *ngFor="let forma of formasPago" [value]="forma.clave">
+                    {{ forma.clave }} - {{ forma.descripcion }}
+                  </mat-option>
+                </mat-select>
+                <mat-error *ngIf="isPagoInvalid(i, 'formaPago')">Campo requerido</mat-error>
+              </mat-form-field>
+              
+              <mat-form-field appearance="outline">
+                <mat-label>Fecha de pago</mat-label>
+                <input matInput [matDatepicker]="pickerPago" formControlName="fechaPago" required>
+                <mat-datepicker-toggle matSuffix [for]="pickerPago"></mat-datepicker-toggle>
+                <mat-datepicker #pickerPago></mat-datepicker>
+                <mat-error *ngIf="isPagoInvalid(i, 'fechaPago')">Campo requerido</mat-error>
+              </mat-form-field>
+              
+              <mat-form-field appearance="outline">
+                <mat-label>Moneda</mat-label>
+                <mat-select formControlName="moneda" required>
+                  <mat-option *ngFor="let moneda of monedas" [value]="moneda.clave">
+                    {{ moneda.descripcion }}
+                  </mat-option>
+                </mat-select>
+                <mat-error *ngIf="isPagoInvalid(i, 'moneda')">Campo requerido</mat-error>
+              </mat-form-field>
+              
+              <mat-form-field appearance="outline">
+                <mat-label>Monto</mat-label>
+                <input matInput type="number" min="0.01" step="0.01" formControlName="monto" required>
+                <span matPrefix>$&nbsp;</span>
+                <mat-error *ngIf="isPagoInvalid(i, 'monto')">Campo requerido</mat-error>
+              </mat-form-field>
+            </div>
+            
+            <div class="form-row">
+              <mat-form-field appearance="outline">
+                <mat-label>RFC Emisor de la cuenta emisora</mat-label>
+                <input matInput formControlName="rfcEmisorCuenta">
+              </mat-form-field>
+              
+              <mat-form-field appearance="outline">
+                <mat-label>RFC Emisor de la cuenta beneficiaria</mat-label>
+                <input matInput formControlName="rfcBeneficiario">
+              </mat-form-field>
+            </div>
+            
+            <div class="form-row">
+              <mat-form-field appearance="outline">
+                <mat-label>Número de cuenta ordenante</mat-label>
+                <input matInput formControlName="numeroCuentaOrdenante">
+              </mat-form-field>
+              
+              <mat-form-field appearance="outline">
+                <mat-label>Número de cuenta beneficiario</mat-label>
+                <input matInput formControlName="numeroCuentaBeneficiario">
+              </mat-form-field>
+            </div>
+            
+            <div class="form-row">
+              <mat-form-field appearance="outline">
+                <mat-label>Nombre del banco ordenante</mat-label>
+                <input matInput formControlName="nombreBancoOrdenante">
+              </mat-form-field>
+              
+              <mat-form-field appearance="outline">
+                <mat-label>Número de operación</mat-label>
+                <input matInput formControlName="numeroOperacion">
+              </mat-form-field>
+              
+              <mat-form-field appearance="outline">
+                <mat-label>Tipo de cadena de pago</mat-label>
+                <mat-select formControlName="tipoCadenaPago">
+                  <mat-option value="">-selecciona-</mat-option>
+                  <mat-option *ngFor="let tipo of tiposCadenaPago" [value]="tipo.clave">
+                    {{ tipo.clave }} - {{ tipo.descripcion }}
+                  </mat-option>
+                </mat-select>
+              </mat-form-field>
+            </div>
+          </div>
+          
+          <div class="add-button">
+            <button type="button" mat-stroked-button color="primary" (click)="addPago()">
+              <mat-icon>add</mat-icon> Agregar pago
+            </button>
+          </div>
+        </div>
+        
+        <div class="section-title">Observación</div>
+        <div class="form-row">
+          <mat-form-field appearance="outline" class="full-width">
+            <mat-label>Escribe una observación</mat-label>
+            <textarea matInput formControlName="observaciones" rows="3"></textarea>
+          </mat-form-field>
+        </div>
+      </div>
+    </form>
+  </mat-dialog-content>
+  
+  <mat-dialog-actions align="end">
+    <button mat-button (click)="onCancel()" [disabled]="loading">Cancelar</button>
+    <button mat-raised-button color="primary" (click)="onSubmit()" [disabled]="loading || cfdiForm.invalid">
+      {{ isEditing ? 'Actualizar' : 'Crear CFDI' }}
+    </button>
+  </mat-dialog-actions>
+</div>

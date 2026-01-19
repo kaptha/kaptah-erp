@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Nota de Remisión - Profesional Delivery</title>
+</head>
+<body>
+    <div class="container">
+        <!-- Título principal -->
+        <div class="title-container">
+            <h1 class="document-title">ORDEN DE VENTA</h1>
+        </div>
+        
+        <!-- Tabla de información principal -->
+        <table class="main-table">
+            <tr>
+                <td width="20%"><span class="label">NÚMERO:</span></td>
+                <td width="50%"><span class="label">PERÍODO</span></td>
+                <th width="10%">DÍA</th>
+                <th width="10%">MES</th>
+                <th width="10%">AÑO</th>
+            </tr>
+            <tr>
+                <td>[[NUMERO_FOLIO]]</td>
+                <td>[[FECHA_REMISION]]</td>
+                <td>[[DIA]]</td>
+                <td>[[MES]]</td>
+                <td>[[AÑO]]</td>
+            </tr>
+            <tr>
+                <td><span class="label">CLIENTE:</span></td>
+                <td colspan="4">[[NOMBRE_CLIENTE]]</td>
+            </tr>
+            <tr>
+                <td><span class="label">DOMICILIO:</span></td>
+                <td colspan="4">[[DIRECCION_CLIENTE]]</td>
+            </tr>
+            <tr>
+                <td colspan="4"><span class="label">CIUDAD O ESTADO:</span> [[DIRECCION_CLIENTE]]</td>
+                <td><span class="label">TEL.:</span> [[TELEFONO_CLIENTE]]</td>
+            </tr>
+        </table>
+        
+        <!-- Tabla de productos -->
+        <table class="products-table">
+            <thead>
+                <tr>
+                    <th width="15%">CANTIDAD</th>
+                    <th width="40%">CONCEPTO</th>
+                    <th width="15%">PRECIO</th>
+                    <th width="15%">IMPORTE</th>
+                </tr>
+            </thead>
+            <tbody>
+                <!-- Aquí van las filas de productos -->
+                [[FILAS_PRODUCTOS]]
+                
+                <!-- Fila de logo y totales -->
+                <tr class="totals-logo-row">
+                    <td colspan="2">
+                        <div class="logo-container">
+                            <div class="logo">
+                                <img src="[[LOGO_URL]]" alt="Logo" class="logo-img" onerror="this.style.display='none'; this.nextElementSibling.style.display='block';">
+                                <div class="logo-text">◆</div>
+                            </div>
+                            <div>
+                                <div class="company-name">[[NOMBRE_EMPRESA]]</div>
+                                <div class="logo-text-desc">y logo</div>
+                            </div>
+                        </div>
+                    </td>
+                    <td class="totals-labels">SUBTOTAL</td>
+                    <td>[[SUBTOTAL]]</td>
+                </tr>
+                <tr>
+                    <td colspan="2" rowspan="2"></td>
+                    <td class="totals-labels">IMPUESTO</td>
+                    <td>[[MONTO_IVA]]</td>
+                </tr>
+                <tr>
+                    <td class="totals-labels">TOTAL</td>
+                    <td>[[TOTAL]]</td>
+                </tr>
+            </tbody>
+        </table>
+        
+        <!-- Sección de observaciones -->
+        <div class="observations-section">
+            <div class="observations-title">OBSERVACIONES:</div>
+            <div class="observations-box">
+                [[OBSERVACIONES]]
+            </div>
+        </div>
+        
+        <!-- Pie de página con contacto -->
+        <div class="footer">
+            <div>
+                <div class="contact-item">DIRECCIÓN</div>
+                <span class="contact-text">[[DIRECCION_EMPRESA]]</span>
+            </div>
+            <div>
+                <div class="contact-item">TELÉFONO</div>
+                <span class="contact-text">[[TELEFONO_EMPRESA]]</span>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

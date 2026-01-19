@@ -1,0 +1,379 @@
+/* === KAPTAH COLOR PALETTE === */
+:root {
+  --kaptah-primary: #7B1FA2;
+  --kaptah-secondary: #4B4B4B;
+  --kaptah-accent: #C158DC;
+  --kaptah-bg-light: #F5F6FA;
+  --kaptah-text: #333333;
+}
+
+/* ===============================
+   SOBRESCRITURA ULTRA-AGRESIVA DE ANGULAR MATERIAL
+   Estos estilos ELIMINAN TODO el fondo blanco
+================================= */
+
+/* CRÍTICO: Eliminar TODOS los fondos de Material */
+.mat-mdc-form-field .mat-mdc-text-field-wrapper,
+.mat-mdc-text-field-wrapper,
+.mdc-text-field,
+.mdc-text-field--filled,
+.mat-mdc-form-field-flex,
+.mat-mdc-text-field-wrapper .mat-mdc-form-field-flex,
+.mat-mdc-form-field.mat-form-field-appearance-fill .mat-mdc-text-field-wrapper,
+.mat-mdc-form-field.mat-form-field-appearance-fill .mdc-text-field--filled,
+.mat-mdc-form-field-appearance-fill .mat-mdc-text-field-wrapper {
+  background-color: transparent !important;
+  background: transparent !important;
+}
+
+/* Eliminar hover de Material */
+.mat-mdc-form-field:hover .mat-mdc-text-field-wrapper,
+.mat-mdc-form-field.mat-form-field-appearance-fill:hover .mat-mdc-text-field-wrapper {
+  background-color: transparent !important;
+  background: transparent !important;
+}
+
+/* Eliminar línea inferior */
+.mdc-line-ripple,
+.mat-mdc-form-field-appearance-fill .mdc-line-ripple {
+  display: none !important;
+}
+
+/* Eliminar overlay de focus */
+.mat-mdc-form-field-focus-overlay {
+  opacity: 0 !important;
+  background-color: transparent !important;
+}
+
+/* Eliminar subscript wrapper background */
+.mat-mdc-form-field-subscript-wrapper {
+  background: transparent !important;
+}
+
+/* ===============================
+   AHORA SÍ - APLICAR NUESTROS ESTILOS
+================================= */
+
+/* Wrapper con NUESTRO fondo */
+#contact .mat-mdc-form-field .mat-mdc-text-field-wrapper {
+  background: rgba(30, 29, 45, 0.6) !important;
+  border-radius: 16px !important;
+  border: 1.5px solid rgba(164, 107, 255, 0.2) !important;
+  transition: all 0.35s ease;
+  overflow: visible;
+  position: relative;
+}
+
+/* FORZAR todos los elementos internos a ser transparentes */
+#contact .mat-mdc-text-field-wrapper *:not(input):not(textarea):not(label) {
+  background: transparent !important;
+  background-color: transparent !important;
+}
+
+/* Input específico */
+#contact input.mat-mdc-input-element,
+#contact textarea.mat-mdc-input-element {
+  background: transparent !important;
+  background-color: transparent !important;
+  color: #FFFFFF !important;
+  font-size: 0.98rem !important;
+  padding: 15px 20px !important;
+  caret-color: #A46BFF;
+}
+
+/* Placeholder */
+#contact input::placeholder,
+#contact textarea::placeholder {
+  color: rgba(255, 255, 255, 0.45) !important;
+}
+
+/* Label */
+#contact .mat-mdc-floating-label {
+  color: rgba(255, 255, 255, 0.65) !important;
+  font-weight: 500;
+}
+
+/* Hover del WRAPPER (no del input) */
+#contact .mat-mdc-form-field:hover .mat-mdc-text-field-wrapper {
+  background: rgba(38, 37, 55, 0.7) !important;
+  border-color: rgba(164, 107, 255, 0.35) !important;
+  box-shadow: 0 4px 16px rgba(127, 63, 240, 0.15);
+}
+
+/* Focus */
+#contact .mat-mdc-form-field.mat-focused .mat-mdc-text-field-wrapper {
+  background: rgba(42, 41, 60, 0.85) !important;
+  border-color: #A46BFF !important;
+  box-shadow: 
+    0 0 0 3px rgba(164, 107, 255, 0.12),
+    0 6px 24px rgba(127, 63, 240, 0.25);
+}
+
+#contact .mat-mdc-form-field.mat-focused .mat-mdc-floating-label {
+  color: #C18DFF !important;
+  font-weight: 600;
+  text-shadow: 0 0 10px rgba(193, 141, 255, 0.5);
+}
+
+/* Efecto de línea brillante en focus */
+#contact .mat-mdc-form-field.mat-focused .mat-mdc-text-field-wrapper::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background: linear-gradient(90deg, 
+    transparent,
+    rgba(164, 107, 255, 0.8) 50%,
+    transparent
+  );
+  animation: slideShine 2s ease-in-out infinite;
+}
+
+@keyframes slideShine {
+  0%, 100% {
+    opacity: 0.5;
+  }
+  50% {
+    opacity: 1;
+  }
+}
+
+/* Textarea específico */
+#contact textarea.mat-mdc-input-element {
+  min-height: 130px !important;
+  resize: vertical;
+  line-height: 1.6;
+}
+
+/* Errores */
+#contact .mat-mdc-form-field-error {
+  color: #FF8FAD !important;
+  font-size: 0.85rem;
+  margin-top: 6px;
+}
+
+/* Campo válido */
+#contact .mat-mdc-form-field.ng-valid.ng-touched .mat-mdc-text-field-wrapper {
+  border-color: rgba(76, 175, 80, 0.4) !important;
+  box-shadow: 0 0 0 2px rgba(76, 175, 80, 0.1);
+}
+
+/* Check mark para válidos */
+#contact .mat-mdc-form-field.ng-valid.ng-touched .mat-mdc-text-field-wrapper::before {
+  content: '✓';
+  position: absolute;
+  right: 18px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: #66FF73;
+  font-size: 1.2rem;
+  font-weight: bold;
+  z-index: 10;
+  text-shadow: 0 0 8px rgba(102, 255, 115, 0.6);
+  pointer-events: none;
+}
+
+/* Form field width */
+#contact .mat-mdc-form-field {
+  width: 100%;
+}
+
+/* ===============================
+   SECCIÓN DE CONTACTO
+================================= */
+
+.contact-section {
+  padding: 100px 10%;
+  background: #0F0E17;
+  color: #fff;
+  text-align: center;
+}
+
+.contact-title {
+  font-size: 2.5rem;
+  font-weight: 700;
+  margin-bottom: 10px;
+}
+
+.contact-subtitle {
+  color: #BDBDC7;
+  margin-bottom: 60px;
+  font-size: 1.1rem;
+}
+
+.contact-grid {
+  display: grid;
+  grid-template-columns: 1fr 1.2fr;
+  gap: 40px;
+  max-width: 1200px;
+  margin: 0 auto;
+  text-align: left;
+}
+
+.contact-card {
+  background: linear-gradient(135deg, rgba(26, 25, 38, 0.5), rgba(26, 25, 38, 0.3));
+  border-radius: 24px;
+  padding: 40px;
+  box-shadow: 
+    0 8px 32px rgba(0, 0, 0, 0.3), 
+    0 0 0 1px rgba(127, 63, 240, 0.2);
+  backdrop-filter: blur(12px);
+  border: 1px solid rgba(127, 63, 240, 0.25);
+  transition: all 0.4s ease;
+}
+
+.contact-card:hover {
+  box-shadow: 
+    0 12px 40px rgba(0, 0, 0, 0.4), 
+    0 0 0 1px rgba(164, 107, 255, 0.4);
+  transform: translateY(-4px);
+}
+
+.contact-info h3 {
+  margin-top: 0;
+  font-size: 1.6rem;
+  margin-bottom: 16px;
+  background: linear-gradient(135deg, #C18DFF, #A46BFF);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.contact-info p {
+  color: #D3D3E0;
+  line-height: 1.7;
+  margin-bottom: 24px;
+}
+
+.contact-items {
+  margin-top: 24px;
+  display: grid;
+  gap: 16px;
+}
+
+.contact-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  color: #E9E9F6;
+  padding: 12px;
+  background: rgba(164, 107, 255, 0.05);
+  border-radius: 12px;
+  border: 1px solid rgba(164, 107, 255, 0.1);
+  transition: all 0.3s ease;
+}
+
+.contact-item:hover {
+  background: rgba(164, 107, 255, 0.12);
+  border-color: rgba(164, 107, 255, 0.25);
+  transform: translateX(4px);
+}
+
+.contact-item mat-icon {
+  color: #A46BFF;
+  font-size: 24px;
+  width: 24px;
+  height: 24px;
+}
+
+.form-row {
+  display: grid;
+  gap: 20px;
+}
+
+/* Botón */
+#contact .btn-primary {
+  position: relative;
+  overflow: hidden;
+  transition: all 0.4s ease;
+  box-shadow: 0 4px 16px rgba(127, 63, 240, 0.4);
+}
+
+#contact .btn-primary:hover {
+  box-shadow: 
+    0 6px 24px rgba(127, 63, 240, 0.6), 
+    0 0 40px rgba(164, 107, 255, 0.3);
+  transform: translateY(-3px);
+}
+
+#contact .btn-primary mat-icon {
+  transition: transform 0.3s ease;
+}
+
+#contact .btn-primary:hover mat-icon {
+  transform: translateX(5px);
+}
+
+/* Mensaje de éxito */
+#contact .form-note {
+  background: linear-gradient(135deg, rgba(76, 175, 80, 0.2), rgba(76, 175, 80, 0.1));
+  border: 1.5px solid rgba(76, 175, 80, 0.4);
+  border-radius: 14px;
+  padding: 14px 18px;
+  margin-top: 20px;
+  color: #CFFFD8;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+#contact .form-note::before {
+  content: '✓';
+  color: #66FF73;
+  font-size: 1.3rem;
+  font-weight: bold;
+  text-shadow: 0 0 8px rgba(102, 255, 115, 0.6);
+}
+
+/* Responsive */
+@media (max-width: 900px) {
+  .contact-grid {
+    grid-template-columns: 1fr;
+    gap: 30px;
+  }
+}
+
+@media (max-width: 768px) {
+  .contact-title {
+    font-size: 2rem;
+  }
+  
+  #contact .mat-mdc-text-field-wrapper {
+    border-radius: 12px !important;
+  }
+  
+  .contact-card {
+    padding: 24px;
+  }
+}
+
+/* ===============================
+   OVERRIDES PARA BOTONES
+================================= */
+
+.mat-mdc-raised-button.mat-primary {
+  background-color: #7F3FF0 !important;
+  color: #fff !important;
+}
+
+.mat-mdc-raised-button.mat-primary:hover {
+  background-color: #A46BFF !important;
+}
+
+.mat-mdc-stroked-button.mat-accent {
+  border-color: #A46BFF !important;
+  color: #A46BFF !important;
+}
+
+.mat-mdc-stroked-button.mat-accent:hover {
+  background-color: rgba(164, 107, 255, 0.1) !important;
+}
+
+body {
+  font-family: 'Poppins', sans-serif;
+  background: #0F0E17;
+  color: #FFFFFF;
+  margin: 0;
+  padding: 0;
+}

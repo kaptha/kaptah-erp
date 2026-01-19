@@ -1,0 +1,379 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Orden de Compra</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Arial', sans-serif;
+            font-size: 11px;
+            line-height: 1.4;
+            color: #333;
+        }
+
+        .container {
+            padding: 15px;
+            max-width: 210mm;
+            margin: 0 auto;
+        }
+
+        /* Header */
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 2px solid #2c3e50;
+        }
+
+        .logo-section {
+            flex: 1;
+        }
+
+        .logo {
+            max-width: 150px;
+            max-height: 80px;
+            object-fit: contain;
+        }
+
+        .company-info {
+            margin-top: 10px;
+            font-size: 10px;
+            color: #555;
+        }
+
+        .document-info {
+            text-align: right;
+            flex: 1;
+        }
+
+        .document-title {
+            font-size: 20px;
+            font-weight: bold;
+            color: #2c3e50;
+            margin-bottom: 8px;
+        }
+
+        .document-number {
+            font-size: 16px;
+            color: #3498db;
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+
+        .document-date {
+            font-size: 10px;
+            color: #666;
+        }
+
+        /* Info Boxes */
+        .info-section {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .info-box {
+            border: 1px solid #ddd;
+            padding: 12px;
+            border-radius: 4px;
+            background-color: #f8f9fa;
+        }
+
+        .info-box-title {
+            font-weight: bold;
+            color: #2c3e50;
+            margin-bottom: 8px;
+            font-size: 11px;
+            text-transform: uppercase;
+            border-bottom: 1px solid #ddd;
+            padding-bottom: 5px;
+        }
+
+        .info-row {
+            margin: 4px 0;
+            font-size: 10px;
+        }
+
+        .info-label {
+            font-weight: bold;
+            color: #555;
+            display: inline-block;
+            width: 100px;
+        }
+
+        /* Table */
+        .items-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 20px;
+        }
+
+        .items-table thead {
+            background-color: #2c3e50;
+            color: white;
+        }
+
+        .items-table th {
+            padding: 10px 8px;
+            text-align: left;
+            font-size: 10px;
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+
+        .items-table tbody tr {
+            border-bottom: 1px solid #e0e0e0;
+        }
+
+        .items-table tbody tr:hover {
+            background-color: #f5f5f5;
+        }
+
+        .items-table td {
+            padding: 10px 8px;
+            font-size: 10px;
+        }
+
+        .items-table td:nth-child(3),
+        .items-table td:nth-child(4),
+        .items-table td:nth-child(5) {
+            text-align: right;
+        }
+
+        /* Totals */
+        .totals-section {
+            display: flex;
+            justify-content: flex-end;
+            margin-bottom: 20px;
+        }
+
+        .totals-box {
+            width: 300px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            overflow: hidden;
+        }
+
+        .total-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 10px 15px;
+            border-bottom: 1px solid #e0e0e0;
+            font-size: 11px;
+        }
+
+        .total-row:last-child {
+            border-bottom: none;
+            background-color: #2c3e50;
+            color: white;
+            font-weight: bold;
+            font-size: 13px;
+        }
+
+        .total-label {
+            font-weight: 600;
+        }
+
+        .total-value {
+            font-weight: bold;
+        }
+
+        /* Notes */
+        .notes-section {
+            margin-top: 20px;
+            padding: 12px;
+            background-color: #fff8e1;
+            border-left: 4px solid #ffc107;
+            border-radius: 4px;
+        }
+
+        .notes-title {
+            font-weight: bold;
+            color: #f57c00;
+            margin-bottom: 5px;
+            font-size: 11px;
+        }
+
+        .notes-content {
+            font-size: 10px;
+            color: #666;
+        }
+
+        /* Footer */
+        .footer {
+            margin-top: 30px;
+            padding-top: 15px;
+            border-top: 1px solid #ddd;
+            text-align: center;
+            font-size: 9px;
+            color: #888;
+        }
+
+        /* Status Badge */
+        .status-badge {
+            display: inline-block;
+            padding: 4px 10px;
+            border-radius: 12px;
+            font-size: 9px;
+            font-weight: bold;
+            text-transform: uppercase;
+        }
+
+        .status-draft {
+            background-color: #ffeaa7;
+            color: #fdcb6e;
+        }
+
+        .status-sent {
+            background-color: #74b9ff;
+            color: #0984e3;
+        }
+
+        .status-received {
+            background-color: #55efc4;
+            color: #00b894;
+        }
+
+        @media print {
+            body {
+                margin: 0;
+            }
+            .container {
+                padding: 0;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <div class="header">
+            <div class="logo-section">
+                <img src="{{logo}}" alt="Logo" class="logo">
+                <div class="company-info">
+                    <div><strong>{{empresa_nombre}}</strong></div>
+                    <div>RFC: {{empresa_rfc}}</div>
+                    <div>Tel: {{empresa_telefono}}</div>
+                    <div>Email: {{empresa_email}}</div>
+                </div>
+            </div>
+            <div class="document-info">
+                <div class="document-title">{{tipo_documento}}</div>
+                <div class="document-number">{{numero_orden}}</div>
+                <div class="document-date">Fecha: {{fecha}}</div>
+                <div class="document-date">Entrega esperada: {{fecha_esperada}}</div>
+                <div style="margin-top: 8px;">
+                    <span class="status-badge status-{{estado}}">{{estado}}</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Info Section -->
+        <div class="info-section">
+            <div class="info-box">
+                <div class="info-box-title">Datos del Emisor</div>
+                <div class="info-row">
+                    <span class="info-label">Empresa:</span>
+                    {{empresa_nombre}}
+                </div>
+                <div class="info-row">
+                    <span class="info-label">RFC:</span>
+                    {{empresa_rfc}}
+                </div>
+                <div class="info-row">
+                    <span class="info-label">Teléfono:</span>
+                    {{empresa_telefono}}
+                </div>
+                <div class="info-row">
+                    <span class="info-label">Email:</span>
+                    {{empresa_email}}
+                </div>
+            </div>
+
+            <div class="info-box">
+                <div class="info-box-title">Datos del Proveedor</div>
+                <div class="info-row">
+                    <span class="info-label">Nombre:</span>
+                    {{proveedor_nombre}}
+                </div>
+                <div class="info-row">
+                    <span class="info-label">RFC:</span>
+                    {{proveedor_rfc}}
+                </div>
+                <div class="info-row">
+                    <span class="info-label">Dirección:</span>
+                    {{proveedor_direccion}}
+                </div>
+                <div class="info-row">
+                    <span class="info-label">Ciudad:</span>
+                    {{proveedor_ciudad}}
+                </div>
+                <div class="info-row">
+                    <span class="info-label">Teléfono:</span>
+                    {{proveedor_telefono}}
+                </div>
+                <div class="info-row">
+                    <span class="info-label">Email:</span>
+                    {{proveedor_email}}
+                </div>
+            </div>
+        </div>
+
+        <!-- Items Table -->
+        <table class="items-table">
+            <thead>
+                <tr>
+                    <th>Producto</th>
+                    <th>Descripción</th>
+                    <th>Cantidad</th>
+                    <th>Precio Unit.</th>
+                    <th>Total</th>
+                </tr>
+            </thead>
+            <tbody>
+                {{items}}
+            </tbody>
+        </table>
+
+        <!-- Totals -->
+        <div class="totals-section">
+            <div class="totals-box">
+                <div class="total-row">
+                    <span class="total-label">Subtotal:</span>
+                    <span class="total-value">${{subtotal}} {{moneda}}</span>
+                </div>
+                <div class="total-row">
+                    <span class="total-label">Impuestos:</span>
+                    <span class="total-value">${{impuestos}} {{moneda}}</span>
+                </div>
+                <div class="total-row">
+                    <span class="total-label">TOTAL:</span>
+                    <span class="total-value">${{total}} {{moneda}}</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Notes -->
+        <div class="notes-section">
+            <div class="notes-title">Notas Adicionales:</div>
+            <div class="notes-content">{{notas}}</div>
+        </div>
+
+        <!-- Footer -->
+        <div class="footer">
+            <p>Este documento es una orden de compra generada electrónicamente.</p>
+            <p>{{empresa_nombre}} - {{empresa_email}}</p>
+        </div>
+    </div>
+</body>
+</html>

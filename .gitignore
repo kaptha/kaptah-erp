@@ -1,0 +1,51 @@
+# Node
+node_modules/
+npm-debug.log
+dist/
+build/
+
+# Environment
+.env
+.env.local
+.env.production
+*.env
+
+# IDE
+.vscode/
+.idea/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Uploads y archivos temporales
+uploads/
+cfdis/
+*.pdf
+*.xml
+tmp/
+
+# Logs
+*.log
+logs/
+
+# Docker
+docker-compose.yml
+Dockerfile*
+
+# Railway
+.railway/
+ai-fiscal-service/
+
+# Google Cloud / Firebase credentials
+**/serviceAccountKey.json
+**/*ServiceAccount*.json
+**/*serviceAccount*.json
+**/firebase-adminsdk-*.json
+**/gcloud-*.json
+
+# Otros secretos
+*.pem
+*.key
+*.p12
+*.pfx

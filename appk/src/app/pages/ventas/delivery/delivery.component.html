@@ -1,0 +1,202 @@
+<div class="delivery-container">
+  <h2 class="page-title">Guías de Remisión</h2>
+  
+  <div class="breadcrumb">
+    <a routerLink="/dashboard">Dashboard</a> / <a routerLink="/ventas">Ventas</a> / Guías
+  </div>
+
+  <!-- Filtro para móvil -->
+  <div class="mobile-filter-section">
+    <mat-form-field appearance="outline" class="search-field">
+      <mat-label>Buscar guías</mat-label>
+      <input matInput (keyup)="applyFilter($event)" placeholder="Buscar por folio, orden...">
+      <mat-icon matSuffix>search</mat-icon>
+    </mat-form-field>
+  </div>
+
+  <!-- Acciones principales y búsqueda -->
+  <div class="actions-container">
+    <button mat-raised-button class="btn-primary" (click)="agregarGuia()">
+      <mat-icon>add</mat-icon> Nueva Guía
+    </button>
+    
+    <!-- Filtro para pantallas grandes -->
+    <mat-form-field appearance="outline" class="search-field" [style.display]="isMobile ? 'none' : 'block'">
+      <mat-label>Buscar guías</mat-label>
+      <input matInput (keyup)="applyFilter($event)" placeholder="Buscar por folio, orden...">
+      <mat-icon matSuffix>search</mat-icon>
+    </mat-form-field>
+    
+    <div class="actions-right">
+      <button mat-raised-button [matMenuTriggerFor]="exportMenu" class="btn-white">
+        <mat-icon>file_download</mat-icon> Exportar
+      </button>
+      <mat-menu #exportMenu="matMenu">
+        <button mat-menu-item (click)="exportarGuias('csv')">
+          <mat-icon>description</mat-icon>
+          <span>Exportar como CSV</span>
+        </button>
+        <button mat-menu-item (click)="exportarGuias('xlsx')">
+          <mat-icon>table_chart</mat-icon>
+          <span>Exportar como Excel</span>
+        </button>
+      </mat-menu>
+      
+      <button mat-icon-button color="primary" (click)="loadDeliveryNotes()" matTooltip="Refrescar">
+        <mat-icon>refresh</mat-icon>
+      </button>
+    </div>
+  </div>
+  
+  <!-- Indicador de carga -->
+  <div class="loading-container" *ngIf="loading">
+    <mat-spinner></mat-spinner>
+  </div>
+
+  <!-- Tabla para pantallas grandes -->
+  <div class="table-container mat-elevation-z8" *ngIf="!loading">
+    <table mat-table [dataSource]="dataSource" class="mat-elevation-z8" matSort>
+      <!-- ✨ NUEVO: Columna de Folio en lugar de ID -->
+      <ng-container matColumnDef="folio">
+        <th mat-header-cell *matHeaderCellDef mat-sort-header> Folio </th>
+        <td mat-cell *matCellDef="let delivery"> 
+          <span class="folio-badge">{{delivery.folio}}</span>
+        </td>
+      </ng-container>
+
+      <!-- Orden Column -->
+      <ng-container matColumnDef="salesOrderId">
+        <th mat-header-cell *matHeaderCellDef mat-sort-header> # Orden </th>
+        <td mat-cell *matCellDef="let delivery"> {{delivery.salesOrderId | slice:0:8}} </td>
+      </ng-container>
+
+      <!-- Fecha de Entrega Column -->
+      <ng-container matColumnDef="deliveryDate">
+        <th mat-header-cell *matHeaderCellDef mat-sort-header> Fecha Entrega </th>
+        <td mat-cell *matCellDef="let delivery"> {{delivery.deliveryDate | date:'dd/MM/yyyy HH:mm'}} </td>
+      </ng-container>
+
+      <!-- Estado Column -->
+      <ng-container matColumnDef="status">
+        <th mat-header-cell *matHeaderCellDef mat-sort-header> Estado </th>
+        <td mat-cell *matCellDef="let delivery"> 
+          <span class="status-chip" [ngClass]="getStatusClass(delivery.status)">
+            {{getStatusText(delivery.status)}}
+          </span>
+        </td>
+      </ng-container>
+
+      <!-- Acciones Column -->
+      <ng-container matColumnDef="acciones">
+        <th mat-header-cell *matHeaderCellDef></th>
+        <td mat-cell *matCellDef="let delivery">
+          <button mat-icon-button [matMenuTriggerFor]="menu">
+            <mat-icon>more_vert</mat-icon>
+          </button>
+          <mat-menu #menu="matMenu">
+            <button mat-menu-item (click)="verDetalle(delivery)">
+              <mat-icon>visibility</mat-icon>
+              <span>Ver detalle</span>
+            </button>
+            <button mat-menu-item (click)="enviarPorEmail(delivery)" *ngIf="delivery.status !== 'CANCELLED'">
+              <mat-icon color="primary">email</mat-icon>
+              <span>Enviar por Email</span>
+            </button>
+            <button mat-menu-item (click)="editarGuia(delivery)">
+              <mat-icon>edit</mat-icon>
+              <span>Editar</span>
+            </button>
+            <button mat-menu-item (click)="eliminarGuia(delivery.id)">
+              <mat-icon color="warn">delete</mat-icon>
+              <span>Eliminar</span>
+            </button>
+          </mat-menu>
+        </td>
+      </ng-container>
+  
+      <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+      <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
+      
+      <!-- Fila para cuando no hay datos -->
+      <tr class="mat-row" *matNoDataRow>
+        <td class="mat-cell empty-state" [attr.colspan]="displayedColumns.length">
+          No hay guías que coincidan con el filtro.
+        </td>
+      </tr>
+    </table>
+    
+    <mat-paginator [pageSizeOptions]="[5, 10, 25, 100]"></mat-paginator>
+  </div>
+
+  <!-- Vista de tarjetas para móviles -->
+  <div class="mobile-cards" *ngIf="!loading">
+    <div *ngIf="dataSource.filteredData.length === 0" class="empty-state">
+      No hay guías que coincidan con el filtro.
+    </div>
+    
+    <div class="mobile-card" *ngFor="let delivery of dataSource.filteredData | slice: getMobileStartIndex(): getMobileEndIndex()">
+      <div class="mobile-card-header">
+        <!-- ✨ NUEVO: Mostrar folio en lugar de ID -->
+        <div class="mobile-card-title">{{delivery.folio}}</div>
+        <div class="mobile-card-status" [ngClass]="getStatusClassMobile(delivery.status)">
+          {{getStatusText(delivery.status)}}
+        </div>
+      </div>
+      
+      <div class="mobile-card-content">
+        <div class="mobile-card-row">
+          <div class="mobile-card-label">Orden:</div>
+          <div class="mobile-card-value">{{delivery.salesOrderId | slice:0:8}}</div>
+        </div>
+        
+        <div class="mobile-card-row">
+          <div class="mobile-card-label">Fecha de Entrega:</div>
+          <div class="mobile-card-value">{{delivery.deliveryDate | date:'dd/MM/yyyy HH:mm'}}</div>
+        </div>
+      </div>
+      
+      <div class="mobile-card-actions">
+        <button mat-icon-button [matMenuTriggerFor]="mobileMenu">
+          <mat-icon>more_vert</mat-icon>
+        </button>
+        <mat-menu #mobileMenu="matMenu">
+          <button mat-menu-item (click)="verDetalle(delivery)">
+            <mat-icon>visibility</mat-icon>
+            <span>Ver detalle</span>
+          </button>
+          <button mat-menu-item (click)="enviarPorEmail(delivery)" *ngIf="delivery.status !== 'CANCELLED'">
+            <mat-icon color="primary">email</mat-icon>
+            <span>Enviar por Email</span>
+          </button>
+          <button mat-menu-item (click)="editarGuia(delivery)">
+            <mat-icon>edit</mat-icon>
+            <span>Editar</span>
+          </button>
+          <button mat-menu-item (click)="eliminarGuia(delivery.id)">
+            <mat-icon color="warn">delete</mat-icon>
+            <span>Eliminar</span>
+          </button>
+        </mat-menu>
+      </div>
+    </div>
+    
+    <!-- Paginador mobile simplificado -->
+    <div class="mobile-paginator" *ngIf="dataSource.filteredData.length > mobilePaginator.pageSize">
+      <div class="mobile-paginator-info">
+        Mostrando {{getMobileStartIndex() + 1}} - {{getMobileEndIndex()}} de {{dataSource.filteredData.length}}
+      </div>
+      <div class="mobile-paginator-actions">
+        <button mat-icon-button [disabled]="mobilePaginator.pageIndex === 0" (click)="previousMobilePage()">
+          <mat-icon>navigate_before</mat-icon>
+        </button>
+        <button mat-icon-button [disabled]="isLastMobilePage()" (click)="nextMobilePage()">
+          <mat-icon>navigate_next</mat-icon>
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+
+

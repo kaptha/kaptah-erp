@@ -1,0 +1,836 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Orden de Compra - Creative</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        @page {
+            size: A4;
+            margin: 0;
+        }
+
+        body {
+            font-family: 'Poppins', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            font-size: 10px;
+            line-height: 1.5;
+            color: #2d3748;
+            background: #f7fafc;
+        }
+
+        .page {
+            width: 210mm;
+            min-height: 297mm;
+            padding: 0;
+            margin: 0 auto;
+            background: white;
+            position: relative;
+            overflow: hidden;
+        }
+
+        /* Decorative elements */
+        .deco-circle-1 {
+            position: absolute;
+            width: 300px;
+            height: 300px;
+            background: linear-gradient(135deg, #ff6b9d 0%, #c06c84 100%);
+            border-radius: 50%;
+            top: -150px;
+            right: -150px;
+            opacity: 0.1;
+            z-index: 0;
+        }
+
+        .deco-circle-2 {
+            position: absolute;
+            width: 200px;
+            height: 200px;
+            background: linear-gradient(135deg, #ffa372 0%, #ff6584 100%);
+            border-radius: 50%;
+            bottom: 100px;
+            left: -100px;
+            opacity: 0.1;
+            z-index: 0;
+        }
+
+        .deco-dots {
+            position: absolute;
+            right: 30px;
+            top: 50%;
+            transform: translateY(-50%);
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 8px;
+            z-index: 0;
+        }
+
+        .deco-dot {
+            width: 6px;
+            height: 6px;
+            background: linear-gradient(135deg, #ff6b9d 0%, #c06c84 100%);
+            border-radius: 50%;
+            opacity: 0.3;
+        }
+
+        /* Header artístico */
+        .header {
+            position: relative;
+            padding: 40px 40px 30px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 50%, #f093fb 100%);
+            clip-path: polygon(0 0, 100% 0, 100% 85%, 0 100%);
+            z-index: 1;
+        }
+
+        .header-pattern {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-image: 
+                repeating-linear-gradient(45deg, transparent, transparent 10px, rgba(255,255,255,0.05) 10px, rgba(255,255,255,0.05) 20px),
+                repeating-linear-gradient(-45deg, transparent, transparent 10px, rgba(255,255,255,0.05) 10px, rgba(255,255,255,0.05) 20px);
+            z-index: 0;
+        }
+
+        .header-content {
+            position: relative;
+            z-index: 1;
+            display: grid;
+            grid-template-columns: auto 1fr auto;
+            gap: 25px;
+            align-items: center;
+        }
+
+        .logo-container {
+            background: white;
+            padding: 15px;
+            border-radius: 20px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+            transform: rotate(-3deg);
+            transition: transform 0.3s ease;
+        }
+
+        .logo {
+            max-width: 120px;
+            max-height: 60px;
+            object-fit: contain;
+            display: block;
+        }
+
+        .company-section {
+            color: white;
+            margin-left: 10px;
+        }
+
+        .company-name {
+            font-size: 24px;
+            font-weight: 800;
+            margin-bottom: 8px;
+            letter-spacing: -1px;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.2);
+        }
+
+        .company-tagline {
+            font-size: 9px;
+            opacity: 0.95;
+            line-height: 1.7;
+            font-weight: 500;
+        }
+
+        .doc-badge-creative {
+            background: white;
+            color: #667eea;
+            padding: 20px 25px;
+            border-radius: 20px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+            text-align: center;
+            transform: rotate(3deg);
+            border: 3px solid #f093fb;
+        }
+
+        .doc-badge-label {
+            font-size: 8px;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            font-weight: 700;
+            color: #718096;
+            margin-bottom: 6px;
+        }
+
+        .doc-badge-number {
+            font-size: 18px;
+            font-weight: 900;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            letter-spacing: -0.5px;
+        }
+
+        .doc-badge-date {
+            font-size: 8px;
+            color: #a0aec0;
+            margin-top: 4px;
+            font-weight: 600;
+        }
+
+        /* Content */
+        .content {
+            padding: 35px 40px;
+            position: relative;
+            z-index: 1;
+        }
+
+        /* Status ribbon */
+        .status-ribbon {
+            display: inline-block;
+            background: linear-gradient(135deg, #ff6b9d 0%, #c06c84 100%);
+            color: white;
+            padding: 8px 24px 8px 16px;
+            border-radius: 0 20px 20px 0;
+            font-size: 10px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 25px;
+            margin-left: -40px;
+            box-shadow: 4px 4px 12px rgba(255, 107, 157, 0.3);
+            position: relative;
+        }
+
+        .status-ribbon::after {
+            content: '';
+            position: absolute;
+            right: -10px;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 0;
+            height: 0;
+            border-style: solid;
+            border-width: 18px 0 18px 10px;
+            border-color: transparent transparent transparent #c06c84;
+        }
+
+        /* Info section creativa */
+        .info-creative-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 25px;
+            margin-bottom: 30px;
+        }
+
+        .info-creative-card {
+            background: white;
+            border-radius: 25px;
+            padding: 25px;
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.08);
+            position: relative;
+            border: 2px solid transparent;
+            background-clip: padding-box;
+            transition: all 0.3s ease;
+        }
+
+        .info-creative-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            border-radius: 25px;
+            padding: 2px;
+            background: linear-gradient(135deg, #667eea, #764ba2, #f093fb);
+            -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+            -webkit-mask-composite: xor;
+            mask-composite: exclude;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .info-creative-card:hover::before {
+            opacity: 1;
+        }
+
+        .card-icon-badge {
+            width: 50px;
+            height: 50px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border-radius: 15px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            margin-bottom: 15px;
+            box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
+            transform: rotate(-5deg);
+        }
+
+        .card-title-creative {
+            font-size: 13px;
+            font-weight: 800;
+            color: #2d3748;
+            margin-bottom: 15px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .info-row-creative {
+            display: flex;
+            padding: 8px 0;
+            border-bottom: 1px dashed #e2e8f0;
+            font-size: 9px;
+        }
+
+        .info-row-creative:last-child {
+            border-bottom: none;
+        }
+
+        .info-label-creative {
+            font-weight: 700;
+            color: #718096;
+            min-width: 90px;
+        }
+
+        .info-value-creative {
+            color: #2d3748;
+            font-weight: 600;
+            flex: 1;
+        }
+
+        /* Timeline de fechas */
+        .timeline-section {
+            background: linear-gradient(135deg, #e6fffa 0%, #b2f5ea 100%);
+            border-radius: 20px;
+            padding: 20px 25px;
+            margin-bottom: 30px;
+            border-left: 5px solid #38b2ac;
+        }
+
+        .timeline-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 20px;
+        }
+
+        .timeline-item {
+            text-align: center;
+            position: relative;
+        }
+
+        .timeline-item:not(:last-child)::after {
+            content: '→';
+            position: absolute;
+            right: -12px;
+            top: 30%;
+            font-size: 18px;
+            color: #38b2ac;
+            font-weight: 700;
+        }
+
+        .timeline-label {
+            font-size: 8px;
+            color: #2c7a7b;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            font-weight: 700;
+            margin-bottom: 6px;
+        }
+
+        .timeline-value {
+            font-size: 14px;
+            font-weight: 800;
+            color: #234e52;
+        }
+
+        /* Products table creativa */
+        .products-creative {
+            margin-bottom: 30px;
+        }
+
+        .section-title-creative {
+            display: inline-flex;
+            align-items: center;
+            gap: 12px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 12px 25px;
+            border-radius: 25px;
+            font-size: 13px;
+            font-weight: 800;
+            margin-bottom: 20px;
+            box-shadow: 0 6px 20px rgba(102, 126, 234, 0.3);
+        }
+
+        .section-icon-creative {
+            font-size: 20px;
+        }
+
+        .products-table-creative {
+            width: 100%;
+            border-collapse: separate;
+            border-spacing: 0 10px;
+        }
+
+        .products-table-creative thead tr {
+            background: linear-gradient(135deg, #f7fafc 0%, #edf2f7 100%);
+        }
+
+        .products-table-creative th {
+            padding: 12px 15px;
+            text-align: left;
+            font-size: 9px;
+            font-weight: 800;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            color: #4a5568;
+            border-top: 2px solid #cbd5e0;
+            border-bottom: 2px solid #cbd5e0;
+        }
+
+        .products-table-creative th:first-child {
+            border-left: 2px solid #cbd5e0;
+            border-radius: 15px 0 0 15px;
+        }
+
+        .products-table-creative th:last-child {
+            border-right: 2px solid #cbd5e0;
+            border-radius: 0 15px 15px 0;
+        }
+
+        .products-table-creative th:nth-child(3),
+        .products-table-creative th:nth-child(4),
+        .products-table-creative th:nth-child(5) {
+            text-align: right;
+        }
+
+        .products-table-creative tbody tr {
+            background: white;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+            border-radius: 15px;
+            transition: all 0.3s ease;
+        }
+
+        .products-table-creative tbody tr:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(102, 126, 234, 0.15);
+        }
+
+        .products-table-creative td {
+            padding: 15px;
+            font-size: 9px;
+            color: #2d3748;
+        }
+
+        .products-table-creative td:first-child {
+            border-radius: 15px 0 0 15px;
+        }
+
+        .products-table-creative td:last-child {
+            border-radius: 0 15px 15px 0;
+        }
+
+        .products-table-creative td:nth-child(3),
+        .products-table-creative td:nth-child(4),
+        .products-table-creative td:nth-child(5) {
+            text-align: right;
+            font-family: 'Courier New', monospace;
+            font-weight: 700;
+        }
+
+        .product-name-creative {
+            font-weight: 800;
+            color: #667eea;
+            font-size: 10px;
+            margin-bottom: 3px;
+        }
+
+        .product-desc-creative {
+            color: #a0aec0;
+            font-size: 8px;
+        }
+
+        /* Totals creativa */
+        .totals-creative-wrapper {
+            display: flex;
+            justify-content: flex-end;
+            margin-bottom: 30px;
+        }
+
+        .totals-creative-box {
+            width: 400px;
+            background: white;
+            border-radius: 25px;
+            overflow: hidden;
+            box-shadow: 0 12px 35px rgba(0, 0, 0, 0.12);
+            border: 3px solid transparent;
+            background-image: 
+                linear-gradient(white, white),
+                linear-gradient(135deg, #667eea, #764ba2, #f093fb);
+            background-origin: border-box;
+            background-clip: padding-box, border-box;
+        }
+
+        .totals-creative-header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 15px 25px;
+            font-size: 12px;
+            font-weight: 800;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            text-align: center;
+        }
+
+        .totals-creative-body {
+            padding: 25px;
+        }
+
+        .total-creative-line {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px 0;
+            font-size: 11px;
+            border-bottom: 2px dashed #e2e8f0;
+        }
+
+        .total-creative-line:last-child {
+            border-bottom: none;
+            margin-top: 15px;
+            padding-top: 20px;
+            border-top: 3px solid #667eea;
+        }
+
+        .total-creative-label {
+            font-weight: 700;
+            color: #4a5568;
+        }
+
+        .total-creative-value {
+            font-family: 'Courier New', monospace;
+            font-weight: 800;
+            color: #2d3748;
+        }
+
+        .total-creative-line:last-child .total-creative-label {
+            font-size: 15px;
+            font-weight: 900;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .total-creative-line:last-child .total-creative-value {
+            font-size: 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        /* Notes artística */
+        .notes-creative {
+            background: linear-gradient(135deg, #fef5e7 0%, #fdebd0 100%);
+            border-radius: 20px;
+            padding: 20px 25px;
+            margin-bottom: 25px;
+            border-left: 6px solid #f39c12;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .notes-creative::before {
+            content: '💡';
+            position: absolute;
+            right: 20px;
+            top: 50%;
+            transform: translateY(-50%);
+            font-size: 60px;
+            opacity: 0.15;
+        }
+
+        .notes-creative-title {
+            font-size: 12px;
+            font-weight: 800;
+            color: #d68910;
+            margin-bottom: 10px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .notes-creative-text {
+            font-size: 9px;
+            color: #7d6608;
+            line-height: 1.7;
+            position: relative;
+            z-index: 1;
+        }
+
+        /* Sticker decorativo */
+        .decorative-sticker {
+            position: absolute;
+            right: 40px;
+            bottom: 200px;
+            width: 80px;
+            height: 80px;
+            background: linear-gradient(135deg, #ff6b9d 0%, #c06c84 100%);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 11px;
+            font-weight: 800;
+            text-align: center;
+            line-height: 1.3;
+            box-shadow: 0 6px 20px rgba(255, 107, 157, 0.4);
+            transform: rotate(15deg);
+            border: 4px solid white;
+            z-index: 2;
+        }
+
+        /* Footer creativo */
+        .footer-creative {
+            background: linear-gradient(135deg, #2d3748 0%, #1a202c 100%);
+            color: white;
+            padding: 25px 40px;
+            clip-path: polygon(0 20%, 100% 0, 100% 100%, 0 100%);
+            margin-top: 50px;
+        }
+
+        .footer-creative-content {
+            padding-top: 20px;
+            text-align: center;
+        }
+
+        .footer-creative-brand {
+            font-size: 16px;
+            font-weight: 800;
+            margin-bottom: 8px;
+            letter-spacing: -0.5px;
+        }
+
+        .footer-creative-info {
+            font-size: 8px;
+            opacity: 0.8;
+            line-height: 1.8;
+        }
+
+        .footer-creative-divider {
+            height: 2px;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent);
+            margin: 12px 0;
+        }
+
+        /* Print styles */
+        @media print {
+            body {
+                margin: 0;
+                padding: 0;
+                background: white;
+            }
+            .page {
+                margin: 0;
+                box-shadow: none;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="page">
+        <!-- Decorative elements -->
+        <div class="deco-circle-1"></div>
+        <div class="deco-circle-2"></div>
+        
+        <div class="deco-dots">
+            <div class="deco-dot"></div>
+            <div class="deco-dot"></div>
+            <div class="deco-dot"></div>
+            <div class="deco-dot"></div>
+            <div class="deco-dot"></div>
+            <div class="deco-dot"></div>
+            <div class="deco-dot"></div>
+            <div class="deco-dot"></div>
+            <div class="deco-dot"></div>
+        </div>
+
+        <!-- Header -->
+        <div class="header">
+            <div class="header-pattern"></div>
+            <div class="header-content">
+                <div class="logo-container">
+                    <img src="{{logo}}" alt="Logo" class="logo">
+                </div>
+                <div class="company-section">
+                    <div class="company-name">{{empresa_nombre}}</div>
+                    <div class="company-tagline">
+                        RFC: {{empresa_rfc}}<br>
+                        📞 {{empresa_telefono}} | ✉️ {{empresa_email}}
+                    </div>
+                </div>
+                <div class="doc-badge-creative">
+                    <div class="doc-badge-label">{{tipo_documento}}</div>
+                    <div class="doc-badge-number">{{numero_orden}}</div>
+                    <div class="doc-badge-date">{{fecha}}</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Content -->
+        <div class="content">
+            <!-- Status Ribbon -->
+            <div class="status-ribbon">
+                ⚡ {{estado}}
+            </div>
+
+            <!-- Timeline -->
+            <div class="timeline-section">
+                <div class="timeline-grid">
+                    <div class="timeline-item">
+                        <div class="timeline-label">📅 Fecha de Orden</div>
+                        <div class="timeline-value">{{dia}}/{{mes}}/{{anio}}</div>
+                    </div>
+                    <div class="timeline-item">
+                        <div class="timeline-label">🚚 Entrega Esperada</div>
+                        <div class="timeline-value">{{fecha_esperada}}</div>
+                    </div>
+                    <div class="timeline-item">
+                        <div class="timeline-label">💰 Moneda</div>
+                        <div class="timeline-value">{{moneda}}</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Info Cards -->
+            <div class="info-creative-grid">
+                <div class="info-creative-card">
+                    <div class="card-icon-badge">🏢</div>
+                    <div class="card-title-creative">Comprador</div>
+                    <div class="info-row-creative">
+                        <div class="info-label-creative">Empresa:</div>
+                        <div class="info-value-creative">{{empresa_nombre}}</div>
+                    </div>
+                    <div class="info-row-creative">
+                        <div class="info-label-creative">RFC:</div>
+                        <div class="info-value-creative">{{empresa_rfc}}</div>
+                    </div>
+                    <div class="info-row-creative">
+                        <div class="info-label-creative">Teléfono:</div>
+                        <div class="info-value-creative">{{empresa_telefono}}</div>
+                    </div>
+                    <div class="info-row-creative">
+                        <div class="info-label-creative">Email:</div>
+                        <div class="info-value-creative">{{empresa_email}}</div>
+                    </div>
+                </div>
+
+                <div class="info-creative-card">
+                    <div class="card-icon-badge">🏭</div>
+                    <div class="card-title-creative">Proveedor</div>
+                    <div class="info-row-creative">
+                        <div class="info-label-creative">Nombre:</div>
+                        <div class="info-value-creative">{{proveedor_nombre}}</div>
+                    </div>
+                    <div class="info-row-creative">
+                        <div class="info-label-creative">RFC:</div>
+                        <div class="info-value-creative">{{proveedor_rfc}}</div>
+                    </div>
+                    <div class="info-row-creative">
+                        <div class="info-label-creative">Dirección:</div>
+                        <div class="info-value-creative">{{proveedor_direccion}}</div>
+                    </div>
+                    <div class="info-row-creative">
+                        <div class="info-label-creative">Ciudad:</div>
+                        <div class="info-value-creative">{{proveedor_ciudad}}</div>
+                    </div>
+                    <div class="info-row-creative">
+                        <div class="info-label-creative">Teléfono:</div>
+                        <div class="info-value-creative">{{proveedor_telefono}}</div>
+                    </div>
+                    <div class="info-row-creative">
+                        <div class="info-label-creative">Email:</div>
+                        <div class="info-value-creative">{{proveedor_email}}</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Products -->
+            <div class="products-creative">
+                <div class="section-title-creative">
+                    <span class="section-icon-creative">📦</span>
+                    Productos Solicitados
+                </div>
+                <table class="products-table-creative">
+                    <thead>
+                        <tr>
+                            <th style="width: 30%;">Producto</th>
+                            <th style="width: 35%;">Descripción</th>
+                            <th style="width: 10%;">Cant.</th>
+                            <th style="width: 12.5%;">P. Unit.</th>
+                            <th style="width: 12.5%;">Total</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {{items}}
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Totals -->
+            <div class="totals-creative-wrapper">
+                <div class="totals-creative-box">
+                    <div class="totals-creative-header">
+                        💎 Resumen Financiero
+                    </div>
+                    <div class="totals-creative-body">
+                        <div class="total-creative-line">
+                            <div class="total-creative-label">Subtotal:</div>
+                            <div class="total-creative-value">${{subtotal}} {{moneda}}</div>
+                        </div>
+                        <div class="total-creative-line">
+                            <div class="total-creative-label">Impuestos (IVA):</div>
+                            <div class="total-creative-value">${{impuestos}} {{moneda}}</div>
+                        </div>
+                        <div class="total-creative-line">
+                            <div class="total-creative-label">TOTAL:</div>
+                            <div class="total-creative-value">${{total}} {{moneda}}</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Notes -->
+            <div class="notes-creative">
+                <div class="notes-creative-title">📝 Notas Importantes</div>
+                <div class="notes-creative-text">{{notas}}</div>
+            </div>
+
+            <!-- Decorative Sticker -->
+            <div class="decorative-sticker">
+                ¡Orden<br>Aprobada!
+            </div>
+        </div>
+
+        <!-- Footer -->
+        <div class="footer-creative">
+            <div class="footer-creative-content">
+                <div class="footer-creative-brand">{{empresa_nombre}}</div>
+                <div class="footer-creative-divider"></div>
+                <div class="footer-creative-info">
+                    {{empresa_email}} | {{empresa_telefono}}<br>
+                    Orden de compra generada el {{fecha}}<br>
+                    Documento con validez legal y comercial
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

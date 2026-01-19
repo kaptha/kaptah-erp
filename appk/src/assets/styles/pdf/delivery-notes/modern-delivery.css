@@ -1,0 +1,469 @@
+/* modern-delivery.css - Diseño moderno con ondas optimizado para html2pdf */
+
+/* Configuración base */
+@page {
+    size: A4;
+    margin: 8mm;
+}
+
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    margin: 0;
+    padding: 0;
+    color: #333;
+    background-color: #fff;
+    line-height: 1.4;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+}
+
+/* Contenedor principal */
+.container {
+    width: 100%;
+    max-width: 190mm;
+    height: auto;
+    max-height: 250mm; /* Límite para una página */
+    margin: 0 auto;
+    position: relative;
+    padding: 0;
+    box-sizing: border-box;
+    background: white;
+    border: none !important;
+    border-radius: 0 !important;
+    overflow: hidden; /* Para contener las ondas */
+    page-break-after: avoid;
+    page-break-inside: avoid;
+}
+
+/* Ondas decorativas simplificadas para html2pdf */
+.wave-top {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 120px; /* Reducido */
+    background: linear-gradient(135deg, #2548b0 0%, #1e3a8a 100%); /* Gradiente simple */
+    z-index: -1;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+}
+
+/* Forma de onda simplificada con CSS puro */
+.wave-top::after {
+    content: "";
+    position: absolute;
+    bottom: -10px;
+    left: 0;
+    width: 100%;
+    height: 20px;
+    background: #d9edf9; /* Azul claro */
+    border-radius: 0 0 50% 50% / 0 0 100% 100%;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+}
+
+.wave-bottom {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    height: 80px; /* Reducido */
+    background: linear-gradient(135deg, #1e3a8a 0%, #2548b0 100%);
+    z-index: -1;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+}
+
+.wave-bottom::before {
+    content: "";
+    position: absolute;
+    top: -10px;
+    left: 0;
+    width: 100%;
+    height: 20px;
+    background: #d9edf9;
+    border-radius: 50% 50% 0 0 / 100% 100% 0 0;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+}
+
+/* Encabezado */
+.header {
+    display: flex;
+    justify-content: space-between;
+    padding: 25px 15px 45px; /* Reducido */
+    color: white;
+    position: relative;
+    z-index: 1;
+}
+
+.logo-container {
+    display: flex;
+    align-items: center;
+}
+
+.logo-img {
+    max-width: 60px; /* Reducido */
+    height: auto;
+    border-radius: 8px;
+}
+
+.logo-text {
+    margin-left: 12px; /* Reducido */
+    font-size: 1.3rem; /* Reducido */
+    font-weight: bold;
+    color: white;
+    display: none; /* Solo mostrar si falla la imagen */
+}
+
+.title-container {
+    padding: 15px; /* Reducido */
+    margin-right: 15px; /* Reducido */
+    text-align: right;
+}
+
+.remission-title {
+    font-size: 1.6rem; /* Reducido */
+    font-weight: bold;
+    color: #000;
+    background-color: rgba(217, 237, 249, 0.9);
+    padding: 8px 16px; /* Reducido */
+    border-radius: 8px;
+    margin: 0;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+}
+
+/* Información principal */
+.main-info {
+    display: flex;
+    justify-content: space-between;
+    padding: 0 15px; /* Reducido */
+    margin-bottom: 20px; /* Reducido */
+    background-color: white;
+    position: relative;
+    z-index: 1;
+}
+
+.client-info, 
+.remission-info {
+    width: 48%;
+}
+
+.info-label {
+    font-weight: bold;
+    margin-bottom: 4px; /* Reducido */
+    color: #2548b0;
+    font-size: 13px; /* Reducido */
+}
+
+.info-value {
+    margin-bottom: 10px; /* Reducido */
+    font-size: 12px; /* Reducido */
+    color: #333;
+}
+
+/* Tabla de productos con diseño moderno */
+.products-container {
+    padding: 0 15px; /* Reducido */
+    margin-bottom: 20px; /* Reducido */
+    position: relative;
+    z-index: 1;
+}
+
+.products-table {
+    width: 100%;
+    border-collapse: separate;
+    border-spacing: 2px; /* Reducido */
+    margin-bottom: 15px; /* Reducido */
+}
+
+.products-table th {
+    background-color: #d9edf9;
+    color: #333;
+    font-weight: 600;
+    padding: 8px; /* Reducido */
+    text-align: left;
+    font-size: 12px; /* Reducido */
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+}
+
+.products-table th:first-child {
+    border-top-left-radius: 8px;
+    border-bottom-left-radius: 8px;
+    text-align: center;
+}
+
+.products-table th:last-child {
+    border-top-right-radius: 8px;
+    border-bottom-right-radius: 8px;
+    text-align: right;
+}
+
+.products-table th:nth-child(3),
+.products-table th:nth-child(4) {
+    text-align: right;
+}
+
+.products-table td {
+    padding: 10px 8px; /* Reducido */
+    background-color: #f0f7fc;
+    font-size: 11px; /* Reducido */
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+}
+
+.products-table tr:nth-child(even) td {
+    background-color: #e6f2fa;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+}
+
+.products-table td:first-child {
+    border-top-left-radius: 8px;
+    border-bottom-left-radius: 8px;
+    text-align: center;
+}
+
+.products-table td:nth-child(2) {
+    text-align: left;
+}
+
+.products-table td:nth-child(3),
+.products-table td:nth-child(4) {
+    text-align: right;
+}
+
+.products-table td:last-child {
+    border-top-right-radius: 8px;
+    border-bottom-right-radius: 8px;
+}
+
+/* Sección de pago y totales */
+.payment-totals {
+    display: flex;
+    justify-content: space-between;
+    padding: 0 15px; /* Reducido */
+    margin-bottom: 25px; /* Reducido */
+    position: relative;
+    z-index: 1;
+}
+
+.payment-info {
+    width: 48%;
+}
+
+.payment-method {
+    margin-bottom: 8px; /* Reducido */
+    font-size: 12px; /* Reducido */
+    color: #333;
+}
+
+.bank-info {
+    margin-bottom: 4px; /* Reducido */
+    font-size: 11px; /* Reducido */
+    color: #555;
+}
+
+.totals-container {
+    width: 40%;
+    text-align: right;
+}
+
+.total-row {
+    display: flex;
+    justify-content: flex-end;
+    margin-bottom: 6px; /* Reducido */
+}
+
+.total-label {
+    font-weight: bold;
+    margin-right: 12px; /* Reducido */
+    min-width: 100px; /* Reducido */
+    text-align: right;
+    font-size: 12px; /* Reducido */
+    color: #333;
+}
+
+.total-value {
+    min-width: 80px; /* Reducido */
+    text-align: right;
+    font-size: 12px; /* Reducido */
+    color: #333;
+}
+
+.total-divider {
+    width: 180px; /* Reducido */
+    height: 1px;
+    background-color: #333;
+    margin: 8px 0 8px auto; /* Reducido */
+}
+
+.grand-total {
+    font-weight: bold;
+    font-size: 1.1rem; /* Reducido */
+    color: #2548b0;
+}
+
+.grand-total .total-label,
+.grand-total .total-value {
+    font-size: 14px !important;
+    color: #2548b0 !important;
+    font-weight: bold !important;
+}
+
+/* Sección de observaciones */
+.observations-section {
+    padding: 0 15px; /* Reducido */
+    margin-bottom: 25px; /* Reducido */
+    position: relative;
+    z-index: 1;
+}
+
+.observations-title {
+    font-weight: bold;
+    margin-bottom: 8px; /* Reducido */
+    color: #2548b0;
+    font-size: 13px; /* Reducido */
+}
+
+.observations-box {
+    border: 1px solid #d9edf9;
+    padding: 12px; /* Reducido */
+    min-height: 50px; /* Reducido */
+    border-radius: 8px;
+    background-color: #f9fcff;
+    color: #333;
+    font-size: 12px; /* Reducido */
+    line-height: 1.4;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+}
+
+/* Mensaje final */
+.thank-you {
+    text-align: center;
+    font-size: 1.1rem; /* Reducido */
+    font-weight: bold;
+    margin: 20px 0 60px; /* Reducido */
+    color: #333;
+    position: relative;
+    z-index: 1;
+}
+
+/* Manejo de imagen del logo */
+.logo-img:not([src]),
+.logo-img[src=""],
+.logo-img[src="#"] {
+    display: none;
+}
+
+.logo-img:not([src]) + .logo-text,
+.logo-img[src=""] + .logo-text,
+.logo-img[src="#"] + .logo-text {
+    display: block !important;
+}
+
+/* Ajustes para impresión */
+@media print {
+    body, .container {
+        margin: 0;
+        padding: 0;
+        width: 100%;
+    }
+
+    .container {
+        height: 275mm !important;
+        max-height: 275mm !important;
+        page-break-after: avoid !important;
+        page-break-inside: avoid !important;
+    }
+
+    /* Forzar colores en impresión */
+    .wave-top,
+    .wave-bottom,
+    .wave-top::after,
+    .wave-bottom::before,
+    .remission-title,
+    .products-table th,
+    .products-table td,
+    .observations-box {
+        -webkit-print-color-adjust: exact !important;
+        print-color-adjust: exact !important;
+        color-adjust: exact !important;
+    }
+
+    /* Evitar saltos de página */
+    .header,
+    .main-info,
+    .products-container,
+    .payment-totals,
+    .observations-section,
+    .thank-you {
+        page-break-inside: avoid !important;
+        break-inside: avoid !important;
+    }
+
+    /* Mantener flexbox */
+    .header,
+    .main-info,
+    .payment-totals {
+        display: flex !important;
+    }
+
+    .logo-container {
+        display: flex !important;
+        align-items: center !important;
+    }
+
+    /* Asegurar que las ondas se mantengan en posición */
+    .wave-top,
+    .wave-bottom {
+        position: absolute !important;
+    }
+}
+
+/* Responsive simplificado para PDF */
+@media (max-width: 768px) {
+    .header {
+        flex-direction: column;
+        align-items: center;
+        text-align: center;
+        padding-bottom: 30px;
+    }
+    
+    .logo-container {
+        margin-bottom: 15px;
+    }
+    
+    .title-container {
+        margin-right: 0;
+        text-align: center;
+    }
+    
+    .main-info,
+    .payment-totals {
+        flex-direction: column;
+    }
+    
+    .client-info, 
+    .remission-info,
+    .payment-info, 
+    .totals-container {
+        width: 100%;
+        margin-bottom: 15px;
+    }
+    
+    .totals-container {
+        text-align: left;
+    }
+    
+    .total-row {
+        justify-content: flex-start;
+    }
+    
+    .total-divider {
+        margin: 8px 0;
+    }
+}

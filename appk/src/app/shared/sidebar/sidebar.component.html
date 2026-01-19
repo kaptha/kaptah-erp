@@ -1,0 +1,170 @@
+<div class="sidebar">
+  <div class="logo-container">
+    <img [src]="logoUrl || 'assets/images/logo-kaptan.png'" 
+         alt="Logo" 
+         class="logo"
+         (error)="onImageError($event)">
+  </div>
+  <mat-nav-list>
+    <a mat-list-item [routerLink]="['/dashboard']" routerLinkActive="active-link">
+      <mat-icon>dashboard</mat-icon>
+      <span>Dashboard</span>
+    </a>
+    
+    <a mat-list-item [routerLink]="['/dashboard/perfil']" routerLinkActive="active-link">
+      <mat-icon>person</mat-icon>
+      <span>Mi Perfil</span>
+    </a>
+    
+    <!-- RELACIONES COMERCIALES -->
+    <mat-expansion-panel>
+      <mat-expansion-panel-header>
+        <mat-panel-title>
+          <mat-icon>groups</mat-icon>
+          <span>Relaciones Comerciales</span>
+        </mat-panel-title>
+      </mat-expansion-panel-header>
+      
+      <mat-nav-list>
+        <a mat-list-item [routerLink]="['/dashboard/clientes']" routerLinkActive="active-link">
+          <mat-icon>people_alt</mat-icon>
+          <span>Clientes</span>
+        </a>
+        <a mat-list-item [routerLink]="['/dashboard/proveedores']" routerLinkActive="active-link">
+          <mat-icon>local_shipping</mat-icon>
+          <span>Proveedores</span>
+        </a>
+        <a mat-list-item [routerLink]="['/dashboard/empleados']" routerLinkActive="active-link">
+          <mat-icon>badge</mat-icon>
+          <span>Empleados</span>
+        </a>
+      </mat-nav-list>
+    </mat-expansion-panel>
+    
+    <!-- INVENTARIO Y CATÁLOGOS -->
+    <mat-expansion-panel>
+      <mat-expansion-panel-header>
+        <mat-panel-title>
+          <mat-icon>inventory_2</mat-icon>
+          <span>Inventario y Catálogos</span>
+        </mat-panel-title>
+      </mat-expansion-panel-header>
+      
+      <mat-nav-list>
+        <a mat-list-item [routerLink]="['/dashboard/categorias']" routerLinkActive="active-link">
+          <mat-icon>category</mat-icon>
+          <span>Categorías</span>
+        </a>
+        <a mat-list-item [routerLink]="['/dashboard/productos']" routerLinkActive="active-link">
+          <mat-icon>inventory</mat-icon>
+          <span>Productos</span>
+        </a>
+        <a mat-list-item [routerLink]="['/dashboard/servicios']" routerLinkActive="active-link">
+          <mat-icon>inventory</mat-icon>
+          <span>Servicios</span>
+        </a>
+      </mat-nav-list>
+    </mat-expansion-panel>
+    
+    <!-- COMPRAS -->
+    <mat-expansion-panel>
+      <mat-expansion-panel-header>
+        <mat-panel-title>
+          <mat-icon>shopping_cart</mat-icon>
+          <span>Compras</span>
+        </mat-panel-title>
+      </mat-expansion-panel-header>
+      
+      <mat-nav-list>
+        <a mat-list-item [routerLink]="['/dashboard/compras/purchase-orders']" routerLinkActive="active-link">
+          <mat-icon>receipt_long</mat-icon>
+          <span>Órdenes de Compra</span>
+        </a>
+      </mat-nav-list>
+    </mat-expansion-panel>
+    
+    <!-- VENTAS -->
+    <mat-expansion-panel>
+      <mat-expansion-panel-header>
+        <mat-panel-title>
+          <mat-icon>point_of_sale</mat-icon>
+          <span>Ventas</span>
+        </mat-panel-title>
+      </mat-expansion-panel-header>
+      
+      <mat-nav-list>
+        <a mat-list-item [routerLink]="['/dashboard/cotizaciones']" routerLinkActive="active-link">
+          <mat-icon>request_quote</mat-icon>
+          <span>Cotizaciones</span>
+        </a>
+        <a mat-list-item [routerLink]="['/dashboard/ventas/orders']" routerLinkActive="active-link">
+          <mat-icon>receipt</mat-icon>
+          <span>Órdenes de Venta</span>
+        </a>
+        <a mat-list-item [routerLink]="['/dashboard/ventas/delivery']" routerLinkActive="active-link">
+          <mat-icon>local_shipping</mat-icon>
+          <span>Guías de Remisión</span>
+        </a>
+        <a mat-list-item [routerLink]="['/dashboard/ventas/notes']" routerLinkActive="active-link">
+          <mat-icon>note</mat-icon>
+          <span>Notas de Venta</span>
+        </a>
+      </mat-nav-list>
+    </mat-expansion-panel>
+    
+    <!-- FINANZAS -->
+    <mat-expansion-panel>
+      <mat-expansion-panel-header>
+        <mat-panel-title>
+          <mat-icon>account_balance</mat-icon>
+          <span>Finanzas</span>
+        </mat-panel-title>
+      </mat-expansion-panel-header>
+      
+      <mat-nav-list>
+        <a mat-list-item [routerLink]="['/dashboard/cobros']" routerLinkActive="active-link">
+          <mat-icon>monetization_on</mat-icon>
+          <span>Cuentas por Cobrar</span>
+        </a>
+        <a mat-list-item [routerLink]="['/dashboard/pagos']" routerLinkActive="active-link">
+          <mat-icon>payments</mat-icon>
+          <span>Cuentas por Pagar</span>
+        </a>
+        <a mat-list-item [routerLink]="['/dashboard/ingresos']" routerLinkActive="active-link">
+          <mat-icon>trending_up</mat-icon>
+          <span>Ingresos</span>
+        </a>
+        <a mat-list-item [routerLink]="['/dashboard/egresos']" routerLinkActive="active-link">
+          <mat-icon>trending_down</mat-icon>
+          <span>Egresos</span>
+        </a>
+      </mat-nav-list>
+    </mat-expansion-panel>
+    
+    <!-- FACTURACIÓN ELECTRÓNICA -->
+    <mat-expansion-panel>
+      <mat-expansion-panel-header>
+        <mat-panel-title>
+          <mat-icon>description</mat-icon>
+          <span>Facturación Electrónica</span>
+        </mat-panel-title>
+      </mat-expansion-panel-header>
+      
+      <mat-nav-list>
+        <a mat-list-item [routerLink]="['/dashboard/cfdi']" routerLinkActive="active-link">
+          <mat-icon>article</mat-icon>
+          <span>CFDI</span>
+        </a>
+        <a mat-list-item [routerLink]="['/dashboard/invoice-design-selector']" routerLinkActive="active-link">
+          <mat-icon>cloud_download</mat-icon>
+          <span>Descarga de Facturas</span>
+        </a>
+      </mat-nav-list>
+    </mat-expansion-panel>
+    
+  </mat-nav-list>
+</div>
+
+
+
+  

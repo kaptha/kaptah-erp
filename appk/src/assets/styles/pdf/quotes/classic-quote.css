@@ -1,0 +1,459 @@
+/* classic-quote.css - Diseño clásico para cotizaciones optimizado para html2pdf */
+
+/* Configuración base */
+@page {
+    size: A4;
+    margin: 8mm;
+}
+
+body {
+    font-family: Arial, sans-serif;
+    margin: 0;
+    padding: 0;
+    color: #333;
+    background-color: #f2f0e9; /* Color crema */
+    line-height: 1.4;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+}
+
+/* Contenedor principal */
+.container {
+    width: 100%;
+    max-width: 190mm;
+    height: auto;
+    max-height: 250mm;
+    margin: 0 auto;
+    background-color: #f2f0e9; /* Color crema */
+    padding: 0;
+    box-sizing: border-box;
+    border: none !important;
+    border-radius: 0 !important;
+    page-break-after: avoid;
+    page-break-inside: avoid;
+}
+
+/* Encabezado con fondo oscuro */
+.header {
+    background-color: #333;
+    color: white;
+    padding: 20px; /* Reducido */
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+}
+
+.header-left {
+    flex: 1;
+}
+
+.company-name {
+    font-size: 2rem; /* Reducido */
+    font-weight: normal;
+    margin: 0;
+    line-height: 1.2;
+    color: white;
+}
+
+.header-right {
+    display: flex;
+    align-items: center;
+}
+
+.logo-img {
+    width: 60px; /* Reducido */
+    height: 60px;
+    object-fit: contain;
+    border-radius: 8px;
+}
+
+.logo-text {
+    font-size: 1.5rem; /* Reducido */
+    font-weight: bold;
+    color: white;
+    display: none; /* Solo mostrar si falla la imagen */
+}
+
+/* Sección de título y descripción */
+.title-section {
+    display: flex;
+    justify-content: space-between;
+    padding: 20px; /* Reducido */
+    background-color: #f2f0e9;
+}
+
+.date {
+    font-size: 0.9rem; /* Reducido */
+    color: #555;
+    align-self: flex-start;
+}
+
+.title-right {
+    text-align: right;
+    flex: 1;
+    max-width: 400px; /* Reducido */
+}
+
+.quote-title {
+    font-size: 2rem; /* Reducido */
+    margin: 0 0 10px 0; /* Reducido */
+    color: #333;
+    font-weight: normal;
+}
+
+.quote-description {
+    color: #555;
+    font-size: 0.9rem; /* Reducido */
+    line-height: 1.3;
+}
+
+/* Sección de cliente y proyecto */
+.client-project {
+    display: flex;
+    padding: 0 20px 20px; /* Reducido */
+    background-color: #f2f0e9;
+}
+
+.client-info {
+    width: 35%; /* Ajustado */
+}
+
+.project-info {
+    width: 65%; /* Ajustado */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.info-label {
+    font-weight: bold;
+    color: #333;
+    margin-bottom: 4px; /* Reducido */
+    display: block;
+    font-size: 0.9rem; /* Reducido */
+}
+
+.client-details {
+    margin-top: 8px; /* Reducido */
+    font-size: 0.85rem; /* Reducido */
+    line-height: 1.3;
+}
+
+.client-details div {
+    margin-bottom: 3px; /* Reducido */
+}
+
+.folio {
+    margin-top: 20px; /* Reducido */
+}
+
+.project-title {
+    font-size: 1rem; /* Reducido */
+    font-weight: bold;
+    text-align: center;
+    text-transform: uppercase;
+    color: #333;
+    padding: 0 10px;
+}
+
+/* Tabla de elementos con diseño clásico */
+.items-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-bottom: 15px; /* Reducido */
+}
+
+.items-table th {
+    background-color: #f2f0e9; /* Color crema */
+    border-bottom: 1px solid #ccc;
+    padding: 8px; /* Reducido */
+    text-align: left;
+    font-weight: bold;
+    font-size: 0.85rem; /* Reducido */
+    color: #333;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+}
+
+.items-table th:first-child {
+    padding-left: 20px; /* Reducido */
+}
+
+.items-table th:last-child {
+    padding-right: 20px; /* Reducido */
+}
+
+.items-table td {
+    border-bottom: 1px solid #eee;
+    padding: 10px 8px; /* Reducido */
+    font-size: 0.8rem; /* Reducido */
+}
+
+.items-table td:first-child {
+    padding-left: 20px; /* Reducido */
+}
+
+.items-table td:last-child {
+    padding-right: 20px; /* Reducido */
+}
+
+.items-table tr:nth-child(odd) td {
+    background-color: #e9e7e0; /* Crema más oscuro para las filas impares */
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+}
+
+.items-table tr:nth-child(even) td {
+    background-color: #f2f0e9; /* Color crema base */
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+}
+
+/* Columnas específicas */
+.items-table th.number,
+.items-table td.number {
+    width: 8%; /* Ajustado */
+    text-align: center;
+}
+
+.items-table th.description,
+.items-table td.description {
+    width: 42%; /* Ajustado */
+    text-align: left;
+}
+
+.items-table th.price,
+.items-table td.price {
+    width: 15%;
+    text-align: right;
+}
+
+.items-table th.quantity,
+.items-table td.quantity {
+    width: 15%;
+    text-align: center;
+}
+
+.items-table th.total,
+.items-table td.total {
+    width: 20%;
+    text-align: right;
+    background-color: #333 !important;
+    color: white !important;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+}
+
+/* Sección de totales */
+.totals-section {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 20px; /* Reducido */
+    padding: 0 20px; /* Reducido */
+    background-color: #f2f0e9;
+}
+
+.grand-total {
+    font-size: 1.4rem; /* Reducido */
+    font-weight: bold;
+    color: #333;
+    align-self: center;
+}
+
+.totals-table {
+    width: 250px; /* Reducido */
+    background-color: #f2f0e9;
+}
+
+.totals-table td {
+    padding: 6px 8px; /* Reducido */
+    text-align: right;
+    font-size: 0.9rem; /* Reducido */
+    border-bottom: 1px solid #ddd;
+}
+
+.totals-table td:first-child {
+    font-weight: bold;
+    text-align: left;
+    color: #333;
+}
+
+.totals-table tr:last-child td {
+    background-color: #333 !important;
+    color: white !important;
+    padding: 8px !important; /* Reducido */
+    font-weight: bold;
+    font-size: 1rem !important;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+}
+
+/* Sección de observaciones */
+.observations-section {
+    padding: 20px; /* Reducido */
+    margin-top: 20px; /* Reducido */
+    background-color: #f2f0e9;
+}
+
+.observations-title {
+    font-weight: bold;
+    margin-bottom: 8px; /* Reducido */
+    font-size: 0.9rem; /* Reducido */
+    color: #333;
+}
+
+.observations-box {
+    border: 1px solid #ccc;
+    padding: 12px; /* Reducido */
+    min-height: 60px; /* Reducido */
+    background-color: #fff;
+    font-size: 0.85rem; /* Reducido */
+    line-height: 1.4;
+}
+
+/* Manejo de imagen del logo */
+.logo-img:not([src]),
+.logo-img[src=""],
+.logo-img[src="#"] {
+    display: none;
+}
+
+.logo-img:not([src]) + .logo-text,
+.logo-img[src=""] + .logo-text,
+.logo-img[src="#"] + .logo-text {
+    display: block !important;
+}
+
+/* Ajustes para impresión */
+@media print {
+    body, .container {
+        margin: 0;
+        padding: 0;
+        width: 100%;
+        background-color: #f2f0e9 !important;
+    }
+
+    .container {
+        height: 275mm !important;
+        max-height: 275mm !important;
+        page-break-after: avoid !important;
+        page-break-inside: avoid !important;
+    }
+
+    /* Forzar colores en impresión */
+    .header,
+    .items-table th,
+    .items-table tr:nth-child(odd) td,
+    .items-table tr:nth-child(even) td,
+    .items-table th.total,
+    .items-table td.total,
+    .totals-table tr:last-child td,
+    .title-section,
+    .client-project,
+    .totals-section,
+    .observations-section {
+        -webkit-print-color-adjust: exact !important;
+        print-color-adjust: exact !important;
+        color-adjust: exact !important;
+    }
+
+    /* Evitar saltos de página */
+    .header,
+    .title-section,
+    .client-project,
+    .items-table,
+    .totals-section,
+    .observations-section {
+        page-break-inside: avoid !important;
+        break-inside: avoid !important;
+    }
+
+    /* Mantener flexbox */
+    .header,
+    .title-section,
+    .client-project,
+    .totals-section {
+        display: flex !important;
+    }
+
+    .project-info {
+        display: flex !important;
+        justify-content: center !important;
+        align-items: center !important;
+    }
+}
+
+/* Responsive simplificado */
+@media (max-width: 768px) {
+    .header, 
+    .title-section, 
+    .client-project,
+    .totals-section {
+        flex-direction: column;
+    }
+    
+    .header {
+        padding: 15px;
+        text-align: center;
+    }
+    
+    .company-name, 
+    .logo-text {
+        font-size: 1.5rem;
+        margin-bottom: 8px;
+    }
+    
+    .title-right {
+        text-align: center;
+        margin-top: 15px;
+        max-width: 100%;
+    }
+    
+    .quote-title {
+        font-size: 1.5rem;
+        text-align: center;
+    }
+    
+    .quote-description {
+        text-align: center;
+    }
+    
+    .client-info, 
+    .project-info {
+        width: 100%;
+        margin-bottom: 15px;
+    }
+    
+    .project-info {
+        text-align: center;
+    }
+    
+    .items-table th.number,
+    .items-table td.number,
+    .items-table th.quantity,
+    .items-table td.quantity {
+        display: none;
+    }
+    
+    .items-table th.description,
+    .items-table td.description {
+        width: 50%;
+    }
+    
+    .items-table th.price,
+    .items-table td.price {
+        width: 25%;
+    }
+    
+    .items-table th.total,
+    .items-table td.total {
+        width: 25%;
+    }
+    
+    .totals-table {
+        width: 100%;
+        margin-top: 15px;
+    }
+}

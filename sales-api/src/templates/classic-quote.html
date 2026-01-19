@@ -1,0 +1,488 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Cotización - Classic</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Arial', 'Helvetica', sans-serif;
+      background-color: #e8e4dc;
+      color: #333;
+      line-height: 1.5;
+    }
+
+    .container {
+      width: 100%;
+      max-width: 210mm;
+      margin: 0 auto;
+      background: #e8e4dc;
+    }
+
+    /* HEADER OSCURO */
+    .header {
+      background-color: #4a4a4a;
+      color: #ffffff;
+      padding: 30px 40px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .logo-section {
+      display: flex;
+      align-items: center;
+      gap: 20px;
+    }
+
+    .logo-img {
+      max-width: 120px;
+      max-height: 80px;
+      object-fit: contain;
+    }
+
+    .company-name {
+      font-size: 28px;
+      font-weight: 300;
+      letter-spacing: 1px;
+      line-height: 1.2;
+      color: #ffffff;
+    }
+
+    /* SECCIÓN SUPERIOR */
+    .top-section {
+      padding: 30px 40px 20px;
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: 40px;
+    }
+
+    .fecha-section {
+      font-size: 12px;
+      color: #666;
+      min-width: 180px;
+    }
+
+    .fecha-section p {
+      margin: 5px 0;
+    }
+
+    .fecha-section strong {
+      color: #333;
+      font-weight: 700;
+    }
+
+    .title-section {
+      text-align: right;
+      flex: 1;
+    }
+
+    .title-section h1 {
+      font-size: 42px;
+      font-weight: 300;
+      margin-bottom: 10px;
+      color: #333;
+      letter-spacing: 1px;
+    }
+
+    .title-section .description {
+      font-size: 11px;
+      line-height: 1.6;
+      color: #666;
+      text-align: right;
+      max-width: 400px;
+      margin-left: auto;
+    }
+
+    /* CONTENIDO PRINCIPAL */
+    .main-content {
+      display: flex;
+      padding: 20px 40px 40px;
+      gap: 30px;
+    }
+
+    .left-content {
+      flex: 1;
+    }
+
+    /* INFORMACIÓN DEL CLIENTE */
+    .cliente-info {
+      margin-bottom: 25px;
+    }
+
+    .cliente-info h3 {
+      font-size: 12px;
+      font-weight: 700;
+      margin-bottom: 12px;
+      text-transform: uppercase;
+      color: #333;
+      letter-spacing: 1px;
+    }
+
+    .cliente-info p {
+      font-size: 11px;
+      margin: 4px 0;
+      color: #555;
+      line-height: 1.5;
+    }
+
+    .cliente-info p strong {
+      color: #333;
+      font-weight: 700;
+      min-width: 80px;
+      display: inline-block;
+    }
+
+    .folio-info {
+      margin-top: 20px;
+      margin-bottom: 25px;
+    }
+
+    .folio-info h3 {
+      font-size: 12px;
+      font-weight: 700;
+      margin-bottom: 12px;
+      text-transform: uppercase;
+      color: #333;
+      letter-spacing: 1px;
+    }
+
+    .folio-info p {
+      font-size: 11px;
+      color: #555;
+      margin: 4px 0;
+      line-height: 1.5;
+    }
+
+    .folio-info p strong {
+      color: #333;
+      font-weight: 700;
+      min-width: 100px;
+      display: inline-block;
+    }
+
+    /* OBSERVACIONES */
+    .observaciones-section {
+      margin-bottom: 25px;
+    }
+
+    .observaciones-section h3 {
+      font-size: 12px;
+      font-weight: 700;
+      margin-bottom: 10px;
+      text-transform: uppercase;
+      color: #333;
+      letter-spacing: 1px;
+    }
+
+    .observaciones-section p {
+      font-size: 11px;
+      color: #555;
+      line-height: 1.6;
+      padding: 12px;
+      background-color: #f5f5f5;
+      border-left: 3px solid #4a4a4a;
+    }
+
+    /* TABLA DE PROYECTO */
+    .proyecto-section h2 {
+      font-size: 12px;
+      font-weight: 700;
+      margin-bottom: 15px;
+      text-transform: uppercase;
+      color: #333;
+      letter-spacing: 1px;
+    }
+
+    .tabla {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 10px;
+      margin-bottom: 20px;
+    }
+
+    .tabla thead th {
+      background-color: #f5f5f5;
+      padding: 10px 8px;
+      text-align: left;
+      font-weight: 700;
+      font-size: 9px;
+      text-transform: uppercase;
+      color: #333;
+      border-bottom: 2px solid #ccc;
+    }
+
+    .tabla thead th:first-child {
+      width: 8%;
+      text-align: center;
+    }
+
+    .tabla thead th:nth-child(2) {
+      width: 42%;
+    }
+
+    .tabla thead th:nth-child(3),
+    .tabla thead th:nth-child(4),
+    .tabla thead th:nth-child(5) {
+      width: 16%;
+      text-align: right;
+    }
+
+    .tabla tbody td {
+      padding: 10px 8px;
+      border-bottom: 1px solid #d0d0d0;
+      color: #555;
+      vertical-align: top;
+      font-size: 10px;
+    }
+
+    .tabla tbody td:first-child {
+      text-align: center;
+      font-weight: 700;
+    }
+
+    .tabla tbody td:nth-child(3),
+    .tabla tbody td:nth-child(4),
+    .tabla tbody td:nth-child(5) {
+      text-align: right;
+    }
+
+    /* TOTAL A PAGAR */
+    .total-pagar {
+      margin-top: 20px;
+      padding-top: 15px;
+      border-top: 2px solid #999;
+    }
+
+    .total-pagar p {
+      font-size: 12px;
+      font-weight: 700;
+      margin-bottom: 8px;
+      text-transform: uppercase;
+      color: #333;
+      letter-spacing: 1px;
+    }
+
+    .total-pagar .amount {
+      font-size: 28px;
+      font-weight: 700;
+      color: #333;
+    }
+
+    /* COLUMNA DE TOTALES (DERECHA) */
+    .totales-column {
+      width: 220px;
+      background-color: #4a4a4a;
+      color: #ffffff;
+      padding: 25px 20px;
+      flex-shrink: 0;
+    }
+
+    .factura-header {
+      text-align: right;
+      margin-bottom: 30px;
+      padding-bottom: 20px;
+      border-bottom: 1px solid #666;
+    }
+
+    .factura-header h3 {
+      font-size: 10px;
+      font-weight: 700;
+      margin-bottom: 8px;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+
+    .factura-header .numero {
+      font-size: 18px;
+      font-weight: 700;
+    }
+
+    .factura-header p {
+      font-size: 9px;
+      margin-top: 12px;
+      color: #ccc;
+    }
+
+    .totales-list {
+      margin-top: 30px;
+    }
+
+    .total-item {
+      display: flex;
+      justify-content: space-between;
+      padding: 12px 0;
+      border-bottom: 1px solid #666;
+      font-size: 10px;
+    }
+
+    .total-item.header {
+      font-weight: 700;
+      text-transform: uppercase;
+      background-color: transparent;
+      padding-top: 0;
+      font-size: 11px;
+    }
+
+    .total-item .label {
+      font-weight: 700;
+      text-transform: uppercase;
+    }
+
+    .total-item .value {
+      text-align: right;
+      font-weight: 700;
+    }
+
+    .total-item:last-child {
+      border-bottom: none;
+      margin-top: 15px;
+      font-size: 14px;
+      padding-top: 15px;
+      border-top: 2px solid #ffffff;
+    }
+
+    /* MEDIA QUERIES */
+    @media print {
+      body {
+        background: #e8e4dc;
+      }
+
+      .container {
+        width: 100%;
+        max-width: none;
+        page-break-after: avoid;
+      }
+      
+      .header, .main-content {
+        page-break-inside: avoid;
+      }
+
+      .header {
+        print-color-adjust: exact;
+        -webkit-print-color-adjust: exact;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <!-- HEADER -->
+    <header class="header">
+      <div class="logo-section">
+        <img src="{{logo}}" alt="Logo" class="logo-img">
+        <div class="company-name">
+          {{sucursal_nombre}}
+          <div>{{empresa_rfc}}</div>
+        </div>
+      </div>
+    </header>
+
+    <!-- SECCIÓN SUPERIOR -->
+    <div class="top-section">
+      <div class="fecha-section">
+        <p><strong>Fecha:</strong> {{fecha}}</p>
+        <p><strong>Folio:</strong> {{folio}}</p>
+        <p><strong>Estado:</strong> {{estado}}</p>
+      </div>
+      <div class="title-section">
+        <h1>{{tipo_documento}}</h1>
+        <p class="description">
+          {{terminos_condiciones}}
+        </p>
+      </div>
+    </div>
+
+    <!-- CONTENIDO PRINCIPAL -->
+    <div class="main-content">
+      <!-- COLUMNA IZQUIERDA -->
+      <div class="left-content">
+        <!-- INFORMACIÓN DEL CLIENTE -->
+        <div class="cliente-info">
+          <h3>Cliente</h3>
+          <p><strong>Nombre:</strong> {{cliente}}</p>
+          <p><strong>RFC:</strong> {{rfc}}</p>
+          <p><strong>Dirección:</strong> {{direccion}}</p>
+          <p><strong>Teléfono:</strong> {{telefono}}</p>
+        </div>
+
+        <!-- INFORMACIÓN DE LA SUCURSAL -->
+        <div class="folio-info">
+          <h3>Información de la Empresa</h3>
+          <p><strong>Dirección:</strong> {{sucursal_calle}}</p>
+          <p><strong>Colonia:</strong> {{sucursal_ciudad}}</p>
+          <p><strong>Código Postal:</strong> {{sucursal_codigoPostal}}</p>
+          <p><strong>Teléfono:</strong> {{sucursal_telefono}}</p>
+          <p><strong>Email:</strong> {{sucursal_email}}</p>
+        </div>
+
+        <!-- OBSERVACIONES -->
+        <div class="observaciones-section">
+          <h3>Observaciones</h3>
+          <p>{{observaciones}}</p>
+        </div>
+
+        <!-- PROYECTO Y TABLA -->
+        <div class="proyecto-section">
+          <h2>Detalle de la Cotización</h2>
+          
+          <table class="tabla">
+            <thead>
+              <tr>
+                <th>No.</th>
+                <th>DESCRIPCIÓN</th>
+                <th>PRECIO U.</th>
+                <th>CANTIDAD</th>
+                <th>IMPORTE</th>
+              </tr>
+            </thead>
+            <tbody>
+              {{items}}
+            </tbody>
+          </table>
+
+          <!-- TOTAL A PAGAR -->
+          <div class="total-pagar">
+            <p>Total a pagar:</p>
+            <div class="amount">${{total}}</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- COLUMNA DE TOTALES (DERECHA) -->
+      <div class="totales-column">
+        <div class="factura-header">
+          <h3>Folio No.</h3>
+          <div class="numero">{{folio}}</div>
+          <p>Válida hasta: {{fecha_validez}}</p>
+        </div>
+
+        <div class="totales-list">
+          <div class="total-item header">
+            <span class="label">Resumen</span>
+          </div>
+          <div class="total-item">
+            <span class="label">Subtotal</span>
+            <span class="value">${{subtotal}}</span>
+          </div>
+          <div class="total-item">
+            <span class="label">Impuestos</span>
+            <span class="value">${{impuestos}}</span>
+          </div>
+          <div class="total-item">
+            <span class="label">Total</span>
+            <span class="value">${{total}}</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</body>
+</html>

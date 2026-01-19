@@ -1,0 +1,130 @@
+.header {
+  background-color: #8e24aa;
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 16px;
+}
+
+.spacer {
+  flex: 1 1 auto;
+}
+
+.user-profile {
+  display: flex;
+  align-items: center;
+  padding: 4px !important;
+  min-width: auto !important;
+}
+
+/* Avatar circular con iniciales - estilo Gmail */
+.user-avatar {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background-color: #7b1fa2; /* Un tono más oscuro del morado principal */
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 500;
+  font-size: 14px;
+  letter-spacing: 0.5px;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+
+.user-avatar:hover {
+  background-color: #6a1b9a; /* Más oscuro al hacer hover */
+}
+
+/* Avatar grande para el menú desplegable */
+.user-avatar-large {
+  width: 64px;
+  height: 64px;
+  border-radius: 50%;
+  background-color: #7b1fa2;
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 500;
+  font-size: 24px;
+  letter-spacing: 1px;
+  margin-bottom: 12px;
+}
+
+/* Asegurando que todos los botones e iconos en el header sean blancos */
+.header button,
+.header mat-icon,
+.header .mat-icon-button {
+  color: white !important;
+}
+
+/* Estilo para el menú desplegable de configuración */
+::ng-deep .mat-menu-panel {
+  background-color: #8e24aa;
+}
+
+::ng-deep .mat-menu-item {
+  color: white;
+}
+
+::ng-deep .mat-menu-item .mat-icon {
+  color: white;
+}
+
+::ng-deep .mat-menu-item:hover {
+  background-color: rgba(255, 255, 255, 0.1);
+}
+
+/* Estilo especial para el menú del usuario (fondo blanco) */
+::ng-deep .user-menu-header {
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  background-color: white;
+}
+
+::ng-deep .user-info {
+  text-align: center;
+  color: #333;
+}
+
+::ng-deep .user-full-name {
+  font-weight: 500;
+  font-size: 16px;
+  color: #333;
+  margin-bottom: 4px;
+}
+
+/* Personalización del menú del usuario */
+::ng-deep .mat-menu-content:has(.user-menu-header) {
+  padding: 0 !important;
+}
+
+::ng-deep .mat-menu-content:has(.user-menu-header) .mat-menu-panel {
+  background-color: white;
+}
+
+::ng-deep .mat-menu-content:has(.user-menu-header) .mat-menu-item {
+  color: #333;
+}
+
+::ng-deep .mat-menu-content:has(.user-menu-header) .mat-menu-item .mat-icon {
+  color: #666;
+}
+
+::ng-deep .mat-menu-content:has(.user-menu-header) .mat-menu-item:hover {
+  background-color: rgba(0, 0, 0, 0.04);
+}
+
+::ng-deep .mat-divider {
+  margin: 8px 0;
+}
+
+
+
+  

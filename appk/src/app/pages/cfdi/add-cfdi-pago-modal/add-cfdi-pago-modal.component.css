@@ -1,0 +1,162 @@
+/* Estilos básicos del modal */
+.cfdi-modal-container {
+  max-width: 950px;
+}
+
+.mat-dialog-title {
+  margin-bottom: 20px;
+  color: #333;
+  font-size: 20px;
+  font-weight: 500;
+}
+
+.mat-dialog-content {
+  max-height: 75vh;
+  overflow-y: auto;
+}
+
+/* Pestañas principales */
+.tab-container {
+  display: flex;
+  margin-bottom: 20px;
+  border-bottom: 1px solid #e0e0e0;
+}
+
+.tab-container button {
+  padding: 10px 20px;
+  border-radius: 0;
+  margin-right: 4px;
+  font-weight: 500;
+}
+
+.active-tab {
+  color: #8e24aa;
+  border-bottom: 2px solid #8e24aa;
+}
+
+/* Títulos de sección */
+.section-title {
+  font-size: 16px;
+  font-weight: 500;
+  margin-top: 24px;
+  margin-bottom: 16px;
+  color: #555;
+  padding-bottom: 8px;
+  border-bottom: 1px solid #eee;
+}
+
+/* Filas del formulario */
+.form-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16px;
+  margin-bottom: 16px;
+}
+
+.form-row:last-child {
+  margin-bottom: 0;
+}
+
+.form-row mat-form-field {
+  flex: 1;
+  min-width: 200px;
+}
+
+.full-width {
+  width: 100%;
+}
+
+/* Contenedor de pagos */
+.pago-container {
+  background-color: #f8f8f8;
+  border: 1px solid #e0e0e0;
+  border-radius: 8px;
+  padding: 16px;
+  margin-bottom: 16px;
+}
+
+.pago-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16px;
+}
+
+.pago-title {
+  font-weight: 500;
+  color: #333;
+  font-size: 16px;
+}
+
+/* Botón para agregar */
+.add-button {
+  margin-top: 16px;
+  margin-bottom: 24px;
+  display: flex;
+  justify-content: center;
+}
+
+/* Información del cliente */
+.cliente-info {
+  background-color: #f5f9ff;
+  border-radius: 8px;
+  border: 1px solid #d6e4ff;
+  padding: 16px;
+  margin-top: 16px;
+  margin-bottom: 16px;
+}
+
+.info-row {
+  display: flex;
+  margin-bottom: 8px;
+}
+
+.info-label {
+  font-weight: 500;
+  color: #555;
+  width: 100px;
+  flex-shrink: 0;
+}
+
+.info-value {
+  flex: 1;
+}
+
+/* Overlay de carga */
+.loading-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background-color: rgba(255, 255, 255, 0.7);
+  z-index: 10;
+}
+
+/* Media queries */
+@media (max-width: 768px) {
+  .form-row {
+    flex-direction: column;
+    gap: 0;
+  }
+  
+  .form-row mat-form-field {
+    width: 100%;
+  }
+  
+  .tab-container button {
+    padding: 8px 12px;
+    font-size: 14px;
+  }
+  
+  .pago-container {
+    padding: 12px;
+  }
+  
+  .mat-dialog-content {
+    max-height: 80vh;
+  }
+}

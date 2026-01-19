@@ -1,0 +1,113 @@
+<h2 mat-dialog-title>{{ data ? 'Editar' : 'Nueva' }} Nota de Entrega</h2>
+
+<mat-dialog-content class="dialog-content">
+  <form [formGroup]="deliveryForm">
+    
+    <!-- Orden de Venta -->
+    <mat-form-field appearance="outline" class="full-width">
+      <mat-label>Orden de Venta</mat-label>
+      <mat-select formControlName="salesOrderId" (selectionChange)="onSalesOrderSelect($event)">
+        <mat-option [value]="order.id" *ngFor="let order of salesOrders">
+          {{ order.id.slice(0, 8) }} - {{ order.customerName }}
+        </mat-option>
+      </mat-select>
+      <mat-error *ngIf="deliveryForm.get('salesOrderId')?.hasError('required')">
+        La orden de venta es requerida
+      </mat-error>
+    </mat-form-field>
+
+    <!-- Sucursal -->
+    <mat-form-field appearance="outline" class="full-width">
+      <mat-label>Sucursal</mat-label>
+      <mat-select 
+        formControlName="sucursalId"
+        (selectionChange)="onSucursalSelect($event)">
+        <mat-option [value]="null">Sin sucursal</mat-option>
+        <mat-option *ngFor="let sucursal of sucursales" [value]="sucursal.id">
+          {{ sucursal.alias }}
+        </mat-option>
+      </mat-select>
+      <mat-hint>Selecciona la sucursal (opcional)</mat-hint>
+    </mat-form-field>
+
+    <!-- Fecha de Entrega -->
+    <mat-form-field appearance="outline" class="full-width">
+      <mat-label>Fecha de Entrega</mat-label>
+      <input matInput [matDatepicker]="picker" formControlName="deliveryDate">
+      <mat-datepicker-toggle matSuffix [for]="picker"></mat-datepicker-toggle>
+      <mat-datepicker #picker></mat-datepicker>
+      <mat-error *ngIf="deliveryForm.get('deliveryDate')?.hasError('required')">
+        La fecha es requerida
+      </mat-error>
+    </mat-form-field>
+
+    <!-- Estado -->
+    <mat-form-field appearance="outline" class="full-width">
+      <mat-label>Estado</mat-label>
+      <mat-select formControlName="status">
+        <mat-option value="PENDING">Pendiente</mat-option>
+        <mat-option value="TRANSIT">En tránsito</mat-option>
+        <mat-option value="DELIVERED">Entregado</mat-option>
+        <mat-option value="CANCELLED">Cancelado</mat-option>
+      </mat-select>
+    </mat-form-field>
+
+    <!-- Items -->
+    <div class="items-section" formArrayName="items">
+      <h3>Items a Entregar</h3>
+      
+      <div *ngFor="let item of items.controls; let i=index" [formGroupName]="i" class="item-row">
+        <mat-form-field appearance="outline" class="item-field">
+          <mat-label>ID Producto</mat-label>
+          <input matInput formControlName="productId">
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" class="item-field">
+          <mat-label>Descripción</mat-label>
+          <input matInput formControlName="description">
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" class="item-field-small">
+          <mat-label>Cantidad Total</mat-label>
+          <input matInput type="number" formControlName="quantity">
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" class="item-field-small">
+          <mat-label>Cantidad Entregada</mat-label>
+          <input matInput type="number" formControlName="deliveredQuantity">
+        </mat-form-field>
+
+        <button mat-icon-button color="warn" type="button" (click)="removeItem(i)">
+          <mat-icon>delete</mat-icon>
+        </button>
+      </div>
+
+      <button mat-stroked-button type="button" (click)="addItem()">
+        <mat-icon>add</mat-icon>
+        Agregar Item
+      </button>
+    </div>
+
+    <!-- Notas -->
+    <mat-form-field appearance="outline" class="full-width">
+      <mat-label>Notas</mat-label>
+      <textarea 
+        matInput 
+        formControlName="notes" 
+        rows="3" 
+        placeholder="Notas adicionales sobre la entrega"></textarea>
+    </mat-form-field>
+
+  </form>
+</mat-dialog-content>
+
+<mat-dialog-actions align="end">
+  <button mat-button (click)="onClose()" class="btn-danger">Cancelar</button>
+  <button 
+    mat-raised-button 
+    class="btn-primary" 
+    (click)="onSubmit()" 
+    type="button">
+    {{ data ? 'Actualizar' : 'Crear' }}
+  </button>
+</mat-dialog-actions>

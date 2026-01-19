@@ -1,0 +1,496 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Nota de Remisión - Professional</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Arial', 'Helvetica', sans-serif;
+      background-color: #f5f0eb;
+      color: #5a4a42;
+      line-height: 1.4;
+    }
+
+    .main-wrapper {
+      width: 100%;
+      max-width: 210mm;
+      min-height: 297mm;
+      margin: 0 auto;
+      background: #f5f0eb;
+      padding: 25px 35px;
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* TÍTULO */
+    .titulo {
+      background-color: #e8d5c4;
+      color: #6b5347;
+      text-align: center;
+      padding: 18px;
+      font-size: 28px;
+      font-weight: 700;
+      letter-spacing: 2px;
+      margin-bottom: 20px;
+      border: 2px solid #8b6f5c;
+    }
+
+    /* SECCIÓN DE DATOS DEL ENCABEZADO */
+    .datos-encabezado {
+      margin-bottom: 20px;
+    }
+
+    .fila {
+      display: flex;
+      gap: 0;
+      margin-bottom: 0;
+      border: 2px solid #8b6f5c;
+      background-color: #ffffff;
+      min-height: 38px;
+    }
+
+    .fila + .fila {
+      border-top: none;
+    }
+
+    .celda {
+      flex: 1;
+      padding: 9px 12px;
+      display: flex;
+      align-items: center;
+      border-right: 2px solid #8b6f5c;
+      font-size: 11px;
+      color: #5a4a42;
+    }
+
+    .celda:last-child {
+      border-right: none;
+    }
+
+    .celda strong {
+      font-weight: 700;
+      margin-right: 6px;
+      color: #6b5347;
+    }
+
+    .celda.header-cell {
+      background-color: #e8d5c4;
+      font-weight: 700;
+      justify-content: center;
+      color: #6b5347;
+    }
+
+    .celda.small {
+      flex: 0.5;
+    }
+
+    .celda.medium {
+      flex: 0.8;
+    }
+
+    .celda.large {
+      flex: 2;
+    }
+
+    /* TABLA DE PRODUCTOS */
+    .tabla-container {
+      border: 2px solid #8b6f5c;
+      background: white;
+      margin-bottom: 18px;
+    }
+
+    .tabla {
+      width: 100%;
+      border-collapse: collapse;
+      background: white;
+    }
+
+    .tabla thead {
+      background-color: #e8d5c4;
+    }
+
+    .tabla thead th {
+      padding: 10px 12px;
+      text-align: left;
+      font-weight: 700;
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      border-right: 2px solid #8b6f5c;
+      color: #6b5347;
+      border-bottom: 2px solid #8b6f5c;
+    }
+
+    .tabla thead th:last-child {
+      border-right: none;
+    }
+
+    .tabla tbody td {
+      padding: 9px 12px;
+      border-right: 2px solid #8b6f5c;
+      border-bottom: 2px solid #8b6f5c;
+      font-size: 11px;
+      color: #5a4a42;
+    }
+
+    .tabla tbody td:last-child {
+      border-right: none;
+    }
+
+    .tabla tbody tr {
+      background-color: #ffffff;
+    }
+
+    /* SECCIÓN DE BRANDING Y TOTALES */
+    .bottom-section {
+      display: flex;
+      border-top: 2px solid #8b6f5c;
+    }
+
+    .branding-area {
+      flex: 1.5;
+      background-color: #e8d5c4;
+      padding: 18px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      border-right: 2px solid #8b6f5c;
+    }
+
+    .logo {
+      height: 70px;
+      width: 70px;
+      object-fit: contain;
+    }
+
+    .branding-text {
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+    }
+
+    .branding-text strong {
+      font-size: 14px;
+      color: #6b5347;
+      margin-bottom: 4px;
+      display: block;
+    }
+
+    .branding-text span {
+      font-size: 12px;
+      color: #8b6f5c;
+    }
+
+    .totales-area {
+      flex: 1;
+      background-color: #ffffff;
+    }
+
+    .total-row {
+      display: flex;
+      border-bottom: 2px solid #8b6f5c;
+      min-height: 38px;
+    }
+
+    .total-row:last-child {
+      border-bottom: none;
+      background-color: #e8d5c4;
+    }
+
+    .total-label {
+      flex: 1;
+      padding: 9px 12px;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      justify-content: flex-end;
+      background-color: #f5ebe3;
+      border-right: 2px solid #8b6f5c;
+      color: #6b5347;
+      font-size: 11px;
+      text-transform: uppercase;
+    }
+
+    .total-value {
+      flex: 0.8;
+      padding: 9px 12px;
+      display: flex;
+      align-items: center;
+      justify-content: flex-end;
+      font-size: 11px;
+      color: #5a4a42;
+    }
+
+    .total-row:last-child .total-label,
+    .total-row:last-child .total-value {
+      background-color: #e8d5c4;
+      font-weight: 700;
+      font-size: 12px;
+    }
+
+    /* SECCIÓN OBSERVACIONES Y QR */
+    .obs-qr-section {
+      display: flex;
+      gap: 18px;
+      margin-bottom: 20px;
+    }
+
+    .observaciones-box {
+      flex: 1.5;
+      border: 2px solid #8b6f5c;
+      padding: 15px;
+      background-color: #ffffff;
+    }
+
+    .observaciones-title {
+      font-size: 11px;
+      font-weight: 700;
+      text-transform: uppercase;
+      margin-bottom: 10px;
+      color: #6b5347;
+      letter-spacing: 0.5px;
+    }
+
+    .observaciones-content {
+      font-size: 10px;
+      color: #5a4a42;
+      line-height: 1.5;
+      white-space: pre-wrap;
+      min-height: 80px;
+    }
+
+    .qr-box {
+      flex: 1;
+      border: 2px solid #8b6f5c;
+      padding: 15px;
+      text-align: center;
+      background-color: #e8d5c4;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+    }
+
+    .qr-title {
+      font-size: 10px;
+      color: #6b5347;
+      margin-bottom: 10px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .qr-code-img {
+      width: 110px;
+      height: 110px;
+      display: block;
+      margin: 0 auto 8px;
+      border: 2px solid #8b6f5c;
+      padding: 3px;
+      background: white;
+    }
+
+    .qr-info {
+      font-size: 8px;
+      color: #5a4a42;
+      margin-top: 6px;
+    }
+
+    .qr-footer-text {
+      font-size: 7px;
+      color: #8b6f5c;
+      margin-top: 3px;
+    }
+
+    /* FOOTER */
+    .footer {
+      display: flex;
+      justify-content: space-around;
+      margin-top: auto;
+      gap: 30px;
+    }
+
+    .footer-section {
+      text-align: center;
+      flex: 1;
+    }
+
+    .footer-section strong {
+      display: block;
+      font-size: 12px;
+      font-weight: 700;
+      margin-bottom: 6px;
+      color: #6b5347;
+      background-color: #e8d5c4;
+      padding: 7px;
+      border: 2px solid #8b6f5c;
+    }
+
+    .footer-section p {
+      margin: 2px 0;
+      font-size: 11px;
+      line-height: 1.4;
+      color: #5a4a42;
+    }
+
+    /* MEDIA QUERIES PARA IMPRESIÓN */
+    @media print {
+      .main-wrapper {
+        width: 100%;
+        max-width: none;
+        min-height: auto;
+        page-break-after: avoid;
+        padding: 20px 30px;
+      }
+      
+      body {
+        margin: 0;
+        padding: 0;
+      }
+      
+      .titulo, .datos-encabezado, .tabla-container, .obs-qr-section, .footer {
+        page-break-inside: avoid;
+      }
+
+      @page {
+        margin: 0;
+        size: A4 portrait;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="main-wrapper">
+    <!-- TÍTULO -->
+    <h1 class="titulo">{{tipo_documento}}</h1>
+
+    <!-- SECCIÓN DE DATOS DEL ENCABEZADO -->
+    <section class="datos-encabezado">
+      <!-- Primera fila: Número y Fecha (DÍA, MES, AÑO) -->
+      <div class="fila">
+        <div class="celda large">
+          <strong>NÚMERO:</strong> <span>{{folio}}</span>
+        </div>
+        <div class="celda header-cell small">DÍA</div>
+        <div class="celda header-cell small">MES</div>
+        <div class="celda header-cell small">AÑO</div>
+      </div>
+
+      <!-- Segunda fila: Cliente con fecha -->
+      <div class="fila">
+        <div class="celda large">
+          <strong>CLIENTE:</strong> <span>{{cliente}}</span>
+        </div>
+        <div class="celda small" style="justify-content: center;">{{dia}}</div>
+        <div class="celda small" style="justify-content: center;">{{mes}}</div>
+        <div class="celda small" style="justify-content: center;">{{anio}}</div>
+      </div>
+
+      <!-- Tercera fila: Domicilio -->
+      <div class="fila">
+        <div class="celda" style="flex: 1;">
+          <strong>DOMICILIO:</strong> <span>{{direccion}}</span>
+        </div>
+      </div>
+
+      <!-- Cuarta fila: Ciudad/Estado y Teléfono -->
+      <div class="fila">
+        <div class="celda" style="flex: 2;">
+          <strong>CIUDAD O ESTADO:</strong> <span>{{ciudad}}</span>
+        </div>
+        <div class="celda">
+          <strong>TEL.:</strong> <span>{{telefono}}</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- TABLA DE PRODUCTOS CON BRANDING Y TOTALES -->
+    <div class="tabla-container">
+      <table class="tabla">
+        <thead>
+          <tr>
+            <th>CANTIDAD</th>
+            <th>CONCEPTO</th>
+            <th>PRECIO</th>
+            <th>IMPORTE</th>
+          </tr>
+        </thead>
+        <tbody>
+          {{items}}
+        </tbody>
+      </table>
+
+      <!-- SECCIÓN INFERIOR: BRANDING + TOTALES -->
+      <div class="bottom-section">
+        <div class="branding-area">
+          <img src="{{logo}}" alt="Logo" class="logo" />
+          <div class="branding-text">
+            <strong>{{sucursal_nombre}}</strong>
+            <span>{{empresa_rfc}}</span>
+          </div>
+        </div>
+        <div class="totales-area">
+          <div class="total-row">
+            <div class="total-label">SUBTOTAL</div>
+            <div class="total-value">${{subtotal}}</div>
+          </div>
+          <div class="total-row">
+            <div class="total-label">IMPUESTO</div>
+            <div class="total-value">${{impuestos}}</div>
+          </div>
+          <div class="total-row">
+            <div class="total-label">TOTAL</div>
+            <div class="total-value">${{total}}</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- SECCIÓN OBSERVACIONES Y QR -->
+    <section class="obs-qr-section">
+      <!-- Observaciones -->
+      <div class="observaciones-box">
+        <div class="observaciones-title">📝 Observaciones</div>
+        <div class="observaciones-content">{{observaciones}}</div>
+      </div>
+
+      <!-- Código QR -->
+      <div class="qr-box">
+        <p class="qr-title">Escanea para verificar</p>
+        <img 
+          src="{{qr_code}}" 
+          alt="Código QR de verificación"
+          class="qr-code-img"
+        />
+        <p class="qr-info">Folio: {{qr_folio}}</p>
+        <p class="qr-info">Fecha: {{qr_fecha}}</p>
+        <p class="qr-footer-text">Verificación en línea disponible</p>
+      </div>
+    </section>
+
+    <!-- FOOTER -->
+    <footer class="footer">
+      <div class="footer-section">
+        <strong>DIRECCIÓN</strong>
+        <p>{{sucursal_calle}}</p>
+        <p>C.P. {{sucursal_codigoPostal}}</p>
+      </div>
+      <div class="footer-section">
+        <strong>TELÉFONO</strong>
+        <p>{{sucursal_telefono}}</p>
+      </div>
+      <div class="footer-section">
+        <strong>CORREO</strong>
+        <p>{{sucursal_email}}</p>
+      </div>
+    </footer>
+  </div>
+</body>
+</html>

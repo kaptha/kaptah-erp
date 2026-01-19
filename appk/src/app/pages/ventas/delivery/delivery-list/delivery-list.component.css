@@ -1,0 +1,272 @@
+.delivery-detail-modal {
+  min-width: 600px;
+  max-width: 800px;
+}
+
+.modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-bottom: 2px solid #e0e0e0;
+  padding-bottom: 16px;
+  margin-bottom: 20px;
+}
+
+.modal-header h2 {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin: 0;
+  font-size: 24px;
+  color: #333;
+}
+
+.modal-header mat-icon {
+  color: #1976d2;
+}
+
+.close-button {
+  color: #666;
+}
+
+.modal-content {
+  max-height: 70vh;
+  overflow-y: auto;
+  padding: 0 24px;
+}
+
+/* Cards */
+.info-card,
+.items-card,
+.notes-card,
+.sales-order-card {
+  margin-bottom: 20px;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+mat-card-header {
+  margin-bottom: 16px;
+}
+
+mat-card-title {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 18px;
+  color: #444;
+}
+
+mat-card-title mat-icon {
+  color: #1976d2;
+}
+
+/* Info Grid */
+.info-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 16px;
+}
+
+.info-item {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.info-item .label {
+  font-size: 12px;
+  color: #666;
+  font-weight: 500;
+  text-transform: uppercase;
+}
+
+.info-item .value {
+  font-size: 16px;
+  color: #333;
+  font-weight: 600;
+}
+
+.info-item .value.folio {
+  color: #1976d2;
+  font-size: 18px;
+}
+
+.info-item .value.total {
+  color: #4caf50;
+  font-size: 18px;
+}
+
+/* Estado Chips */
+mat-chip {
+  font-weight: 600;
+  padding: 4px 12px;
+  border-radius: 16px;
+}
+
+.status-delivered {
+  background-color: #4caf50 !important;
+  color: white !important;
+}
+
+.status-pending {
+  background-color: #ff9800 !important;
+  color: white !important;
+}
+
+.status-transit {
+  background-color: #2196f3 !important;
+  color: white !important;
+}
+
+.status-cancelled {
+  background-color: #f44336 !important;
+  color: white !important;
+}
+
+/* Tabla de Items */
+.items-table {
+  width: 100%;
+  overflow-x: auto;
+}
+
+.detail-table {
+  width: 100%;
+  box-shadow: none;
+}
+
+.detail-table th {
+  background-color: #f5f5f5;
+  font-weight: 600;
+  color: #666;
+  font-size: 14px;
+  padding: 12px 8px;
+}
+
+.detail-table td {
+  padding: 16px 8px;
+  border-bottom: 1px solid #e0e0e0;
+}
+
+.product-info {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.product-id {
+  font-size: 12px;
+  color: #666;
+  font-weight: 500;
+}
+
+.product-desc {
+  font-size: 14px;
+  color: #333;
+  font-weight: 600;
+}
+
+.quantity-badge {
+  display: inline-block;
+  background-color: #e3f2fd;
+  color: #1976d2;
+  padding: 6px 12px;
+  border-radius: 12px;
+  font-weight: 600;
+  font-size: 14px;
+}
+
+/* Estado de Entrega */
+.delivery-status {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  align-items: flex-start;
+}
+
+.delivered-badge {
+  display: inline-block;
+  padding: 6px 12px;
+  border-radius: 12px;
+  font-weight: 600;
+  font-size: 14px;
+  background-color: #e0e0e0;
+  color: #666;
+}
+
+.delivered-badge.fully-delivered {
+  background-color: #c8e6c9;
+  color: #2e7d32;
+}
+
+.delivered-badge.partially-delivered {
+  background-color: #fff3e0;
+  color: #e65100;
+}
+
+mat-progress-bar {
+  width: 100%;
+  height: 8px;
+  border-radius: 4px;
+}
+
+mat-progress-bar.complete ::ng-deep .mat-progress-bar-fill::after {
+  background-color: #4caf50 !important;
+}
+
+mat-progress-bar.partial ::ng-deep .mat-progress-bar-fill::after {
+  background-color: #ff9800 !important;
+}
+
+.percentage {
+  font-size: 12px;
+  color: #666;
+  font-weight: 500;
+}
+
+/* Notas */
+.notes-text {
+  background-color: #fffde7;
+  padding: 16px;
+  border-radius: 8px;
+  border-left: 4px solid #fbc02d;
+  color: #333;
+  font-size: 14px;
+  line-height: 1.6;
+  margin: 0;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .delivery-detail-modal {
+    min-width: auto;
+    width: 100%;
+  }
+
+  .info-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .modal-header h2 {
+    font-size: 20px;
+  }
+
+  .detail-table {
+    font-size: 12px;
+  }
+
+  .detail-table th,
+  .detail-table td {
+    padding: 8px 4px;
+  }
+}
+
+/* Actions */
+mat-dialog-actions {
+  border-top: 1px solid #e0e0e0;
+  padding: 16px 24px;
+  margin-top: 20px;
+}
+
+mat-dialog-actions button {
+  min-width: 100px;
+}

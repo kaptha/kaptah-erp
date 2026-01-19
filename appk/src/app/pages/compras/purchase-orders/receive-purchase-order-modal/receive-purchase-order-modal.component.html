@@ -1,0 +1,212 @@
+<h2 mat-dialog-title>
+  <mat-icon>inventory</mat-icon>
+  Recibir Mercancía - {{order.orderNumber}}
+</h2>
+
+<mat-dialog-content>
+  <!-- Información de la orden -->
+  <div class="order-info-card">
+    <mat-card>
+      <mat-card-content>
+        <div class="info-grid">
+          <div class="info-item">
+            <span class="label">Proveedor:</span>
+            <span class="value">{{order.supplierName}}</span>
+          </div>
+          <div class="info-item">
+            <span class="label">Fecha de Orden:</span>
+            <span class="value">{{order.orderDate | date:'dd/MM/yyyy'}}</span>
+          </div>
+          <div class="info-item">
+            <span class="label">Estado Actual:</span>
+            <span class="value">
+              <span class="status-chip" [ngClass]="'status-' + order.status.toLowerCase()">
+                {{order.status === 'SENT' ? 'Enviada' : order.status === 'PARTIAL' ? 'Parcial' : order.status}}
+              </span>
+            </span>
+          </div>
+          <div class="info-item">
+            <span class="label">Total de la Orden:</span>
+            <span class="value"><strong>{{order.total | currency:order.currency || 'MXN'}}</strong></span>
+          </div>
+        </div>
+      </mat-card-content>
+    </mat-card>
+  </div>
+
+  <form [formGroup]="receiveForm">
+    <!-- Acciones rápidas -->
+    <div class="quick-actions">
+      <button mat-stroked-button color="primary" type="button" (click)="receiveAll()">
+        <mat-icon>check_circle</mat-icon>
+        Recibir Todo
+      </button>
+      <button mat-stroked-button type="button" (click)="clearAll()">
+        <mat-icon>clear</mat-icon>
+        Limpiar Todo
+      </button>
+    </div>
+
+    <!-- Lista de productos -->
+    <div formArrayName="items" class="items-container">
+      <h3>
+        <mat-icon>inventory_2</mat-icon>
+        Productos de la Orden
+      </h3>
+
+      <div *ngFor="let item of items.controls; let i=index" [formGroupName]="i" class="item-card">
+        <mat-card>
+          <mat-card-content>
+            <!-- Header del producto -->
+            <div class="item-header">
+              <div class="product-info">
+                <h4>{{item.get('productName')?.value}}</h4>
+                <span class="sku" *ngIf="item.get('productSku')?.value">
+                  SKU: {{item.get('productSku')?.value}}
+                </span>
+              </div>
+              <div class="item-cost">
+                <span class="cost-label">Costo Unitario:</span>
+                <span class="cost-value">{{item.get('unitCost')?.value | currency:'MXN'}}</span>
+              </div>
+            </div>
+
+            <!-- Cantidades -->
+            <div class="quantities-grid">
+              <div class="quantity-box">
+                <span class="qty-label">Ordenada</span>
+                <span class="qty-value ordered">{{item.get('quantityOrdered')?.value}}</span>
+              </div>
+              <div class="quantity-box">
+                <span class="qty-label">Ya Recibida</span>
+                <span class="qty-value received">{{item.get('quantityReceived')?.value}}</span>
+              </div>
+              <div class="quantity-box pending-box">
+                <span class="qty-label">Pendiente</span>
+                <span class="qty-value pending">{{item.get('quantityPending')?.value}}</span>
+              </div>
+            </div>
+
+            <!-- Input para cantidad a recibir -->
+            <div class="receive-input-section">
+              <mat-form-field appearance="outline" class="receive-input">
+                <mat-label>Cantidad a Recibir Ahora</mat-label>
+                <input 
+                  matInput 
+                  type="number" 
+                  formControlName="quantityToReceive" 
+                  min="0" 
+                  [max]="item.get('quantityPending')?.value"
+                  placeholder="0">
+                <mat-icon matPrefix>add_shopping_cart</mat-icon>
+                <mat-error *ngIf="item.get('quantityToReceive')?.hasError('required')">
+                  La cantidad es requerida
+                </mat-error>
+                <mat-error *ngIf="item.get('quantityToReceive')?.hasError('min')">
+                  La cantidad no puede ser negativa
+                </mat-error>
+                <mat-error *ngIf="item.get('quantityToReceive')?.hasError('max')">
+                  No puedes recibir más de {{item.get('quantityPending')?.value}} unidades
+                </mat-error>
+              </mat-form-field>
+
+              <!-- Botón para recibir todo del item -->
+              <button 
+                mat-icon-button 
+                color="primary" 
+                type="button"
+                matTooltip="Recibir todas las unidades pendientes"
+                (click)="item.patchValue({quantityToReceive: item.get('quantityPending')?.value})">
+                <mat-icon>done_all</mat-icon>
+              </button>
+            </div>
+
+            <!-- Notas del item -->
+            <mat-form-field appearance="outline" class="full-width">
+              <mat-label>Notas (Opcional)</mat-label>
+              <input 
+                matInput 
+                formControlName="notes" 
+                placeholder="Ej: Producto en buen estado, sin daños...">
+              <mat-icon matPrefix>note</mat-icon>
+            </mat-form-field>
+
+            <!-- Resumen del item -->
+            <div class="item-summary" *ngIf="item.get('quantityToReceive')?.value > 0">
+              <mat-icon>info</mat-icon>
+              <span>
+                Se recibirán <strong>{{item.get('quantityToReceive')?.value}}</strong> unidades
+                por un total de <strong>{{item.get('quantityToReceive')?.value * item.get('unitCost')?.value | currency:'MXN'}}</strong>
+              </span>
+            </div>
+          </mat-card-content>
+        </mat-card>
+      </div>
+
+      <!-- Mensaje si no hay items -->
+      <div *ngIf="items.length === 0" class="no-items">
+        <mat-icon>inventory_2</mat-icon>
+        <p>No hay productos en esta orden</p>
+      </div>
+    </div>
+
+    <!-- Notas generales de la recepción -->
+    <mat-form-field appearance="outline" class="full-width notes-field">
+      <mat-label>Notas Generales de la Recepción</mat-label>
+      <textarea 
+        matInput 
+        formControlName="notes" 
+        rows="3"
+        placeholder="Comentarios generales sobre la recepción de mercancía..."></textarea>
+      <mat-icon matPrefix>description</mat-icon>
+    </mat-form-field>
+
+    <!-- Resumen de la recepción -->
+    <div class="receive-summary" *ngIf="hasQuantityToReceive()">
+      <h3>Resumen de Recepción</h3>
+      <mat-card class="summary-card">
+        <mat-card-content>
+          <div class="summary-grid">
+            <div class="summary-item">
+              <mat-icon>shopping_basket</mat-icon>
+              <div>
+                <span class="summary-label">Productos a Recibir</span>
+                <span class="summary-value">{{calculateReceivingTotals().items}}</span>
+              </div>
+            </div>
+            <div class="summary-item">
+              <mat-icon>inventory</mat-icon>
+              <div>
+                <span class="summary-label">Unidades Totales</span>
+                <span class="summary-value">{{calculateReceivingTotals().quantity}}</span>
+              </div>
+            </div>
+            <div class="summary-item highlight">
+              <mat-icon>attach_money</mat-icon>
+              <div>
+                <span class="summary-label">Monto Total</span>
+                <span class="summary-value">{{calculateReceivingTotals().amount | currency:'MXN'}}</span>
+              </div>
+            </div>
+          </div>
+        </mat-card-content>
+      </mat-card>
+    </div>
+  </form>
+</mat-dialog-content>
+
+<mat-dialog-actions align="end">
+  <button mat-button (click)="onClose()" [disabled]="loading">
+    Cancelar
+  </button>
+  <button 
+    mat-raised-button 
+    color="primary" 
+    (click)="onSubmit()" 
+    [disabled]="!receiveForm.valid || loading || !hasQuantityToReceive()">
+    <mat-spinner diameter="20" *ngIf="loading" style="display: inline-block; margin-right: 8px;"></mat-spinner>
+    <mat-icon *ngIf="!loading">check_circle</mat-icon>
+    <span *ngIf="!loading">Confirmar Recepción</span>
+    <span *ngIf="loading">Procesando...</span>
+  </button>
+</mat-dialog-actions>

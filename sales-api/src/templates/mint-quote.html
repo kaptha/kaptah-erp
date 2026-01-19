@@ -1,0 +1,407 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>{{tipo_documento}} - Mint</title>
+
+  <style>
+    :root{
+      --ink:#0f172a;
+      --muted:#475569;
+      --line:#d1d5db;
+
+      --mint:#22c7b8;     /* acento principal */
+      --mintSoft:#baf3ee; /* fondos suaves */
+      --mintSoft2:#e9fbf9;
+
+      --bg:#ffffff;
+    }
+
+    *{ margin:0; padding:0; box-sizing:border-box; }
+
+    body{
+      font-family: Arial, Helvetica, sans-serif;
+      background: var(--bg);
+      color: var(--ink);
+      line-height: 1.35;
+    }
+
+    /* PAGE */
+    .page{
+      width: 210mm;
+      min-height: 297mm;
+      margin: 0 auto;
+      padding: 18mm 16mm 22mm 16mm;
+      position: relative;
+      overflow: hidden;
+      background: var(--bg);
+    }
+
+    /* BOTTOM BAR */
+    .bottom-bar{
+      position:absolute;
+      left:0; right:0; bottom:0;
+      height: 18mm;
+      background: var(--mint);
+      z-index: 3;
+      -webkit-print-color-adjust: exact;
+      print-color-adjust: exact;
+    }
+
+    /* TOP CIRCUIT DECOR */
+    .circuit-top{
+      position:absolute;
+      top:-5mm;
+      left:-10mm;
+      right:50mm;
+      height: 22mm;
+      opacity:.9;
+      z-index: 0;
+      pointer-events:none;
+    }
+    /* RIGHT WAVES */
+    .waves-right{
+      position:absolute;
+      top: 10mm;
+      right: -14mm;
+      width: 68mm;
+      height: 68mm;
+      opacity:.9;
+      z-index: 0;
+      pointer-events:none;
+    }
+
+    /* CONTENT Z-LAYER */
+    .content{
+      position: relative;
+      z-index: 2;
+    }
+
+    /* HEADER ROW */
+    .header{
+      display:flex;
+      justify-content: space-between;
+      gap: 16mm;
+      align-items:flex-start;
+      margin-top: 6mm;
+    }
+
+    /* BIG PILL TITLE (QUOTE NO / FOLIO) */
+    .pill{
+      display:inline-flex;
+      align-items:center;
+      gap: 10px;
+      padding: 10px 18px;
+      border: 3px solid var(--mint);
+      border-radius: 999px;
+      color: var(--mint);
+      font-weight: 900;
+      letter-spacing: .6px;
+      text-transform: uppercase;
+      font-size: 18px;
+      max-width: 120mm;
+      -webkit-print-color-adjust: exact;
+      print-color-adjust: exact;
+    }
+    .pill .val{
+      color: var(--mint);
+      font-weight: 900;
+    }
+
+    /* LEFT META (date/valid/folio) */
+    .meta-left{
+      margin-top: 12mm;
+      font-size: 12.5px;
+      color: var(--ink);
+    }
+    .meta-left .row{ margin: 3px 0; }
+    .meta-left .label{ font-weight: 900; }
+
+    /* BRAND + DOC STATE */
+    .brand{
+      margin-top: 2mm;
+      display:flex;
+      flex-direction:column;
+      align-items:flex-end;
+      text-align:right;
+      gap: 6px;
+    }
+    .brand .logo{
+      width: 42px;
+      height: 42px;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      overflow:hidden;
+    }
+    .brand .logo img{
+      max-width: 100%;
+      max-height: 100%;
+      object-fit: contain;
+    }
+    .brand .company{
+      font-weight: 900;
+      letter-spacing: .4px;
+      text-transform: uppercase;
+      font-size: 14px;
+    }
+    .brand .rfc{
+      font-size: 11px;
+      color: var(--muted);
+    }
+    .status{
+      display:inline-block;
+      margin-top: 6px;
+      padding: 5px 10px;
+      border: 1px solid var(--mint);
+      color: var(--mint);
+      border-radius: 999px;
+      font-size: 11px;
+      font-weight: 900;
+      text-transform: uppercase;
+      letter-spacing: .6px;
+      background: rgba(34,199,184,.10);
+      -webkit-print-color-adjust: exact;
+      print-color-adjust: exact;
+    }
+
+    /* TWO COLUMNS: COMPANY / CLIENT */
+    .info-row{
+      display:flex;
+      justify-content: space-between;
+      gap: 18mm;
+      margin-top: 16mm;
+    }
+    .info-col{
+      width: 50%;
+      font-size: 12.5px;
+    }
+    .info-col .title{
+      font-weight: 900;
+      text-transform: uppercase;
+      letter-spacing: .6px;
+      margin-bottom: 6px;
+    }
+    .info-col p{ margin: 3px 0; }
+    .muted{ color: var(--muted); }
+
+    /* TABLE */
+    .table-wrap{
+      margin-top: 18mm;
+    }
+    table{
+      width:100%;
+      border-collapse: collapse;
+      font-size: 12.5px;
+    }
+    thead th{
+      padding: 12px 10px;
+      text-transform: uppercase;
+      letter-spacing: .6px;
+      font-weight: 900;
+      background: var(--mintSoft);
+      border-bottom: 2px solid var(--mint);
+      -webkit-print-color-adjust: exact;
+      print-color-adjust: exact;
+    }
+    tbody td{
+      padding: 12px 10px;
+      border-bottom: 1px solid var(--line);
+      background: #fff;
+    }
+    tbody tr:nth-child(even) td{
+      background: var(--mintSoft2);
+      -webkit-print-color-adjust: exact;
+      print-color-adjust: exact;
+    }
+
+    /* Column sizing + alignment */
+    .c-item{ width: 52%; font-weight: 700; }
+    .c-qty{ width: 14%; text-align:center; font-weight: 800; }
+    .c-unit{ width: 17%; text-align:right; font-weight: 800; }
+    .c-sub{ width: 17%; text-align:right; font-weight: 900; }
+
+    /* TOTALS AREA */
+    .totals-area{
+      display:flex;
+      justify-content: flex-end;
+      margin-top: 10mm;
+    }
+    .totals{
+      min-width: 78mm;
+      font-size: 12.5px;
+    }
+    .totals .row{
+      display:flex;
+      justify-content: space-between;
+      gap: 10px;
+      padding: 6px 0;
+      border-bottom: 1px solid var(--line);
+    }
+    .totals .row .label{ color: var(--muted); }
+    .totals .row .value{ font-weight: 900; }
+
+    .grand{
+      margin-top: 10px;
+      background: var(--mintSoft);
+      border-left: 6px solid var(--mint);
+      padding: 10px 12px;
+      display:flex;
+      justify-content: space-between;
+      font-weight: 900;
+      letter-spacing: .4px;
+      text-transform: uppercase;
+      -webkit-print-color-adjust: exact;
+      print-color-adjust: exact;
+    }
+
+    /* TERMS + OBS */
+    .bottom-grid{
+      margin-top: 14mm;
+      display:grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16mm;
+      align-items:start;
+    }
+    .box .title{
+      font-weight: 900;
+      text-transform: uppercase;
+      letter-spacing: .6px;
+      margin-bottom: 8px;
+      font-size: 14px;
+    }
+    .box .content{
+      font-size: 11.5px;
+      color: var(--muted);
+      line-height: 1.55;
+      white-space: pre-line;
+    }
+
+    /* PRINT */
+    @media print{
+      body{ background:#fff; }
+      .page{ margin:0; }
+      thead th, tbody tr:nth-child(even) td, .grand, .pill, .status{
+        -webkit-print-color-adjust: exact;
+        print-color-adjust: exact;
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <div class="page">
+    <!-- Decorative circuit (simple inline SVG) -->
+    <svg class="circuit-top" viewBox="0 0 1200 140" preserveAspectRatio="none">
+      <g fill="none" stroke="#22c7b8" stroke-width="4" stroke-linecap="round" stroke-linejoin="round" opacity="0.95">
+        <path d="M20 60 H260 V30 H420" />
+        <circle cx="420" cy="30" r="10" fill="#ffffff" stroke="#22c7b8"/>
+        <path d="M140 100 H360 V120 H560" />
+        <circle cx="140" cy="100" r="10" fill="#22c7b8" stroke="#22c7b8"/>
+        <path d="M520 60 H740 V30 H880" />
+        <circle cx="880" cy="30" r="10" fill="#ffffff" stroke="#22c7b8"/>
+        <path d="M720 100 H900 V120 H1100" />
+        <circle cx="1100" cy="120" r="10" fill="#ffffff" stroke="#22c7b8"/>
+      </g>
+    </svg>
+
+    <!-- Decorative waves right -->
+    <svg class="waves-right" viewBox="0 0 300 300">
+      <g fill="none" stroke="#22c7b8" stroke-width="4" opacity="0.95">
+        <path d="M240 10 C190 40, 190 90, 240 120 C290 150, 290 200, 240 230 C190 260, 190 310, 240 340" />
+        <path d="M220 10 C170 40, 170 90, 220 120 C270 150, 270 200, 220 230 C170 260, 170 310, 220 340" />
+        <path d="M200 10 C150 40, 150 90, 200 120 C250 150, 250 200, 200 230 C150 260, 150 310, 200 340" />
+        <path d="M180 10 C130 40, 130 90, 180 120 C230 150, 230 200, 180 230 C130 260, 130 310, 180 340" />
+      </g>
+    </svg>
+
+    <div class="content">
+      <!-- Header -->
+      <div class="header">
+        <div>
+          <div class="pill">
+            <span>{{tipo_documento}} No:</span>
+            <span class="val">{{folio}}</span>
+          </div>
+
+          <div class="meta-left">
+            <div class="row"><span class="label">Fecha:</span> {{fecha}}</div>
+            <div class="row"><span class="label">Valido hasta:</span> {{fecha_validez}}</div>
+          </div>
+        </div>
+
+        <div class="brand">
+          <div class="logo">
+            <img src="{{logo}}" alt="Logo">
+          </div>
+          <div class="company">{{sucursal_nombre}}</div>
+          <div class="rfc">RFC: {{empresa_rfc}}</div>
+          <div class="status">{{estado}}</div>
+        </div>
+      </div>
+
+      <!-- Info columns -->
+      <div class="info-row">
+        <div class="info-col">
+          <div class="title">Empresa</div>
+          <p><strong>{{sucursal_nombre}}</strong></p>
+          <p class="muted">{{sucursal_calle}}</p>
+          <p class="muted">{{sucursal_ciudad}} C.P. {{sucursal_codigoPostal}}</p>
+          <p class="muted">{{sucursal_telefono}}</p>
+          <p class="muted">{{sucursal_email}}</p>
+        </div>
+
+        <div class="info-col" style="text-align:right;">
+          <div class="title">Cotización para</div>
+          <p><strong>{{cliente}}</strong></p>
+          <p class="muted">RFC: {{rfc}}</p>
+          <p class="muted">{{direccion}}</p>
+          <p class="muted">{{telefono}}</p>
+        </div>
+      </div>
+
+      <!-- Items table -->
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th class="c-item">Cantidad</th>
+              <th class="c-qty">Descripcion</th>
+              <th class="c-unit">Precio</th>
+              <th class="c-sub">Subtotal</th>
+            </tr>
+          </thead>
+          <tbody>
+            {{items}}
+          </tbody>
+        </table>
+      </div>
+
+      <!-- Totals summary -->
+      <div class="totals-area">
+        <div class="totals">
+          <div class="row"><span class="label">Subtotal:</span> <span class="value">$ {{subtotal}}</span></div>
+          <div class="row"><span class="label">Tax:</span> <span class="value">$ {{impuestos}}</span></div>
+          <div class="grand"><span>Total:</span> <span>$ {{total}}</span></div>
+        </div>
+      </div>
+
+      <!-- Terms + Observaciones -->
+      <div class="bottom-grid">
+        <div class="box">
+          <div class="title">Términos y condiciones</div>
+          <div class="content">{{terminos_condiciones}}</div>
+        </div>
+
+        <div class="box">
+          <div class="title">Observaciones</div>
+          <div class="content">{{observaciones}}</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="bottom-bar"></div>
+  </div>
+</body>
+</html>

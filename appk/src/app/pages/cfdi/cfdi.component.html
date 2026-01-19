@@ -1,0 +1,273 @@
+<div class="cfdi-container">
+  <h2 class="page-title">Comprobantes Fiscales Digitales (CFDI)</h2>
+  
+  <div class="breadcrumb">
+    <a routerLink="/dashboard">Dashboard</a> / Gestión de CFDI
+  </div>
+
+  <!-- Filtro para móvil -->
+  <div class="mobile-filter-section">
+    <mat-form-field appearance="outline" class="search-field">
+      <mat-label>Buscar CFDI</mat-label>
+      <input matInput (keyup)="applyFilter($event)" placeholder="Buscar por folio, UUID, cliente...">
+      <mat-icon matSuffix>search</mat-icon>
+    </mat-form-field>
+  </div>
+
+  <!-- Acciones principales y búsqueda -->
+  <div class="actions-container">
+    <button mat-raised-button class="btn-primary" [matMenuTriggerFor]="cfdiMenu">
+      <mat-icon>add</mat-icon> Crear CFDI
+    </button>
+    <mat-menu #cfdiMenu="matMenu">
+      <button mat-menu-item (click)="createIngresoCFDI()">
+        <mat-icon>receipt</mat-icon>
+        <span>CFDI de Ingreso</span>
+      </button>
+      <button mat-menu-item (click)="createNominaCFDI()">
+        <mat-icon>work</mat-icon>
+        <span>CFDI de Nómina</span>
+      </button>
+      <button mat-menu-item (click)="createPagoCFDI()">
+        <mat-icon>payments</mat-icon>
+        <span>CFDI de Recepción de Pago</span>
+      </button>
+    </mat-menu>
+    
+    <!-- Filtro para pantallas grandes -->
+    <mat-form-field appearance="outline" class="search-field" [style.display]="isMobile ? 'none' : 'block'">
+      <mat-label>Buscar CFDI</mat-label>
+      <input matInput (keyup)="applyFilter($event)" placeholder="Buscar por folio, UUID, cliente...">
+      <mat-icon matSuffix>search</mat-icon>
+    </mat-form-field>
+    
+    <div class="actions-right">
+      <button mat-raised-button [matMenuTriggerFor]="exportMenu" class="btn-white">
+          <mat-icon>file_download</mat-icon> Exportar
+      </button>
+      <mat-menu #exportMenu="matMenu">
+        <button mat-menu-item (click)="exportCFDIs('csv')">
+          <mat-icon>description</mat-icon>
+          <span>Exportar como CSV</span>
+        </button>
+        <button mat-menu-item (click)="exportCFDIs('xlsx')">
+          <mat-icon>table_chart</mat-icon>
+          <span>Exportar como Excel</span>
+        </button>
+      </mat-menu>
+      
+      <button mat-icon-button color="primary" (click)="loadCFDIs()" matTooltip="Refrescar">
+        <mat-icon>refresh</mat-icon>
+      </button>
+    </div>
+  </div>
+  
+  <!-- Indicador de carga -->
+  <div class="loading-container" *ngIf="loading">
+    <mat-spinner></mat-spinner>
+  </div>
+
+  <!-- Tabla para pantallas grandes -->
+  <div class="table-container mat-elevation-z8" *ngIf="!loading">
+    <table mat-table [dataSource]="dataSource" class="mat-elevation-z8">
+      <!-- Serie Column -->
+      <ng-container matColumnDef="serie">
+        <th mat-header-cell *matHeaderCellDef> Serie </th>
+        <td mat-cell *matCellDef="let cfdi"> {{cfdi.serie}} </td>
+      </ng-container>
+  
+      <!-- Folio Column -->
+      <ng-container matColumnDef="folio">
+        <th mat-header-cell *matHeaderCellDef> Folio </th>
+        <td mat-cell *matCellDef="let cfdi"> {{cfdi.folio}} </td>
+      </ng-container>
+  
+      <!-- Fecha Column -->
+      <ng-container matColumnDef="fecha">
+        <th mat-header-cell *matHeaderCellDef> Fecha </th>
+        <td mat-cell *matCellDef="let cfdi"> {{cfdi.fecha | date:'dd/MM/yyyy HH:mm'}} </td>
+      </ng-container>
+  
+      <!-- Tipo Column -->
+      <ng-container matColumnDef="tipo">
+        <th mat-header-cell *matHeaderCellDef> Tipo </th>
+        <td mat-cell *matCellDef="let cfdi"> 
+          <span [ngClass]="{'badge-primary': cfdi.tipo === 'Ingreso', 
+                          'badge-warning': cfdi.tipo === 'Egreso',
+                          'badge-info': cfdi.tipo === 'Nomina',
+                          'badge-success': cfdi.tipo === 'Pago'}">
+            {{cfdi.tipo}}
+          </span>
+        </td>
+      </ng-container>
+      
+      <!-- Cliente Column -->
+      <ng-container matColumnDef="cliente">
+        <th mat-header-cell *matHeaderCellDef> Cliente </th>
+        <td mat-cell *matCellDef="let cfdi"> 
+          {{cfdi.cliente.nombre}} 
+          <div class="secondary-text">{{cfdi.cliente.rfc}}</div>
+        </td>
+      </ng-container>
+      
+      <!-- Total Column -->
+      <ng-container matColumnDef="total">
+        <th mat-header-cell *matHeaderCellDef> Total </th>
+        <td mat-cell *matCellDef="let cfdi" class="amount-cell"> ${{cfdi.total | number:'1.2-2'}} </td>
+      </ng-container>
+      
+      <!-- Estado Column -->
+      <ng-container matColumnDef="estado">
+        <th mat-header-cell *matHeaderCellDef> Estado </th>
+        <td mat-cell *matCellDef="let cfdi"> 
+          <span [ngClass]="{'status-active': cfdi.estado === 'Vigente', 
+                          'status-cancelled': cfdi.estado === 'Cancelado'}">
+            {{cfdi.estado}}
+          </span>
+        </td>
+      </ng-container>
+
+      <!-- Actions Column -->
+      <ng-container matColumnDef="actions">
+        <th mat-header-cell *matHeaderCellDef> Acciones </th>
+        <td mat-cell *matCellDef="let cfdi">
+          <button mat-icon-button [matMenuTriggerFor]="actionMenu" matTooltip="Opciones">
+            <mat-icon>more_vert</mat-icon>
+          </button>
+          <mat-menu #actionMenu="matMenu">
+            <button mat-menu-item (click)="editCFDI(cfdi)">
+              <mat-icon>edit</mat-icon>
+              <span>Editar</span>
+            </button>
+            <button mat-menu-item (click)="deleteCFDI($event, cfdi.ID)">
+              <mat-icon>delete</mat-icon>
+              <span>Eliminar</span>
+            </button>
+            <mat-divider></mat-divider>
+            <button mat-menu-item (click)="verDetalleCFDI(cfdi)">
+              <mat-icon>print</mat-icon>
+              <span>Imprimir</span>
+            </button>
+            <button mat-menu-item>
+              <mat-icon>picture_as_pdf</mat-icon>
+              <span>Descargar PDF</span>
+            </button>
+            <button mat-menu-item>
+              <mat-icon>code</mat-icon>
+              <span>Descargar XML</span>
+            </button>
+            <mat-divider></mat-divider>
+            <button mat-menu-item>
+              <mat-icon>email</mat-icon>
+              <span>Enviar por email</span>
+            </button>
+          </mat-menu>
+        </td>
+      </ng-container>
+  
+      <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+      <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
+      
+      <!-- Fila para cuando no hay datos -->
+      <tr class="mat-row" *matNoDataRow>
+        <td class="mat-cell empty-state" [attr.colspan]="displayedColumns.length">
+          No hay CFDI que coincidan con el filtro.
+        </td>
+      </tr>
+    </table>
+  </div>
+
+  <!-- Vista de tarjetas para móviles -->
+  <div class="mobile-cards" *ngIf="!loading">
+    <div *ngIf="dataSource.filteredData.length === 0" class="empty-state">
+      No hay CFDI que coincidan con el filtro.
+    </div>
+    
+    <div class="mobile-card" *ngFor="let cfdi of dataSource.filteredData | slice: getMobileStartIndex(): getMobileEndIndex()">
+      <div class="mobile-card-header" [ngClass]="{'header-ingreso': cfdi.tipo === 'Ingreso', 
+                                               'header-egreso': cfdi.tipo === 'Egreso',
+                                               'header-nomina': cfdi.tipo === 'Nomina',
+                                               'header-pago': cfdi.tipo === 'Pago'}">
+        <div class="mobile-card-title">{{cfdi.serie}}-{{cfdi.folio}}</div>
+        <div class="mobile-card-tipo">{{cfdi.tipo}}</div>
+      </div>
+      
+      <div class="mobile-card-content">
+        <div class="mobile-card-row">
+          <div class="mobile-card-label">Cliente:</div>
+          <div class="mobile-card-value">{{cfdi.cliente.nombre}}</div>
+        </div>
+        
+        <div class="mobile-card-row">
+          <div class="mobile-card-label">RFC:</div>
+          <div class="mobile-card-value">{{cfdi.cliente.rfc}}</div>
+        </div>
+        
+        <div class="mobile-card-row">
+          <div class="mobile-card-label">Fecha:</div>
+          <div class="mobile-card-value">{{cfdi.fecha | date:'dd/MM/yyyy HH:mm'}}</div>
+        </div>
+        
+        <div class="mobile-card-row">
+          <div class="mobile-card-label">Total:</div>
+          <div class="mobile-card-value amount">${{cfdi.total | number:'1.2-2'}}</div>
+        </div>
+        
+        <div class="mobile-card-row">
+          <div class="mobile-card-label">Estado:</div>
+          <div class="mobile-card-value">
+            <span [ngClass]="{'status-active': cfdi.estado === 'Vigente', 
+                            'status-cancelled': cfdi.estado === 'Cancelado'}">
+              {{cfdi.estado}}
+            </span>
+          </div>
+        </div>
+      </div>
+      
+      <div class="mobile-card-actions">
+        <button mat-icon-button color="primary" matTooltip="Editar" (click)="editCFDI(cfdi)">
+          <mat-icon>edit</mat-icon>
+        </button>
+        <button mat-icon-button color="warn" matTooltip="Eliminar" (click)="deleteCFDI($event, cfdi.ID)">
+          <mat-icon>delete</mat-icon>
+        </button>
+        <button mat-icon-button color="accent" [matMenuTriggerFor]="mobileActionMenu" matTooltip="Más opciones">
+          <mat-icon>more_vert</mat-icon>
+        </button>
+        <mat-menu #mobileActionMenu="matMenu" (click)="verDetalleCFDI(cfdi)">
+          <button mat-menu-item>
+            <mat-icon>print</mat-icon>
+            <span>Imprimir</span>
+          </button>
+          <button mat-menu-item (click)="verDetalleCFDI(cfdi)">
+            <mat-icon>picture_as_pdf</mat-icon>
+            <span>Descargar PDF</span>
+          </button>
+          <button mat-menu-item>
+            <mat-icon>code</mat-icon>
+            <span>Descargar XML</span>
+          </button>
+          <button mat-menu-item>
+            <mat-icon>email</mat-icon>
+            <span>Enviar por email</span>
+          </button>
+        </mat-menu>
+      </div>
+    </div>
+    
+    <!-- Paginador mobile simplificado -->
+    <div class="mobile-paginator" *ngIf="dataSource.filteredData.length > mobilePaginator.pageSize">
+      <div class="mobile-paginator-info">
+        Mostrando {{getMobileStartIndex() + 1}} - {{getMobileEndIndex()}} de {{dataSource.filteredData.length}}
+      </div>
+      <div class="mobile-paginator-actions">
+        <button mat-icon-button [disabled]="mobilePaginator.pageIndex === 0" (click)="previousMobilePage()">
+          <mat-icon>navigate_before</mat-icon>
+        </button>
+        <button mat-icon-button [disabled]="isLastMobilePage()" (click)="nextMobilePage()">
+          <mat-icon>navigate_next</mat-icon>
+        </button>
+      </div>
+    </div>
+  </div>
+</div>

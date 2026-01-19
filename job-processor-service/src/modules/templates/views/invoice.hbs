@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>Factura {{folio}}</title>
+</head>
+<body style="margin:0;padding:0;background:#F5F6FA;font-family:Arial,Helvetica,sans-serif;">
+<table width="100%" cellspacing="0" cellpadding="0" style="padding:40px 0;background:#F5F6FA;">
+  <tr><td align="center">
+    <table width="650" cellpadding="0" cellspacing="0" style="background:white;border-radius:16px;padding:40px;">
+      
+      <!-- Header con logo -->
+<tr><td align="center">
+  {{#if companyLogo}}
+    <img src="{{companyLogo}}" width="120" style="margin-bottom:20px;" alt="Logo Empresa">
+  {{else}}
+    <img src="https://via.placeholder.com/120x40/7F3FF0/FFFFFF?text=KAPTAH" width="120" style="margin-bottom:20px;" alt="Logo">
+  {{/if}}
+</td></tr>
+
+<!-- Título con folio -->
+<tr><td style="font-size:32px;font-weight:bold;color:#333;text-align:center;padding-bottom:10px;">
+  Nota de Venta
+</td></tr>
+
+<tr><td style="font-size:18px;color:#7F3FF0;font-weight:600;text-align:center;padding-bottom:20px;">
+  {{folio}}
+</td></tr>
+
+      <!-- Mensaje personalizado (si existe) -->
+      {{#if customMessage}}
+      <tr><td style="padding:15px 0;font-size:15px;color:#666;text-align:center;line-height:22px;background:#F8F9FC;border-radius:8px;margin:15px 0;">
+        {{customMessage}}
+      </td></tr>
+      {{/if}}
+
+      <!-- Datos del cliente -->
+      <tr><td style="padding:25px 0 15px 0;">
+        <table width="100%" cellpadding="8" cellspacing="0">
+          <tr>
+            <td style="width:50%;vertical-align:top;">
+              <div style="font-size:12px;color:#888;margin-bottom:5px;">CLIENTE</div>
+              <div style="font-size:15px;font-weight:bold;color:#333;">{{clientName}}</div>
+              {{#if clientRFC}}
+              <div style="font-size:14px;color:#666;margin-top:3px;">RFC: {{clientRFC}}</div>
+              {{/if}}
+            </td>
+            <td style="width:50%;vertical-align:top;text-align:right;">
+              <div style="font-size:12px;color:#888;margin-bottom:5px;">FECHA</div>
+              <div style="font-size:15px;font-weight:bold;color:#333;">{{date}}</div>
+            </td>
+          </tr>
+        </table>
+      </td></tr>
+
+      <!-- Línea divisoria -->
+      <tr><td style="padding:0;"><div style="border-top:2px solid #E5E7EB;"></div></td></tr>
+
+      <!-- Items de la factura -->
+      <tr><td style="padding:20px 0;">
+        <table width="100%" cellpadding="10" cellspacing="0">
+          <thead>
+            <tr style="background:#F8F9FC;">
+              <th style="text-align:left;font-size:12px;color:#888;font-weight:600;padding:12px;">CONCEPTO</th>
+              <th style="text-align:center;font-size:12px;color:#888;font-weight:600;padding:12px;">CANT.</th>
+              <th style="text-align:right;font-size:12px;color:#888;font-weight:600;padding:12px;">P. UNIT.</th>
+              <th style="text-align:right;font-size:12px;color:#888;font-weight:600;padding:12px;">TOTAL</th>
+            </tr>
+          </thead>
+          <tbody>
+            {{#each items}}
+            <tr>
+              <td style="font-size:14px;color:#333;padding:12px;border-bottom:1px solid #F0F0F0;">
+                {{this.description}}
+                {{#if this.details}}
+                <div style="font-size:12px;color:#888;margin-top:3px;">{{this.details}}</div>
+                {{/if}}
+              </td>
+              <td style="font-size:14px;color:#333;text-align:center;padding:12px;border-bottom:1px solid #F0F0F0;">{{this.quantity}}</td>
+              <td style="font-size:14px;color:#333;text-align:right;padding:12px;border-bottom:1px solid #F0F0F0;">{{currency}} {{this.unitPrice}}</td>
+              <td style="font-size:14px;color:#333;text-align:right;padding:12px;border-bottom:1px solid #F0F0F0;font-weight:600;">{{../currency}} {{this.total}}</td>
+            </tr>
+            {{/each}}
+          </tbody>
+        </table>
+      </td></tr>
+
+      <!-- Totales -->
+      <tr><td style="padding:0 0 20px 0;">
+        <table width="100%" cellpadding="0" cellspacing="0">
+          <tr><td width="60%"></td><td width="40%">
+            <table width="100%" cellpadding="8" cellspacing="0">
+              {{#if subtotal}}
+              <tr>
+                <td style="font-size:14px;color:#666;text-align:right;padding:5px 0;">Subtotal:</td>
+                <td style="font-size:14px;color:#333;text-align:right;padding:5px 0;font-weight:600;">{{currency}} {{subtotal}}</td>
+              </tr>
+              {{/if}}
+              {{#if tax}}
+              <tr>
+                <td style="font-size:14px;color:#666;text-align:right;padding:5px 0;">IVA ({{taxRate}}%):</td>
+                <td style="font-size:14px;color:#333;text-align:right;padding:5px 0;font-weight:600;">{{currency}} {{tax}}</td>
+              </tr>
+              {{/if}}
+              <tr style="border-top:2px solid #E5E7EB;">
+                <td style="font-size:16px;color:#333;text-align:right;padding:12px 0;font-weight:bold;">TOTAL:</td>
+                <td style="font-size:18px;color:#7F3FF0;text-align:right;padding:12px 0;font-weight:bold;">{{currency}} {{total}}</td>
+              </tr>
+            </table>
+          </td></tr>
+        </table>
+      </td></tr>
+
+      <!-- Botón para descargar PDF -->
+      <tr><td align="center" style="padding:25px 0;">
+        <a href="#"
+          style="background:#7F3FF0;color:white;text-decoration:none;padding:14px 35px;
+          border-radius:50px;font-weight:bold;display:inline-block;font-size:15px;">
+          📄 Ver factura adjunta
+        </a>
+      </td></tr>
+
+      <!-- Notas adicionales -->
+      {{#if notes}}
+      <tr><td style="padding:20px;background:#F8F9FC;border-radius:8px;margin-top:20px;">
+        <div style="font-size:12px;color:#888;margin-bottom:5px;font-weight:600;">NOTAS:</div>
+        <div style="font-size:14px;color:#666;line-height:20px;">{{notes}}</div>
+      </td></tr>
+      {{/if}}
+
+      <!-- Mensaje de agradecimiento -->
+      <tr><td style="padding:25px 0 10px 0;font-size:14px;color:#666;text-align:center;">
+        Gracias por tu preferencia
+      </td></tr>
+
+    </table>
+    
+    <!-- Footer -->
+    <p style="font-size:12px;color:#999;margin-top:20px;text-align:center;">
+      Este es un correo automático. Si tienes dudas, contáctanos.<br>
+      © 2025 {{recipientName}}. Todos los derechos reservados.
+    </p>
+  </td></tr>
+</table>
+</body>
+</html>

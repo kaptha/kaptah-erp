@@ -1,0 +1,395 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Factura - Diseño Minimalista</title>
+    <style>
+        /* Estilos generales */
+        body {
+            font-family: 'Arial', sans-serif;
+            margin: 0;
+            padding: 0;
+            color: #000;
+            background-color: #fff;
+            line-height: 1.6;
+        }
+        
+        .container {
+            width: 100%;
+            max-width: 800px;
+            margin: 0 auto;
+            position: relative;
+        }
+        
+        /* Encabezado con el efecto diagonal */
+        .header {
+            position: relative;
+            height: 140px;
+            overflow: hidden;
+        }
+        
+        .header-left {
+            position: absolute;
+            left: 0;
+            top: 0;
+            width: 60%;
+            height: 100%;
+            background-color: #000;
+            color: #fff;
+            padding: 40px;
+            box-sizing: border-box;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+        
+        .header-right {
+            position: absolute;
+            right: 0;
+            top: 0;
+            width: 50%;
+            height: 100%;
+            background-color: #c0e832; /* Color verde lima */
+            color: #000;
+            padding: 40px;
+            box-sizing: border-box;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: flex-end;
+            clip-path: polygon(20% 0, 100% 0, 100% 100%, 0% 100%);
+        }
+        
+        .company-name {
+            font-size: 1.5rem;
+            font-weight: bold;
+            text-transform: uppercase;
+            margin: 0;
+        }
+        
+        .invoice-title {
+            font-size: 2rem;
+            font-weight: bold;
+            margin: 0;
+            text-transform: uppercase;
+        }
+        
+        .invoice-number {
+            font-size: 1.5rem;
+            font-weight: bold;
+            margin-top: 5px;
+        }
+        
+        /* Sección de fecha */
+        .date-section {
+            text-align: right;
+            padding: 20px 0;
+            margin-top: 30px;
+        }
+        
+        /* Información del cliente */
+        .client-section {
+            padding: 20px 0;
+        }
+        
+        .section-title {
+            font-weight: bold;
+            text-transform: uppercase;
+            margin-bottom: 10px;
+        }
+        
+        .client-name {
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+        
+        /* Línea divisoria */
+        .divider {
+            height: 1px;
+            background-color: #000;
+            margin: 20px 0;
+        }
+        
+        /* Tabla de productos/servicios */
+        .product-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        
+        .product-table th {
+            text-align: left;
+            border-bottom: 2px solid #c0e832; /* Color verde lima */
+            padding: 10px 0;
+            text-transform: uppercase;
+        }
+        
+        .product-table td {
+            padding: 15px 0;
+            vertical-align: top;
+        }
+        
+        .product-table tr:not(:last-child) td {
+            border-bottom: 1px solid #e0e0e0;
+        }
+        
+        .product-table th:last-child,
+        .product-table td:last-child {
+            text-align: right;
+        }
+        
+        /* Sección de totales */
+        .totals-section {
+            text-align: right;
+            margin: 30px 0;
+            font-size: 1.2rem;
+            font-weight: bold;
+        }
+        
+        /* Sección de pago */
+        .payment-section {
+            margin-top: 50px;
+        }
+        
+        /* Pie de página con efecto diagonal */
+        .footer {
+            position: relative;
+            margin-top: 150px;
+            height: 150px;
+            overflow: hidden;
+        }
+        
+        .footer-content {
+            position: absolute;
+            left: 0;
+            bottom: 0;
+            width: 70%;
+            height: 100%;
+            padding: 20px;
+            box-sizing: border-box;
+        }
+        
+        .footer-diagonal {
+            position: absolute;
+            right: 0;
+            bottom: 0;
+            width: 40%;
+            height: 100%;
+            background-color: #000;
+            clip-path: polygon(50% 0, 100% 0, 100% 100%, 0% 100%);
+        }
+        
+        .logo {
+            position: absolute;
+            right: 20px;
+            bottom: 20px;
+            width: 100px;
+            height: auto;
+            z-index: 1;
+        }
+        
+        /* Sección de sellos CFDI */
+        .cfdi-section {
+            margin: 40px 0 20px;
+            padding: 15px;
+            background-color: #f8f8f8;
+            border-radius: 4px;
+            font-size: 0.8rem;
+        }
+        
+        .cfdi-section h3 {
+            margin-top: 0;
+            font-size: 0.9rem;
+        }
+        
+        .cfdi-info {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+        
+        .cfdi-item {
+            flex: 1 1 45%;
+            min-width: 250px;
+        }
+        
+        .cfdi-item strong {
+            display: inline-block;
+            min-width: 100px;
+        }
+        
+        /* Sellos digitales */
+        .digital-stamps {
+            margin: 20px 0;
+            font-size: 0.7rem;
+        }
+        
+        .digital-stamps h4 {
+            margin: 10px 0 5px;
+            font-size: 0.8rem;
+        }
+        
+        .digital-stamps p {
+            margin: 5px 0;
+            word-break: break-all;
+        }
+        
+        /* Código QR */
+        .qr-code {
+            float: right;
+            width: 120px;
+            margin-left: 20px;
+            margin-bottom: 20px;
+        }
+        
+        .qr-code img {
+            width: 100%;
+            height: auto;
+        }
+        
+        /* Nota legal */
+        .legal-note {
+            clear: both;
+            text-align: center;
+            font-style: italic;
+            font-size: 0.8rem;
+            margin: 30px 0;
+        }
+        
+        /* Responsive */
+        @media (max-width: 768px) {
+            .header-left, .header-right {
+                position: relative;
+                width: 100%;
+                clip-path: none;
+                height: auto;
+            }
+            
+            .header {
+                height: auto;
+            }
+            
+            .footer-diagonal {
+                width: 100%;
+                clip-path: none;
+            }
+            
+            .footer {
+                height: 200px;
+            }
+            
+            .logo {
+                right: calc(50% - 50px);
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Encabezado con efecto diagonal -->
+        <div class="header">
+            <div class="header-left">
+                <div class="company-name">[[NOMBRE_EMPRESA]]</div>
+            </div>
+            <div class="header-right">
+                <div class="invoice-title">Factura</div>
+                <div class="invoice-number">#[[NUMERO_FACTURA]]</div>
+            </div>
+        </div>
+        
+        <!-- Sección de fecha -->
+        <div class="date-section">
+            <div>[[FECHA_EMISION]]</div>
+        </div>
+        
+        <!-- Información del cliente -->
+        <div class="client-section">
+            <div class="section-title">Facturar a:</div>
+            <div class="client-name">[[NOMBRE_CLIENTE]]</div>
+            <div>[[DOMICILIO_CLIENTE]]</div>
+            <div><strong>RFC:</strong> [[RFC_CLIENTE]] | <strong>Régimen fiscal:</strong> [[REGIMEN_FISCAL_CLIENTE]]</div>
+            <div><strong>Uso CFDI:</strong> [[USO_CFDI]]</div>
+        </div>
+        
+        <div class="divider"></div>
+        
+        <!-- Tabla de productos/servicios -->
+        <table class="product-table">
+            <thead>
+                <tr>
+                    <th>Descripción</th>
+                    <th>Cant.</th>
+                    <th>Precio</th>
+                    <th>Total</th>
+                </tr>
+            </thead>
+            <tbody>
+                <!-- Esta sección se repetirá por cada producto/servicio -->
+                [[PRODUCTOS_SERVICIOS]]
+                <!-- Fin de la sección repetible -->
+            </tbody>
+        </table>
+        
+        <div class="divider"></div>
+        
+        <!-- Sección de totales -->
+        <div class="totals-section">
+            <div>Total: [[TOTAL]]</div>
+        </div>
+        
+        <!-- Sección de pago -->
+        <div class="payment-section">
+            <div class="section-title">Favor de pagar</div>
+            <div>[[METODO_PAGO]] | [[FORMA_PAGO]]</div>
+        </div>
+        
+        <!-- Sección CFDI -->
+        <div class="cfdi-section">
+            <!-- Código QR -->
+            <div class="qr-code">
+                <img src="[[QR_CODE_URL]]" alt="Código QR">
+            </div>
+            
+            <h3>Información fiscal</h3>
+            <div class="cfdi-info">
+                <div class="cfdi-item"><strong>RFC Emisor:</strong> [[RFC_EMISOR]]</div>
+                <div class="cfdi-item"><strong>Folio fiscal:</strong> [[FOLIO_FISCAL]]</div>
+                <div class="cfdi-item"><strong>Régimen fiscal:</strong> [[REGIMEN_FISCAL_EMISOR]]</div>
+                <div class="cfdi-item"><strong>CP expedición:</strong> [[CP_EXPEDICION]]</div>
+                <div class="cfdi-item"><strong>Tipo comprobante:</strong> [[TIPO_COMPROBANTE]]</div>
+                <div class="cfdi-item"><strong>Fecha certificación:</strong> [[FECHA_CERTIFICACION]]</div>
+                <div class="cfdi-item"><strong>CSD emisor:</strong> [[CSD_EMISOR]]</div>
+                <div class="cfdi-item"><strong>CSD SAT:</strong> [[CSD_SAT]]</div>
+            </div>
+            
+            <!-- Sellos digitales -->
+            <div class="digital-stamps">
+                <h4>Sello Digital del Emisor:</h4>
+                <p>[[SELLO_DIGITAL_EMISOR]]</p>
+                
+                <h4>Sello Digital SAT:</h4>
+                <p>[[SELLO_DIGITAL_SAT]]</p>
+                
+                <h4>Cadena Original del Timbre:</h4>
+                <p>[[CADENA_ORIGINAL_TIMBRE]]</p>
+            </div>
+        </div>
+        
+        <!-- Nota legal -->
+        <div class="legal-note">
+            <p>Este documento es una representación impresa de un CFDI.</p>
+        </div>
+        
+        <!-- Pie de página con logo -->
+        <div class="footer">
+            <div class="footer-content">
+                <div class="company-name">[[NOMBRE_EMPRESA]]</div>
+                <div>[[DOMICILIO_FISCAL_EMISOR]]</div>
+                <div>[[SITIO_WEB_EMPRESA]]</div>
+            </div>
+            <div class="footer-diagonal"></div>
+            <img src="[[LOGO_URL]]" alt="Logo" class="logo">
+        </div>
+    </div>
+</body>
+</html>

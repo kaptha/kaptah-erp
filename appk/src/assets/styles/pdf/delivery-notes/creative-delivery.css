@@ -1,0 +1,409 @@
+/* creative-delivery.css - Versión compatible con html2pdf */
+
+/* Configuración base */
+@page {
+    size: A4;
+    margin: 8mm;
+}
+
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    margin: 0;
+    padding: 0;
+    color: #333;
+    background-color: #fff;
+    line-height: 1.4;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+}
+
+/* Contenedor principal */
+.container {
+    width: 100%;
+    max-width: 190mm;
+    height: auto;
+    max-height: 250mm;
+    margin: 0 auto;
+    position: relative;
+    padding: 6mm;
+    box-sizing: border-box;
+    background: white;
+    border: none !important;
+    border-radius: 0 !important;
+    overflow: visible;
+    page-break-after: avoid;
+    page-break-inside: avoid;
+}
+
+/* Elementos decorativos simplificados para html2pdf */
+.geometric-top-left,
+.geometric-bottom-right {
+    position: absolute;
+    z-index: 0;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+    /* Usar background sólido en lugar de gradiente */
+    background: #1573e2 !important;
+}
+
+.geometric-top-left {
+    top: 5px;
+    left: 5px;
+    width: 0;
+    height: 0;
+    /* Crear triángulo con borders en lugar de clip-path */
+    border-style: solid;
+    border-width: 60px 0 0 60px;
+    border-color: transparent transparent transparent #1573e2;
+    background: transparent !important;
+}
+
+.geometric-bottom-right {
+    bottom: 50px;
+    right: 5px;
+    width: 0;
+    height: 0;
+    /* Crear triángulo con borders */
+    border-style: solid;
+    border-width: 0 60px 60px 0;
+    border-color: transparent #0246a6 transparent transparent;
+    background: transparent !important;
+}
+
+/* Logo simplificado */
+.logo-container {
+    text-align: center;
+    margin-bottom: 15px;
+    position: relative;
+    z-index: 1;
+}
+
+.logo {
+    width: 70px;
+    height: 70px;
+    border-radius: 35px; /* Usar border-radius simple */
+    border: 2px solid #46b0f8;
+    display: block;
+    margin: 0 auto;
+}
+
+.logo-text {
+    font-size: 16px;
+    font-weight: bold;
+    color: #1573e2;
+    margin-top: 8px;
+}
+
+/* Encabezado */
+.header {
+    text-align: center;
+    margin-bottom: 20px;
+    position: relative;
+    z-index: 1;
+}
+
+.remission-title {
+    font-size: 2rem;
+    font-weight: bold;
+    margin: 0;
+    text-transform: uppercase;
+    color: #1573e2;
+    letter-spacing: 2px;
+}
+
+.remission-subtitle {
+    font-size: 1rem;
+    margin: 3px 0;
+    color: #555;
+    font-weight: 600;
+}
+
+.remission-date {
+    font-size: 0.95rem;
+    margin: 3px 0;
+    color: #666;
+}
+
+/* Información del cliente con fondo sólido */
+.client-info {
+    margin-bottom: 20px;
+    padding: 15px;
+    background: #e3f2fd; /* Color sólido en lugar de gradiente */
+    border-radius: 10px;
+    border-left: 3px solid #1573e2;
+    position: relative;
+    z-index: 1;
+}
+
+.info-row {
+    display: flex;
+    margin-bottom: 6px;
+    align-items: center;
+}
+
+.info-label {
+    font-weight: bold;
+    width: 100px;
+    color: #1573e2;
+    font-size: 13px;
+}
+
+.info-value {
+    flex: 1;
+    color: #333;
+    font-size: 13px;
+}
+
+/* Tabla simplificada */
+.products-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-bottom: 30px;
+    margin-top: 20px;
+    position: relative;
+    z-index: 1;
+    border-radius: 10px;
+    overflow: hidden;
+}
+
+.products-table th {
+    background: #1573e2; /* Color sólido en lugar de gradiente */
+    color: white;
+    padding: 15px 10px;
+    text-align: center;
+    font-weight: bold;
+    font-size: 13px;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    border: none;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+}
+
+.products-table td {
+    background-color: #f9f9f9;
+    padding: 12px 10px;
+    text-align: center;
+    border: 1px solid #e0e0e0;
+    font-size: 12px;
+}
+
+.products-table tr:nth-child(even) td {
+    background-color: #f0f8ff;
+}
+
+/* Columnas específicas */
+.products-table th:nth-child(1),
+.products-table td:nth-child(1) { width: 15%; }
+.products-table th:nth-child(2),
+.products-table td:nth-child(2) { width: 45%; text-align: left; }
+.products-table th:nth-child(3),
+.products-table td:nth-child(3) { width: 20%; text-align: right; }
+.products-table th:nth-child(4),
+.products-table td:nth-child(4) { width: 20%; text-align: right; }
+
+/* Sección de pago y totales */
+.payment-totals {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 15px;
+    gap: 15px;
+    position: relative;
+    z-index: 1;
+}
+
+.payment-info {
+    width: 55%;
+    background: #e3f2fd; /* Color sólido */
+    padding: 12px;
+    border-radius: 8px;
+    border-left: 3px solid #46b0f8;
+}
+
+.payment-title {
+    font-weight: bold;
+    font-size: 1rem;
+    margin-bottom: 8px;
+    color: #1573e2;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+.payment-detail {
+    margin-bottom: 5px;
+    display: flex;
+    align-items: center;
+    color: #333;
+    font-size: 13px;
+}
+
+.payment-detail::before {
+    content: "▶";
+    margin-right: 8px;
+    color: #1573e2;
+    font-size: 10px;
+}
+
+.totals-container {
+    width: 40%;
+    background: white;
+    padding: 12px;
+    border-radius: 8px;
+    border: 1px solid #e0e0e0;
+}
+
+.total-row {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 8px;
+    padding: 5px 0;
+    border-bottom: 1px solid #f0f0f0;
+}
+
+.total-row:last-child {
+    border-bottom: none;
+}
+
+.total-label {
+    font-weight: bold;
+    color: #555;
+    font-size: 13px;
+}
+
+.total-value {
+    color: #333;
+    font-size: 13px;
+    font-weight: 600;
+}
+
+.grand-total {
+    background: #1573e2 !important; /* Color sólido */
+    color: white !important;
+    border-radius: 6px;
+    padding: 8px !important;
+    margin: 8px 0 0 0;
+    border-bottom: none !important;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+}
+
+.grand-total .total-label,
+.grand-total .total-value {
+    color: white !important;
+    font-size: 14px !important;
+    font-weight: bold !important;
+}
+
+/* Observaciones */
+.observations-section {
+    margin-bottom: 15px;
+    position: relative;
+    z-index: 1;
+}
+
+.observations-title {
+    font-weight: bold;
+    font-size: 1rem;
+    margin-bottom: 8px;
+    color: #1573e2;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+.observations-box {
+    border: 2px solid #46b0f8;
+    padding: 12px;
+    min-height: 50px;
+    border-radius: 8px;
+    background: #f8fbff; /* Color sólido */
+    color: #333;
+    font-size: 13px;
+    line-height: 1.4;
+}
+
+/* Sección de contacto */
+.contact-section {
+    margin-bottom: 10px;
+    position: relative;
+    z-index: 1;
+    background: #1573e2 !important; /* Color sólido */
+    color: white;
+    padding: 12px;
+    border-radius: 10px;
+    text-align: center;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+}
+
+.contact-title {
+    font-weight: bold;
+    font-size: 1rem;
+    margin-bottom: 8px;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+.contact-info {
+    margin-bottom: 4px;
+    font-size: 13px;
+    opacity: 0.95;
+}
+
+/* Ajustes para impresión */
+@media print {
+    body, .container {
+        margin: 0;
+        padding: 0;
+        width: 100%;
+    }
+
+    .container {
+        padding: 8mm;
+        height: 275mm !important;
+        max-height: 275mm !important;
+        page-break-after: avoid !important;
+        page-break-inside: avoid !important;
+    }
+
+    /* Forzar colores en impresión */
+    .geometric-top-left,
+    .geometric-bottom-right,
+    .products-table th,
+    .grand-total,
+    .contact-section {
+        -webkit-print-color-adjust: exact !important;
+        print-color-adjust: exact !important;
+        color-adjust: exact !important;
+    }
+
+    .header, 
+    .client-info,
+    .products-table, 
+    .payment-totals,
+    .observations-section,
+    .contact-section {
+        page-break-inside: avoid !important;
+        break-inside: avoid !important;
+    }
+
+    .payment-totals {
+        display: flex !important;
+    }
+    
+    .payment-info,
+    .totals-container {
+        break-inside: avoid !important;
+    }
+
+    .geometric-top-left {
+        position: absolute !important;
+        top: 8px !important;
+        left: 8px !important;
+    }
+    
+    .geometric-bottom-right {
+        position: absolute !important;
+        bottom: 60px !important;
+        right: 8px !important;
+    }
+}

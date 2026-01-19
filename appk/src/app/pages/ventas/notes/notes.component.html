@@ -1,0 +1,254 @@
+<div class="notes-container">
+  <h2 class="page-title">Notas de Venta</h2>
+  
+  <div class="breadcrumb">
+    <a routerLink="/dashboard">Dashboard</a> / <a routerLink="/ventas">Ventas</a> / Notas
+  </div>
+
+  <!-- Filtro para móvil -->
+  <div class="mobile-filter-section">
+    <mat-form-field appearance="outline" class="search-field">
+      <mat-label>Buscar notas</mat-label>
+      <input matInput (keyup)="applyFilter($event)" placeholder="Buscar por folio, cliente, RFC...">
+      <mat-icon matSuffix>search</mat-icon>
+    </mat-form-field>
+  </div>
+
+  <!-- Acciones principales y búsqueda -->
+  <div class="actions-container">
+    <button mat-raised-button class="btn-primary" (click)="agregarNota()">
+      <mat-icon>add</mat-icon> Nueva Nota
+    </button>
+    
+    <!-- Filtro para pantallas grandes -->
+    <mat-form-field appearance="outline" class="search-field" [style.display]="isMobile ? 'none' : 'block'">
+      <mat-label>Buscar notas</mat-label>
+      <input matInput (keyup)="applyFilter($event)" placeholder="Buscar por folio, cliente, RFC...">
+      <mat-icon matSuffix>search</mat-icon>
+    </mat-form-field>
+    
+    <div class="actions-right">
+      <button mat-raised-button [matMenuTriggerFor]="exportMenu" class="btn-white">
+        <mat-icon>file_download</mat-icon> Exportar
+      </button>
+      <mat-menu #exportMenu="matMenu">
+        <button mat-menu-item (click)="exportarNotas('csv')">
+          <mat-icon>description</mat-icon>
+          <span>Exportar como CSV</span>
+        </button>
+        <button mat-menu-item (click)="exportarNotas('xlsx')">
+          <mat-icon>table_chart</mat-icon>
+          <span>Exportar como Excel</span>
+        </button>
+      </mat-menu>
+      
+      <button mat-icon-button color="primary" (click)="loadNotes()" matTooltip="Refrescar">
+        <mat-icon>refresh</mat-icon>
+      </button>
+    </div>
+  </div>
+  
+  <!-- Indicador de carga -->
+  <div class="loading-container" *ngIf="loading">
+    <mat-spinner></mat-spinner>
+  </div>
+
+  <!-- Tabla para pantallas grandes -->
+  <div class="table-container mat-elevation-z8" *ngIf="!loading">
+    <table mat-table [dataSource]="dataSource" class="mat-elevation-z8" matSort>
+      <!-- ✨ NUEVO: Columna de Folio en lugar de ID -->
+      <ng-container matColumnDef="folio">
+        <th mat-header-cell *matHeaderCellDef mat-sort-header> Folio </th>
+        <td mat-cell *matCellDef="let note"> 
+          <span class="folio-badge">{{note.folio}}</span>
+        </td>
+      </ng-container>
+
+      <!-- Cliente Column -->
+      <ng-container matColumnDef="customerName">
+        <th mat-header-cell *matHeaderCellDef mat-sort-header> Cliente </th>
+        <td mat-cell *matCellDef="let note"> {{note.customerName}} </td>
+      </ng-container>
+
+      <!-- RFC Column -->
+      <ng-container matColumnDef="customerRfc">
+        <th mat-header-cell *matHeaderCellDef mat-sort-header> RFC </th>
+        <td mat-cell *matCellDef="let note"> {{note.customerRfc}} </td>
+      </ng-container>
+
+      <!-- Fecha Column -->
+      <ng-container matColumnDef="saleDate">
+        <th mat-header-cell *matHeaderCellDef mat-sort-header> Fecha </th>
+        <td mat-cell *matCellDef="let note"> {{note.saleDate | date:'dd/MM/yyyy HH:mm'}} </td>
+      </ng-container>
+
+      <!-- Total Column -->
+      <ng-container matColumnDef="total">
+        <th mat-header-cell *matHeaderCellDef mat-sort-header> Total </th>
+        <td mat-cell *matCellDef="let note"> {{getSafeTotal(note.total) | currency:'MXN'}} </td>
+      </ng-container>
+
+      <!-- Método de Pago Column -->
+      <ng-container matColumnDef="paymentMethod">
+        <th mat-header-cell *matHeaderCellDef mat-sort-header> Método de Pago </th>
+        <td mat-cell *matCellDef="let note"> 
+          <div class="payment-method">
+            <mat-icon class="payment-method-icon" [ngClass]="getPaymentMethodClass(note.paymentMethod)">
+              {{getPaymentMethodIcon(note.paymentMethod)}}
+            </mat-icon>
+            {{note.paymentMethod}}
+          </div>
+        </td>
+      </ng-container>
+
+      <!-- Estado Column -->
+      <ng-container matColumnDef="status">
+        <th mat-header-cell *matHeaderCellDef mat-sort-header> Estado </th>
+        <td mat-cell *matCellDef="let note"> 
+          <span class="status-chip" [ngClass]="getStatusClass(note.status)">
+            {{getStatusText(note.status)}}
+          </span>
+        </td>
+      </ng-container>
+
+      <!-- Acciones Column -->
+      <ng-container matColumnDef="acciones">
+        <th mat-header-cell *matHeaderCellDef></th>
+        <td mat-cell *matCellDef="let note">
+          <button mat-icon-button [matMenuTriggerFor]="menu">
+            <mat-icon>more_vert</mat-icon>
+          </button>
+          <mat-menu #menu="matMenu">
+            <button mat-menu-item (click)="verDetalle(note)">
+              <mat-icon>visibility</mat-icon>
+              <span>Ver detalle</span>
+            </button>
+            <button mat-menu-item (click)="editarNota(note)">
+              <mat-icon>edit</mat-icon>
+              <span>Editar</span>
+            </button>
+            <button mat-menu-item (click)="enviarPorEmail(note)">
+              <mat-icon color="primary">email</mat-icon>
+              <span>Enviar por Email</span>
+            </button>
+            <button mat-menu-item (click)="descargarPDF(note)">
+              <mat-icon>picture_as_pdf</mat-icon>
+              <span>Descargar PDF</span>
+            </button>
+            <button mat-menu-item (click)="eliminarNota(note.id)">
+              <mat-icon color="warn">delete</mat-icon>
+              <span>Eliminar</span>
+            </button>
+          </mat-menu>
+        </td>
+      </ng-container>
+  
+      <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+      <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
+      
+      <!-- Fila para cuando no hay datos -->
+      <tr class="mat-row" *matNoDataRow>
+        <td class="mat-cell empty-state" [attr.colspan]="displayedColumns.length">
+          No hay notas que coincidan con el filtro.
+        </td>
+      </tr>
+    </table>
+    
+    <mat-paginator [pageSizeOptions]="[5, 10, 25, 100]"></mat-paginator>
+  </div>
+
+  <!-- Vista de tarjetas para móviles -->
+  <div class="mobile-cards" *ngIf="!loading">
+    <div *ngIf="dataSource.filteredData.length === 0" class="empty-state">
+      No hay notas que coincidan con el filtro.
+    </div>
+    
+    <div class="mobile-card" *ngFor="let note of dataSource.filteredData | slice: getMobileStartIndex(): getMobileEndIndex()">
+      <div class="mobile-card-header">
+        <!-- ✨ NUEVO: Mostrar folio en lugar de UUID -->
+        <div class="mobile-card-title">{{note.folio}}</div>
+        <div class="mobile-card-status" [ngClass]="getStatusClassMobile(note.status)">
+          {{getStatusText(note.status)}}
+        </div>
+      </div>
+      
+      <div class="mobile-card-content">
+        <div class="mobile-card-row">
+          <div class="mobile-card-label">Cliente:</div>
+          <div class="mobile-card-value">{{note.customerName}}</div>
+        </div>
+        
+        <div class="mobile-card-row">
+          <div class="mobile-card-label">RFC:</div>
+          <div class="mobile-card-value">{{note.customerRfc}}</div>
+        </div>
+        
+        <div class="mobile-card-row">
+          <div class="mobile-card-label">Fecha:</div>
+          <div class="mobile-card-value">{{note.saleDate | date:'dd/MM/yyyy HH:mm'}}</div>
+        </div>
+        
+        <div class="mobile-card-row">
+          <div class="mobile-card-label">Total:</div>
+          <div class="mobile-card-value">{{note.total | currency}}</div>
+        </div>
+        
+        <div class="mobile-card-row">
+          <div class="mobile-card-label">Método de Pago:</div>
+          <div class="mobile-card-value">
+            <div class="payment-method">
+              <mat-icon class="payment-method-icon" [ngClass]="getPaymentMethodClass(note.paymentMethod)">
+                {{getPaymentMethodIcon(note.paymentMethod)}}
+              </mat-icon>
+              {{note.paymentMethod}}
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      <div class="mobile-card-actions">
+        <button mat-icon-button [matMenuTriggerFor]="mobileMenu">
+          <mat-icon>more_vert</mat-icon>
+        </button>
+        <mat-menu #mobileMenu="matMenu">
+          <button mat-menu-item (click)="verDetalle(note)">
+            <mat-icon>visibility</mat-icon>
+            <span>Ver detalle</span>
+          </button>
+          <button mat-menu-item (click)="editarNota(note)">
+            <mat-icon>edit</mat-icon>
+            <span>Editar</span>
+          </button>
+          <button mat-menu-item (click)="enviarPorEmail(note)">
+            <mat-icon color="primary">email</mat-icon>
+            <span>Enviar por Email</span>
+          </button>
+          <button mat-menu-item (click)="descargarPDF(note)">
+            <mat-icon>picture_as_pdf</mat-icon>
+            <span>Descargar PDF</span>
+          </button>
+          <button mat-menu-item (click)="eliminarNota(note.id)">
+            <mat-icon color="warn">delete</mat-icon>
+            <span>Eliminar</span>
+          </button>
+        </mat-menu>
+      </div>
+    </div>
+    
+    <!-- Paginador mobile simplificado -->
+    <div class="mobile-paginator" *ngIf="dataSource.filteredData.length > mobilePaginator.pageSize">
+      <div class="mobile-paginator-info">
+        Mostrando {{getMobileStartIndex() + 1}} - {{getMobileEndIndex()}} de {{dataSource.filteredData.length}}
+      </div>
+      <div class="mobile-paginator-actions">
+        <button mat-icon-button [disabled]="mobilePaginator.pageIndex === 0" (click)="previousMobilePage()">
+          <mat-icon>navigate_before</mat-icon>
+        </button>
+        <button mat-icon-button [disabled]="isLastMobilePage()" (click)="nextMobilePage()">
+          <mat-icon>navigate_next</mat-icon>
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+

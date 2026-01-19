@@ -1,0 +1,44 @@
+::ng-deep .mat-dialog-container {
+  display: flex !important;
+  flex-direction: column !important;
+  max-height: 80vh !important;
+  background-color: white !important; /* Forzamos fondo blanco */
+}
+
+::ng-deep .mat-dialog-content {
+  max-height: 60vh !important;
+  overflow-y: auto !important;
+  margin: 0;
+  padding: 0 24px 20px 24px;
+}
+
+h2 {
+  color: #9c27b0;
+  margin-bottom: 1rem;
+}
+
+h3 {
+  color: #673ab7;
+  margin-top: 1.5rem;
+  margin-bottom: 0.5rem;
+}
+
+p {
+  margin-bottom: 1rem;
+  color: #333333 !important; /* Color oscuro para el texto */
+}
+
+/* Asegurar que el contenido es visible */
+.terms-content {
+  color: #333333 !important;
+}
+
+/* Color para los títulos numerados */
+::ng-deep .terms-dialog-container h3 {
+  color: #673ab7 !important;
+}
+
+/* Color para el texto normal */
+::ng-deep .terms-dialog-container p {
+  color: #333333 !important;
+}

@@ -1,0 +1,99 @@
+/* impuesto-modal.component.css */
+:host {
+  display: block;
+  width: 100%;
+  max-width: 800px; /* Ajusta este valor según sea necesario */
+}
+
+h2.mat-dialog-title {
+  font-size: 20px;
+  font-weight: bold;
+  padding: 16px 24px;
+  margin: 0;
+  border-bottom: 1px solid #e0e0e0;
+}
+
+.mat-dialog-content {
+  padding: 16px 24px;
+  margin: 0;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.full-width {
+  width: 100%;
+}
+
+table {
+  width: 100%;
+  table-layout: fixed;
+  border-collapse: collapse;
+  margin-top: 16px;
+}
+
+th, td {
+  text-align: left;
+  padding: 8px;
+  border-bottom: 1px solid #e0e0e0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+/* Ajustar el ancho de las columnas */
+th:nth-child(1), td:nth-child(1) { width: 25%; }
+th:nth-child(2), td:nth-child(2) { width: 25%; }
+th:nth-child(3), td:nth-child(3) { width: 20%; }
+th:nth-child(4), td:nth-child(4) { width: 20%; }
+th:nth-child(5), td:nth-child(5) { width: 10%; } /* Para el icono de menú */
+
+th {
+  font-weight: bold;
+  color: #757575;
+}
+
+input {
+  width: 100%;
+  border: none;
+  background: transparent;
+  outline: none;
+}
+
+.mat-dialog-actions {
+  padding: 16px 24px;
+  margin: 0;
+  justify-content: flex-end;
+}
+
+/* Estilos para mejorar la apariencia de los campos de formulario */
+::ng-deep .mat-form-field-outline {
+  background-color: white;
+}
+
+::ng-deep .mat-form-field-flex {
+  padding: 0 8px;
+}
+
+/* Ajustes adicionales para que se parezca más a la imagen */
+::ng-deep .mat-dialog-container {
+  padding: 0 !important;
+  border-radius: 8px !important;
+  overflow: hidden !important;
+  width: 100% !important;
+  max-width: 800px !important;
+}
+
+/* Estilo para el icono de menú en la última columna */
+.mat-column-menu {
+  width: 40px;
+  text-align: center;
+}
+
+/* Ajuste para el espacio entre los botones de acción */
+.mat-dialog-actions button {
+  margin-left: 8px;
+}
+.impuesto-modal-dialog .mat-dialog-container {
+  padding: 0;
+  overflow: hidden;
+}
+  

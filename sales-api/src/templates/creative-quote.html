@@ -1,0 +1,548 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Cotización - Creative</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Arial', 'Helvetica', sans-serif;
+      background-color: #f8f9fa;
+      color: #333;
+      line-height: 1.5;
+      position: relative;
+      overflow-x: hidden;
+    }
+
+    .container {
+      width: 100%;
+      max-width: 210mm;
+      
+      margin: 0 auto;
+      background: #ffffff;
+      position: relative;
+    }
+
+    /* ELEMENTOS DECORATIVOS SUPERIORES */
+    .decorative-top {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 150px;
+      overflow: hidden;
+      z-index: 0;
+    }
+
+    .shape-top {
+      position: absolute;
+      background: linear-gradient(135deg, rgba(0, 150, 199, 0.2) 0%, rgba(0, 188, 212, 0.3) 100%);
+      transform-origin: top left;
+    }
+
+    .shape-top-1 {
+      width: 600px;
+      height: 150px;
+      top: -20px;
+      left: -50px;
+      transform: rotate(-15deg) skewX(-15deg);
+    }
+
+    .shape-top-2 {
+      width: 500px;
+      height: 120px;
+      top: 20px;
+      left: 100px;
+      transform: rotate(-10deg) skewX(-20deg);
+      background: linear-gradient(135deg, rgba(0, 188, 212, 0.3) 0%, rgba(77, 208, 225, 0.4) 100%);
+    }
+
+    .shape-top-3 {
+      width: 400px;
+      height: 100px;
+      top: 50px;
+      left: 250px;
+      transform: rotate(-5deg) skewX(-25deg);
+      background: linear-gradient(135deg, rgba(77, 208, 225, 0.3) 0%, rgba(128, 222, 234, 0.4) 100%);
+    }
+
+    /* ELEMENTOS DECORATIVOS INFERIORES */
+    .decorative-bottom {
+      position: absolute;
+      bottom: 0;
+      right: 0;
+      width: 100%;
+      height: 150px;
+      overflow: hidden;
+      z-index: 0;
+    }
+
+    .shape-bottom {
+      position: absolute;
+      background: linear-gradient(135deg, rgba(0, 150, 199, 0.2) 0%, rgba(0, 188, 212, 0.3) 100%);
+      transform-origin: bottom right;
+    }
+
+    .shape-bottom-1 {
+      width: 700px;
+      height: 180px;
+      bottom: -30px;
+      right: -100px;
+      transform: rotate(15deg) skewX(15deg);
+    }
+
+    .shape-bottom-2 {
+      width: 550px;
+      height: 140px;
+      bottom: 10px;
+      right: 50px;
+      transform: rotate(10deg) skewX(20deg);
+      background: linear-gradient(135deg, rgba(0, 188, 212, 0.3) 0%, rgba(77, 208, 225, 0.4) 100%);
+    }
+
+    .shape-bottom-3 {
+      width: 450px;
+      height: 110px;
+      bottom: 40px;
+      right: 200px;
+      transform: rotate(5deg) skewX(25deg);
+      background: linear-gradient(135deg, rgba(77, 208, 225, 0.3) 0%, rgba(128, 222, 234, 0.4) 100%);
+    }
+
+    /* CONTENIDO */
+    .content {
+      position: relative;
+      z-index: 2;
+      padding: 50px 40px 40px;
+    }
+
+    /* HEADER */
+    .header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      margin-bottom: 25px;
+    }
+
+    .logo-section {
+      display: flex;
+      align-items: center;
+      gap: 15px;
+    }
+
+    .logo-img {
+      max-width: 80px;
+      max-height: 80px;
+      object-fit: contain;
+    }
+
+    .logo-hex {
+      width: 70px;
+      height: 70px;
+      background: #0096c7;
+      clip-path: polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      overflow: hidden;
+    }
+
+    .logo-hex img {
+      max-width: 60px;
+      max-height: 60px;
+      object-fit: contain;
+    }
+
+    .company-text {
+      font-size: 16px;
+      text-transform: uppercase;
+      color: #0096c7;
+      font-weight: 700;
+      line-height: 1.3;
+    }
+
+    .title-section h1 {
+      font-size: 48px;
+      font-weight: 700;
+      color: #4a4a4a;
+      letter-spacing: 3px;
+    }
+
+    /* INFO SECCIÓN */
+    .info-section {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 25px;
+    }
+
+    .invoice-to {
+      flex: 1;
+    }
+
+    .invoice-to h3 {
+      font-size: 12px;
+      font-weight: 400;
+      color: #666;
+      margin-bottom: 5px;
+    }
+
+    .invoice-to .name {
+      font-size: 18px;
+      font-weight: 700;
+      color: #333;
+      margin-bottom: 10px;
+    }
+
+    .invoice-to p {
+      font-size: 13px;
+      color: #666;
+      margin: 3px 0;
+    }
+
+    .invoice-details {
+      text-align: right;
+    }
+
+    .detail-row {
+      display: flex;
+      gap: 15px;
+      margin: 5px 0;
+      justify-content: flex-end;
+    }
+
+    .detail-row .label {
+      font-weight: 700;
+      color: #333;
+      font-size: 13px;
+    }
+
+    .detail-row .value {
+      font-size: 13px;
+      color: #666;
+    }
+
+    /* INFORMACIÓN DE LA EMPRESA */
+    .empresa-info {
+      background-color: #f0f8ff;
+      padding: 15px;
+      margin-bottom: 20px;
+      border-left: 4px solid #0096c7;
+    }
+
+    .empresa-info h3 {
+      font-size: 13px;
+      font-weight: 700;
+      color: #0096c7;
+      margin-bottom: 8px;
+    }
+
+    .empresa-info p {
+      font-size: 11px;
+      margin: 4px 0;
+      color: #555;
+    }
+
+    /* OBSERVACIONES */
+    .observaciones-section {
+      margin-bottom: 20px;
+    }
+
+    .observaciones-section h3 {
+      font-size: 14px;
+      font-weight: 700;
+      color: #333;
+      margin-bottom: 10px;
+    }
+
+    .observaciones-box {
+      background-color: #f8f9fa;
+      border-left: 4px solid #0096c7;
+      padding: 12px;
+    }
+
+    .observaciones-box p {
+      font-size: 11px;
+      line-height: 1.6;
+      color: #666;
+    }
+
+    /* TABLA */
+    .tabla {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 20px 0 15px 0;
+    }
+
+    .tabla thead {
+      background: linear-gradient(135deg, #0096c7 0%, #00b4d8 100%);
+      color: white;
+    }
+
+    .tabla thead th {
+      padding: 15px 12px;
+      text-align: left;
+      font-weight: 700;
+      font-size: 14px;
+    }
+
+    .tabla thead th:first-child {
+      width: 8%;
+      text-align: center;
+    }
+
+    .tabla thead th:nth-child(2) {
+      width: 42%;
+    }
+
+    .tabla thead th:nth-child(3),
+    .tabla thead th:nth-child(4),
+    .tabla thead th:nth-child(5) {
+      width: 16%;
+      text-align: right;
+    }
+
+    .tabla tbody td {
+      padding: 12px;
+      border-bottom: 2px solid #e0e0e0;
+      font-size: 13px;
+      color: #555;
+    }
+
+    .tabla tbody td:first-child {
+      text-align: center;
+      font-weight: 700;
+      color: #333;
+    }
+
+    .tabla tbody td:nth-child(3),
+    .tabla tbody td:nth-child(4),
+    .tabla tbody td:nth-child(5) {
+      text-align: right;
+    }
+
+    .tabla tbody td:nth-child(5) {
+      font-weight: 700;
+      color: #333;
+    }
+
+    /* SECCIÓN INFERIOR */
+    .bottom-section {
+      display: flex;
+      justify-content: space-between;
+      margin-top: 20px;
+      gap: 40px;
+      margin-bottom: 120px;
+    }
+
+    .terms-section {
+      flex: 1;
+      max-width: 450px;
+    }
+
+    .terms-section h3 {
+      font-size: 14px;
+      font-weight: 700;
+      color: #333;
+      margin-bottom: 10px;
+    }
+
+    .terms-section p {
+      font-size: 10px;
+      line-height: 1.6;
+      color: #666;
+      text-align: justify;
+    }
+
+    .totales-section {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: flex-end;
+    }
+
+    .total-row {
+      display: flex;
+      justify-content: space-between;
+      min-width: 300px;
+      padding: 10px 20px;
+      font-size: 13px;
+      border-bottom: 1px solid #e0e0e0;
+    }
+
+    .total-row .label {
+      font-weight: 700;
+      color: #555;
+    }
+
+    .total-row .value {
+      font-weight: 700;
+      color: #333;
+    }
+
+    .total-row.final {
+      background: linear-gradient(135deg, #0096c7 0%, #00b4d8 100%);
+      color: white;
+      border: none;
+      margin-top: 8px;
+      font-size: 16px;
+      padding: 12px 20px;
+    }
+
+    .total-row.final .label,
+    .total-row.final .value {
+      color: white;
+    }
+
+    /* MEDIA QUERIES */
+    @media print {
+      body {
+        background: white;
+      }
+
+      .container {
+        width: 100%;
+        max-width: none;
+        page-break-after: avoid;
+      }
+      
+      .header, .info-section, .tabla, .bottom-section {
+        page-break-inside: avoid;
+      }
+
+      .decorative-top, .decorative-bottom {
+        print-color-adjust: exact;
+        -webkit-print-color-adjust: exact;
+      }
+    }
+  </style>
+</head>
+<body>
+  <!-- DECORACIÓN SUPERIOR -->
+  <div class="decorative-top">
+    <div class="shape-top shape-top-1"></div>
+    <div class="shape-top shape-top-2"></div>
+    <div class="shape-top shape-top-3"></div>
+  </div>
+
+  <!-- DECORACIÓN INFERIOR -->
+  <div class="decorative-bottom">
+    <div class="shape-bottom shape-bottom-1"></div>
+    <div class="shape-bottom shape-bottom-2"></div>
+    <div class="shape-bottom shape-bottom-3"></div>
+  </div>
+
+  <div class="container">
+    <div class="content">
+      <!-- HEADER -->
+      <div class="header">
+        <div class="logo-section">
+          <div class="logo-hex">
+            <img src="{{logo}}" alt="Logo" class="logo-img">
+          </div>
+          <div class="company-text">
+            {{sucursal_nombre}}
+            <di>{{empresa_rfc}}</di>
+          </div>          
+        </div>
+        <div class="title-section">
+          <h1>{{tipo_documento}}</h1>
+        </div>
+      </div>
+
+      <!-- INFORMACIÓN -->
+      <div class="info-section">
+        <div class="invoice-to">
+          <h3>Cotización para:</h3>
+          <div class="name">{{cliente}}</div>
+          <p><strong>RFC:</strong> {{rfc}}</p>
+          <p><strong>Dirección:</strong> {{direccion}}</p>
+          <p><strong>Teléfono:</strong> {{telefono}}</p>
+        </div>
+        <div class="invoice-details">
+          <div class="detail-row">
+            <span class="label">Folio:</span>
+            <span class="value">{{folio}}</span>
+          </div>
+          <div class="detail-row">
+            <span class="label">Fecha:</span>
+            <span class="value">{{fecha}}</span>
+          </div>
+          <div class="detail-row">
+            <span class="label">Válida hasta:</span>
+            <span class="value">{{fecha_validez}}</span>
+          </div>
+          <div class="detail-row">
+            <span class="label">Estado:</span>
+            <span class="value">{{estado}}</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- INFORMACIÓN DE LA EMPRESA -->
+      <section class="empresa-info">
+        <h3>Información de la Empresa</h3>
+        <p><strong>Dirección:</strong> {{sucursal_calle}}</p>
+        <p><strong>Colonia:</strong> {{sucursal_ciudad}}</p>
+        <p><strong>Código Postal:</strong> {{sucursal_codigoPostal}}</p>
+        <p><strong>Teléfono:</strong> {{sucursal_telefono}}</p>
+        <p><strong>Email:</strong> {{sucursal_email}}</p>
+      </section>
+
+      <!-- OBSERVACIONES -->
+      <section class="observaciones-section">
+        <h3>Observaciones:</h3>
+        <div class="observaciones-box">
+          <p>{{observaciones}}</p>
+        </div>
+      </section>
+
+      <!-- TABLA -->
+      <table class="tabla">
+        <thead>
+          <tr>
+            <th>No.</th>
+            <th>Descripción</th>
+            <th>Precio U.</th>
+            <th>Cantidad</th>
+            <th>Importe</th>
+          </tr>
+        </thead>
+        <tbody>
+          {{items}}
+        </tbody>
+      </table>
+
+      <!-- SECCIÓN INFERIOR -->
+      <div class="bottom-section">
+        <div class="terms-section">
+          <h3>Términos y Condiciones:</h3>
+          <p>
+            {{terminos_condiciones}}
+          </p>
+        </div>
+        
+        <div class="totales-section">
+          <div class="total-row">
+            <span class="label">Subtotal:</span>
+            <span class="value">${{subtotal}}</span>
+          </div>
+          <div class="total-row">
+            <span class="label">Impuestos:</span>
+            <span class="value">${{impuestos}}</span>
+          </div>
+          <div class="total-row final">
+            <span class="label">Total:</span>
+            <span class="value">${{total}}</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</body>
+</html>

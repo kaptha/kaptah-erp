@@ -1,0 +1,719 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CFDI - Comprobante Fiscal Digital</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Arial', 'Helvetica', sans-serif;
+      background-color: #ffffff;
+      color: #2c2c2c;
+      line-height: 1.5;
+      font-size: 9px;
+    }
+
+    .container {
+      width: 100%;
+      max-width: 210mm;
+      margin: 0 auto;
+      background: #ffffff;
+      position: relative;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* HEADER */
+    .header {
+      padding: 40px 50px 30px 50px;
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+    }
+
+    .header-left {
+      display: flex;
+      align-items: center;
+      gap: 15px;
+    }
+
+    .logo-container {
+      width: 70px;
+      height: 70px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .logo-container img {
+      max-width: 100%;
+      max-height: 100%;
+      object-fit: contain;
+    }
+
+    .company-info {
+      display: flex;
+      flex-direction: column;
+    }
+
+    .company-name {
+      font-size: 16px;
+      font-weight: 700;
+      color: #2c2c2c;
+      margin-bottom: 2px;
+    }
+
+    .company-tagline {
+      font-size: 9px;
+      color: #666;
+      font-weight: 400;
+    }
+
+    .header-right {
+      text-align: right;
+    }
+
+    .company-brand {
+      font-size: 32px;
+      font-weight: 900;
+      color: #e31e24;
+      letter-spacing: 1px;
+      line-height: 1.1;
+      margin-bottom: 20px;
+    }
+
+    .invoice-details {
+      text-align: right;
+    }
+
+    .invoice-label {
+      font-size: 10px;
+      color: #666;
+      text-transform: uppercase;
+      margin-bottom: 3px;
+    }
+
+    .invoice-number {
+      font-size: 18px;
+      font-weight: 700;
+      color: #2c2c2c;
+      font-family: 'Courier New', monospace;
+    }
+
+    /* SEPARATOR LINE */
+    .separator {
+      width: calc(100% - 100px);
+      height: 2px;
+      background: #2c2c2c;
+      margin: 0 50px 30px 50px;
+    }
+
+    /* CONTENT */
+    .content {
+      flex: 1;
+      padding: 0 50px;
+    }
+
+    /* CLIENT INFO */
+    .client-section {
+      margin-bottom: 30px;
+    }
+
+    .client-name {
+      font-size: 16px;
+      font-weight: 700;
+      color: #2c2c2c;
+      margin-bottom: 8px;
+    }
+
+    .client-details {
+      font-size: 9px;
+      color: #666;
+      line-height: 1.6;
+    }
+
+    .client-details p {
+      margin: 2px 0;
+    }
+
+    /* UUID SECTION */
+    .uuid-section {
+      background: #f8f8f8;
+      border-left: 3px solid #e31e24;
+      padding: 12px 16px;
+      margin-bottom: 25px;
+    }
+
+    .uuid-label {
+      font-size: 8px;
+      color: #666;
+      text-transform: uppercase;
+      font-weight: 600;
+      margin-bottom: 4px;
+      letter-spacing: 0.5px;
+    }
+
+    .uuid-value {
+      font-size: 10px;
+      font-weight: 700;
+      color: #2c2c2c;
+      font-family: 'Courier New', monospace;
+      word-break: break-all;
+    }
+
+    /* FISCAL DATA */
+    .fiscal-data {
+      display: flex;
+      gap: 40px;
+      margin-bottom: 30px;
+    }
+
+    .fiscal-column {
+      flex: 1;
+    }
+
+    .fiscal-title {
+      font-size: 11px;
+      font-weight: 700;
+      color: #2c2c2c;
+      margin-bottom: 10px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .fiscal-item {
+      margin-bottom: 6px;
+      font-size: 8px;
+      display: flex;
+    }
+
+    .fiscal-item .label {
+      color: #666;
+      min-width: 110px;
+      font-weight: 600;
+    }
+
+    .fiscal-item .value {
+      color: #2c2c2c;
+      font-weight: 500;
+    }
+
+    /* TABLE */
+    .table-section {
+      margin: 30px 0;
+    }
+
+    .tabla {
+      width: 100%;
+      border-collapse: collapse;
+    }
+
+    .tabla thead {
+      background: #3a4a5a;
+      color: white;
+    }
+
+    .tabla thead th {
+      padding: 12px 10px;
+      text-align: left;
+      font-weight: 700;
+      font-size: 9px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .tabla thead th:nth-child(1) { width: 45%; }
+    .tabla thead th:nth-child(2) { width: 18%; text-align: right; }
+    .tabla thead th:nth-child(3) { width: 12%; text-align: center; }
+    .tabla thead th:nth-child(4) { width: 25%; text-align: right; }
+
+    .tabla tbody tr {
+      border-bottom: 1px solid #e0e0e0;
+    }
+
+    .tabla tbody tr:nth-child(even) {
+      background: #f8f8f8;
+    }
+
+    .tabla tbody td {
+      padding: 12px 10px;
+      font-size: 9px;
+      color: #2c2c2c;
+    }
+
+    .tabla tbody td:nth-child(1) {
+      font-weight: 500;
+    }
+
+    .tabla tbody td:nth-child(2),
+    .tabla tbody td:nth-child(3),
+    .tabla tbody td:nth-child(4) {
+      text-align: right;
+      font-family: 'Courier New', monospace;
+    }
+
+    .tabla tbody td:nth-child(3) {
+      text-align: center;
+      font-weight: 600;
+    }
+
+    .tabla tbody td:nth-child(4) {
+      font-weight: 700;
+    }
+
+    /* PAYMENT DATA & TOTALS */
+    .bottom-section {
+      display: flex;
+      justify-content: space-between;
+      margin: 30px 0 40px 0;
+      gap: 40px;
+    }
+
+    .payment-data {
+      flex: 1;
+    }
+
+    .payment-title {
+      font-size: 10px;
+      font-weight: 700;
+      color: #2c2c2c;
+      margin-bottom: 10px;
+      text-transform: uppercase;
+    }
+
+    .payment-item {
+      font-size: 9px;
+      color: #666;
+      margin-bottom: 4px;
+    }
+
+    .totals-section {
+      min-width: 280px;
+    }
+
+    .total-row {
+      display: flex;
+      justify-content: space-between;
+      padding: 10px 0;
+      font-size: 11px;
+      border-bottom: 1px solid #e0e0e0;
+    }
+
+    .total-row:last-child {
+      border-bottom: none;
+      border-top: 2px solid #2c2c2c;
+      padding-top: 12px;
+      margin-top: 5px;
+    }
+
+    .total-row .label {
+      font-weight: 600;
+      color: #666;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .total-row .value {
+      font-family: 'Courier New', monospace;
+      font-weight: 700;
+      color: #2c2c2c;
+    }
+
+    .total-row:last-child .label,
+    .total-row:last-child .value {
+      font-size: 14px;
+      color: #2c2c2c;
+    }
+
+    /* SEPARATOR LINE 2 */
+    .separator-bottom {
+      width: calc(100% - 100px);
+      height: 2px;
+      background: #2c2c2c;
+      margin: 40px 50px 30px 50px;
+    }
+
+    /* CERTIFICATION SECTION */
+    .cert-section {
+      padding: 0 50px;
+      margin-bottom: 40px;
+      display: flex;
+      gap: 40px;
+    }
+
+    .qr-container {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      min-width: 140px;
+    }
+
+    .qr-container img {
+      width: 120px;
+      height: 120px;
+      margin-bottom: 8px;
+      border: 2px solid #e0e0e0;
+      padding: 5px;
+    }
+
+    .qr-label {
+      font-size: 8px;
+      color: #666;
+      text-align: center;
+      line-height: 1.4;
+    }
+
+    .cert-data {
+      flex: 1;
+    }
+
+    .cert-title {
+      font-size: 11px;
+      font-weight: 700;
+      color: #2c2c2c;
+      margin-bottom: 12px;
+      text-transform: uppercase;
+    }
+
+    .cert-item {
+      margin-bottom: 6px;
+      font-size: 8px;
+      display: flex;
+    }
+
+    .cert-item .label {
+      color: #666;
+      min-width: 150px;
+      font-weight: 600;
+    }
+
+    .cert-item .value {
+      color: #2c2c2c;
+      font-family: 'Courier New', monospace;
+    }
+
+    /* SELLOS */
+    .sellos-section {
+      padding: 0 50px;
+      margin-bottom: 30px;
+    }
+
+    .sello-box {
+      background: #f8f8f8;
+      border-left: 3px solid #e31e24;
+      padding: 12px 15px;
+      margin-bottom: 12px;
+    }
+
+    .sello-title {
+      font-size: 8px;
+      font-weight: 700;
+      color: #666;
+      margin-bottom: 6px;
+      text-transform: uppercase;
+    }
+
+    .sello-content {
+      font-size: 6px;
+      color: #2c2c2c;
+      font-family: 'Courier New', monospace;
+      word-break: break-all;
+      line-height: 1.5;
+      max-height: 45px;
+      overflow: hidden;
+    }
+
+    /* CADENA ORIGINAL */
+    .cadena-section {
+      padding: 0 50px;
+      margin-bottom: 60px;
+    }
+
+    .cadena-box {
+      background: #f8f8f8;
+      border-left: 3px solid #3a4a5a;
+      padding: 12px 15px;
+    }
+
+    .cadena-title {
+      font-size: 8px;
+      font-weight: 700;
+      color: #666;
+      margin-bottom: 6px;
+      text-transform: uppercase;
+    }
+
+    .cadena-content {
+      font-size: 6px;
+      color: #2c2c2c;
+      font-family: 'Courier New', monospace;
+      word-break: break-all;
+      line-height: 1.5;
+      max-height: 40px;
+      overflow: hidden;
+    }
+
+    /* FOOTER ANGULAR */
+    .footer {
+      position: relative;
+      margin-top: auto;
+      height: 120px;
+    }
+
+    .footer-shape {
+      position: absolute;
+      bottom: 50px;
+      left: 0;
+      width: 100%;
+      height: 80px;
+      overflow: hidden;
+    }
+
+    .footer-shape::before {
+      content: '';
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      width: 350px;
+      height: 80px;
+      background: linear-gradient(90deg, #e31e24 0%, #c71a1f 100%);
+      clip-path: polygon(0 0, 100% 50%, 100% 100%, 0 100%);
+    }
+
+    .footer-bar {
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      height: 50px;
+      background: #3a4a5a;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      font-size: 7px;
+    }
+
+    .footer-bar p {
+      margin: 3px 0;
+    }
+
+    /* PRINT STYLES */
+    @media print {
+      body {
+        background: white;
+      }
+
+      .container {
+        width: 100%;
+        max-width: none;
+      }
+
+      .footer-shape::before,
+      .footer-bar {
+        print-color-adjust: exact;
+        -webkit-print-color-adjust: exact;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <!-- HEADER -->
+    <div class="header">
+      <div class="header-left">
+        <div class="logo-container">
+          <img src="{{logo}}" alt="Logo">
+        </div>
+        <div class="company-info">
+          <div class="company-name">{{emisorNombre}}</div>
+          <div class="company-tagline">{{regimenFiscal}}</div>
+        </div>
+      </div>
+      <div class="header-right">
+        <div class="company-brand">NOMBRE<br>EMPRESA</div>
+        <div class="invoice-details">
+          <div class="invoice-label">INVOICE</div>
+          <div class="invoice-number">{{serie}}{{folio}}</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- SEPARATOR -->
+    <div class="separator"></div>
+
+    <!-- CONTENT -->
+    <div class="content">
+      <!-- CLIENT INFO -->
+      <div class="client-section">
+        <div class="client-name">{{receptorNombre}}</div>
+        <div class="client-details">
+          <p>{{fecha}}</p>
+          <p>RFC: {{receptorRfc}}</p>
+          <p>Código Postal: {{receptorCP}}</p>
+        </div>
+      </div>
+
+      <!-- UUID -->
+      <div class="uuid-section">
+        <div class="uuid-label">Folio Fiscal (UUID)</div>
+        <div class="uuid-value">{{uuid}}</div>
+      </div>
+
+      <!-- FISCAL DATA -->
+      <div class="fiscal-data">
+        <div class="fiscal-column">
+          <div class="fiscal-title">Datos del Emisor</div>
+          <div class="fiscal-item">
+            <span class="label">RFC:</span>
+            <span class="value">{{emisorRfc}}</span>
+          </div>
+          <div class="fiscal-item">
+            <span class="label">Lugar de Expedición:</span>
+            <span class="value">{{lugarExpedicion}}</span>
+          </div>
+          <div class="fiscal-item">
+            <span class="label">Tipo de Comprobante:</span>
+            <span class="value">{{tipoCfdi}}</span>
+          </div>
+        </div>
+
+        <div class="fiscal-column">
+          <div class="fiscal-title">Datos del Receptor</div>
+          <div class="fiscal-item">
+            <span class="label">Uso del CFDI:</span>
+            <span class="value">{{usoCfdi}}</span>
+          </div>
+          <div class="fiscal-item">
+            <span class="label">Régimen Fiscal:</span>
+            <span class="value">{{receptorRegimen}}</span>
+          </div>
+          <div class="fiscal-item">
+            <span class="label">Moneda:</span>
+            <span class="value">{{moneda}}</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- TABLE -->
+      <div class="table-section">
+        <table class="tabla">
+          <thead>
+            <tr>
+              <th>PRODUCT</th>
+              <th>PRICE</th>
+              <th>QTY</th>
+              <th>TOTAL</th>
+            </tr>
+          </thead>
+          <tbody>
+            {{conceptos}}
+          </tbody>
+        </table>
+      </div>
+
+      <!-- PAYMENT DATA & TOTALS -->
+      <div class="bottom-section">
+        <div class="payment-data">
+          <div class="payment-title">PAYMENT DATA:</div>
+          <div class="payment-item">ACCOUNT#: {{noCertificadoCSD}}</div>
+          <div class="payment-item">NAME: {{emisorNombre}}</div>
+          <div class="payment-item">PAYMENT METHOD: {{metodoPago}}</div>
+          <div class="payment-item">FORMA DE PAGO: {{formaPago}}</div>
+        </div>
+
+        <div class="totals-section">
+          <div class="total-row">
+            <span class="label">Subtotal</span>
+            <span class="value">${{subtotal}}</span>
+          </div>
+          <div class="total-row">
+            <span class="label">Tax</span>
+            <span class="value">${{iva}}</span>
+          </div>
+          <div class="total-row">
+            <span class="label">Total</span>
+            <span class="value">${{total}}</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- SEPARATOR BOTTOM -->
+    <div class="separator-bottom"></div>
+
+    <!-- CERTIFICATION -->
+    <div class="cert-section">
+      <div class="qr-container">
+        <img src="{{qrImage}}" alt="QR Code">
+        <div class="qr-label">
+          Código QR de Verificación<br>
+          Escanea para verificar en SAT
+        </div>
+      </div>
+
+      <div class="cert-data">
+        <div class="cert-title">Información de Certificación</div>
+        <div class="cert-item">
+          <span class="label">Fecha de Certificación:</span>
+          <span class="value">{{fechaTimbrado}}</span>
+        </div>
+        <div class="cert-item">
+          <span class="label">No. Certificado SAT:</span>
+          <span class="value">{{noCertificadoSAT}}</span>
+        </div>
+        <div class="cert-item">
+          <span class="label">RFC Proveedor Certificación:</span>
+          <span class="value">SAT970701NN3</span>
+        </div>
+        <div class="cert-item">
+          <span class="label">Exportación:</span>
+          <span class="value">{{exportacion}}</span>
+        </div>
+        <div class="cert-item">
+          <span class="label">Estado:</span>
+          <span class="value">{{estado}}</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- SELLOS -->
+    <div class="sellos-section">
+      <div class="sello-box">
+        <div class="sello-title">Sello Digital del CFDI</div>
+        <div class="sello-content">{{selloCFD}}</div>
+      </div>
+      <div class="sello-box">
+        <div class="sello-title">Sello Digital del SAT</div>
+        <div class="sello-content">{{selloSAT}}</div>
+      </div>
+    </div>
+
+    <!-- CADENA ORIGINAL -->
+    <div class="cadena-section">
+      <div class="cadena-box">
+        <div class="cadena-title">Cadena Original del Complemento de Certificación Digital del SAT</div>
+        <div class="cadena-content">{{cadenaOriginal}}</div>
+      </div>
+    </div>
+
+    <!-- FOOTER ANGULAR -->
+    <div class="footer">
+      <div class="footer-shape"></div>
+      <div class="footer-bar">
+        <div>
+          <p><strong>Este documento es una representación impresa de un CFDI</strong></p>
+          <p>Generado el {{fechaGeneracion}}</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</body>
+</html>

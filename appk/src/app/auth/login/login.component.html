@@ -1,0 +1,60 @@
+<div class="body-login">
+  <!-- ANIMATED DECOR -->
+<span class="blob blob-1"></span>
+<span class="blob blob-2"></span>
+
+<span class="particle p1"></span>
+<span class="particle p2"></span>
+<span class="particle p3"></span>
+<span class="particle p4"></span>
+
+  <mat-card>
+    <mat-card-title>Iniciar sesión</mat-card-title>
+    <mat-card-content>
+      <form [formGroup]="loginForm" (ngSubmit)="onSubmit()">
+        <mat-form-field appearance="fill">
+          <mat-label>Correo electrónico</mat-label>
+          <input matInput type="email" formControlName="email" required>
+          <mat-icon matPrefix>email</mat-icon>
+          <mat-error *ngIf="email?.invalid && (email?.dirty || email?.touched)">
+            <ng-container *ngIf="email?.errors?.['required']">Correo electrónico es requerido.</ng-container>
+            <ng-container *ngIf="email?.errors?.['email']">Correo electrónico no es válido.</ng-container>
+          </mat-error>
+        </mat-form-field>
+  
+        <mat-form-field appearance="fill">
+          <mat-label>Contraseña</mat-label>
+          <input matInput [type]="hidePassword ? 'password' : 'text'" formControlName="password" required>
+          <mat-icon matPrefix>lock</mat-icon>
+          <button mat-icon-button matSuffix (click)="hidePassword = !hidePassword" [attr.aria-label]="'Toggle password visibility'" type="button">
+            <mat-icon>{{hidePassword ? 'visibility_off' : 'visibility'}}</mat-icon>
+          </button>
+          <mat-error *ngIf="password?.invalid && (password?.dirty || password?.touched)">
+            <ng-container *ngIf="password?.errors?.['required']">Contraseña es requerida.</ng-container>
+            <ng-container *ngIf="password?.errors?.['minlength']">Contraseña debe tener al menos 8 caracteres.</ng-container>
+            <ng-container *ngIf="password?.errors?.['pattern']">
+              Contraseña debe incluir al menos una mayúscula, una minúscula, un número y un carácter especial.
+            </ng-container>
+          </mat-error>
+        </mat-form-field>
+  
+        <div class="options-row">
+          <mat-checkbox formControlName="rememberMe" color="primary">Recordar en este equipo</mat-checkbox>
+          <a mat-button (click)="openPasswordResetDialog()">¿Olvidaste tu contraseña?</a>
+        </div>
+  
+        <div class="login-actions">
+          <button mat-flat-button class="btn-in" type="submit" [disabled]="loginForm.invalid">
+            <span *ngIf="!isLoading">Ingresar</span>
+            <mat-spinner *ngIf="isLoading" diameter="24"></mat-spinner>
+          </button>       
+          
+        </div>
+      </form>
+    </mat-card-content>
+  </mat-card>
+</div>
+
+<!-- Olvido de contraseña -->
+
+

@@ -1,0 +1,698 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CFDI - Professional</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Arial', 'Helvetica', sans-serif;
+      background-color: #f5f5f5;
+      color: #333;
+      line-height: 1.5;
+      font-size: 10px;
+    }
+
+    .container {
+      width: 100%;
+      max-width: 210mm;
+      margin: 0 auto;
+      background: #ffffff;
+      position: relative;
+    }
+
+    /* FORMAS GEOMÉTRICAS DE FONDO */
+    .background-shapes {
+      position: absolute;
+      top: 0;
+      right: 0;
+      width: 100%;
+      height: 100%;
+      overflow: hidden;
+      z-index: 0;
+      pointer-events: none;
+    }
+
+    .shape-decoration {
+      position: absolute;
+      opacity: 0.08;
+    }
+
+    .shape-1 {
+      width: 300px;
+      height: 300px;
+      background: #3a3a3a;
+      border-radius: 50%;
+      top: 100px;
+      right: -150px;
+    }
+
+    .shape-2 {
+      width: 150px;
+      height: 150px;
+      background: #3a3a3a;
+      transform: rotate(45deg);
+      top: 400px;
+      right: 50px;
+    }
+
+    .shape-3 {
+      width: 200px;
+      height: 200px;
+      background: #3a3a3a;
+      border-radius: 50%;
+      bottom: 150px;
+      right: -80px;
+    }
+
+    /* HEADER OSCURO */
+    .header {
+      position: relative;
+      z-index: 2;
+      background: linear-gradient(135deg, #2d2d2d 0%, #3a3a3a 100%);
+      padding: 25px 35px;
+      color: white;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .logo-section {
+      display: flex;
+      align-items: center;
+      gap: 15px;
+    }
+
+    .logo-container {
+      width: 50px;
+      height: 50px;
+      background: white;
+      border-radius: 4px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 8px;
+    }
+
+    .logo-container img {
+      max-width: 100%;
+      max-height: 100%;
+      object-fit: contain;
+    }
+
+    .company-name {
+      font-size: 18px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+
+    .invoice-info {
+      text-align: right;
+    }
+
+    .invoice-number {
+      font-size: 18px;
+      font-weight: 700;
+      margin-bottom: 3px;
+    }
+
+    .invoice-date {
+      font-size: 10px;
+      opacity: 0.9;
+    }
+
+    /* CONTENIDO */
+    .content {
+      position: relative;
+      z-index: 2;
+      padding: 30px 35px;
+    }
+
+    /* UUID DESTACADO */
+    .uuid-banner {
+      background: #f8f9fa;
+      border-left: 4px solid #2d2d2d;
+      padding: 10px 15px;
+      margin-bottom: 20px;
+      border-radius: 3px;
+    }
+
+    .uuid-label {
+      font-size: 8px;
+      color: #666;
+      text-transform: uppercase;
+      font-weight: 600;
+      margin-bottom: 4px;
+    }
+
+    .uuid-value {
+      font-size: 11px;
+      font-weight: 700;
+      color: #2d2d2d;
+      font-family: 'Courier New', monospace;
+    }
+
+    /* INFORMACIÓN EN DOS COLUMNAS */
+    .billing-section {
+      display: flex;
+      gap: 30px;
+      margin-bottom: 25px;
+    }
+
+    .billing-column {
+      flex: 1;
+    }
+
+    .column-title {
+      font-size: 11px;
+      font-weight: 700;
+      color: #2d2d2d;
+      text-transform: uppercase;
+      margin-bottom: 10px;
+      letter-spacing: 0.5px;
+    }
+
+    .billing-info p {
+      font-size: 10px;
+      color: #555;
+      margin: 5px 0;
+      line-height: 1.6;
+    }
+
+    .billing-info strong {
+      color: #333;
+      font-weight: 600;
+    }
+
+    .company-box {
+      text-align: right;
+      padding: 15px;
+      background: #f8f9fa;
+      border-radius: 4px;
+    }
+
+    .company-box-title {
+      font-size: 12px;
+      font-weight: 700;
+      color: #2d2d2d;
+      margin-bottom: 8px;
+    }
+
+    .company-box-code {
+      font-size: 10px;
+      color: #666;
+      margin: 3px 0;
+    }
+
+    /* TABLA PROFESIONAL */
+    .table-section {
+      margin: 25px 0;
+    }
+
+    .table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+
+    .table thead {
+      background: #3a3a3a;
+      color: white;
+    }
+
+    .table thead th {
+      padding: 10px 8px;
+      text-align: left;
+      font-weight: 600;
+      font-size: 9px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .table thead th:nth-child(1) { width: 6%; text-align: center; }
+    .table thead th:nth-child(2) { width: 43%; }
+    .table thead th:nth-child(3) { width: 12%; text-align: center; }
+    .table thead th:nth-child(4) { width: 13%; text-align: right; }
+    .table thead th:nth-child(5) { width: 13%; text-align: right; }
+    .table thead th:nth-child(6) { width: 13%; text-align: right; }
+
+    .table tbody tr {
+      background: #fafafa;
+    }
+
+    .table tbody tr:nth-child(even) {
+      background: #ffffff;
+    }
+
+    .table tbody td {
+      padding: 10px 8px;
+      border-bottom: 1px solid #e5e7eb;
+      font-size: 9px;
+      color: #555;
+    }
+
+    .table tbody td:nth-child(1) {
+      text-align: center;
+      font-weight: 600;
+      color: #2d2d2d;
+    }
+
+    .table tbody td:nth-child(3) {
+      text-align: center;
+    }
+
+    .table tbody td:nth-child(4),
+    .table tbody td:nth-child(5),
+    .table tbody td:nth-child(6) {
+      text-align: right;
+    }
+
+    .table tbody td:nth-child(6) {
+      font-weight: 700;
+      color: #333;
+    }
+
+    /* SECCIÓN INFERIOR */
+    .bottom-section {
+      display: flex;
+      gap: 30px;
+      margin: 25px 0;
+    }
+
+    .payment-info {
+      flex: 1;
+    }
+
+    .payment-title {
+      font-size: 11px;
+      font-weight: 700;
+      color: #2d2d2d;
+      text-transform: uppercase;
+      margin-bottom: 10px;
+    }
+
+    .payment-details {
+      font-size: 9px;
+      color: #555;
+      line-height: 1.7;
+    }
+
+    .payment-details strong {
+      color: #333;
+    }
+
+    .totals-box {
+      min-width: 300px;
+    }
+
+    .total-row {
+      display: flex;
+      justify-content: space-between;
+      padding: 8px 15px;
+      font-size: 10px;
+      background: #f8f9fa;
+      margin-bottom: 2px;
+    }
+
+    .total-row .label {
+      font-weight: 600;
+      color: #666;
+    }
+
+    .total-row .value {
+      font-weight: 700;
+      color: #333;
+    }
+
+    .total-row.final {
+      background: #3a3a3a;
+      color: white;
+      padding: 12px 15px;
+      font-size: 13px;
+      margin-top: 5px;
+    }
+
+    .total-row.final .label,
+    .total-row.final .value {
+      color: white;
+    }
+
+    /* QR Y CERTIFICACIÓN */
+    .qr-section {
+      display: flex;
+      gap: 25px;
+      margin: 25px 0;
+      background: #f8f9fa;
+      padding: 20px;
+      border-radius: 4px;
+    }
+
+    .qr-container {
+      flex-shrink: 0;
+      text-align: center;
+    }
+
+    .qr-container img {
+      width: 110px;
+      height: 110px;
+      border: 3px solid #2d2d2d;
+      border-radius: 4px;
+      padding: 8px;
+      background: white;
+    }
+
+    .qr-title {
+      font-size: 9px;
+      font-weight: 700;
+      color: #2d2d2d;
+      margin-top: 8px;
+      text-transform: uppercase;
+    }
+
+    .qr-text {
+      font-size: 8px;
+      color: #666;
+      margin-top: 3px;
+    }
+
+    .cert-details {
+      flex: 1;
+    }
+
+    .cert-details h3 {
+      font-size: 11px;
+      font-weight: 700;
+      color: #2d2d2d;
+      margin-bottom: 10px;
+      text-transform: uppercase;
+    }
+
+    .cert-line {
+      margin-bottom: 6px;
+      font-size: 9px;
+    }
+
+    .cert-line .cert-label {
+      font-weight: 600;
+      color: #666;
+      display: inline-block;
+      min-width: 140px;
+    }
+
+    .cert-line .cert-value {
+      color: #333;
+    }
+
+    /* SELLOS - COMPACTOS */
+    .seals {
+      margin: 20px 0;
+    }
+
+    .seal {
+      background: #fffbf0;
+      border-left: 3px solid #f59e0b;
+      padding: 10px;
+      margin-bottom: 10px;
+      border-radius: 3px;
+    }
+
+    .seal-header {
+      font-size: 9px;
+      font-weight: 700;
+      color: #92400e;
+      margin-bottom: 5px;
+      text-transform: uppercase;
+    }
+
+    .seal-content {
+      font-size: 7px;
+      color: #78350f;
+      font-family: 'Courier New', monospace;
+      word-break: break-all;
+      line-height: 1.5;
+      background: rgba(255, 255, 255, 0.6);
+      padding: 6px;
+      border-radius: 2px;
+      max-height: 45px;
+      overflow: hidden;
+    }
+
+    /* CADENA ORIGINAL */
+    .chain {
+      background: #f0fdf4;
+      border-left: 3px solid #10b981;
+      padding: 10px;
+      margin: 20px 0;
+      border-radius: 3px;
+    }
+
+    .chain-header {
+      font-size: 9px;
+      font-weight: 700;
+      color: #065f46;
+      margin-bottom: 5px;
+      text-transform: uppercase;
+    }
+
+    .chain-content {
+      font-size: 7px;
+      color: #064e3b;
+      font-family: 'Courier New', monospace;
+      word-break: break-all;
+      line-height: 1.5;
+      background: rgba(255, 255, 255, 0.6);
+      padding: 6px;
+      border-radius: 2px;
+      max-height: 35px;
+      overflow: hidden;
+    }
+
+    /* FOOTER */
+    .footer {
+      background: #e8e8e8;
+      padding: 12px 35px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-top: 25px;
+      font-size: 9px;
+      color: #555;
+    }
+
+    .footer-item {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .footer-icon {
+      width: 18px;
+      height: 18px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #2d2d2d;
+    }
+
+    .footer-legal {
+      text-align: center;
+      padding: 10px;
+      font-size: 8px;
+      color: #666;
+      background: #f5f5f5;
+    }
+
+    /* PRINT STYLES */
+    @media print {
+      body {
+        background: white;
+      }
+
+      .container {
+        width: 100%;
+        max-width: none;
+      }
+
+      .background-shapes,
+      .header,
+      .content,
+      .footer {
+        page-break-inside: avoid;
+      }
+    }
+  </style>
+</head>
+<body>
+  <!-- FORMAS DE FONDO -->
+  <div class="background-shapes">
+    <div class="shape-decoration shape-1"></div>
+    <div class="shape-decoration shape-2"></div>
+    <div class="shape-decoration shape-3"></div>
+  </div>
+
+  <div class="container">
+    <!-- HEADER -->
+    <div class="header">
+      <div class="logo-section">
+        <div class="logo-container">
+          <img src="{{logo}}" alt="Logo">
+        </div>
+        <div class="company-name">{{emisorNombre}}</div>
+      </div>
+      <div class="invoice-info">
+        <div class="invoice-number">CFDI: {{serie}}-{{folio}}</div>
+        <div class="invoice-date">{{fecha}}</div>
+      </div>
+    </div>
+
+    <!-- CONTENIDO -->
+    <div class="content">
+      <!-- UUID -->
+      <div class="uuid-banner">
+        <div class="uuid-label">Folio Fiscal (UUID)</div>
+        <div class="uuid-value">{{uuid}}</div>
+      </div>
+
+      <!-- INFORMACIÓN DE FACTURACIÓN -->
+      <div class="billing-section">
+        <div class="billing-column">
+          <div class="column-title">Facturado a:</div>
+          <div class="billing-info">
+            <p><strong>{{receptorNombre}}</strong></p>
+            <p>{{receptorRfc}}</p>
+            <p>{{receptorDireccion}}</p>
+            <p><strong>Uso CFDI:</strong> {{usoCfdi}}</p>
+            <p><strong>Régimen Fiscal:</strong> {{receptorRegimen}}</p>
+            <p><strong>Código Postal:</strong> {{receptorCP}}</p>
+          </div>
+        </div>
+
+        <div class="billing-column">
+          <div class="company-box">
+            <div class="company-box-title">{{emisorNombre}}</div>
+            <p class="company-box-code">RFC: {{emisorRfc}}</p>
+            <p class="company-box-code">Régimen: {{regimenFiscal}}</p>
+            <p class="company-box-code">Lugar de Expedición: {{lugarExpedicion}}</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- TABLA -->
+      <div class="table-section">
+        <table class="table">
+          <thead>
+            <tr>
+              <th>No.</th>
+              <th>Descripción</th>
+              <th>Cantidad</th>
+              <th>P. Unitario</th>
+              <th>Impuestos</th>
+              <th>Total</th>
+            </tr>
+          </thead>
+          <tbody>
+            {{conceptos}}
+          </tbody>
+        </table>
+      </div>
+
+      <!-- SECCIÓN INFERIOR -->
+      <div class="bottom-section">
+        <div class="payment-info">
+          <div class="payment-title">Información de Pago:</div>
+          <div class="payment-details">
+            <p><strong>Forma de Pago:</strong> {{formaPago}}</p>
+            <p><strong>Método de Pago:</strong> {{metodoPago}}</p>
+            <p><strong>Moneda:</strong> {{moneda}}</p>
+            <p><strong>Exportación:</strong> {{exportacion}}</p>
+            <p><strong>No. Serie CSD:</strong> {{noCertificadoCSD}}</p>
+          </div>
+        </div>
+
+        <div class="totals-box">
+          <div class="total-row">
+            <span class="label">Subtotal:</span>
+            <span class="value">${{subtotal}}</span>
+          </div>
+          <div class="total-row">
+            <span class="label">Impuestos (16%):</span>
+            <span class="value">${{iva}}</span>
+          </div>
+          <div class="total-row final">
+            <span class="label">Total:</span>
+            <span class="value">${{total}}</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- QR Y CERTIFICACIÓN -->
+      <div class="qr-section">
+        <div class="qr-container">
+          <img src="{{qrImage}}" alt="Código QR SAT">
+          <div class="qr-title">Verificación SAT</div>
+          <p class="qr-text">Escanea para verificar</p>
+        </div>
+        <div class="cert-details">
+          <h3>Información de Certificación</h3>
+          <div class="cert-line">
+            <span class="cert-label">Fecha de Certificación:</span>
+            <span class="cert-value">{{fechaTimbrado}}</span>
+          </div>
+          <div class="cert-line">
+            <span class="cert-label">No. Certificado SAT:</span>
+            <span class="cert-value">{{noCertificadoSAT}}</span>
+          </div>
+          <div class="cert-line">
+            <span class="cert-label">RFC Proveedor Certificación:</span>
+            <span class="cert-value">SAT970701NN3</span>
+          </div>
+          <div class="cert-line">
+            <span class="cert-label">Estado del CFDI:</span>
+            <span class="cert-value">{{estado}}</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- SELLOS DIGITALES -->
+      <div class="seals">
+        <div class="seal">
+          <div class="seal-header">🔐 Sello Digital del CFDI</div>
+          <div class="seal-content">{{selloCFD}}</div>
+        </div>
+        <div class="seal">
+          <div class="seal-header">🔐 Sello Digital del SAT</div>
+          <div class="seal-content">{{selloSAT}}</div>
+        </div>
+      </div>
+
+      <!-- CADENA ORIGINAL -->
+      <div class="chain">
+        <div class="chain-header">⛓️ Cadena Original del Complemento de Certificación Digital del SAT</div>
+        <div class="chain-content">{{cadenaOriginal}}</div>
+      </div>
+    </div>
+
+    <!-- FOOTER -->
+    <div class="footer">
+      <div class="footer-item">
+        <span class="footer-icon">✉️</span>
+        <span>{{emailContacto}}</span>
+      </div>
+      <div class="footer-item">
+        <span class="footer-icon">📞</span>
+        <span>{{telefonoContacto}}</span>
+      </div>
+    </div>
+
+    <div class="footer-legal">
+      <p><strong>Este documento es una representación impresa de un CFDI</strong> | Generado el {{fechaGeneracion}}</p>
+    </div>
+  </div>
+</body>
+</html>

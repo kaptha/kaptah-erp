@@ -1,0 +1,440 @@
+<div class="dialog-header">
+  <h2 mat-dialog-title>
+    <mat-icon color="primary" class="dialog-icon">account_balance_wallet</mat-icon>
+    {{ data?.id ? 'Editar' : 'Nueva' }} Cuenta por Cobrar
+  </h2>
+  <button mat-icon-button mat-dialog-close>
+    <mat-icon>close</mat-icon>
+  </button>
+</div>
+
+<mat-dialog-content>
+  <form [formGroup]="cobroForm" class="cobro-form">
+    
+    <!-- ✅ NUEVA SECCIÓN: Selector de Cliente -->
+    <div class="form-section">
+      <h3 class="section-title">
+        <mat-icon>person_search</mat-icon>
+        Seleccionar Cliente
+      </h3>
+      
+      <div class="form-row">
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label>Buscar Cliente</mat-label>
+          <mat-select formControlName="selectedCustomerId" (selectionChange)="onCustomerSelect($event)">
+            <mat-option>
+              <ngx-mat-select-search 
+                [formControl]="customerFilterCtrl"
+                placeholderLabel="Buscar cliente por nombre o RFC..."
+                noEntriesFoundLabel="No se encontraron clientes">
+              </ngx-mat-select-search>
+            </mat-option>
+            <mat-option *ngFor="let customer of filteredCustomers | async" [value]="customer.ID">
+              <div class="customer-option">
+                <div class="customer-name">{{customer.nombre}}</div>
+                <div class="customer-rfc">{{customer.Rfc}}</div>
+              </div>
+            </mat-option>
+          </mat-select>
+          <mat-icon matSuffix>search</mat-icon>
+          <mat-hint *ngIf="!clientsLoaded">Cargando clientes...</mat-hint>
+          <mat-error *ngIf="hasFieldError('selectedCustomerId')">
+            Seleccione un cliente de la lista
+          </mat-error>
+        </mat-form-field>
+      </div>
+
+      <!-- ✅ NUEVA: Información del cliente seleccionado -->
+      <div *ngIf="selectedCustomer" class="customer-info">
+        <div class="info-card">
+          <h4>Cliente Seleccionado</h4>
+          <div class="info-row">
+            <span class="label">Nombre:</span>
+            <span class="value">{{selectedCustomer.nombre}}</span>
+          </div>
+          <div class="info-row">
+            <span class="label">RFC:</span>
+            <span class="value">{{selectedCustomer.Rfc}}</span>
+          </div>
+          <div class="info-row" *ngIf="selectedCustomer.email">
+            <span class="label">Email:</span>
+            <span class="value">{{selectedCustomer.email}}</span>
+          </div>
+          <div class="info-row" *ngIf="selectedCustomer.Telefono">
+            <span class="label">Teléfono:</span>
+            <span class="value">{{selectedCustomer.Telefono}}</span>
+          </div>
+          <div class="info-row" *ngIf="selectedCustomer.Colonia">
+            <span class="label">Dirección:</span>
+            <span class="value">{{selectedCustomer.Colonia}}, CP: {{selectedCustomer.Cpostal}}</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Información del Cliente (campos editables) -->
+    <div class="form-section">
+      <h3 class="section-title">
+        <mat-icon>person</mat-icon>
+        Información del Cliente
+        <small *ngIf="selectedCustomer">(Auto-completado)</small>
+      </h3>
+      
+      <div class="form-row">
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label>Nombre del Cliente</mat-label>
+          <input matInput formControlName="customerName" placeholder="Nombre completo o razón social">
+          <mat-icon matSuffix>person</mat-icon>
+          <mat-error *ngIf="hasFieldError('customerName')">
+            {{getFieldError('customerName')}}
+          </mat-error>
+        </mat-form-field>
+      </div>
+
+      <div class="form-row">
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label>RFC del Cliente</mat-label>
+          <input matInput formControlName="customerRfc" placeholder="RFC del cliente" 
+                 style="text-transform: uppercase;">
+          <mat-icon matSuffix>assignment_ind</mat-icon>
+          <mat-error *ngIf="hasFieldError('customerRfc')">
+            {{getFieldError('customerRfc')}}
+          </mat-error>
+        </mat-form-field>
+      </div>
+
+      <!-- ID del Cliente (UUID) - Solo visible si se está editando -->
+      <div class="form-row" *ngIf="data?.id">
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label>ID del Cliente (UUID)</mat-label>
+          <input matInput formControlName="customerId" readonly>
+          <mat-icon matSuffix>fingerprint</mat-icon>
+        </mat-form-field>
+      </div>
+    </div>
+
+    <!-- Información del Documento -->
+<div class="form-section">
+  <h3 class="section-title">
+    <mat-icon>description</mat-icon>
+    Información del Documento
+  </h3>
+
+  <div class="form-row">
+    <div class="form-col">
+      <mat-form-field appearance="outline" class="full-width">
+        <mat-label>Tipo de Documento</mat-label>
+        <mat-select formControlName="documentType">
+          <mat-option *ngFor="let type of documentTypes" [value]="type.value">
+            {{type.label}}
+          </mat-option>
+        </mat-select>
+        <mat-icon matSuffix>article</mat-icon>
+      </mat-form-field>
+    </div>
+
+    <!-- ✅ USAR PROPIEDAD BOOLEANA en lugar de método -->
+    <div class="form-col" *ngIf="showSaleNoteSelector">
+      <mat-form-field appearance="outline" class="full-width">
+        <mat-label>Seleccionar Nota de Venta</mat-label>
+        <mat-select formControlName="documentId" 
+                    [disabled]="!notesLoaded"
+                    (selectionChange)="onSaleNoteSelect($event.value)">
+          <mat-option value="">-- Seleccionar nota --</mat-option>
+          <mat-option *ngFor="let note of filteredSaleNotes" [value]="note.id">
+            <div class="sale-note-option">
+              <div class="note-number">#{{note.id}}</div>
+              <div class="note-details">
+                Total: {{note.total | currency:'MXN':'symbol-narrow':'1.2-2'}} - 
+                {{note.saleDate | date:'dd/MM/yyyy'}}
+              </div>
+            </div>
+          </mat-option>
+        </mat-select>
+        <mat-icon matSuffix>receipt</mat-icon>
+        
+        <mat-hint *ngIf="!notesLoaded">
+          Cargando notas...
+        </mat-hint>
+        <mat-hint *ngIf="notesLoaded && filteredSaleNotes.length === 0">
+          ⚠️ No hay notas de venta para este cliente
+        </mat-hint>
+        <mat-hint *ngIf="notesLoaded && filteredSaleNotes.length > 0">
+          {{filteredSaleNotes.length}} nota(s) disponible(s)
+        </mat-hint>
+      </mat-form-field>
+    </div>
+
+    <!-- ✅ Selector de CFDI (Factura) - CON PROPIEDADES CORRECTAS -->
+<div class="form-col" *ngIf="showCfdiSelector">
+  <mat-form-field appearance="outline" class="full-width">
+    <mat-label>Seleccionar Factura (CFDI)</mat-label>
+    <mat-select formControlName="documentId" 
+                [disabled]="!cfdisLoaded"
+                (selectionChange)="onCfdiSelect($event.value)">
+      <mat-option value="">-- Seleccionar factura --</mat-option>
+      <mat-option *ngFor="let cfdi of filteredCfdis" [value]="cfdi.id">
+        <div class="cfdi-option">
+          <div class="cfdi-folio">{{getCfdiFolio(cfdi)}}</div>
+          <div class="cfdi-details">
+            Total: {{cfdi.total | currency:'MXN':'symbol-narrow':'1.2-2'}} - 
+            {{cfdi.fecha | date:'dd/MM/yyyy'}}
+          </div>
+        </div>
+      </mat-option>
+    </mat-select>
+    <mat-icon matSuffix>receipt_long</mat-icon>
+    
+    <mat-hint *ngIf="!cfdisLoaded">
+      Cargando facturas...
+    </mat-hint>
+    <mat-hint *ngIf="cfdisLoaded && filteredCfdis.length === 0">
+      ⚠️ No hay facturas (CFDIs) para este cliente
+    </mat-hint>
+    <mat-hint *ngIf="cfdisLoaded && filteredCfdis.length > 0">
+      {{filteredCfdis.length}} factura(s) disponible(s)
+    </mat-hint>
+  </mat-form-field>
+</div>
+
+    <!-- ✅ USAR PROPIEDAD BOOLEANA en lugar de método -->
+    <div class="form-col" *ngIf="showDocumentIdInput">
+      <mat-form-field appearance="outline" class="full-width">
+        <mat-label>ID del Documento</mat-label>
+        <input matInput formControlName="documentId" placeholder="ID o folio del documento">
+        <mat-icon matSuffix>tag</mat-icon>
+      </mat-form-field>
+    </div>
+  </div>
+
+  <!-- ✅ Información de la nota de venta seleccionada -->
+  <div *ngIf="selectedSaleNote" class="sale-note-info">
+    <div class="info-card sale-note">
+      <h4>Nota de Venta Seleccionada</h4>
+      <div class="info-row">
+        <span class="label">ID:</span>
+        <span class="value">{{selectedSaleNote.id}}</span>
+      </div>
+      <div class="info-row">
+        <span class="label">Cliente:</span>
+        <span class="value">{{selectedSaleNote.customerName}}</span>
+      </div>
+      <div class="info-row">
+        <span class="label">RFC:</span>
+        <span class="value">{{selectedSaleNote.customerRfc}}</span>
+      </div>
+      <div class="info-row">
+        <span class="label">Fecha de venta:</span>
+        <span class="value">{{selectedSaleNote.saleDate | date:'dd/MM/yyyy'}}</span>
+      </div>
+      <div class="info-row">
+        <span class="label">Método de pago:</span>
+        <span class="value">{{selectedSaleNote.paymentMethod}}</span>
+      </div>
+      <div class="info-row">
+        <span class="label">Estado:</span>
+        <span class="value" [ngClass]="{'status-completed': selectedSaleNote.status === 'COMPLETED', 
+                                        'status-pending': selectedSaleNote.status === 'PENDING',
+                                        'status-cancelled': selectedSaleNote.status === 'CANCELLED'}">
+          {{getStatusText(selectedSaleNote.status)}}
+        </span>
+      </div>
+      <div class="info-row">
+        <span class="label">Items:</span>
+        <span class="value">{{selectedSaleNote.items.length || 0}} producto(s)</span>
+      </div>
+      <div class="info-row">
+        <span class="label">Total:</span>
+        <span class="value amount">{{selectedSaleNote.total | currency:'MXN':'symbol-narrow':'1.2-2'}}</span>
+      </div>
+    </div>
+  </div>
+  <!-- ✅ Información del CFDI seleccionado - CON PROPIEDADES CORRECTAS -->
+<div *ngIf="selectedCfdi" class="cfdi-info">
+  <div class="info-card cfdi">
+    <h4>Factura (CFDI) Seleccionada</h4>
+    <div class="info-row">
+      <span class="label">Folio:</span>
+      <span class="value">{{getCfdiFolio(selectedCfdi)}}</span>
+    </div>
+    <div class="info-row">
+      <span class="label">UUID:</span>
+      <span class="value uuid">{{selectedCfdi.folio_fiscal}}</span>
+    </div>
+    <div class="info-row">
+      <span class="label">Receptor:</span>
+      <span class="value">{{selectedCfdi.nombre_receptor}}</span>
+    </div>
+    <div class="info-row">
+      <span class="label">RFC:</span>
+      <span class="value">{{selectedCfdi.rfc_receptor}}</span>
+    </div>
+    <div class="info-row">
+      <span class="label">Fecha:</span>
+      <span class="value">{{selectedCfdi.fecha | date:'dd/MM/yyyy HH:mm'}}</span>
+    </div>
+    <div class="info-row">
+      <span class="label">Método de pago:</span>
+      <span class="value">{{selectedCfdi.metodo_pago}}</span>
+    </div>
+    <div class="info-row">
+      <span class="label">Forma de pago:</span>
+      <span class="value">{{selectedCfdi.forma_pago}}</span>
+    </div>
+    <div class="info-row" *ngIf="selectedCfdi.condiciones_pago">
+      <span class="label">Condiciones:</span>
+      <span class="value">{{selectedCfdi.condiciones_pago}}</span>
+    </div>
+    <div class="info-row">
+      <span class="label">Uso CFDI:</span>
+      <span class="value">{{selectedCfdi.uso_cfdi}}</span>
+    </div>
+    <div class="info-row">
+      <span class="label">Moneda:</span>
+      <span class="value">{{selectedCfdi.moneda}}</span>
+    </div>
+    <div class="info-row">
+      <span class="label">Subtotal:</span>
+      <span class="value">{{selectedCfdi.sub_total | currency:'MXN':'symbol-narrow':'1.2-2'}}</span>
+    </div>
+    <div class="info-row" *ngIf="selectedCfdi.descuento && selectedCfdi.descuento > 0">
+      <span class="label">Descuento:</span>
+      <span class="value">{{selectedCfdi.descuento | currency:'MXN':'symbol-narrow':'1.2-2'}}</span>
+    </div>
+    <div class="info-row" *ngIf="selectedCfdi.iva_trasladado && selectedCfdi.iva_trasladado > 0">
+      <span class="label">IVA Trasladado:</span>
+      <span class="value">{{selectedCfdi.iva_trasladado | currency:'MXN':'symbol-narrow':'1.2-2'}}</span>
+    </div>
+    <div class="info-row">
+      <span class="label">Total:</span>
+      <span class="value amount">{{selectedCfdi.total | currency:'MXN':'symbol-narrow':'1.2-2'}}</span>
+    </div>
+    <div class="info-row">
+      <span class="label">Estado:</span>
+      <span class="value" [ngClass]="{'status-active': selectedCfdi.estado_procesamiento === 'procesado', 
+                                      'status-pending': selectedCfdi.estado_procesamiento === 'pendiente'}">
+        {{selectedCfdi.estado_procesamiento || 'N/A'}}
+      </span>
+    </div>
+  </div>
+</div>
+
+      <div class="form-row">
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label>Concepto</mat-label>
+          <input matInput formControlName="concept" placeholder="Descripción del cobro">
+          <mat-icon matSuffix>subject</mat-icon>
+        </mat-form-field>
+      </div>
+    </div>
+
+    <!-- Información Financiera -->
+    <div class="form-section">
+      <h3 class="section-title">
+        <mat-icon>attach_money</mat-icon>
+        Información Financiera
+      </h3>
+
+      <div class="form-row">
+        <div class="form-col">
+          <mat-form-field appearance="outline" class="full-width">
+            <mat-label>Monto Total</mat-label>
+            <input matInput type="number" formControlName="totalAmount" 
+                   placeholder="0.00" min="0" step="0.01">
+            <span matPrefix>$&nbsp;</span>
+            <mat-icon matSuffix>money</mat-icon>
+            <mat-error *ngIf="hasFieldError('totalAmount')">
+              {{getFieldError('totalAmount')}}
+            </mat-error>
+          </mat-form-field>
+        </div>
+
+        <div class="form-col">
+          <mat-form-field appearance="outline" class="full-width">
+            <mat-label>Días de Crédito</mat-label>
+            <mat-select formControlName="creditDays">
+              <mat-option *ngFor="let option of creditDaysOptions" [value]="option.value">
+                {{option.label}}
+              </mat-option>
+            </mat-select>
+            <mat-icon matSuffix>schedule</mat-icon>
+            <mat-error *ngIf="hasFieldError('creditDays')">
+              {{getFieldError('creditDays')}}
+            </mat-error>
+          </mat-form-field>
+        </div>
+      </div>
+
+      <div class="form-row">
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label>Fecha de Vencimiento</mat-label>
+          <input matInput [matDatepicker]="picker" formControlName="dueDate">
+          <mat-datepicker-toggle matSuffix [for]="picker"></mat-datepicker-toggle>
+          <mat-datepicker #picker></mat-datepicker>
+          <mat-error *ngIf="hasFieldError('dueDate')">
+            {{getFieldError('dueDate')}}
+          </mat-error>
+        </mat-form-field>
+      </div>
+    </div>
+
+    <!-- Notas Adicionales -->
+    <div class="form-section">
+      <h3 class="section-title">
+        <mat-icon>note</mat-icon>
+        Notas Adicionales
+      </h3>
+
+      <div class="form-row">
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label>Notas o Comentarios</mat-label>
+          <textarea matInput formControlName="notes" rows="3" 
+                    placeholder="Información adicional sobre esta cuenta por cobrar"></textarea>
+          <mat-icon matSuffix>note_add</mat-icon>
+        </mat-form-field>
+      </div>
+    </div>
+
+    <!-- Resumen de la Cuenta -->
+    <div class="form-summary" *ngIf="cobroForm.get('totalAmount')?.value > 0">
+      <div class="summary-card">
+        <h4>Resumen de la Cuenta</h4>
+        <div class="summary-row">
+          <span>Cliente:</span>
+          <span>{{cobroForm.get('customerName')?.value || 'Sin especificar'}}</span>
+        </div>
+        <div class="summary-row">
+          <span>RFC:</span>
+          <span>{{cobroForm.get('customerRfc')?.value || 'Sin especificar'}}</span>
+        </div>
+        <div class="summary-row">
+          <span>Monto:</span>
+          <span class="amount">{{cobroForm.get('totalAmount')?.value | currency:'USD':'symbol':'1.2-2'}}</span>
+        </div>
+        <div class="summary-row">
+          <span>Vencimiento:</span>
+          <span>{{cobroForm.get('dueDate')?.value | date:'dd/MM/yyyy'}}</span>
+        </div>
+        <div class="summary-row">
+          <span>Días de crédito:</span>
+          <span>{{cobroForm.get('creditDays')?.value}} días</span>
+        </div>
+      </div>
+    </div>
+
+  </form>
+</mat-dialog-content>
+
+<mat-dialog-actions align="end" class="dialog-actions">
+  <button mat-button (click)="onClose()" [disabled]="loading" class="btn-danger">
+    <mat-icon>close</mat-icon>
+    Cancelar
+  </button>
+  
+  <button mat-raised-button class="btn-primary" (click)="onSubmit()" 
+          [disabled]="!cobroForm.valid || loading">
+    <mat-icon *ngIf="!loading">{{data?.id ? 'update' : 'save'}}</mat-icon>
+    <mat-spinner diameter="20" *ngIf="loading"></mat-spinner>
+    {{data?.id ? 'Actualizar' : 'Guardar'}}
+  </button>
+</mat-dialog-actions>
