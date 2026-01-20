@@ -18,11 +18,19 @@ build/
 .DS_Store
 Thumbs.db
 
-# Uploads y archivos temporales
-uploads/
+# Ignora archivos subidos por usuarios
+**/uploads/*.jpg
+**/uploads/*.jpeg
+**/uploads/*.png
+**/uploads/*.gif
+**/uploads/*.pdf
+**/uploads/*.webp
+
+# Ignora CFDIs
 cfdis/
-*.pdf
 *.xml
+
+# Archivos temporales
 tmp/
 
 # Logs
