@@ -1,14 +1,17 @@
-import * as admin from 'firebase-admin';
+﻿import * as admin from 'firebase-admin';
 import { ServiceAccount } from 'firebase-admin';
-import * as path from 'path';
-const serviceAccountPath = path.join(process.cwd(), 'config', 'serviceAccountKey.json');
-//const serviceAccountPath = path.join(__dirname, '..', '..', 'config', 'serviceAccountKey.json');
-const serviceAccount = require(serviceAccountPath);
 
 function initializeFirebaseAdmin() {
   if (!admin.apps.length) {
+    // Usar variables de entorno en lugar de archivo
+    const serviceAccount: ServiceAccount = {
+      projectId: process.env.FIREBASE_PROJECT_ID,
+      privateKey: process.env.FIREBASE_PRIVATE_KEY?.replace(/\\n/g, '\n'),
+      clientEmail: process.env.FIREBASE_CLIENT_EMAIL,
+    };
+
     admin.initializeApp({
-      credential: admin.credential.cert(serviceAccount as ServiceAccount),
+      credential: admin.credential.cert(serviceAccount),
     });
   }
 }
