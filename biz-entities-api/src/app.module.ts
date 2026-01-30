@@ -25,11 +25,11 @@ import { UserPostgres } from './users/entities/user.postgres.entity';
       imports: [ConfigModule],
       useFactory: (configService: ConfigService) => ({
         type: 'mysql',
-        host: configService.get('DB_HOST'),
-        port: +configService.get<number>('DB_PORT'),
-        username: configService.get('DB_USERNAME'),
-        password: configService.get('DB_PASSWORD'),
-        database: configService.get('DB_NAME'),
+        host: configService.get('MYSQL_HOST'),
+        port: +configService.get<number>('MYSQL_PORT'),
+        username: configService.get('MYSQL_USER'),
+        password: configService.get('MYSQL_PASSWORD'),
+        database: configService.get('MYSQL_DATABASE') || 'railway', 
         entities: [__dirname + '/**/*.entity{.ts,.js}', User],
         synchronize: false, // true for development, false for production
         logging: configService.get('NODE_ENV') !== 'production',
