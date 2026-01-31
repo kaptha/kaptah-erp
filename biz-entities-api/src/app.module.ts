@@ -29,7 +29,7 @@ import { UserPostgres } from './users/entities/user.postgres.entity';
         port: +configService.get<number>('MYSQL_PORT'),
         username: configService.get('MYSQL_USER'),
         password: configService.get('MYSQL_PASSWORD'),
-        database: configService.get('MYSQL_DATABASE') || 'railway', 
+        database: configService.get('MYSQL_DATABASE'), 
         entities: [__dirname + '/**/*.entity{.ts,.js}', User],
         synchronize: false, // true for development, false for production
         logging: configService.get('NODE_ENV') !== 'production',
