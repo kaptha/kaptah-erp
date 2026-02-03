@@ -7,12 +7,13 @@ import { Cliente } from '../models/cliente.model';
 import { Empleado } from '../models/empleado.model';
 import { Proveedor } from '../models/proveedor.model';
 import { UsersService } from './users.service';
+import { environment } from '../environments/environment';
 
 @Injectable({
   providedIn: 'root'
 })
 export class ApibizService {
-  private apiUrl = 'http://localhost:3000/api'; 
+  private apiUrl = environment.apiUrl; 
 
   constructor(
     private http: HttpClient,
