@@ -1,12 +1,12 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
-
+import { environment } from '../../environments/environment';
 @Injectable({
   providedIn: 'root'
 })
 export class UnidadMedidaService {
-  private apiUrl = 'http://localhost:3001/unidad-medida'; // Ajusta la URL según tu configuración
+  private apiUrl = `${environment.satCatalogosUrl}/unidad-medida`;
 
   constructor(private http: HttpClient) { }
 
