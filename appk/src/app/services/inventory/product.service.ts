@@ -1,4 +1,4 @@
-import { Injectable } from '@angular/core';
+﻿import { Injectable } from '@angular/core';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Observable, throwError } from 'rxjs';
 import { tap, catchError } from 'rxjs/operators';
@@ -9,7 +9,7 @@ import { CreateProductDto } from '../../pages/productos/interfaces/create-produc
   providedIn: 'root'
 })
 export class ProductService {
-  private apiUrl = 'http://localhost:4005/api';
+  private apiUrl = 'https://selfless-analysis-production.up.railway.app/api';
 
   constructor(private http: HttpClient) {}
 
@@ -62,7 +62,7 @@ export class ProductService {
 
   /**
    * Actualizar stock de un producto
-   * Usa el endpoint específico PATCH /products/:id/stock
+   * Usa el endpoint especÃ­fico PATCH /products/:id/stock
    */
   updateStock(id: number, quantity: number): Observable<Product> {
     const headers = this.getHeaders();

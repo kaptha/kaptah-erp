@@ -1,4 +1,4 @@
-import { Injectable } from '@angular/core';
+﻿import { Injectable } from '@angular/core';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Observable, throwError, from } from 'rxjs';
 import { tap, catchError, switchMap, map } from 'rxjs/operators';
@@ -22,7 +22,7 @@ export interface AccountPayable {
   updated_at: string;
 }
 
-// ✅ Interfaz para la respuesta del backend
+// âœ… Interfaz para la respuesta del backend
 export interface AccountPayable {
   id: string;
   userId: string;
@@ -30,7 +30,7 @@ export interface AccountPayable {
   partnerId: string;
   providerName?: string;
   providerRfc?: string;
-  providerInfo?: {          // ✅ AGREGAR
+  providerInfo?: {          // âœ… AGREGAR
     id: number;
     nombre: string;
     rfc: string;
@@ -53,13 +53,13 @@ export interface AccountPayable {
   notes?: string;
 }
 
-// ✅ DTO para crear cuenta por pagar
+// âœ… DTO para crear cuenta por pagar
 export interface CreateAccountPayableDto {
   // Campos requeridos
   partnerId: number;
   providerId: number;
   providerName: string;
-  providerRfc: string;           // ✅ AGREGAR RFC del proveedor
+  providerRfc: string;           // âœ… AGREGAR RFC del proveedor
   totalAmount: number;
   creditDays: number;
   dueDate: string;
@@ -74,12 +74,12 @@ export interface CreateAccountPayableDto {
   notes?: string;
 }
 
-// ✅ DTO para actualizar cuenta por pagar
+// âœ… DTO para actualizar cuenta por pagar
 export interface UpdateAccountPayableDto {
   partnerId?: number;
   providerId?: number;
   providerName?: string;
-  providerRfc?: string;          // ✅ AGREGAR
+  providerRfc?: string;          // âœ… AGREGAR
   totalAmount?: number;
   creditDays?: number;
   creditRemainingDays?: number;
@@ -106,7 +106,7 @@ export interface PaymentData {
   providedIn: 'root'
 })
 export class AccountsPayableService {
-  private apiUrl = 'http://localhost:3003/accounts-payable';
+  private apiUrl = 'https://imaginative-flexibility-production-c3f2.up.railway.app/accounts-payable';
 
   constructor(
     private http: HttpClient,
@@ -137,7 +137,7 @@ export class AccountsPayableService {
   create(data: CreateAccountPayableDto): Observable<AccountPayable> {
     console.log('Enviando datos al backend:', data);
     
-    // Validación simplificada
+    // ValidaciÃ³n simplificada
     if (!data.providerId || data.providerId === 0) {
       return throwError('providerId es requerido');
     }

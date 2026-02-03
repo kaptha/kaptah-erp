@@ -1,4 +1,4 @@
-import { Injectable } from '@angular/core';
+﻿import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 
@@ -6,7 +6,7 @@ import { Observable } from 'rxjs';
   providedIn: 'root'
 })
 export class UnidadMedidaService {
-  private apiUrl = 'http://localhost:3001/unidad-medida'; // Ajusta la URL según tu configuración
+  private apiUrl = 'https://grateful-courage-production-4de4.up.railway.app/unidad-medida'; // Ajusta la URL segÃºn tu configuraciÃ³n
 
   constructor(private http: HttpClient) { }
 

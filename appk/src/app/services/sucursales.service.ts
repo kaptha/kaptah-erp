@@ -1,4 +1,4 @@
-import { Injectable } from '@angular/core';
+﻿import { Injectable } from '@angular/core';
 import { HttpClient, HttpHeaders, HttpErrorResponse } from '@angular/common/http';
 import { Observable, throwError, tap } from 'rxjs';
 import { catchError, switchMap } from 'rxjs/operators';
@@ -9,7 +9,7 @@ import { Sucursal } from '../models/sucursal.model';
   providedIn: 'root'
 })
 export class SucursalesService {
-  private apiUrl = 'http://localhost:3000/api';
+  private apiUrl = 'https://kaptah-erp-production.up.railway.app/api';
 
   constructor(
     private http: HttpClient,
@@ -19,7 +19,7 @@ export class SucursalesService {
   private getHeaders(): HttpHeaders {
     const token = localStorage.getItem('idToken');
     if (!token) {
-      throw new Error('No se encontró token de autenticación');
+      throw new Error('No se encontrÃ³ token de autenticaciÃ³n');
     }
     return new HttpHeaders({
       'Authorization': `Bearer ${token}`,
@@ -30,13 +30,13 @@ export class SucursalesService {
   getSucursales(): Observable<Sucursal[]> {
     const idToken = localStorage.getItem('idToken');
     if (!idToken) {
-      return throwError(() => new Error('No se encontró el token de autenticación'));
+      return throwError(() => new Error('No se encontrÃ³ el token de autenticaciÃ³n'));
     }
     
     return this.usersService.getUserByToken(idToken).pipe(
       switchMap(user => {
         if (!user) {
-          throw new Error('No se encontró el usuario');
+          throw new Error('No se encontrÃ³ el usuario');
         }
         const headers = this.getHeaders();
         return this.http.get<Sucursal[]>(`${this.apiUrl}/branches/${user.id}`, { headers });
@@ -52,7 +52,7 @@ export class SucursalesService {
   const { codigoPostal, ...rest } = sucursalData;
   const dataToSend = {
     ...rest,
-    codigoPostal: Number(codigoPostal) // Aseguramos que sea número
+    codigoPostal: Number(codigoPostal) // Aseguramos que sea nÃºmero
   };
 
   console.log('Datos a enviar:', dataToSend);
@@ -65,7 +65,7 @@ export class SucursalesService {
     tap(response => console.log('Respuesta del servidor:', response)),
     catchError((error: HttpErrorResponse) => {
       console.error('Error completo:', error);
-      let errorMessage = 'Ocurrió un error al crear la sucursal';
+      let errorMessage = 'OcurriÃ³ un error al crear la sucursal';
       
       if (error.error?.message) {
         errorMessage = Array.isArray(error.error.message) 

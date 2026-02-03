@@ -1,4 +1,4 @@
-import { Injectable } from '@angular/core';
+﻿import { Injectable } from '@angular/core';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Observable, throwError } from 'rxjs';
 import { tap, catchError } from 'rxjs/operators';
@@ -7,7 +7,7 @@ import { tap, catchError } from 'rxjs/operators';
   providedIn: 'root'
 })
 export class ServiceService {
-  private apiUrl = 'http://localhost:4005/api';  // Ajusta según tu configuración
+  private apiUrl = 'https://selfless-analysis-production.up.railway.app/api';  // Ajusta segÃºn tu configuraciÃ³n
 
   constructor(private http: HttpClient) {}
 

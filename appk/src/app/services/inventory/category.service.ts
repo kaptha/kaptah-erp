@@ -1,4 +1,4 @@
-import { Observable, switchMap, throwError } from 'rxjs';
+﻿import { Observable, switchMap, throwError } from 'rxjs';
 import { tap, catchError } from 'rxjs/operators';
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
@@ -18,7 +18,7 @@ export interface Category {
   providedIn: 'root'
 })
 export class CategoryService {
-  private apiUrl = 'http://localhost:4005/api/categories'; 
+  private apiUrl = 'https://selfless-analysis-production.up.railway.app/api/categories'; 
 
   constructor(private http: HttpClient, private usersService: UsersService) {}
 
@@ -30,7 +30,7 @@ export class CategoryService {
   });
 }
 
-  // Obtener todas las categorías
+  // Obtener todas las categorÃ­as
   getCategories(): Observable<Category[]> {
   const idToken = localStorage.getItem('idToken');
   console.log('Token encontrado:', !!idToken);
@@ -48,7 +48,7 @@ export class CategoryService {
       const headers = this.getHeaders();
       console.log('Headers:', headers);
       return this.http.get<Category[]>(`${this.apiUrl}`, { headers }).pipe(
-        tap(categories => console.log('Categorías recibidas:', categories))
+        tap(categories => console.log('CategorÃ­as recibidas:', categories))
       );
     }),
     catchError(error => {
@@ -58,26 +58,26 @@ export class CategoryService {
   );
 }
 
-  // Obtener una categoría por ID
+  // Obtener una categorÃ­a por ID
   getCategory(id: number): Observable<Category> {
     const headers = this.getHeaders();
     return this.http.get<Category>(`${this.apiUrl}/${id}`, { headers });
   }
 
-  // Crear una nueva categoría
+  // Crear una nueva categorÃ­a
   createCategory(category: Omit<Category, 'id'>): Observable<Category> {
   const headers = this.getHeaders(); 
   return this.http.post<Category>(this.apiUrl, category, { headers });
 }
 
 
-  // Actualizar una categoría
+  // Actualizar una categorÃ­a
   updateCategory(id: number, category: Partial<Category>): Observable<Category> {
     const headers = this.getHeaders();
     return this.http.put<Category>(`${this.apiUrl}/${id}`, category, { headers });
   }
 
-  // Eliminar una categoría
+  // Eliminar una categorÃ­a
   deleteCategory(id: number): Observable<void> {
     const headers = this.getHeaders();
     return this.http.delete<void>(`${this.apiUrl}/${id}`, { headers });

@@ -1,4 +1,4 @@
-import { Injectable } from '@angular/core';
+﻿import { Injectable } from '@angular/core';
 import { HttpClient, HttpParams, HttpHeaders } from '@angular/common/http';
 import { Observable, throwError } from 'rxjs';
 import { catchError } from 'rxjs/operators';
@@ -10,7 +10,7 @@ export interface CfdiRecibido {
   rfc_emisor: string;
   nombre_emisor?: string;
   fecha_recepcion: string;
-  usuario_id: string; // 🔹 Cambiado a string para coincidir con Firebase UID
+  usuario_id: string; // ðŸ”¹ Cambiado a string para coincidir con Firebase UID
   estado_procesamiento: string;
   xml_completo: string;
   folio?: string;
@@ -88,13 +88,13 @@ export interface AuthResponse {
   providedIn: 'root'
 })
 export class CfdiApiService {
-  private baseUrl = 'http://localhost:3005/xml-financiero'; // Puerto del cfdi-receiver-api
+  private baseUrl = 'https://energetic-communication-production-5b96.up.railway.app/xml-financiero'; // Puerto del cfdi-receiver-api
   
   constructor(private http: HttpClient) {
-    console.log('🔹 CfdiApiService inicializado con baseUrl:', this.baseUrl);
+    console.log('ðŸ”¹ CfdiApiService inicializado con baseUrl:', this.baseUrl);
   }
   /**
-   * Obtiene los headers con autenticación
+   * Obtiene los headers con autenticaciÃ³n
    */
   private getHeaders(): HttpHeaders {
     const token = localStorage.getItem('access_token');
@@ -104,13 +104,13 @@ export class CfdiApiService {
     });
   }
 
-  // ==================== MÉTODOS DE XMLs ====================
+  // ==================== MÃ‰TODOS DE XMLs ====================
 
   /**
    * Importa estructura completa de XMLs
    */
   importarEstructuraCompleta(rutaBase: string): Observable<any> {
-    console.log('📤 Importando estructura completa desde:', rutaBase);
+    console.log('ðŸ“¤ Importando estructura completa desde:', rutaBase);
     return this.http.post(
       `${this.baseUrl}/xml-import/estructura-completa`,
       { rutaBase }
@@ -120,10 +120,10 @@ export class CfdiApiService {
   }
 
   /**
-   * Obtiene estadísticas de importación
+   * Obtiene estadÃ­sticas de importaciÃ³n
    */
   getEstadisticasImportacion(): Observable<any> {
-    console.log('📊 Obteniendo estadísticas de importación');
+    console.log('ðŸ“Š Obteniendo estadÃ­sticas de importaciÃ³n');
     return this.http.get(
       `${this.baseUrl}/xml-import/estadisticas`
     ).pipe(
@@ -135,7 +135,7 @@ export class CfdiApiService {
    * Reprocesa RFCs existentes
    */
   reprocesarRfcs(): Observable<any> {
-    console.log('🔄 Reprocesando RFCs existentes');
+    console.log('ðŸ”„ Reprocesando RFCs existentes');
     return this.http.post(
       `${this.baseUrl}/xml-import/reprocesar-rfcs`,
       {}
@@ -144,13 +144,13 @@ export class CfdiApiService {
     );
   }
 
-  // ==================== MÉTODOS DE DATOS FINANCIEROS ====================
+  // ==================== MÃ‰TODOS DE DATOS FINANCIEROS ====================
 
   /**
    * Procesa todos los XMLs para extraer datos financieros
    */
   procesarTodosLosXmls(): Observable<any> {
-    console.log('⚙️ Procesando todos los XMLs...');
+    console.log('âš™ï¸ Procesando todos los XMLs...');
     return this.http.post(
       `${this.baseUrl}/procesar-todos`,
       {}
@@ -160,10 +160,10 @@ export class CfdiApiService {
   }
 
   /**
-   * Obtiene estadísticas financieras generales
+   * Obtiene estadÃ­sticas financieras generales
    */
   getEstadisticasFinancieras(): Observable<EstadisticasFinancieras> {
-    console.log('📊 Obteniendo estadísticas financieras');
+    console.log('ðŸ“Š Obteniendo estadÃ­sticas financieras');
     return this.http.get<EstadisticasFinancieras>(
       `${this.baseUrl}/xml-financiero/estadisticas`
     ).pipe(
@@ -172,10 +172,10 @@ export class CfdiApiService {
   }
 
   /**
-   * Obtiene análisis financiero por período
+   * Obtiene anÃ¡lisis financiero por perÃ­odo
    */
   getAnalisisPorPeriodo(fechaInicio: string, fechaFin: string): Observable<AnalisisPeriodo> {
-    console.log('📈 Obteniendo análisis de período:', fechaInicio, 'a', fechaFin);
+    console.log('ðŸ“ˆ Obteniendo anÃ¡lisis de perÃ­odo:', fechaInicio, 'a', fechaFin);
     return this.http.get<AnalisisPeriodo>(
       `${this.baseUrl}/analisis-periodo`,
       {
@@ -190,10 +190,10 @@ export class CfdiApiService {
   }
 
   /**
-   * Obtiene resumen de IVA por período
+   * Obtiene resumen de IVA por perÃ­odo
    */
   getResumenIva(fechaInicio: string, fechaFin: string): Observable<any> {
-    console.log('💰 Obteniendo resumen de IVA:', fechaInicio, 'a', fechaFin);
+    console.log('ðŸ’° Obteniendo resumen de IVA:', fechaInicio, 'a', fechaFin);
     return this.http.get(
       `${this.baseUrl}/resumen-iva`,
       {
@@ -208,10 +208,10 @@ export class CfdiApiService {
   }
 
   /**
-   * Obtiene top proveedores por período
+   * Obtiene top proveedores por perÃ­odo
    */
   getTopProveedores(fechaInicio: string, fechaFin: string, limite: number = 10): Observable<TopProveedoresResponse> {
-    console.log('🏆 Obteniendo top proveedores:', limite);
+    console.log('ðŸ† Obteniendo top proveedores:', limite);
     return this.http.get<TopProveedoresResponse>(
       `${this.baseUrl}/top-proveedores`,
       {
@@ -226,14 +226,14 @@ export class CfdiApiService {
     );
   }
 
-  // ==================== AUTENTICACIÓN ====================
+  // ==================== AUTENTICACIÃ“N ====================
 
   /**
    * Login con Firebase token para obtener JWT
-   * NOTA: Este método NO requiere autenticación previa
+   * NOTA: Este mÃ©todo NO requiere autenticaciÃ³n previa
    */
   login(firebaseToken: string): Observable<AuthResponse> {
-    console.log('🔐 Haciendo login en cfdi-receiver-api...');
+    console.log('ðŸ” Haciendo login en cfdi-receiver-api...');
     return this.http.post<AuthResponse>(
       `${this.baseUrl}/auth/login`,
       { firebaseToken }
@@ -244,10 +244,10 @@ export class CfdiApiService {
 
   /**
    * Refresca el token de acceso
-   * NOTA: Este método NO requiere autenticación previa
+   * NOTA: Este mÃ©todo NO requiere autenticaciÃ³n previa
    */
   refreshToken(refreshToken: string): Observable<AuthResponse> {
-    console.log('🔄 Refrescando token en cfdi-receiver-api...');
+    console.log('ðŸ”„ Refrescando token en cfdi-receiver-api...');
     return this.http.post<AuthResponse>(
       `${this.baseUrl}/auth/refresh`,
       { refresh_token: refreshToken }
@@ -256,13 +256,13 @@ export class CfdiApiService {
     );
   }
 
-  // ==================== MÉTODOS DE CFDIs ====================
+  // ==================== MÃ‰TODOS DE CFDIs ====================
 
   /**
    * Obtiene CFDIs por ID de usuario
    */
   getCfdisByUserId(userId: string): Observable<CfdiRecibido[]> {
-    console.log('📄 Obteniendo CFDIs para usuario:', userId);
+    console.log('ðŸ“„ Obteniendo CFDIs para usuario:', userId);
     return this.http.get<CfdiRecibido[]>(
       `${this.baseUrl}/cfdis/user/${userId}`
     ).pipe(
@@ -274,7 +274,7 @@ export class CfdiApiService {
    * Obtiene CFDIs filtrados por RFC del emisor (proveedor)
    */
   getCfdisByProviderRfc(userId: string, providerRfc: string): Observable<CfdiRecibido[]> {
-    console.log('📄 Obteniendo CFDIs del proveedor:', providerRfc);
+    console.log('ðŸ“„ Obteniendo CFDIs del proveedor:', providerRfc);
     return this.http.get<CfdiRecibido[]>(
       `${this.baseUrl}/cfdis/user/${userId}/provider/${providerRfc}`
     ).pipe(
@@ -286,7 +286,7 @@ export class CfdiApiService {
    * Obtiene CFDIs pendientes de procesar
    */
   getPendingCfdis(userId: string): Observable<CfdiRecibido[]> {
-    console.log('⏳ Obteniendo CFDIs pendientes para usuario:', userId);
+    console.log('â³ Obteniendo CFDIs pendientes para usuario:', userId);
     return this.http.get<CfdiRecibido[]>(
       `${this.baseUrl}/cfdis/user/${userId}/pending`
     ).pipe(
@@ -294,14 +294,14 @@ export class CfdiApiService {
     );
   }
 
-  // ==================== ANÁLISIS DE INGRESOS Y EGRESOS ====================
+  // ==================== ANÃLISIS DE INGRESOS Y EGRESOS ====================
 
   /**
-   * Obtiene análisis completo de ingresos
+   * Obtiene anÃ¡lisis completo de ingresos
    */
   getAnalisisCompletoIngresos(fechaInicio: string, fechaFin: string): Observable<any> {
     const userRfc = this.getCurrentUserRfc();
-    console.log('📊 Obteniendo análisis completo de ingresos');
+    console.log('ðŸ“Š Obteniendo anÃ¡lisis completo de ingresos');
     
     return this.http.get(`${this.baseUrl}/ingresos/analisis-completo`, {
       params: { rfcUsuario: userRfc, fechaInicio, fechaFin },
@@ -310,11 +310,11 @@ export class CfdiApiService {
   }
 
   /**
-   * Obtiene análisis completo de egresos
+   * Obtiene anÃ¡lisis completo de egresos
    */
   getAnalisisCompletoEgresos(fechaInicio: string, fechaFin: string): Observable<any> {
     const userRfc = this.getCurrentUserRfc();
-    console.log('📊 Obteniendo análisis completo de egresos');
+    console.log('ðŸ“Š Obteniendo anÃ¡lisis completo de egresos');
     
     return this.http.get(`${this.baseUrl}/egresos/analisis-completo`, {
       params: { rfcUsuario: userRfc, fechaInicio, fechaFin },
@@ -323,10 +323,10 @@ export class CfdiApiService {
   }
 
   /**
-   * Búsqueda simple de egresos (por query string)
+   * BÃºsqueda simple de egresos (por query string)
    */
   buscarCfdisEgresos(query: string): Observable<any> {
-    console.log('🔍 buscarCfdisEgresos - Query:', query);
+    console.log('ðŸ” buscarCfdisEgresos - Query:', query);
     
     return this.busquedaRapidaEgresos({
       query: query,
@@ -336,13 +336,13 @@ export class CfdiApiService {
   }
 
   /**
-   * Búsqueda avanzada de egresos
+   * BÃºsqueda avanzada de egresos
    */
   busquedaAvanzadaEgresos(filtros: any): Observable<any> {
-    console.log('🔍 ===== BÚSQUEDA AVANZADA DE EGRESOS =====');
-    console.log('🔍 Filtros recibidos:', filtros);
+    console.log('ðŸ” ===== BÃšSQUEDA AVANZADA DE EGRESOS =====');
+    console.log('ðŸ” Filtros recibidos:', filtros);
     
-    // ✅ Construir el query string combinando TODOS los campos de búsqueda
+    // âœ… Construir el query string combinando TODOS los campos de bÃºsqueda
     const queryParts: string[] = [];
     
     if (filtros.rfc) queryParts.push(filtros.rfc);
@@ -351,23 +351,23 @@ export class CfdiApiService {
     if (filtros.folio) queryParts.push(filtros.folio);
     if (filtros.serie) queryParts.push(filtros.serie);
     
-    // Unir todos los términos de búsqueda con espacio
+    // Unir todos los tÃ©rminos de bÃºsqueda con espacio
     const query = queryParts.join(' ').trim();
     
-    console.log('🔍 Query construido:', query);
-    console.log('🔍 Query length:', query.length);
+    console.log('ðŸ” Query construido:', query);
+    console.log('ðŸ” Query length:', query.length);
     
-    // ✅ Si no hay query Y no hay filtros de fecha/monto, retornar vacío
+    // âœ… Si no hay query Y no hay filtros de fecha/monto, retornar vacÃ­o
     if (!query && !filtros.fechaInicio && !filtros.fechaFin && 
         filtros.montoMin === null && filtros.montoMax === null) {
-      console.warn('⚠️ Búsqueda avanzada sin filtros, retornando vacío');
+      console.warn('âš ï¸ BÃºsqueda avanzada sin filtros, retornando vacÃ­o');
       return new Observable(observer => {
         observer.next({ cfdis: [], total: 0 });
         observer.complete();
       });
     }
     
-    // ✅ Construir parámetros para busquedaRapidaEgresos
+    // âœ… Construir parÃ¡metros para busquedaRapidaEgresos
     const params: any = {
       query: query || '',
       offset: 0,
@@ -377,55 +377,55 @@ export class CfdiApiService {
     // Filtros adicionales
     if (filtros.fechaInicio) {
       params.fechaInicio = filtros.fechaInicio;
-      console.log('✅ FechaInicio agregada:', filtros.fechaInicio);
+      console.log('âœ… FechaInicio agregada:', filtros.fechaInicio);
     }
     if (filtros.fechaFin) {
       params.fechaFin = filtros.fechaFin;
-      console.log('✅ FechaFin agregada:', filtros.fechaFin);
+      console.log('âœ… FechaFin agregada:', filtros.fechaFin);
     }
     if (filtros.montoMin !== null && filtros.montoMin !== undefined) {
       params.montoMin = filtros.montoMin;
-      console.log('✅ MontoMin agregado:', filtros.montoMin);
+      console.log('âœ… MontoMin agregado:', filtros.montoMin);
     }
     if (filtros.montoMax !== null && filtros.montoMax !== undefined) {
       params.montoMax = filtros.montoMax;
-      console.log('✅ MontoMax agregado:', filtros.montoMax);
+      console.log('âœ… MontoMax agregado:', filtros.montoMax);
     }
     
-    console.log('🔍 Parámetros finales:', params);
+    console.log('ðŸ” ParÃ¡metros finales:', params);
     
     return this.busquedaRapidaEgresos(params);
   }
 
-  // ====== MÉTODOS DE BÚSQUEDA AVANZADA PARA INGRESOS ======
+  // ====== MÃ‰TODOS DE BÃšSQUEDA AVANZADA PARA INGRESOS ======
 
   /**
-   * Búsqueda rápida de CFDIs de ingresos (autocomplete)
-   * @param query - Término de búsqueda
+   * BÃºsqueda rÃ¡pida de CFDIs de ingresos (autocomplete)
+   * @param query - TÃ©rmino de bÃºsqueda
    */
   buscarCfdisIngresos(query: string): Observable<any> {
-    console.log('🔍 ===== BÚSQUEDA DE INGRESOS =====');
-    console.log('🔍 Query recibido:', query);
-    console.log('🔍 Query tipo:', typeof query);
-    console.log('🔍 Query length:', query?.length);
-    console.log('🔍 Query trimmed:', query?.trim());
+    console.log('ðŸ” ===== BÃšSQUEDA DE INGRESOS =====');
+    console.log('ðŸ” Query recibido:', query);
+    console.log('ðŸ” Query tipo:', typeof query);
+    console.log('ðŸ” Query length:', query?.length);
+    console.log('ðŸ” Query trimmed:', query?.trim());
     
-    // ✅ Validar que el query no esté vacío
+    // âœ… Validar que el query no estÃ© vacÃ­o
     const queryTrimmed = query?.trim() || '';
     
     if (!queryTrimmed || queryTrimmed.length === 0) {
-      console.warn('⚠️ Query vacío, retornando observable vacío');
+      console.warn('âš ï¸ Query vacÃ­o, retornando observable vacÃ­o');
       return new Observable(observer => {
         observer.next({ cfdis: [], total: 0 });
         observer.complete();
       });
     }
     
-    // ✅ CORRECCIÓN: Usar el endpoint correcto
+    // âœ… CORRECCIÃ“N: Usar el endpoint correcto
     const url = `${this.baseUrl}/cfdis/ingresos/busqueda-rapida`;
     
-    console.log('🔍 URL completa:', url);
-    console.log('🔍 Parámetros enviados:', { query: queryTrimmed });
+    console.log('ðŸ” URL completa:', url);
+    console.log('ðŸ” ParÃ¡metros enviados:', { query: queryTrimmed });
     
     return this.http.get<any>(url, {
       params: { query: queryTrimmed },  // El RFC se obtiene del token en el backend
@@ -436,14 +436,14 @@ export class CfdiApiService {
   }
 
   /**
-   * Búsqueda avanzada de CFDIs de ingresos con múltiples filtros
-   * @param filtros - Objeto con los filtros de búsqueda
+   * BÃºsqueda avanzada de CFDIs de ingresos con mÃºltiples filtros
+   * @param filtros - Objeto con los filtros de bÃºsqueda
    */
   busquedaAvanzadaIngresos(filtros: any): Observable<any> {
-    console.log('🔍 ===== BÚSQUEDA AVANZADA DE INGRESOS =====');
-    console.log('🔍 Filtros recibidos:', filtros);
+    console.log('ðŸ” ===== BÃšSQUEDA AVANZADA DE INGRESOS =====');
+    console.log('ðŸ” Filtros recibidos:', filtros);
     
-    // ✅ Construir el query string combinando TODOS los campos de búsqueda
+    // âœ… Construir el query string combinando TODOS los campos de bÃºsqueda
     const queryParts: string[] = [];
     
     if (filtros.rfc) queryParts.push(filtros.rfc);
@@ -452,67 +452,67 @@ export class CfdiApiService {
     if (filtros.folio) queryParts.push(filtros.folio);
     if (filtros.serie) queryParts.push(filtros.serie);
     
-    // Unir todos los términos de búsqueda con espacio
+    // Unir todos los tÃ©rminos de bÃºsqueda con espacio
     const query = queryParts.join(' ').trim();
     
-    console.log('🔍 Query construido:', query);
-    console.log('🔍 Query length:', query.length);
+    console.log('ðŸ” Query construido:', query);
+    console.log('ðŸ” Query length:', query.length);
     
-    // ✅ Si no hay query Y no hay filtros de fecha/monto, retornar vacío
+    // âœ… Si no hay query Y no hay filtros de fecha/monto, retornar vacÃ­o
     if (!query && !filtros.fechaInicio && !filtros.fechaFin && 
         filtros.montoMin === null && filtros.montoMax === null &&
         !filtros.metodoPago && !filtros.formaPago) {
-      console.warn('⚠️ Búsqueda avanzada sin filtros, retornando vacío');
+      console.warn('âš ï¸ BÃºsqueda avanzada sin filtros, retornando vacÃ­o');
       return new Observable(observer => {
         observer.next({ cfdis: [], total: 0 });
         observer.complete();
       });
     }
     
-    // ✅ Usar el endpoint de búsqueda rápida con filtros adicionales
+    // âœ… Usar el endpoint de bÃºsqueda rÃ¡pida con filtros adicionales
     const url = `${this.baseUrl}/cfdis/ingresos/busqueda-rapida`;
     
-    // ✅ Construir query params con TODOS los filtros
+    // âœ… Construir query params con TODOS los filtros
     let params = new HttpParams();
     
     // Query principal (SOLO si existe)
     if (query) {
       params = params.set('query', query);
-      console.log('✅ Query agregado a params:', query);
+      console.log('âœ… Query agregado a params:', query);
     }
     
     // Filtros adicionales
     if (filtros.fechaInicio) {
       params = params.set('fechaInicio', filtros.fechaInicio);
-      console.log('✅ FechaInicio agregada:', filtros.fechaInicio);
+      console.log('âœ… FechaInicio agregada:', filtros.fechaInicio);
     }
     if (filtros.fechaFin) {
       params = params.set('fechaFin', filtros.fechaFin);
-      console.log('✅ FechaFin agregada:', filtros.fechaFin);
+      console.log('âœ… FechaFin agregada:', filtros.fechaFin);
     }
     if (filtros.montoMin !== null && filtros.montoMin !== undefined) {
       params = params.set('montoMin', filtros.montoMin.toString());
-      console.log('✅ MontoMin agregado:', filtros.montoMin);
+      console.log('âœ… MontoMin agregado:', filtros.montoMin);
     }
     if (filtros.montoMax !== null && filtros.montoMax !== undefined) {
       params = params.set('montoMax', filtros.montoMax.toString());
-      console.log('✅ MontoMax agregado:', filtros.montoMax);
+      console.log('âœ… MontoMax agregado:', filtros.montoMax);
     }
     if (filtros.metodoPago) {
       params = params.set('metodoPago', filtros.metodoPago);
-      console.log('✅ MetodoPago agregado:', filtros.metodoPago);
+      console.log('âœ… MetodoPago agregado:', filtros.metodoPago);
     }
     if (filtros.formaPago) {
       params = params.set('formaPago', filtros.formaPago);
-      console.log('✅ FormaPago agregada:', filtros.formaPago);
+      console.log('âœ… FormaPago agregada:', filtros.formaPago);
     }
     
-    // Paginación
+    // PaginaciÃ³n
     params = params.set('offset', '0');
     params = params.set('limit', '100');
     
-    console.log('🔍 URL final:', url);
-    console.log('🔍 Parámetros finales:', params.toString());
+    console.log('ðŸ” URL final:', url);
+    console.log('ðŸ” ParÃ¡metros finales:', params.toString());
     
     return this.http.get<any>(url, { 
       params,
@@ -522,10 +522,10 @@ export class CfdiApiService {
     );
   }
 
-  // ====== MÉTODOS AUXILIARES ======
+  // ====== MÃ‰TODOS AUXILIARES ======
 
   /**
-   * Búsqueda rápida de egresos
+   * BÃºsqueda rÃ¡pida de egresos
    */
   busquedaRapidaEgresos(params: any): Observable<any> {
     const url = `${this.baseUrl}/cfdis/egresos/busqueda-rapida`;
@@ -545,7 +545,7 @@ export class CfdiApiService {
     );
   }
 
-  // ====== MÉTODOS DE DETALLES DE CFDI ======
+  // ====== MÃ‰TODOS DE DETALLES DE CFDI ======
 
   /**
    * Obtiene los detalles completos de un CFDI
@@ -639,7 +639,7 @@ export class CfdiApiService {
     );
   }
 
-  // ====== MÉTODOS ADICIONALES PARA INGRESOS ======
+  // ====== MÃ‰TODOS ADICIONALES PARA INGRESOS ======
 
   /**
    * Obtiene CFDIs pendientes de pago (PPD)
@@ -696,7 +696,7 @@ export class CfdiApiService {
     );
   }
 
-  // ==================== MÉTODOS PRIVADOS ====================
+  // ==================== MÃ‰TODOS PRIVADOS ====================
 
   /**
    * Obtiene el RFC del usuario actual (privado)
@@ -718,9 +718,9 @@ export class CfdiApiService {
    * Maneja errores HTTP
    */
   private handleError(error: any): Observable<never> {
-    console.error('❌ Error en CfdiApiService:', error);
+    console.error('âŒ Error en CfdiApiService:', error);
     
-    let errorMessage = 'Ocurrió un error en el servidor';
+    let errorMessage = 'OcurriÃ³ un error en el servidor';
     
     if (error.error instanceof ErrorEvent) {
       // Error del lado del cliente
@@ -733,13 +733,13 @@ export class CfdiApiService {
         errorMessage = error.error.message;
       }
 
-      // Mensajes específicos según el código de error
+      // Mensajes especÃ­ficos segÃºn el cÃ³digo de error
       switch (error.status) {
         case 401:
-          errorMessage = 'No autorizado. Por favor, inicia sesión nuevamente.';
+          errorMessage = 'No autorizado. Por favor, inicia sesiÃ³n nuevamente.';
           break;
         case 403:
-          errorMessage = 'No tienes permisos para realizar esta acción.';
+          errorMessage = 'No tienes permisos para realizar esta acciÃ³n.';
           break;
         case 404:
           errorMessage = 'Recurso no encontrado.';

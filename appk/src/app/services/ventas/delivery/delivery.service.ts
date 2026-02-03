@@ -1,4 +1,4 @@
-import { Injectable } from '@angular/core';
+﻿import { Injectable } from '@angular/core';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Observable, from, throwError } from 'rxjs';
 import { switchMap, map } from 'rxjs/operators';
@@ -11,7 +11,7 @@ import { AuthResponse } from '../../../models/auth.model';
   providedIn: 'root'
 })
 export class DeliveryService {
-  private apiUrl = 'http://localhost:4000/delivery-notes';
+  private apiUrl = 'https://extraordinary-beauty-production-78f6.up.railway.app/delivery-notes';
 
   constructor(
     private http: HttpClient,
@@ -47,8 +47,8 @@ export class DeliveryService {
   create(delivery: Partial<DeliveryNote>): Observable<DeliveryNote> {
     return this.getHeaders().pipe(
       switchMap((headers: HttpHeaders) => {
-        console.log('🚀 Enviando POST a:', this.apiUrl);
-        console.log('📦 Payload:', delivery);
+        console.log('ðŸš€ Enviando POST a:', this.apiUrl);
+        console.log('ðŸ“¦ Payload:', delivery);
         return this.http.post<DeliveryNote>(this.apiUrl, delivery, { headers });
       })
     );
@@ -57,7 +57,7 @@ export class DeliveryService {
   update(id: string, delivery: Partial<DeliveryNote>): Observable<DeliveryNote> {
     return this.getHeaders().pipe(
       switchMap((headers: HttpHeaders) => {
-        // ✅ CAMBIADO: Usar PUT en vez de PATCH
+        // âœ… CAMBIADO: Usar PUT en vez de PATCH
         return this.http.put<DeliveryNote>(`${this.apiUrl}/${id}`, delivery, { headers });
       })
     );
@@ -66,14 +66,14 @@ export class DeliveryService {
   delete(id: string): Observable<void> {
     return this.getHeaders().pipe(
       switchMap((headers: HttpHeaders) => {
-        // ✅ CORREGIDO: Usar paréntesis en vez de backticks
+        // âœ… CORREGIDO: Usar parÃ©ntesis en vez de backticks
         return this.http.delete<void>(`${this.apiUrl}/${id}`, { headers });
       })
     );
   }
 
   /**
-   * Descargar PDF de guía de remisión desde el backend
+   * Descargar PDF de guÃ­a de remisiÃ³n desde el backend
    */
   descargarPDF(deliveryNoteId: string): Observable<Blob> {
     const url = `${this.apiUrl}/${deliveryNoteId}/pdf`;
@@ -89,7 +89,7 @@ export class DeliveryService {
   }
 
   /**
-   * Enviar guía de remisión por email
+   * Enviar guÃ­a de remisiÃ³n por email
    */
   sendDeliveryNoteByEmail(deliveryNoteId: string, emailData: {
     recipientEmail: string;
@@ -101,14 +101,14 @@ export class DeliveryService {
     const idToken = localStorage.getItem('idToken');
     
     if (!idToken) {
-      return throwError(() => new Error('No se encontró token de autenticación'));
+      return throwError(() => new Error('No se encontrÃ³ token de autenticaciÃ³n'));
     }
 
-    // Convertir a JWT para autenticación del guard
+    // Convertir a JWT para autenticaciÃ³n del guard
     return from(this.authService.convertToJWT(idToken)).pipe(
       switchMap((response: AuthResponse) => {
         // Enviar AMBOS tokens:
-        // - accessToken para el JwtAuthGuard (autenticación)
+        // - accessToken para el JwtAuthGuard (autenticaciÃ³n)
         // - idToken original para obtener el logo (header custom)
         const headers = new HttpHeaders({
           'Content-Type': 'application/json',
@@ -125,3 +125,4 @@ export class DeliveryService {
     );
   }
 }
+

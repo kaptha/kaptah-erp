@@ -1,4 +1,4 @@
-import { Injectable } from '@angular/core';
+﻿import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { tap } from 'rxjs/operators';
@@ -6,7 +6,7 @@ import { tap } from 'rxjs/operators';
   providedIn: 'root'
 })
 export class ClaveProdServService {
-  private apiUrl = 'http://localhost:3001/clave-prod-serv'; // Ajusta la URL según tu configuración
+  private apiUrl = 'https://grateful-courage-production-4de4.up.railway.app/clave-prod-serv'; // Ajusta la URL segÃºn tu configuraciÃ³n
 
   constructor(private http: HttpClient) { }
 

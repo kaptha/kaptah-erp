@@ -1,4 +1,4 @@
-import { Injectable } from '@angular/core';
+﻿import { Injectable } from '@angular/core';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { UsersService } from './users.service';
 import { switchMap, catchError } from 'rxjs/operators';
@@ -14,7 +14,7 @@ interface CsdResponse {
   validUntil: string;
   issuerName: string;
   issuerSerial: string;
-  // Campos específicos de CSD
+  // Campos especÃ­ficos de CSD
   cerPem: string;
   keyPem: string;
   cerBase64: string;
@@ -25,7 +25,7 @@ interface CsdResponse {
   providedIn: 'root'
 })
 export class CsdService {
-  private apiUrl = 'http://localhost:3004/api';
+  private apiUrl = 'https://reliable-harmony-production-ca69.up.railway.app/api';
 
   constructor(
     private http: HttpClient,
@@ -35,8 +35,8 @@ export class CsdService {
   private getHeaders(): HttpHeaders {
     const token = localStorage.getItem('idToken');
     if (!token) {
-      console.error('No se encontró token de autenticación');
-      throw new Error('No se encontró token de autenticación');
+      console.error('No se encontrÃ³ token de autenticaciÃ³n');
+      throw new Error('No se encontrÃ³ token de autenticaciÃ³n');
     }
     return new HttpHeaders({
       'Authorization': `Bearer ${token}`
@@ -98,16 +98,16 @@ export class CsdService {
 private handleError(error: any) {
   console.error('Error en CsdService:', error);
   
-  let errorMessage = 'Ocurrió un error en el servidor';
+  let errorMessage = 'OcurriÃ³ un error en el servidor';
   
   if (error.error instanceof ErrorEvent) {
     // Error del cliente
     errorMessage = `Error: ${error.error.message}`;
   } else if (error.status) {
-    // Error del servidor con código de estado
+    // Error del servidor con cÃ³digo de estado
     errorMessage = `Error ${error.status}: ${error.message}`;
     
-    // Si hay un mensaje específico del API
+    // Si hay un mensaje especÃ­fico del API
     if (error.error && error.error.message) {
       errorMessage = error.error.message;
     }
@@ -116,7 +116,7 @@ private handleError(error: any) {
   return throwError(() => new Error(errorMessage));
 }
 
-  // Método opcional para verificar el estado de un CSD
+  // MÃ©todo opcional para verificar el estado de un CSD
   verifyCsdStatus(csdId: string): Observable<any> {
     const headers = this.getHeaders();
     return this.http.get(

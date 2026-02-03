@@ -1,4 +1,4 @@
-import { Injectable } from '@angular/core';
+﻿import { Injectable } from '@angular/core';
 import { HttpClient, HttpHeaders, HttpErrorResponse } from '@angular/common/http';
 import { Observable, throwError, tap } from 'rxjs';
 import { catchError, switchMap } from 'rxjs/operators';
@@ -20,7 +20,7 @@ interface Impuesto {
   providedIn: 'root'
 })
 export class ImpuestosService {
-  private apiUrl = 'http://localhost:3000/api';
+  private apiUrl = 'https://kaptah-erp-production.up.railway.app/api';
 
   constructor(
     private http: HttpClient,
@@ -30,7 +30,7 @@ export class ImpuestosService {
   private getHeaders(): HttpHeaders {
     const token = localStorage.getItem('idToken');
     if (!token) {
-      throw new Error('No se encontró token de autenticación');
+      throw new Error('No se encontrÃ³ token de autenticaciÃ³n');
     }
     return new HttpHeaders({
       'Authorization': `Bearer ${token}`,
@@ -41,15 +41,15 @@ export class ImpuestosService {
   getImpuestos(): Observable<Impuesto[]> {
     const idToken = localStorage.getItem('idToken');
     if (!idToken) {
-      return throwError(() => new Error('No se encontró el token de autenticación'));
+      return throwError(() => new Error('No se encontrÃ³ el token de autenticaciÃ³n'));
     }
     
     return this.usersService.getUserByToken(idToken).pipe(
     switchMap(user => {
       if (!user) {
-        throw new Error('No se encontró el usuario');
+        throw new Error('No se encontrÃ³ el usuario');
       }
-      console.log('Haciendo petición para userId:', user.id); // Agrega este log
+      console.log('Haciendo peticiÃ³n para userId:', user.id); // Agrega este log
       const headers = this.getHeaders();
       return this.http.get<Impuesto[]>(`${this.apiUrl}/taxes/${user.id}`, { headers });
     }),
@@ -66,7 +66,7 @@ createImpuesto(impuestoData: any): Observable<any> {
     .pipe(
       tap(response => console.log('Respuesta del servidor:', response)),
       catchError(error => {
-        console.error('Error en la petición:', error);
+        console.error('Error en la peticiÃ³n:', error);
         return throwError(() => error);
       })
     );

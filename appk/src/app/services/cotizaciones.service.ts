@@ -1,4 +1,4 @@
-import { Injectable } from '@angular/core';
+﻿import { Injectable } from '@angular/core';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Observable, throwError } from 'rxjs';
 import { tap, catchError, switchMap } from 'rxjs/operators';
@@ -54,15 +54,15 @@ export interface CreateCotizacionDto {
   providedIn: 'root'
 })
 export class CotizacionesService {
-  private apiUrl = 'http://localhost:4000/cotizaciones';
+  private apiUrl = 'https://extraordinary-beauty-production-78f6.up.railway.app/cotizaciones';
 
   constructor(private http: HttpClient, private quoteItemResolver: QuoteItemResolverService) { }
 
   private getHeaders(): HttpHeaders {
     const token = localStorage.getItem('idToken');
     if (!token) {
-      console.error('No se encontró token de autenticación');
-      throw new Error('No se encontró token de autenticación');
+      console.error('No se encontrÃ³ token de autenticaciÃ³n');
+      throw new Error('No se encontrÃ³ token de autenticaciÃ³n');
     }
     return new HttpHeaders({
       'Authorization': `Bearer ${token}`,
@@ -72,8 +72,8 @@ export class CotizacionesService {
 
   // Obtener el ID del usuario del localStorage o de donde lo tengas almacenado
   private getUserId(): number {
-    // Esta es una implementación básica. Deberías adaptarla según cómo almacenes el ID del usuario
-    // Por ejemplo, podrías descodificar un JWT o usar un servicio de autenticación
+    // Esta es una implementaciÃ³n bÃ¡sica. DeberÃ­as adaptarla segÃºn cÃ³mo almacenes el ID del usuario
+    // Por ejemplo, podrÃ­as descodificar un JWT o usar un servicio de autenticaciÃ³n
     const userId = localStorage.getItem('userId');
     return userId ? parseInt(userId, 10) : 1; // Valor por defecto 1 si no existe
   }
@@ -94,11 +94,11 @@ export class CotizacionesService {
   
   return this.http.get<Cotizacion>(`${this.apiUrl}/${id}`, { headers }).pipe(
     tap(cotizacion => {
-      console.log('Cotización recibida del servidor:', cotizacion);
+      console.log('CotizaciÃ³n recibida del servidor:', cotizacion);
       
       // Verificar y normalizar el formato de items
       if (!cotizacion.items) {
-        console.warn('La cotización no tiene items, inicializando array vacío');
+        console.warn('La cotizaciÃ³n no tiene items, inicializando array vacÃ­o');
         cotizacion.items = [];
       } else if (typeof cotizacion.items === 'string') {
         try {
@@ -112,26 +112,26 @@ export class CotizacionesService {
       
       // Verificar nuevamente que items sea un array
       if (!Array.isArray(cotizacion.items)) {
-        console.warn('Items no es un array después de procesamiento, inicializando array vacío');
+        console.warn('Items no es un array despuÃ©s de procesamiento, inicializando array vacÃ­o');
         cotizacion.items = [];
       }
       
-      // Si los items están vacíos (como [{}]), inicializar correctamente
+      // Si los items estÃ¡n vacÃ­os (como [{}]), inicializar correctamente
       if (cotizacion.items.length === 1 && 
           typeof cotizacion.items[0] === 'object' && 
           cotizacion.items[0] !== null &&
           Object.keys(cotizacion.items[0]).length === 0) {
-        console.warn('Items recibidos como [{}], inicializando array vacío');
+        console.warn('Items recibidos como [{}], inicializando array vacÃ­o');
         cotizacion.items = [];
       }
     }),
     switchMap(cotizacion => this.quoteItemResolver.resolveItemsInfo(cotizacion)),
     tap(cotizacion => {
-      console.log('Cotización después de enriquecer items:', cotizacion);
+      console.log('CotizaciÃ³n despuÃ©s de enriquecer items:', cotizacion);
       console.log('Items enriquecidos:', cotizacion.items);
     }),
     catchError(error => {
-      console.error(`Error al obtener cotización ${id}:`, error);
+      console.error(`Error al obtener cotizaciÃ³n ${id}:`, error);
       return throwError(() => error);
     })
   );
@@ -146,12 +146,12 @@ export class CotizacionesService {
       usuarioId: cotizacion.usuarioId || this.getUserId()
     };
     
-    console.log('Datos enviados al crear cotización:', JSON.stringify(cotizacionConUsuario));
+    console.log('Datos enviados al crear cotizaciÃ³n:', JSON.stringify(cotizacionConUsuario));
     
     return this.http.post<Cotizacion>(this.apiUrl, cotizacionConUsuario, { headers }).pipe(
-      tap(response => console.log('Cotización creada:', response)),
+      tap(response => console.log('CotizaciÃ³n creada:', response)),
       catchError(error => {
-        console.error('Error al crear cotización:', error);
+        console.error('Error al crear cotizaciÃ³n:', error);
         return throwError(() => error);
       })
     );
@@ -167,9 +167,9 @@ export class CotizacionesService {
     };
     
     return this.http.put<Cotizacion>(`${this.apiUrl}/${id}`, cotizacionConUsuario, { headers }).pipe(
-      tap(response => console.log('Cotización actualizada:', response)),
+      tap(response => console.log('CotizaciÃ³n actualizada:', response)),
       catchError(error => {
-        console.error(`Error al actualizar cotización ${id}:`, error);
+        console.error(`Error al actualizar cotizaciÃ³n ${id}:`, error);
         return throwError(() => error);
       })
     );
@@ -178,35 +178,35 @@ export class CotizacionesService {
   deleteCotizacion(id: number): Observable<void> {
     const headers = this.getHeaders();
     return this.http.delete<void>(`${this.apiUrl}/${id}`, { headers }).pipe(
-      tap(() => console.log(`Cotización ${id} eliminada`)),
+      tap(() => console.log(`CotizaciÃ³n ${id} eliminada`)),
       catchError(error => {
-        console.error(`Error al eliminar cotización ${id}:`, error);
+        console.error(`Error al eliminar cotizaciÃ³n ${id}:`, error);
         return throwError(() => error);
       })
     );
   }
 
   /**
-   * Descarga un PDF de cotización generado en el backend con Puppeteer
-   * @param cotizacionId - ID de la cotización
+   * Descarga un PDF de cotizaciÃ³n generado en el backend con Puppeteer
+   * @param cotizacionId - ID de la cotizaciÃ³n
    * @param estilo - Estilo del template (ej: 'minimal', 'classic', 'modern', 'professional')
    * @returns Observable<Blob> - El archivo PDF como Blob
    */
   descargarPDF(cotizacionId: number, estilo: string): Observable<Blob> {
     const token = localStorage.getItem('idToken');
     if (!token) {
-      console.error('No se encontró token de autenticación');
-      return throwError(() => new Error('No se encontró token de autenticación'));
+      console.error('No se encontrÃ³ token de autenticaciÃ³n');
+      return throwError(() => new Error('No se encontrÃ³ token de autenticaciÃ³n'));
     }
 
     const headers = new HttpHeaders({
       'Authorization': `Bearer ${token}`
     });
 
-    // ✅ CORRECCIÓN: Estilo como parámetro de ruta, no query parameter
+    // âœ… CORRECCIÃ“N: Estilo como parÃ¡metro de ruta, no query parameter
     const url = `${this.apiUrl}/${cotizacionId}/pdf/${estilo}`;
     
-    console.log('📄 Solicitando PDF de cotización:', {
+    console.log('ðŸ“„ Solicitando PDF de cotizaciÃ³n:', {
       cotizacionId,
       estilo,
       url
@@ -217,19 +217,19 @@ export class CotizacionesService {
       headers: headers
     }).pipe(
       tap(blob => {
-        console.log('✅ PDF de cotización recibido:', {
+        console.log('âœ… PDF de cotizaciÃ³n recibido:', {
           size: blob.size,
           type: blob.type
         });
       }),
       catchError(error => {
-        console.error('❌ Error al descargar PDF de cotización:', error);
+        console.error('âŒ Error al descargar PDF de cotizaciÃ³n:', error);
         return throwError(() => error);
       })
     );
   }
   /**
- * Enviar cotización por email
+ * Enviar cotizaciÃ³n por email
  */
 sendQuotationByEmail(cotizacionId: number, emailData: {
   recipientEmail: string;
@@ -239,7 +239,7 @@ sendQuotationByEmail(cotizacionId: number, emailData: {
   const headers = this.getHeaders();
   const url = `${this.apiUrl}/${cotizacionId}/send-email`;
   
-  console.log('📧 Enviando cotización por email:', {
+  console.log('ðŸ“§ Enviando cotizaciÃ³n por email:', {
     cotizacionId,
     recipientEmail: emailData.recipientEmail,
     pdfStyle: emailData.pdfStyle || 'modern'
@@ -247,10 +247,10 @@ sendQuotationByEmail(cotizacionId: number, emailData: {
   
   return this.http.post(url, emailData, { headers }).pipe(
     tap(response => {
-      console.log('✅ Cotización enviada por email:', response);
+      console.log('âœ… CotizaciÃ³n enviada por email:', response);
     }),
     catchError(error => {
-      console.error('❌ Error al enviar cotización por email:', error);
+      console.error('âŒ Error al enviar cotizaciÃ³n por email:', error);
       return throwError(() => error);
     })
   );

@@ -1,4 +1,4 @@
-import { Injectable } from '@angular/core';
+﻿import { Injectable } from '@angular/core';
 import { HttpClient, HttpErrorResponse } from '@angular/common/http';
 import { Observable, throwError, BehaviorSubject } from 'rxjs';
 import { tap, catchError } from 'rxjs/operators';
@@ -18,7 +18,7 @@ interface AuthResponse {
   providedIn: 'root'
 })
 export class AuthService {
-  private apiUrl = 'http://localhost:4000'; // sales-api URL
+  private apiUrl = 'https://extraordinary-beauty-production-78f6.up.railway.app'; // sales-api URL
   private currentUserSubject = new BehaviorSubject<any>(null);
   public currentUser$ = this.currentUserSubject.asObservable();
 
@@ -37,13 +37,13 @@ export class AuthService {
    * Login con Firebase token
    */
   login(firebaseToken: string): Observable<AuthResponse> {
-    console.log('🔹 AuthService: Intentando login...');
+    console.log('ðŸ”¹ AuthService: Intentando login...');
     
     return this.http.post<AuthResponse>(`${this.apiUrl}/auth/login`, {
       firebaseToken
     }).pipe(
       tap(response => {
-        console.log('✅ AuthService: Login exitoso');
+        console.log('âœ… AuthService: Login exitoso');
         this.saveTokens(response);
       }),
       catchError(this.handleError)
@@ -54,17 +54,17 @@ export class AuthService {
    * Refrescar access token usando refresh token
    */
   refreshToken(refreshToken: string): Observable<AuthResponse> {
-    console.log('🔄 AuthService: Refrescando token...');
+    console.log('ðŸ”„ AuthService: Refrescando token...');
     
     return this.http.post<AuthResponse>(`${this.apiUrl}/auth/refresh`, {
       refresh_token: refreshToken
     }).pipe(
       tap(response => {
-        console.log('✅ AuthService: Token refrescado exitosamente');
+        console.log('âœ… AuthService: Token refrescado exitosamente');
         this.saveTokens(response);
       }),
       catchError(error => {
-        console.error('❌ AuthService: Error al refrescar token');
+        console.error('âŒ AuthService: Error al refrescar token');
         this.logout();
         return throwError(() => error);
       })
@@ -75,17 +75,17 @@ export class AuthService {
    * Convertir Firebase ID token a JWT
    */
   convertToJWT(idToken: string): Observable<AuthResponse> {
-    console.log('🔄 AuthService: Convirtiendo Firebase token a JWT...');
+    console.log('ðŸ”„ AuthService: Convirtiendo Firebase token a JWT...');
     
     return this.http.post<AuthResponse>(`${this.apiUrl}/auth/convert`, {
       idToken
     }).pipe(
       tap(response => {
-        console.log('✅ AuthService: Token convertido exitosamente');
+        console.log('âœ… AuthService: Token convertido exitosamente');
         this.saveTokens(response);
       }),
       catchError(error => {
-        console.error('❌ AuthService: Error al convertir token');
+        console.error('âŒ AuthService: Error al convertir token');
         return throwError(() => error);
       })
     );
@@ -101,7 +101,7 @@ export class AuthService {
     
     this.currentUserSubject.next(response.user);
     
-    console.log('💾 Tokens guardados en localStorage');
+    console.log('ðŸ’¾ Tokens guardados en localStorage');
   }
 
   /**
@@ -113,10 +113,10 @@ export class AuthService {
   }
 
   /**
-   * Cerrar sesión - MEJORADO para limpiar TODOS los tokens
+   * Cerrar sesiÃ³n - MEJORADO para limpiar TODOS los tokens
    */
   logout(): void {
-    console.log('👋 AuthService: Cerrando sesión...');
+    console.log('ðŸ‘‹ AuthService: Cerrando sesiÃ³n...');
     
     // Limpiar JWT tokens
     localStorage.removeItem('access_token');
@@ -127,13 +127,13 @@ export class AuthService {
     localStorage.removeItem('idToken');
     localStorage.removeItem('expiresIn');
     
-    // Limpiar cualquier otro dato de sesión
+    // Limpiar cualquier otro dato de sesiÃ³n
     localStorage.removeItem('jwt_token'); // Por si existe el nombre antiguo
     
     // Resetear el subject
     this.currentUserSubject.next(null);
     
-    console.log('✅ Todos los tokens eliminados');
+    console.log('âœ… Todos los tokens eliminados');
     
     // Redirigir al login
     this.router.navigate(['/login']);
@@ -154,7 +154,7 @@ export class AuthService {
   }
 
   /**
-   * Verificar si el usuario está autenticado
+   * Verificar si el usuario estÃ¡ autenticado
    */
   isAuthenticated(): boolean {
     // Verificar si existe JWT O Firebase token
@@ -174,7 +174,7 @@ export class AuthService {
    * Manejo de errores
    */
   private handleError(error: HttpErrorResponse) {
-    console.error('❌ Error en AuthService:', error);
+    console.error('âŒ Error en AuthService:', error);
     
     let errorMessage = 'Ha ocurrido un error';
     
@@ -183,7 +183,7 @@ export class AuthService {
       errorMessage = `Error: ${error.error.message}`;
     } else {
       // Error del lado del servidor
-      errorMessage = `Código de error: ${error.status}\nMensaje: ${error.error?.message || error.message}`;
+      errorMessage = `CÃ³digo de error: ${error.status}\nMensaje: ${error.error?.message || error.message}`;
     }
     
     return throwError(() => new Error(errorMessage));

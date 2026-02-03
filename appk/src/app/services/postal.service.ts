@@ -1,16 +1,16 @@
-import { Injectable } from '@angular/core';
+﻿import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
 interface Postal {
   codigo: string;
-  // Añade otras propiedades si las hay
+  // AÃ±ade otras propiedades si las hay
 }
 @Injectable({
   providedIn: 'root'
 })
 export class PostalService {
-  private apiUrl = 'http://localhost:3001/postal'; 
+  private apiUrl = 'https://grateful-courage-production-4de4.up.railway.app/postal'; 
 
   constructor(private http: HttpClient) {}
 

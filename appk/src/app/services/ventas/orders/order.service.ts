@@ -1,4 +1,4 @@
-import { Injectable } from '@angular/core';
+﻿import { Injectable } from '@angular/core';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Observable, throwError, from } from 'rxjs';
 import { tap, catchError, switchMap, map } from 'rxjs/operators';
@@ -12,7 +12,7 @@ import { AuthResponse } from '../../../models/auth.model';
   providedIn: 'root'
 })
 export class SalesOrdersService {
-  private apiUrl = 'http://localhost:4000/sales-orders';
+  private apiUrl = 'https://extraordinary-beauty-production-78f6.up.railway.app/sales-orders';
 
   constructor(
     private http: HttpClient,
@@ -81,15 +81,15 @@ export class SalesOrdersService {
 descargarPDF(orderId: string, estilo: string): Observable<Blob> {
   const url = `${this.apiUrl}/${orderId}/pdf/${estilo}`;
   
-  // ⭐ CAMBIO: Usar 'idToken' en lugar de lo que sea que esté usando ahora
+  // â­ CAMBIO: Usar 'idToken' en lugar de lo que sea que estÃ© usando ahora
   const idToken = localStorage.getItem('idToken'); 
   
   if (!idToken) {
-    return throwError(() => new Error('No se encontró token de autenticación'));
+    return throwError(() => new Error('No se encontrÃ³ token de autenticaciÃ³n'));
   }
   
   const headers = new HttpHeaders({
-    'Authorization': `Bearer ${idToken}` // ← Token de Firebase
+    'Authorization': `Bearer ${idToken}` // â† Token de Firebase
   });
   
   return this.http.get(url, { 
@@ -112,9 +112,9 @@ sendSaleOrderByEmail(orderId: string, emailData: {
         { headers }
       );
     }),
-    tap(response => console.log('✅ Orden enviada por email:', response)),
+    tap(response => console.log('âœ… Orden enviada por email:', response)),
     catchError(error => {
-      console.error('❌ Error enviando orden:', error);
+      console.error('âŒ Error enviando orden:', error);
       return throwError(() => error);
     })
   );

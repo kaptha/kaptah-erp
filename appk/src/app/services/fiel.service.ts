@@ -1,4 +1,4 @@
-import { Injectable } from '@angular/core';
+﻿import { Injectable } from '@angular/core';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { UsersService } from './users.service';
 import { switchMap } from 'rxjs/operators';
@@ -17,7 +17,7 @@ interface FielResponse {
   providedIn: 'root'
 })
 export class FielService {
-  private apiUrl = 'http://localhost:3000/api';
+  private apiUrl = 'https://kaptah-erp-production.up.railway.app/api';
 
   constructor(
     private http: HttpClient,
@@ -27,8 +27,8 @@ export class FielService {
   private getHeaders(): HttpHeaders {
     const token = localStorage.getItem('idToken');
     if (!token) {
-      console.error('No se encontró token de autenticación');
-      throw new Error('No se encontró token de autenticación');
+      console.error('No se encontrÃ³ token de autenticaciÃ³n');
+      throw new Error('No se encontrÃ³ token de autenticaciÃ³n');
     }
     // Quitar el Content-Type para FormData
     return new HttpHeaders({

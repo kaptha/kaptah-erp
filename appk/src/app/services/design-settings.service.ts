@@ -1,4 +1,4 @@
-import { Injectable } from '@angular/core';
+﻿import { Injectable } from '@angular/core';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Observable, throwError, of, BehaviorSubject } from 'rxjs';
 import { catchError, map } from 'rxjs/operators';
@@ -8,43 +8,43 @@ export interface DesignSettings {
   invoiceDesignId?: string;
   deliveryNoteDesignId?: string;
   quoteDesignId?: string;
-  cfdiDesignId?: string; // ⭐ AGREGAR
+  cfdiDesignId?: string; // â­ AGREGAR
 }
 
 @Injectable({
   providedIn: 'root'
 })
 export class DesignSettingsService {
-  private apiUrl = 'http://localhost:3000/api/design';
+  private apiUrl = 'https://kaptah-erp-production.up.railway.app/api/design';
   private selectedDesign = new BehaviorSubject<string>(
     localStorage.getItem('selectedDesign') || 'minimal'
   );
 
-  // Diseños predeterminados
+  // DiseÃ±os predeterminados
   private defaultSettings: DesignSettings = {
     invoiceDesignId: 'classic-invoice',
     deliveryNoteDesignId: 'classic-delivery',
     quoteDesignId: 'classic-quote'
   };
 
-  // Definición de diseños disponibles
+  // DefiniciÃ³n de diseÃ±os disponibles
   private availableDesigns = {
     invoice: [
-      { id: 'classic-invoice', name: 'Clásico' },
+      { id: 'classic-invoice', name: 'ClÃ¡sico' },
       { id: 'modern-invoice', name: 'Moderno' },
       { id: 'minimal-invoice', name: 'Minimalista' },
       { id: 'professional-invoice', name: 'Profesional' },
       { id: 'creative-invoice', name: 'Creativo' }
     ],
     deliveryNote: [
-      { id: 'classic-delivery', name: 'Clásico' },
+      { id: 'classic-delivery', name: 'ClÃ¡sico' },
       { id: 'modern-delivery', name: 'Moderno' },
       { id: 'minimal-delivery', name: 'Minimalista' },
       { id: 'professional-delivery', name: 'Profesional' },
       { id: 'creative-delivery', name: 'Creativo' }
     ],
     quote: [
-      { id: 'classic-quote', name: 'Clásico' },
+      { id: 'classic-quote', name: 'ClÃ¡sico' },
       { id: 'modern-quote', name: 'Moderno' },
       { id: 'minimal-quote', name: 'Minimalista' },
       { id: 'professional-quote', name: 'Profesional' },
@@ -62,8 +62,8 @@ export class DesignSettingsService {
   private getHeaders(): HttpHeaders {
     const token = localStorage.getItem('idToken');
     if (!token) {
-      console.error('No se encontró token de autenticación');
-      throw new Error('No se encontró token de autenticación');
+      console.error('No se encontrÃ³ token de autenticaciÃ³n');
+      throw new Error('No se encontrÃ³ token de autenticaciÃ³n');
     }
     return new HttpHeaders({
       'Authorization': `Bearer ${token}`,
@@ -88,7 +88,7 @@ export class DesignSettingsService {
     return this.selectedDesign.value;
   }
 
-  // Obtener configuración actual del usuario
+  // Obtener configuraciÃ³n actual del usuario
   getUserDesignSettings(): Observable<DesignSettings> {
     try {
       const headers = this.getHeaders();
@@ -105,7 +105,7 @@ export class DesignSettingsService {
     }
   }
 
-  // Guardar un nuevo diseño seleccionado
+  // Guardar un nuevo diseÃ±o seleccionado
   saveDesignSetting(documentType: DocumentType, designId: string): Observable<any> {
     try {
       const headers = this.getHeaders();
@@ -122,7 +122,7 @@ export class DesignSettingsService {
   }
 
   /**
-   * Obtener el diseño apropiado según el tipo de documento
+   * Obtener el diseÃ±o apropiado segÃºn el tipo de documento
    */
   getDesignForDocumentType(documentType: DocumentType, settings?: DesignSettings): string {
     if (!settings) {
@@ -144,7 +144,7 @@ export class DesignSettingsService {
   }
 
   /**
-   * Obtener todos los diseños disponibles para un tipo de documento
+   * Obtener todos los diseÃ±os disponibles para un tipo de documento
    */
   getAvailableDesignsForType(documentType: DocumentType): {id: string, name: string}[] {
     switch(documentType) {
@@ -161,7 +161,7 @@ export class DesignSettingsService {
   }
 
   /**
-   * Obtener el nombre amigable de un diseño según su ID y tipo
+   * Obtener el nombre amigable de un diseÃ±o segÃºn su ID y tipo
    */
   getDesignName(designId: string, documentType: DocumentType): string {
     const designs = this.getAvailableDesignsForType(documentType);
@@ -174,7 +174,7 @@ export class DesignSettingsService {
     return throwError(() => new Error(error.error?.message || 'Error desconocido'));
   }
 
-  // ⭐ MÉTODO HELPER PARA OBTENER SETTINGS DE FORMA SÍNCRONA
+  // â­ MÃ‰TODO HELPER PARA OBTENER SETTINGS DE FORMA SÃNCRONA
   async getSettings(): Promise<DesignSettings> {
     try {
       return await this.getUserDesignSettings().toPromise() || this.defaultSettings;

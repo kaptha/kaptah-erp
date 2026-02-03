@@ -1,4 +1,4 @@
-import { Injectable } from '@angular/core';
+﻿import { Injectable } from '@angular/core';
 import { HttpClient, HttpEvent, HttpRequest, HttpHeaders } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { timeout } from 'rxjs/operators';
@@ -7,20 +7,20 @@ import { timeout } from 'rxjs/operators';
   providedIn: 'root'
 })
 export class LogoService {
-  private apiUrl = 'http://localhost:3000/api/logos';
+  private apiUrl = 'https://kaptah-erp-production.up.railway.app/api/logos';
 
   constructor(private http: HttpClient) {}
 
   /**
-   * Obtiene los encabezados con el token de autenticación
+   * Obtiene los encabezados con el token de autenticaciÃ³n
    */
   private getHeaders(): HttpHeaders {
     const token = localStorage.getItem('idToken');
     if (!token) {
-      console.error('No se encontró token de autenticación');
-      throw new Error('No se encontró token de autenticación');
+      console.error('No se encontrÃ³ token de autenticaciÃ³n');
+      throw new Error('No se encontrÃ³ token de autenticaciÃ³n');
     }
-    // Quitamos el Content-Type para permitir que FormData lo establezca automáticamente
+    // Quitamos el Content-Type para permitir que FormData lo establezca automÃ¡ticamente
     return new HttpHeaders({
       'Authorization': `Bearer ${token}`
     });

@@ -1,4 +1,4 @@
-import { Injectable } from '@angular/core';
+﻿import { Injectable } from '@angular/core';
 import { HttpClient, HttpHeaders, HttpErrorResponse } from '@angular/common/http';
 import { Observable, from, throwError, tap } from 'rxjs';
 import { switchMap, catchError, retry, map } from 'rxjs/operators';
@@ -12,7 +12,7 @@ import { UsersService } from './users.service';
   providedIn: 'root'
 })
 export class ApibizService {
-  private apiUrl = 'http://localhost:3000/api'; 
+  private apiUrl = 'https://kaptah-erp-production.up.railway.app/api'; 
 
   constructor(
     private http: HttpClient,
@@ -22,8 +22,8 @@ export class ApibizService {
   private getHeaders(): HttpHeaders {
     const token = localStorage.getItem('idToken');
     if (!token) {
-      console.error('No se encontró token de autenticación');
-      throw new Error('No se encontró token de autenticación');
+      console.error('No se encontrÃ³ token de autenticaciÃ³n');
+      throw new Error('No se encontrÃ³ token de autenticaciÃ³n');
     }
     return new HttpHeaders({
       'Authorization': `Bearer ${token}`,
@@ -34,13 +34,13 @@ export class ApibizService {
   getClients(): Observable<Cliente[]> {
     const idToken = localStorage.getItem('idToken');
     if (!idToken) {
-      return throwError(() => new Error('No se encontró el token de autenticación'));
+      return throwError(() => new Error('No se encontrÃ³ el token de autenticaciÃ³n'));
     }
     
     return this.usersService.getUserByToken(idToken).pipe(
       switchMap(user => {
         if (!user) {
-          throw new Error('No se encontró el usuario');
+          throw new Error('No se encontrÃ³ el usuario');
         }
         console.log('userId:', user.id);
         const headers = this.getHeaders();
@@ -88,13 +88,13 @@ export class ApibizService {
   getEmpleados(): Observable<Empleado[]> {
     const idToken = localStorage.getItem('idToken');
     if (!idToken) {
-      return throwError(() => new Error('No se encontró el token de autenticación'));
+      return throwError(() => new Error('No se encontrÃ³ el token de autenticaciÃ³n'));
     }
     
     return this.usersService.getUserByToken(idToken).pipe(
       switchMap(user => {
         if (!user) {
-          throw new Error('No se encontró el usuario');
+          throw new Error('No se encontrÃ³ el usuario');
         }
         console.log('userId:', user.id);
         const headers = this.getHeaders();
@@ -137,13 +137,13 @@ export class ApibizService {
   getProveedores(): Observable<Proveedor[]> {
     const idToken = localStorage.getItem('idToken');
     if (!idToken) {
-      return throwError(() => new Error('No se encontró el token de autenticación'));
+      return throwError(() => new Error('No se encontrÃ³ el token de autenticaciÃ³n'));
     }
     
     return this.usersService.getUserByToken(idToken).pipe(
       switchMap(user => {
         if (!user) {
-          throw new Error('No se encontró el usuario');
+          throw new Error('No se encontrÃ³ el usuario');
         }
         console.log('userId:', user.id);
         const headers = this.getHeaders();
@@ -164,15 +164,15 @@ export class ApibizService {
 
   updateProveedor(id: number, proveedorData: any): Observable<Proveedor> {
     const headers = this.getHeaders();
-    // Eliminar campos que no deben enviarse en la actualización
+    // Eliminar campos que no deben enviarse en la actualizaciÃ³n
     const { 
       ID, 
       userId, 
       fecha_registro, 
-      Fecha_Registro,  // ← También eliminar la versión con mayúscula
+      Fecha_Registro,  // â† TambiÃ©n eliminar la versiÃ³n con mayÃºscula
       activo, 
       isEditing,
-      estado_proveedor, // ← Este también puede causar problemas
+      estado_proveedor, // â† Este tambiÃ©n puede causar problemas
       pais,
       ...cleanData 
     } = proveedorData;
@@ -194,17 +194,17 @@ export class ApibizService {
       catchError(this.handleError)
     );
   }
-  // Método para obtener términos y condiciones
+  // MÃ©todo para obtener tÃ©rminos y condiciones
 getTerminosCondiciones(): Observable<{terminos: string}> {
   const idToken = localStorage.getItem('idToken');
   if (!idToken) {
-    return throwError(() => new Error('No se encontró el token de autenticación'));
+    return throwError(() => new Error('No se encontrÃ³ el token de autenticaciÃ³n'));
   }
   
   return this.usersService.getUserByToken(idToken).pipe(
     switchMap(user => {
       if (!user || !user.firebaseUid) {
-        throw new Error('No se encontró el usuario o firebaseUid');
+        throw new Error('No se encontrÃ³ el usuario o firebaseUid');
       }
       const headers = this.getHeaders();
       return this.http.get<{terminos: string}>(
@@ -216,17 +216,17 @@ getTerminosCondiciones(): Observable<{terminos: string}> {
   );
 }
 
-// Método para actualizar términos y condiciones
+// MÃ©todo para actualizar tÃ©rminos y condiciones
 updateTerminosCondiciones(terminos: string): Observable<any> {
   const idToken = localStorage.getItem('idToken');
   if (!idToken) {
-    return throwError(() => new Error('No se encontró el token de autenticación'));
+    return throwError(() => new Error('No se encontrÃ³ el token de autenticaciÃ³n'));
   }
   
   return this.usersService.getUserByToken(idToken).pipe(
     switchMap(user => {
       if (!user || !user.firebaseUid) {
-        throw new Error('No se encontró el usuario o firebaseUid');
+        throw new Error('No se encontrÃ³ el usuario o firebaseUid');
       }
       const headers = this.getHeaders();
       return this.http.put(

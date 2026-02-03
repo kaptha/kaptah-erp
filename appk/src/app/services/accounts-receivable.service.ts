@@ -1,4 +1,4 @@
-import { Injectable } from '@angular/core';
+﻿import { Injectable } from '@angular/core';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Observable, throwError, from } from 'rxjs';
 import { tap, catchError, switchMap, map } from 'rxjs/operators';
@@ -22,42 +22,42 @@ export interface AccountReceivable {
   updated_at: string;
 }
 
-// ✅ DTO CORREGIDO para coincidir con el backend
+// âœ… DTO CORREGIDO para coincidir con el backend
 export interface CreateAccountReceivableDto {
   // Campos requeridos que coinciden con el backend
-  customerId: number;           // ✅ CAMBIO: De string a number
-  customerName: string;         // ✅ AGREGADO: Campo requerido
-  customerRfc: string;          // ✅ AGREGADO: Campo requerido
+  customerId: number;           // âœ… CAMBIO: De string a number
+  customerName: string;         // âœ… AGREGADO: Campo requerido
+  customerRfc: string;          // âœ… AGREGADO: Campo requerido
   totalAmount: number;
   creditDays: number;
   dueDate: string;              // Formato ISO: YYYY-MM-DD
-  concept: string;              // ✅ AGREGADO: Campo requerido
+  concept: string;              // âœ… AGREGADO: Campo requerido
   
   // Campos opcionales
-  partnerId?: number;           // ✅ AGREGADO: Campo opcional
-  issueDate?: string;           // ✅ AGREGADO: Campo opcional
+  partnerId?: number;           // âœ… AGREGADO: Campo opcional
+  issueDate?: string;           // âœ… AGREGADO: Campo opcional
   documentId?: string;
-  documentNumber?: string;      // ✅ AGREGADO: Campo opcional
-  documentType?: string;        // ✅ AGREGADO: Campo opcional
-  documentReference?: string;   // ✅ AGREGADO: Campo opcional
-  notes?: string;               // ✅ AGREGADO: Campo opcional
+  documentNumber?: string;      // âœ… AGREGADO: Campo opcional
+  documentType?: string;        // âœ… AGREGADO: Campo opcional
+  documentReference?: string;   // âœ… AGREGADO: Campo opcional
+  notes?: string;               // âœ… AGREGADO: Campo opcional
 }
 
 export interface UpdateAccountReceivableDto {
-  customerId?: number;          // ✅ CAMBIO: De string a number
-  customerName?: string;        // ✅ AGREGADO
-  customerRfc?: string;         // ✅ AGREGADO
+  customerId?: number;          // âœ… CAMBIO: De string a number
+  customerName?: string;        // âœ… AGREGADO
+  customerRfc?: string;         // âœ… AGREGADO
   totalAmount?: number;
   creditDays?: number;
-  creditRemainingDays?: number; // ✅ AGREGADO
+  creditRemainingDays?: number; // âœ… AGREGADO
   dueDate?: string;
-  issueDate?: string;           // ✅ AGREGADO
-  concept?: string;             // ✅ AGREGADO
+  issueDate?: string;           // âœ… AGREGADO
+  concept?: string;             // âœ… AGREGADO
   documentId?: string;
-  documentNumber?: string;      // ✅ AGREGADO
-  documentType?: string;        // ✅ AGREGADO
-  documentReference?: string;   // ✅ AGREGADO
-  notes?: string;               // ✅ AGREGADO
+  documentNumber?: string;      // âœ… AGREGADO
+  documentType?: string;        // âœ… AGREGADO
+  documentReference?: string;   // âœ… AGREGADO
+  notes?: string;               // âœ… AGREGADO
 }
 
 export interface PaymentData {
@@ -73,7 +73,7 @@ export interface PaymentData {
   providedIn: 'root'
 })
 export class AccountsReceivableService {
-  private apiUrl = 'http://localhost:3003/accounts-receivable';
+  private apiUrl = 'https://imaginative-flexibility-production-c3f2.up.railway.app/accounts-receivable';
 
   constructor(
     private http: HttpClient,
@@ -103,7 +103,7 @@ export class AccountsReceivableService {
    * Crea una nueva cuenta por cobrar
    */
   create(data: CreateAccountReceivableDto): Observable<AccountReceivable> {
-    // ✅ VALIDACIÓN CORREGIDA: Validar correctamente los campos
+    // âœ… VALIDACIÃ“N CORREGIDA: Validar correctamente los campos
     console.log('Enviando datos al backend:', data);
     
     // Validar campos requeridos con verificaciones correctas
@@ -149,7 +149,7 @@ export class AccountsReceivableService {
     );
   }
 
-  // ... resto de los métodos permanecen igual
+  // ... resto de los mÃ©todos permanecen igual
   getAll(): Observable<AccountReceivable[]> {
     return this.getHeaders().pipe(
       switchMap((headers: HttpHeaders) => {
@@ -236,9 +236,9 @@ sendPaymentReminder(accountId: string, emailData: {
         { headers }
       );
     }),
-    tap(response => console.log('✅ Recordatorio enviado:', response)),
+    tap(response => console.log('âœ… Recordatorio enviado:', response)),
     catchError(error => {
-      console.error('❌ Error enviando recordatorio:', error);
+      console.error('âŒ Error enviando recordatorio:', error);
       return throwError(() => error);
     })
   );
@@ -256,9 +256,9 @@ sendOverdueReminders(): Observable<{ sent: number; failed: number; results: any[
         { headers }
       );
     }),
-    tap(response => console.log('✅ Recordatorios masivos enviados:', response)),
+    tap(response => console.log('âœ… Recordatorios masivos enviados:', response)),
     catchError(error => {
-      console.error('❌ Error enviando recordatorios masivos:', error);
+      console.error('âŒ Error enviando recordatorios masivos:', error);
       return throwError(() => error);
     })
   );
