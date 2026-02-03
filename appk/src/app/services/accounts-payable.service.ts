@@ -2,7 +2,7 @@ import { Injectable } from '@angular/core';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Observable, throwError, from } from 'rxjs';
 import { tap, catchError, switchMap, map } from 'rxjs/operators';
-import { environment } from 'src/environments/environment';
+import { environment } from '../environments/environment';
 import { AuthService } from './auth.service';
 import { AuthResponse } from '../models/auth.model';
 
@@ -106,7 +106,7 @@ export interface PaymentData {
   providedIn: 'root'
 })
 export class AccountsPayableService {
-  private apiUrl = 'http://localhost:3003/accounts-payable';
+  private apiUrl = `${environment.financeApiUrl}/accounts-payable`;
 
   constructor(
     private http: HttpClient,
