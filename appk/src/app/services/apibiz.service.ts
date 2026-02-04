@@ -37,13 +37,17 @@ export class ApibizService {
     return throwError(() => new Error('No se encontró el token de autenticación'));
   }
   
-  const headers = this.getHeaders();
-  
-  // CAMBIO: Usar /clients/all en lugar de /clients/:id
-  // Este endpoint usa el firebaseUid del token JWT automáticamente
-  return this.http.get<Cliente[]>(`${this.apiUrl}/clients/all`, { headers }).pipe(
+  return this.usersService.getUserByToken(idToken).pipe(
+    switchMap(user => {
+      if (!user) {
+        throw new Error ('No se encontro el usuario');
+        {
+          console.log('userId:', user.id);
+          const headers = this.getHeaders();
+          return this.http.get<Cliente[]>(`${this.apiUrl}/clients/${user.id}`, { headers });
+        }),
     catchError(this.handleError)
-  );
+    );
 }
 
   createClient(clientData: Omit<Cliente, 'ID'>): Observable<Cliente> {
