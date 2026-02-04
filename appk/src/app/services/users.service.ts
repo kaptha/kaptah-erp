@@ -190,8 +190,9 @@ export class UsersService {
         return null;
       }
       const users = Object.keys(response).map(key => ({
-        id: key,
-        ...response[key]
+      id: response[key].firebaseUid,
+      realtimeDbKey: key,
+      ...response[key]
       }));
       return users.length > 0 ? users[0] : null;
     })
