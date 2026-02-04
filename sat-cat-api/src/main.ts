@@ -27,7 +27,11 @@ async function bootstrap() {
       'https://app.kaptah.mx',
       'https://kaptah-git-main-xals-projects.vercel.app',
       'https://kaptah-3w4kxihd3-xals-projects.vercel.app',
+<<<<<<< HEAD
       /https:\/\/.*\.vercel\.app$/
+=======
+      /https:\/\/.*\.vercel\.app`$/
+>>>>>>> 9b52076bad77878568b2caa817bde24afdd1e75b
     ],
     methods: 'GET,HEAD,PUT,PATCH,POST,DELETE,OPTIONS',
     allowedHeaders: ['Origin', 'X-Requested-With', 'Content-Type', 'Accept', 'Authorization', 'X-Firebase-Token'],
@@ -40,7 +44,11 @@ async function bootstrap() {
   
   // Iniciar servidor HTTP
   await app.listen(3001);
+<<<<<<< HEAD
   console.log(`Application is running on: ${await app.getUrl()}`);
+=======
+  console.log(\`Application is running on: \${await app.getUrl()}\`);
+>>>>>>> 9b52076bad77878568b2caa817bde24afdd1e75b
 }
 
 bootstrap();
