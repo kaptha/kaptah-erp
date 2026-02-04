@@ -12,7 +12,7 @@ async function bootstrap() {
     transport: Transport.TCP,
     options: {
       host: '0.0.0.0',
-      port: 3002, // Cambiado a 3002 para el microservicio TCP
+      port: 3002,
     },
   });
   
@@ -27,7 +27,7 @@ async function bootstrap() {
       'https://app.kaptah.mx',
       'https://kaptah-git-main-xals-projects.vercel.app',
       'https://kaptah-3w4kxihd3-xals-projects.vercel.app',
-      /https:\/\/.*\.vercel\.app$/ // Permite cualquier URL de Vercel
+      /https:\/\/.*\.vercel\.app$/
     ],
     methods: 'GET,HEAD,PUT,PATCH,POST,DELETE,OPTIONS',
     allowedHeaders: ['Origin', 'X-Requested-With', 'Content-Type', 'Accept', 'Authorization', 'X-Firebase-Token'],
@@ -40,7 +40,7 @@ async function bootstrap() {
   
   // Iniciar servidor HTTP
   await app.listen(3001);
-  console.log(\Application is running on: \\);
+  console.log(`Application is running on: ${await app.getUrl()}`);
 }
 
 bootstrap();
