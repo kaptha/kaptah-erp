@@ -67,7 +67,7 @@ import { UserPostgres } from './users/entities/user.postgres.entity';
   controllers: [AppController],
   providers: [AppService],
 })
-export class AppModule implements NestModule {
+export class AppModule {
   //configure(consumer: MiddlewareConsumer) {
     //consumer
       //.apply(CorsMiddleware)
