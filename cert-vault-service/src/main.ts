@@ -1,4 +1,4 @@
-import { NestFactory } from '@nestjs/core';
+﻿import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
 import { ValidationPipe } from '@nestjs/common';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
@@ -11,9 +11,9 @@ async function bootstrap() {
   const configService = app.get(ConfigService);
 
   app.use((req, res, next) => {
-    console.log(`📥 Request recibido: ${req.method} ${req.url}`);
-    console.log(`📍 Origin: ${req.headers.origin}`);
-    console.log(`🎫 Auth: ${req.headers.authorization?.substring(0, 30)}...`);
+    console.log(\🔥 Request recibido: \ \\);
+    console.log(\📍 Origin: \\);
+    console.log(\🎫 Auth: \...\);
     next();
   });
 
@@ -21,25 +21,22 @@ async function bootstrap() {
   app.use(helmet());
   app.use(compression());
 
-  // Configuración de CORS
+  // Configuración de CORS - ACTUALIZADO
   app.enableCors({
-  origin: (origin, callback) => {
-    const allowedOrigins = [
-      'http://localhost:4200',  // Frontend
-      'http://localhost:4000',  // Sales API
-    ];
-    
-    // Permitir requests sin origin (como Postman o backend-to-backend)
-    if (!origin || allowedOrigins.includes(origin)) {
-      callback(null, true);
-    } else {
-      callback(new Error('Not allowed by CORS'));
-    }
-  },
-  methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH'],
-  credentials: true,
-  allowedHeaders: ['Content-Type', 'Authorization', 'X-Firebase-Token'],
-});
+    origin: [
+      'http://localhost:4200',
+      'http://127.0.0.1:4200',
+      'http://localhost:4000',
+      'https://app.kaptah.mx',
+      'https://kaptah-git-main-xals-projects.vercel.app',
+      'https://kaptah-3w4kxihd3-xals-projects.vercel.app',
+      /https:\/\/.*\.vercel\.app$/
+    ],
+    methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
+    credentials: true,
+    allowedHeaders: ['Content-Type', 'Authorization', 'X-Firebase-Token'],
+    exposedHeaders: ['Content-Disposition']
+  });
 
   // Validación global
   app.useGlobalPipes(new ValidationPipe({
@@ -79,10 +76,10 @@ async function bootstrap() {
   // Puerto desde configuración
   const port = configService.get('PORT', 3004);
   await app.listen(port);
-  
-  console.log(`Application running on port ${port}`);
+
+  console.log(\Application running on port \\);
   if (process.env.NODE_ENV !== 'production') {
-    console.log(`Swagger documentation available at http://localhost:${port}/api/docs`);
+    console.log(\Swagger documentation available at http://localhost:\/api/docs\);
   }
 }
 

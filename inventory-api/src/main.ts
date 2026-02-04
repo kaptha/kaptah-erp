@@ -1,4 +1,4 @@
-import './firebase/firebase.config';
+﻿import './firebase/firebase.config';
 import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
 import { ConfigService } from '@nestjs/config';
@@ -9,17 +9,20 @@ async function bootstrap() {
   const app = await NestFactory.create(AppModule);
   const configService = app.get(ConfigService);
 
-  // Obtener y parsear los orígenes permitidos desde las variables de entorno
-  const allowedOrigins = configService
-    .get<string>('ALLOWED_ORIGINS')
-    ?.split(',') || ['http://localhost:4200'];
-
-  // Configuración de CORS con múltiples orígenes
+  // Configuración de CORS - ACTUALIZADO
   app.enableCors({
-    origin: allowedOrigins,
+    origin: [
+      'http://localhost:4200',
+      'http://127.0.0.1:4200',
+      'https://app.kaptah.mx',
+      'https://kaptah-git-main-xals-projects.vercel.app',
+      'https://kaptah-3w4kxihd3-xals-projects.vercel.app',
+      /https:\/\/.*\.vercel\.app$/
+    ],
     methods: 'GET,HEAD,PUT,PATCH,POST,DELETE,OPTIONS',
     credentials: true,
-    allowedHeaders: 'Content-Type, Accept, Authorization',
+    allowedHeaders: ['Content-Type', 'Accept', 'Authorization', 'X-Firebase-Token'],
+    exposedHeaders: ['Content-Disposition']
   });
 
   // Configuración de Validación Global
@@ -53,11 +56,9 @@ async function bootstrap() {
       },
       'access-token',
     )
-    // Tags para Inventario
     .addTag('categories', 'Category management endpoints')
     .addTag('products', 'Product management endpoints')
     .addTag('inventory', 'Inventory management endpoints')
-    // Tags para Servicios
     .addTag('services', 'Services management endpoints')
     .addTag('service-categories', 'Service categories management endpoints')
     .addTag('service-prices', 'Service pricing management endpoints')
@@ -66,7 +67,6 @@ async function bootstrap() {
 
   const document = SwaggerModule.createDocument(app, config);
 
-  // Configuración personalizada de Swagger UI
   SwaggerModule.setup('docs', app, document, {
     swaggerOptions: {
       persistAuthorization: true,
@@ -78,19 +78,13 @@ async function bootstrap() {
     },
   });
 
-  // Puerto de la aplicación
   const port = configService.get<number>('PORT') || 4005;
   const nodeEnv = configService.get<string>('NODE_ENV') || 'development';
 
   await app.listen(port);
-  console.log(`Application is running in ${nodeEnv} mode`);
-  console.log(`Server running on: ${await app.getUrl()}`);
-  console.log(`Swagger documentation available at: ${await app.getUrl()}/docs`);
-
-  // Log de orígenes permitidos en modo desarrollo
-  if (nodeEnv === 'development') {
-    console.log('Allowed origins:', allowedOrigins);
-  }
+  console.log(\Application is running in \ mode\);
+  console.log(\Server running on: \\);
+  console.log(\Swagger documentation available at: \/docs\);
 }
 
 bootstrap();

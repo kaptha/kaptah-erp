@@ -1,4 +1,4 @@
-import { NestFactory } from '@nestjs/core';
+﻿import { NestFactory } from '@nestjs/core';
 import { Logger } from '@nestjs/common';
 import { MicroserviceOptions, Transport } from '@nestjs/microservices';
 import { AppModule } from './app.module';
@@ -15,17 +15,32 @@ async function bootstrap() {
       port: 3002, // Cambiado a 3002 para el microservicio TCP
     },
   });
-
+  
   // Configurar logger
   app.useLogger(new Logger('debug'));
-
+  
+  // Configurar CORS
+  app.enableCors({
+    origin: [
+      'http://localhost:4200',
+      'http://127.0.0.1:4200',
+      'https://app.kaptah.mx',
+      'https://kaptah-git-main-xals-projects.vercel.app',
+      'https://kaptah-3w4kxihd3-xals-projects.vercel.app',
+      /https:\/\/.*\.vercel\.app$/ // Permite cualquier URL de Vercel
+    ],
+    methods: 'GET,HEAD,PUT,PATCH,POST,DELETE,OPTIONS',
+    allowedHeaders: ['Origin', 'X-Requested-With', 'Content-Type', 'Accept', 'Authorization', 'X-Firebase-Token'],
+    credentials: true,
+    exposedHeaders: ['Content-Disposition']
+  });
+  
   // Iniciar microservicios
   await app.startAllMicroservices();
-  app.enableCors();
+  
   // Iniciar servidor HTTP
   await app.listen(3001);
-  
-  console.log(`Application is running on: ${await app.getUrl()}`);
+  console.log(\Application is running on: \\);
 }
 
 bootstrap();

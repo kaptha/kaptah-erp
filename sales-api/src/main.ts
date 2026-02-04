@@ -1,4 +1,4 @@
-import { NestFactory } from '@nestjs/core';
+﻿import { NestFactory } from '@nestjs/core';
 import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger';
 import { AppModule } from './app.module';
 import { Logger } from '@nestjs/common';
@@ -6,15 +6,23 @@ import * as admin from 'firebase-admin';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule, {
-    logger: ['error', 'warn', 'log', 'debug', 'verbose'], // ⭐ Activar debug
+    logger: ['error', 'warn', 'log', 'debug', 'verbose'],
   });
 
-
-  // Agregar CORS
+  // Configuración de CORS - ACTUALIZADO
   app.enableCors({
-    origin: 'http://localhost:4200',
-    methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
-    credentials: true
+    origin: [
+      'http://localhost:4200',
+      'http://127.0.0.1:4200',
+      'https://app.kaptah.mx',
+      'https://kaptah-git-main-xals-projects.vercel.app',
+      'https://kaptah-3w4kxihd3-xals-projects.vercel.app',
+      /https:\/\/.*\.vercel\.app$/
+    ],
+    methods: 'GET,HEAD,PUT,PATCH,POST,DELETE,OPTIONS',
+    credentials: true,
+    allowedHeaders: ['Content-Type', 'Authorization', 'X-Firebase-Token'],
+    exposedHeaders: ['Content-Disposition']
   });
 
   const config = new DocumentBuilder()

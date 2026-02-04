@@ -1,4 +1,4 @@
-import './firebase/firebase-admin';
+﻿import './firebase/firebase-admin';
 import { join } from 'path';
 import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
@@ -10,20 +10,27 @@ async function bootstrap() {
   
   const app = await NestFactory.create<NestExpressApplication>(AppModule);
   
-  // Configurar carpeta de archivos estáticos
+  // Configurar carpeta de archivos estÃ¡ticos
   app.useStaticAssets(join(process.cwd(), 'uploads'), {
     prefix: '/uploads',
   });
   
   // Configurar CORS (una sola vez)
   app.enableCors({
-    origin: ['http://localhost:4200', 'http://127.0.0.1:4200'], // Incluir ambas variantes
+    origin: [
+      'http://localhost:4200',
+      'http://127.0.0.1:4200',
+      'https://app.kaptah.mx',
+      'https://kaptah-git-main-xals-projects.vercel.app',
+      'https://kaptah-3w4kxihd3-xals-projects.vercel.app',
+      /https:\/\/.*\.vercel\.app$/ // Permite cualquier URL de Vercel
+    ],
     methods: 'GET,HEAD,PUT,PATCH,POST,DELETE,OPTIONS',
-    allowedHeaders: ['Origin', 'X-Requested-With', 'Content-Type', 'Accept', 'Authorization'],
+    allowedHeaders: ['Origin', 'X-Requested-With', 'Content-Type', 'Accept', 'Authorization', 'X-Firebase-Token'],
     credentials: true,
     exposedHeaders: ['Content-Disposition']
   });
-  // Configurar archivos estáticos para permitir CORS
+  // Configurar archivos estÃ¡ticos para permitir CORS
 app.useStaticAssets(join(process.cwd(), 'uploads'), {
   prefix: '/uploads',
   setHeaders: (res, path, stat) => {
