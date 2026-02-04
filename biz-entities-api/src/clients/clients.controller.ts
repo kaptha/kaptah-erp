@@ -69,6 +69,11 @@ export class ClientsController {
     }
     return client;
   }
+  @Get('firebase/:firebaseUid')
+async findByFirebaseUid(@Param('firebaseUid') firebaseUid: string) {
+  console.log('📋 GET /clients/firebase/:firebaseUid - firebaseUid:', firebaseUid);
+  return this.clientsService.findAllByUser(firebaseUid);
+}
 
   // 👇 2. DESPUÉS: GET con parámetro (más genérico)
   @Get(':realtimeDbKey')

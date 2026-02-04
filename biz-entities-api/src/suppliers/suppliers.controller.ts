@@ -52,6 +52,11 @@ export class SuppliersController {
   async findAll(@Param('realtimeDbKey') realtimeDbKey: string) {
     return this.suppliersService.findAllByRealtimeDbKey(realtimeDbKey);
   }
+  @Get('firebase/:firebaseUid')
+async findByFirebaseUid(@Param('firebaseUid') firebaseUid: string) {
+  console.log('📋 GET /suppliers/firebase/:firebaseUid - firebaseUid:', firebaseUid);
+  return this.suppliersService.findAllByUser(firebaseUid);
+}
 
   @Put(':id')
   async update(
