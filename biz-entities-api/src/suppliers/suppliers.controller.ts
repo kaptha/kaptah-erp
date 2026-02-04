@@ -47,17 +47,16 @@ export class SuppliersController {
     }
     return this.suppliersService.create(createSupplierDto, req.user.firebaseUid);
   }
-
-  @Get(':realtimeDbKey')
-  async findAll(@Param('realtimeDbKey') realtimeDbKey: string) {
-    return this.suppliersService.findAllByRealtimeDbKey(realtimeDbKey);
-  }
-  @Get('firebase/:firebaseUid')
+@Get('firebase/:firebaseUid')
 async findByFirebaseUid(@Param('firebaseUid') firebaseUid: string) {
   console.log('📋 GET /suppliers/firebase/:firebaseUid - firebaseUid:', firebaseUid);
   return this.suppliersService.findAllByUser(firebaseUid);
 }
-
+  @Get(':realtimeDbKey')
+  async findAll(@Param('realtimeDbKey') realtimeDbKey: string) {
+    return this.suppliersService.findAllByRealtimeDbKey(realtimeDbKey);
+  }
+  
   @Put(':id')
   async update(
     @Param('id', ParseIntPipe) id: number,
