@@ -4,10 +4,8 @@ import { MicroserviceOptions, Transport } from '@nestjs/microservices';
 import { AppModule } from './app.module';
 
 async function bootstrap() {
-  // Crear aplicación HTTP
   const app = await NestFactory.create(AppModule);
   
-  // Configurar microservicio TCP
   app.connectMicroservice<MicroserviceOptions>({
     transport: Transport.TCP,
     options: {
@@ -16,10 +14,8 @@ async function bootstrap() {
     },
   });
   
-  // Configurar logger
   app.useLogger(new Logger('debug'));
   
-  // Configurar CORS
   app.enableCors({
     origin: [
       'http://localhost:4200',
@@ -27,11 +23,7 @@ async function bootstrap() {
       'https://app.kaptah.mx',
       'https://kaptah-git-main-xals-projects.vercel.app',
       'https://kaptah-3w4kxihd3-xals-projects.vercel.app',
-<<<<<<< HEAD
       /https:\/\/.*\.vercel\.app$/
-=======
-      /https:\/\/.*\.vercel\.app`$/
->>>>>>> 9b52076bad77878568b2caa817bde24afdd1e75b
     ],
     methods: 'GET,HEAD,PUT,PATCH,POST,DELETE,OPTIONS',
     allowedHeaders: ['Origin', 'X-Requested-With', 'Content-Type', 'Accept', 'Authorization', 'X-Firebase-Token'],
@@ -39,16 +31,9 @@ async function bootstrap() {
     exposedHeaders: ['Content-Disposition']
   });
   
-  // Iniciar microservicios
   await app.startAllMicroservices();
-  
-  // Iniciar servidor HTTP
   await app.listen(3001);
-<<<<<<< HEAD
   console.log(`Application is running on: ${await app.getUrl()}`);
-=======
-  console.log(\`Application is running on: \${await app.getUrl()}\`);
->>>>>>> 9b52076bad77878568b2caa817bde24afdd1e75b
 }
 
 bootstrap();
