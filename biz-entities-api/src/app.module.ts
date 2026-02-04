@@ -1,7 +1,7 @@
 import { Module, NestModule, MiddlewareConsumer } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { CorsMiddleware } from "./common/middlewares/cors.middleware";
+//import { CorsMiddleware } from "./common/middlewares/cors.middleware";
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { ClientsModule } from './clients/clients.module';
@@ -68,9 +68,9 @@ import { UserPostgres } from './users/entities/user.postgres.entity';
   providers: [AppService],
 })
 export class AppModule implements NestModule {
-  configure(consumer: MiddlewareConsumer) {
-    consumer
-      .apply(CorsMiddleware)
-      .forRoutes('*');
-  }
+  //configure(consumer: MiddlewareConsumer) {
+    //consumer
+      //.apply(CorsMiddleware)
+      //.forRoutes('*');
+  //}
 }
