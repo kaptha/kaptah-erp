@@ -100,6 +100,14 @@ export class EmployeesService {
     }
     return this.employeesRepository.find({ where: { userId: user.ID } });
   }
+  async findAllByUser(firebaseUid: string): Promise<Employee[]> {
+  const user = await this.usersService.findUserByFirebaseUid(firebaseUid);
+  if (!user) {
+    throw new NotFoundException('Usuario no encontrado');
+  }
+
+  return this.employeesRepository.find({ where: { userId: user.ID } });
+}
 
   async update(id: number, updateEmployeeDto: UpdateEmployeeDto): Promise<Employee> {
     const employee = await this.employeesRepository.findOne({ where: { id } });

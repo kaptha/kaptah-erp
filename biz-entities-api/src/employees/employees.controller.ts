@@ -55,6 +55,11 @@ async findByFirebaseUid(@Param('firebaseUid') firebaseUid: string) {
   console.log('📋 GET /employees/firebase/:firebaseUid - firebaseUid:', firebaseUid);
   return this.employeesService.findAllByUser(firebaseUid);
 }
+@Get('firebase/:firebaseUid')
+async findByFirebaseUid(@Param('firebaseUid') firebaseUid: string) {
+  console.log('📋 GET /employees/firebase/:firebaseUid - firebaseUid:', firebaseUid);
+  return this.employeesService.findAllByUser(firebaseUid);
+}
   @Put(':id')
   async update(
     @Param('id') id: string, 
