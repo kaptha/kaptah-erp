@@ -32,23 +32,23 @@ export class ApibizService {
   }
 
   getClients(): Observable<Cliente[]> {
-  const idToken = localStorage.getItem('idToken');
-  if (!idToken) {
-    return throwError(() => new Error('No se encontró el token de autenticación'));
-  }
-  
-  return this.usersService.getUserByToken(idToken).pipe(
-    switchMap(user => {
-      if (!user) {
-        throw new Error ('No se encontro el usuario');
-        {
-          console.log('userId:', user.id);
-          const headers = this.getHeaders();
-          return this.http.get<Cliente[]>(`${this.apiUrl}/clients/${user.id}`, { headers });
-        }),
-    catchError(this.handleError)
+    const idToken = localStorage.getItem('idToken');
+    if (!idToken) {
+      return throwError(() => new Error('No se encontrÃ³ el token de autenticaciÃ³n'));
+    }
+    
+    return this.usersService.getUserByToken(idToken).pipe(
+      switchMap(user => {
+        if (!user) {
+          throw new Error('No se encontrÃ³ el usuario');
+        }
+        console.log('userId:', user.id);
+        const headers = this.getHeaders();
+        return this.http.get<Cliente[]>(`${this.apiUrl}/clients/${user.id}`, { headers });
+      }),
+      catchError(this.handleError)
     );
-}
+  }
 
   createClient(clientData: Omit<Cliente, 'ID'>): Observable<Cliente> {
     const headers = this.getHeaders();
