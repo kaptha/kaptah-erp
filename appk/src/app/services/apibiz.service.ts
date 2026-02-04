@@ -1,4 +1,4 @@
-﻿import { Injectable } from '@angular/core';
+import { Injectable } from '@angular/core';
 import { HttpClient, HttpHeaders, HttpErrorResponse } from '@angular/common/http';
 import { Observable, from, throwError, tap } from 'rxjs';
 import { switchMap, catchError, retry, map } from 'rxjs/operators';
@@ -47,7 +47,7 @@ export class ApibizService {
       
       console.log('userId:', user.id);
       const headers = this.getHeaders();
-      return this.http.get<Cliente[]>(`${this.apiUrl}/clients/${user.id}`, { headers });
+      return this.http.get<Cliente[]>(`${this.apiUrl}/clients/firebase/${user.id}`, { headers });
     }),
     catchError(this.handleError)
   );
@@ -101,7 +101,7 @@ export class ApibizService {
         }
         console.log('userId:', user.id);
         const headers = this.getHeaders();
-        return this.http.get<Empleado[]>(`${this.apiUrl}/employees/${user.id}`, { headers });
+        return this.http.get<Empleado[]>(`${this.apiUrl}/employees/firebase/${user.id}`, { headers });
       }),
       catchError(this.handleError)
     );
@@ -150,7 +150,7 @@ export class ApibizService {
         }
         console.log('userId:', user.id);
         const headers = this.getHeaders();
-        return this.http.get<Proveedor[]>(`${this.apiUrl}/suppliers/${user.id}`, { headers });
+        return this.http.get<Proveedor[]>(`${this.apiUrl}/suppliers/firebase/${user.id}`, { headers });
       }),
       catchError(this.handleError)
     );
@@ -242,3 +242,4 @@ updateTerminosCondiciones(terminos: string): Observable<any> {
   );
 }
 }
+
