@@ -40,6 +40,11 @@ export class ServiceCategoryController {
     }
     return this.serviceCategoryService.create(createServiceCategoryDto, req.user.firebaseUid);
   }
+  @Get('firebase/:firebaseUid')
+async findByFirebaseUid(@Param('firebaseUid') firebaseUid: string) {
+  console.log('📋 GET /service-categories/firebase/:firebaseUid - firebaseUid:', firebaseUid);
+  return this.serviceCategoryService.findAllByUser(firebaseUid);
+}
 
   @Get()
   async findAll(@Req() req: RequestWithUser) {

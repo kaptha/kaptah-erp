@@ -124,6 +124,11 @@ export class PurchaseOrderController {
       req.user.firebaseUid,
     );
   }
+ @Get('firebase/:firebaseUid')
+async findByFirebaseUid(@Param('firebaseUid') firebaseUid: string) {
+  console.log('📋 GET /purchase-orders/firebase/:firebaseUid - firebaseUid:', firebaseUid);
+  return this.purchaseOrderService.findAllByUser(firebaseUid);
+}
 
   @Get()
   @ApiOperation({ summary: 'Listar todas las órdenes de compra' })

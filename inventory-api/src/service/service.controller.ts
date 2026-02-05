@@ -40,6 +40,11 @@ export class ServiceController {
     }
     return this.serviceService.create(createServiceDto, req.user.firebaseUid);
   }
+  @Get('firebase/:firebaseUid')
+async findByFirebaseUid(@Param('firebaseUid') firebaseUid: string) {
+  console.log('📋 GET /services/firebase/:firebaseUid - firebaseUid:', firebaseUid);
+  return this.serviceService.findAllByUser(firebaseUid);
+}
 
   @Get()
   async findAll(@Req() req: RequestWithUser) {

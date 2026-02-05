@@ -40,6 +40,11 @@ import {
     }
     return this.inventoryItemService.create(createInventoryItemDto, req.user.firebaseUid);
   }
+  @Get('firebase/:firebaseUid')
+async findByFirebaseUid(@Param('firebaseUid') firebaseUid: string) {
+  console.log('📋 GET /inventory-items/firebase/:firebaseUid - firebaseUid:', firebaseUid);
+  return this.inventoryItemService.findAllByUser(firebaseUid);
+}
  
   @Get()
   async findAll(

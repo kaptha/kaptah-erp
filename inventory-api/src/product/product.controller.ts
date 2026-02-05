@@ -41,6 +41,11 @@ export class ProductController {
     }
     return this.productService.create(createProductDto, req.user.firebaseUid);
   }
+  @Get('firebase/:firebaseUid')
+async findByFirebaseUid(@Param('firebaseUid') firebaseUid: string) {
+  console.log('📋 GET /products/firebase/:firebaseUid - firebaseUid:', firebaseUid);
+  return this.productService.findAllByUser(firebaseUid);
+}
 
   @Get()
   async findAll(@Req() req: RequestWithUser) {

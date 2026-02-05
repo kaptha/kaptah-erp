@@ -40,6 +40,11 @@ export class CategoriesController {
     }
     return this.categoriesService.create(createCategoryDto, req.user.firebaseUid);
   }
+  @Get('firebase/:firebaseUid')
+async findByFirebaseUid(@Param('firebaseUid') firebaseUid: string) {
+  console.log('📋 GET /categories/firebase/:firebaseUid - firebaseUid:', firebaseUid);
+  return this.categoriesService.findAllByUser(firebaseUid);
+}
 
   @Get()
   async findAll(@Req() req: RequestWithUser) {
