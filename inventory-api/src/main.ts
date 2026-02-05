@@ -1,4 +1,4 @@
-﻿import './firebase/firebase.config';
+import './firebase/firebase.config';
 import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
 import { ConfigService } from '@nestjs/config';
@@ -8,7 +8,7 @@ import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger';
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
   const configService = app.get(ConfigService);
-
+  
   // Configuración de CORS - ACTUALIZADO
   app.enableCors({
     origin: [
@@ -66,7 +66,6 @@ async function bootstrap() {
     .build();
 
   const document = SwaggerModule.createDocument(app, config);
-
   SwaggerModule.setup('docs', app, document, {
     swaggerOptions: {
       persistAuthorization: true,
@@ -80,11 +79,12 @@ async function bootstrap() {
 
   const port = configService.get<number>('PORT') || 4005;
   const nodeEnv = configService.get<string>('NODE_ENV') || 'development';
-
+  
   await app.listen(port);
-  console.log(\Application is running in \ mode\);
-  console.log(\Server running on: \\);
-  console.log(\Swagger documentation available at: \/docs\);
+  
+  console.log(`Application is running in ${nodeEnv} mode`);
+  console.log(`Server running on: http://localhost:${port}`);
+  console.log(`Swagger documentation available at: http://localhost:${port}/docs`);
 }
 
 bootstrap();
