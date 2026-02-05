@@ -47,6 +47,11 @@ export class TaxController {
     }
     return this.taxService.create(createTaxDto, req.user.firebaseUid);
   }
+  @Get('firebase/:firebaseUid')
+async findByFirebaseUid(@Param('firebaseUid') firebaseUid: string) {
+  console.log('📋 GET /taxes/firebase/:firebaseUid - firebaseUid:', firebaseUid);
+  return this.taxService.findAllByUser(firebaseUid);
+}
 
   @Get(':realtimeDbKey')
   async findAll(@Param('realtimeDbKey') realtimeDbKey: string) {

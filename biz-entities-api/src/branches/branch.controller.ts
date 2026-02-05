@@ -47,6 +47,11 @@ export class BranchController {
     }
     return this.branchService.create(createBranchDto, req.user.firebaseUid);
   }
+  @Get('firebase/:firebaseUid')
+async findByFirebaseUid(@Param('firebaseUid') firebaseUid: string) {
+  console.log('📋 GET /branches/firebase/:firebaseUid - firebaseUid:', firebaseUid);
+  return this.branchService.findAllByUser(firebaseUid);
+}
 
   @Get(':realtimeDbKey')
   async findAll(@Param('realtimeDbKey') realtimeDbKey: string) {
