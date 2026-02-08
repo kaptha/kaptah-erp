@@ -46,6 +46,13 @@ async findByFirebaseUid(@Param('firebaseUid') firebaseUid: string) {
   console.log('📋 GET /products/firebase/:firebaseUid - firebaseUid:', firebaseUid);
   return this.productService.findAllByUser(firebaseUid);
 }
+   @Get(':id')
+  async findOne(@Param('id', ParseIntPipe) id: number, @Req() req: RequestWithUser) {
+    if (!req.user?.firebaseUid) {
+      throw new UnauthorizedException('Usuario no autenticado');
+    }
+    return this.productService.findOne(id, req.user.firebaseUid);
+  }
 
   @Get()
   async findAll(@Req() req: RequestWithUser) {
@@ -53,14 +60,6 @@ async findByFirebaseUid(@Param('firebaseUid') firebaseUid: string) {
       throw new UnauthorizedException('Usuario no autenticado');
     }
     return this.productService.findAllByUser(req.user.firebaseUid);
-  }
-
-  @Get(':id')
-  async findOne(@Param('id', ParseIntPipe) id: number, @Req() req: RequestWithUser) {
-    if (!req.user?.firebaseUid) {
-      throw new UnauthorizedException('Usuario no autenticado');
-    }
-    return this.productService.findOne(id, req.user.firebaseUid);
   }
 
   @Patch(':id')
