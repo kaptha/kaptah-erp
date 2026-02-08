@@ -8,45 +8,21 @@ import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger';
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
   const configService = app.get(ConfigService);
-
-  // Middleware manual para preflight - ANTES de enableCors
-  app.use((req, res, next) => {
-    const allowedOrigins = [
-      'http://localhost:4200',
-      'http://127.0.0.1:4200',
-      'https://app.kaptah.mx',
-    ];
-    const origin = req.headers.origin;
-    
-    if (allowedOrigins.includes(origin) || /https:\/\/.*\.vercel\.app$/.test(origin)) {
-      res.setHeader('Access-Control-Allow-Origin', origin);
-      res.setHeader('Access-Control-Allow-Methods', 'GET,HEAD,PUT,PATCH,POST,DELETE,OPTIONS');
-      res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Accept, Authorization, X-Firebase-Token');
-      res.setHeader('Access-Control-Allow-Credentials', 'true');
-      res.setHeader('Access-Control-Expose-Headers', 'Content-Disposition');
-    }
-
-    if (req.method === 'OPTIONS') {
-      return res.sendStatus(204);
-    }
-
-    next();
-  });
   
-  // Configuración de CORS - ACTUALIZADO
+  // Configuración de CORS - ÚNICA Y LIMPIA
   app.enableCors({
     origin: [
       'http://localhost:4200',
       'http://127.0.0.1:4200',
       'https://app.kaptah.mx',
-      'https://kaptah-git-main-xals-projects.vercel.app',
-      'https://kaptah-3w4kxihd3-xals-projects.vercel.app',
       /https:\/\/.*\.vercel\.app$/
     ],
-    methods: 'GET,HEAD,PUT,PATCH,POST,DELETE,OPTIONS',
+    methods: ['GET', 'HEAD', 'PUT', 'PATCH', 'POST', 'DELETE', 'OPTIONS'],
     credentials: true,
     allowedHeaders: ['Content-Type', 'Accept', 'Authorization', 'X-Firebase-Token'],
-    exposedHeaders: ['Content-Disposition']
+    exposedHeaders: ['Content-Disposition'],
+    preflightContinue: false,
+    optionsSuccessStatus: 204
   });
 
   // Configuración de Validación Global
@@ -88,7 +64,7 @@ async function bootstrap() {
     .addTag('service-prices', 'Service pricing management endpoints')
     .addTag('service-providers', 'Service providers management endpoints')
     .build();
-
+    
   const document = SwaggerModule.createDocument(app, config);
   SwaggerModule.setup('docs', app, document, {
     swaggerOptions: {
@@ -106,9 +82,8 @@ async function bootstrap() {
   
   await app.listen(port);
   
-  console.log(`Application is running in ${nodeEnv} mode`);
-  console.log(`Server running on: http://localhost:${port}`);
-  console.log(`Swagger documentation available at: http://localhost:${port}/docs`);
+  console.log`Application is running in ${nodeEnv} mode`);
+  console.log`Server running on: http://localhost:${port}`);
+  console.log`Swagger documentation available at: http://localhost:${port}/docs`);
 }
-
 bootstrap();
