@@ -64,8 +64,17 @@ export class CategoriesService {
   }
 
   async findAllByUser(firebaseUid: string): Promise<any[]> {
-    const user = await this.usersService.findByFirebaseUid(firebaseUid);
-          
+  console.log('📋 CategoriesService.findAllByUser - firebaseUid:', firebaseUid);
+  
+  const user = await this.usersService.findByFirebaseUid(firebaseUid);
+  
+  if (!user) {
+    console.error('❌ Usuario no encontrado para firebaseUid:', firebaseUid);
+    throw new NotFoundException('Usuario no encontrado');
+  }
+  
+  console.log('✅ Usuario encontrado - ID:', user.ID);
+  
   const [productCategories, serviceCategories] = await Promise.all([
     this.productCategoriesRepository.find({
       where: { userId: user.ID, active: true }
@@ -74,27 +83,11 @@ export class CategoriesService {
       where: { userId: user.ID, active: true }
     })
   ]);
-
-  console.log('Product Categories:', productCategories);
-  console.log('Service Categories:', serviceCategories);
   
-    return [
-      ...productCategories.map(pc => ({
-        id: pc.id,
-        name: pc.name,
-        description: pc.description,
-        tipo: 'producto',
-        active: pc.active
-      })),
-      ...serviceCategories.map(sc => ({
-        id: sc.id,
-        name: sc.name,
-        description: sc.description,
-        tipo: 'servicio',
-        active: sc.active
-      }))
-    ];
-  }
+  console.log('📦 Categorías encontradas - Productos:', productCategories.length, 'Servicios:', serviceCategories.length);
+  
+  return [...productCategories, ...serviceCategories];
+}
 
   async findOne(id: number, firebaseUid: string): Promise<CategoryResponse> {
     const user = await this.usersService.findByFirebaseUid(firebaseUid);

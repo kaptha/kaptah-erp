@@ -11,10 +11,16 @@ export class UsersService {
   ) {}
 
   async findByFirebaseUid(firebaseUid: string): Promise<User | null> {
-    return this.usersRepository.findOne({ 
-      where: { firebaseUid }
-    });
-  }
+  console.log('🔍 Buscando usuario con firebaseUid:', firebaseUid);
+  
+  const user = await this.usersRepository.findOne({
+    where: { firebaseUid }
+  });
+  
+  console.log('👤 Usuario encontrado:', user ? `ID: ${user.ID}, email: ${user.email}` : 'NO ENCONTRADO');
+  
+  return user;
+}
 
   async findByEmail(email: string): Promise<User | null> {
     return this.usersRepository.findOne({
