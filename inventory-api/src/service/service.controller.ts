@@ -45,6 +45,13 @@ async findByFirebaseUid(@Param('firebaseUid') firebaseUid: string) {
   console.log('📋 GET /services/firebase/:firebaseUid - firebaseUid:', firebaseUid);
   return this.serviceService.findAllByUser(firebaseUid);
 }
+  @Get(':id')
+  async findOne(@Param('id', ParseIntPipe) id: number, @Req() req: RequestWithUser) {
+    if (!req.user?.firebaseUid) {
+      throw new UnauthorizedException('Usuario no autenticado');
+    }
+    return this.serviceService.findOne(id, req.user.firebaseUid);
+  }
 
   @Get()
   async findAll(@Req() req: RequestWithUser) {
@@ -52,14 +59,6 @@ async findByFirebaseUid(@Param('firebaseUid') firebaseUid: string) {
       throw new UnauthorizedException('Usuario no autenticado');
     }
     return this.serviceService.findAllByUser(req.user.firebaseUid);
-  }
-
-  @Get(':id')
-  async findOne(@Param('id', ParseIntPipe) id: number, @Req() req: RequestWithUser) {
-    if (!req.user?.firebaseUid) {
-      throw new UnauthorizedException('Usuario no autenticado');
-    }
-    return this.serviceService.findOne(id, req.user.firebaseUid);
   }
 
   @Put(':id')
