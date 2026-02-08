@@ -3,6 +3,7 @@ import { Observable } from 'rxjs';
 import * as admin from 'firebase-admin';
 import { FirebaseUser } from '../interfaces/firebase-user.interface';
 import { AuthService } from '../auth/auth.service';
+
 declare global {
   namespace Express {
     interface Request {
@@ -17,6 +18,12 @@ export class FirebaseAuthGuard implements CanActivate {
 
   canActivate(context: ExecutionContext): Promise<boolean> {
     const request = context.switchToHttp().getRequest();
+
+    // Permitir preflight requests (CORS)
+    if (request.method === 'OPTIONS') {
+      return Promise.resolve(true);
+    }
+
     const token = request.headers.authorization;
 
     if (!token) {
