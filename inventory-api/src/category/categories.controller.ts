@@ -32,20 +32,19 @@ export class CategoriesController {
   constructor(
     private readonly categoriesService: CategoriesService
   ) {}
-
-  @Post()
-  async create(@Body() createCategoryDto: CreateCategoryDto, @Req() req: RequestWithUser) {
-    if (!req.user?.firebaseUid) {
-      throw new UnauthorizedException('Usuario no autenticado');
-    }
-    return this.categoriesService.create(createCategoryDto, req.user.firebaseUid);
-  }
   @Get('firebase/:firebaseUid')
 async findByFirebaseUid(@Param('firebaseUid') firebaseUid: string) {
   console.log('📋 GET /categories/firebase/:firebaseUid - firebaseUid:', firebaseUid);
   return this.categoriesService.findAllByUser(firebaseUid);
 }
 
+  @Get(':id')
+  async findOne(@Param('id', ParseIntPipe) id: number, @Req() req: RequestWithUser) {
+    if (!req.user?.firebaseUid) {
+      throw new UnauthorizedException('Usuario no autenticado');
+    }
+    return this.categoriesService.findOne(id, req.user.firebaseUid);
+  }
   @Get()
   async findAll(@Req() req: RequestWithUser) {
     if (!req.user?.firebaseUid) {
@@ -54,12 +53,12 @@ async findByFirebaseUid(@Param('firebaseUid') firebaseUid: string) {
     return this.categoriesService.findAllByUser(req.user.firebaseUid);
   }
 
-  @Get(':id')
-  async findOne(@Param('id', ParseIntPipe) id: number, @Req() req: RequestWithUser) {
+  @Post()
+  async create(@Body() createCategoryDto: CreateCategoryDto, @Req() req: RequestWithUser) {
     if (!req.user?.firebaseUid) {
       throw new UnauthorizedException('Usuario no autenticado');
     }
-    return this.categoriesService.findOne(id, req.user.firebaseUid);
+    return this.categoriesService.create(createCategoryDto, req.user.firebaseUid);
   }
 
   @Put(':id')
