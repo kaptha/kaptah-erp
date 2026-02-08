@@ -25,27 +25,32 @@ interface RequestWithUser extends Request {
 }
 
 @Controller('categories')
-@UseGuards(FirebaseAuthGuard)
+// ❌ REMOVIDO: @UseGuards(FirebaseAuthGuard) - ahora se aplica por endpoint
 export class CategoriesController {
   private readonly logger = new Logger(CategoriesController.name);
 
   constructor(
     private readonly categoriesService: CategoriesService
   ) {}
+
   @Get('firebase/:firebaseUid')
-async findByFirebaseUid(@Param('firebaseUid') firebaseUid: string) {
-  console.log('📋 GET /categories/firebase/:firebaseUid - firebaseUid:', firebaseUid);
-  return this.categoriesService.findAllByUser(firebaseUid);
-}
+  @UseGuards(FirebaseAuthGuard) // ✅ Guard específico por endpoint
+  async findByFirebaseUid(@Param('firebaseUid') firebaseUid: string) {
+    console.log('📋 GET /categories/firebase/:firebaseUid - firebaseUid:', firebaseUid);
+    return this.categoriesService.findAllByUser(firebaseUid);
+  }
 
   @Get(':id')
+  @UseGuards(FirebaseAuthGuard)
   async findOne(@Param('id', ParseIntPipe) id: number, @Req() req: RequestWithUser) {
     if (!req.user?.firebaseUid) {
       throw new UnauthorizedException('Usuario no autenticado');
     }
     return this.categoriesService.findOne(id, req.user.firebaseUid);
   }
+
   @Get()
+  @UseGuards(FirebaseAuthGuard)
   async findAll(@Req() req: RequestWithUser) {
     if (!req.user?.firebaseUid) {
       throw new UnauthorizedException('Usuario no autenticado');
@@ -54,6 +59,7 @@ async findByFirebaseUid(@Param('firebaseUid') firebaseUid: string) {
   }
 
   @Post()
+  @UseGuards(FirebaseAuthGuard)
   async create(@Body() createCategoryDto: CreateCategoryDto, @Req() req: RequestWithUser) {
     if (!req.user?.firebaseUid) {
       throw new UnauthorizedException('Usuario no autenticado');
@@ -62,6 +68,7 @@ async findByFirebaseUid(@Param('firebaseUid') firebaseUid: string) {
   }
 
   @Put(':id')
+  @UseGuards(FirebaseAuthGuard)
   async update(
     @Param('id', ParseIntPipe) id: number,
     @Body() updateCategoryDto: UpdateCategoryDto,
@@ -74,6 +81,7 @@ async findByFirebaseUid(@Param('firebaseUid') firebaseUid: string) {
   }
 
   @Delete(':id')
+  @UseGuards(FirebaseAuthGuard)
   async remove(@Param('id', ParseIntPipe) id: number, @Req() req: RequestWithUser) {
     if (!req.user?.firebaseUid) {
       throw new UnauthorizedException('Usuario no autenticado');
