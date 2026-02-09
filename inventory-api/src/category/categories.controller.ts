@@ -25,7 +25,6 @@ interface RequestWithUser extends Request {
 }
 
 @Controller('categories')
-// ❌ REMOVIDO: @UseGuards(FirebaseAuthGuard) - ahora se aplica por endpoint
 export class CategoriesController {
   private readonly logger = new Logger(CategoriesController.name);
 
@@ -34,9 +33,8 @@ export class CategoriesController {
   ) {}
 
   @Get('firebase/:firebaseUid')
-  @UseGuards(FirebaseAuthGuard) // ✅ Guard específico por endpoint
   async findByFirebaseUid(@Param('firebaseUid') firebaseUid: string) {
-    console.log('📋 GET /categories/firebase/:firebaseUid - firebaseUid:', firebaseUid);
+    this.logger.log('📋 GET /categories/firebase/:firebaseUid - firebaseUid: ' + firebaseUid);
     return this.categoriesService.findAllByUser(firebaseUid);
   }
 
