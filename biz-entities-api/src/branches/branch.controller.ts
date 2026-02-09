@@ -39,6 +39,19 @@ export class BranchController {
     private readonly usersService: UsersService
   ) {}
 
+  // ✅ RUTAS ESPECÍFICAS PRIMERO
+  @Get('firebase/:firebaseUid')
+  async findByFirebaseUid(@Param('firebaseUid') firebaseUid: string) {
+    console.log('📋 GET /branches/firebase/:firebaseUid - firebaseUid:', firebaseUid);
+    return this.branchService.findAllByUser(firebaseUid);
+  }
+
+  // ✅ RUTAS GENÉRICAS AL FINAL
+  @Get(':realtimeDbKey')
+  async findAll(@Param('realtimeDbKey') realtimeDbKey: string) {
+    return this.branchService.findAllByRealtimeDbKey(realtimeDbKey);
+  }
+
   @Post()
   async create(@Body() createBranchDto: CreateBranchDto, @Req() req: RequestWithUser) {
     this.logger.log('Datos recibidos en el backend:', createBranchDto);
@@ -46,16 +59,6 @@ export class BranchController {
       throw new UnauthorizedException('No se pudo obtener el UID de Firebase del usuario');
     }
     return this.branchService.create(createBranchDto, req.user.firebaseUid);
-  }
-  @Get('firebase/:firebaseUid')
-async findByFirebaseUid(@Param('firebaseUid') firebaseUid: string) {
-  console.log('📋 GET /branches/firebase/:firebaseUid - firebaseUid:', firebaseUid);
-  return this.branchService.findAllByUser(firebaseUid);
-}
-
-  @Get(':realtimeDbKey')
-  async findAll(@Param('realtimeDbKey') realtimeDbKey: string) {
-    return this.branchService.findAllByRealtimeDbKey(realtimeDbKey);
   }
 
   @Put(':id')
