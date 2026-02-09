@@ -190,7 +190,7 @@ export class PurchaseOrderService {
     }
   }
   async findAllByUser(firebaseUid: string): Promise<PurchaseOrder[]> {
-  const user = await this.usersService.findUserByFirebaseUid(firebaseUid);
+  const user = await this.usersService.findByFirebaseUid(firebaseUid);
   if (!user) {
     throw new NotFoundException('Usuario no encontrado');
   }
