@@ -1,7 +1,6 @@
-import { Module, NestModule, MiddlewareConsumer } from '@nestjs/common';
+import { Module } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { CorsMiddleware } from './common/middlewares/cors.middleware';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { User } from './users/entities/user.entity';
@@ -16,12 +15,12 @@ import { ServiceCategoryModule } from './service-category/service-category.modul
 import { SatCatalogService } from './common/services/sat-catalog/sat-catalog.service';
 import { SatCatalogModule } from './common/modules/sat-catalog/sat-catalog.module';
 import { PurchaseOrderModule } from './purchase-order/purchase-order.module';
+
 @Module({
   imports: [
     ConfigModule.forRoot({
       isGlobal: true,
     }),
-
     // Conexión principal para acceder a la tabla users de biz_entities
     TypeOrmModule.forRootAsync({
       name: 'default',
@@ -38,7 +37,6 @@ import { PurchaseOrderModule } from './purchase-order/purchase-order.module';
       }),
       inject: [ConfigService],
     }),
-
     // Conexión secundaria para las tablas de inventario
     TypeOrmModule.forRootAsync({
       name: 'inventory',
@@ -50,13 +48,12 @@ import { PurchaseOrderModule } from './purchase-order/purchase-order.module';
         username: configService.get('DB_USERNAME'),
         password: configService.get('DB_PASSWORD'),
         database: 'inventory_db',
-        autoLoadEntities: true, // Esto cargará las entidades automáticamente
-        synchronize: false, // Cambiado a false para evitar cambios automáticos
+        autoLoadEntities: true,
+        synchronize: false,
         logging: configService.get('NODE_ENV') === 'development',
       }),
       inject: [ConfigService],
     }),
-
     // Módulos de la aplicación
     UsersModule,
     CategoriesModule,
@@ -70,10 +67,4 @@ import { PurchaseOrderModule } from './purchase-order/purchase-order.module';
   controllers: [AppController],
   providers: [AppService, SatCatalogService],
 })
-export class AppModule implements NestModule {
-  configure(consumer: MiddlewareConsumer) {
-    consumer
-      .apply(CorsMiddleware)
-      .forRoutes('*');
-  }
-}
+export class AppModule {}
