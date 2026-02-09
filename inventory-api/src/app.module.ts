@@ -1,4 +1,4 @@
-import { Module } from '@nestjs/common';
+import { Module, NestModule, MiddlewareConsumer } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { AppController } from './app.controller';
@@ -6,6 +6,7 @@ import { AppService } from './app.service';
 import { User } from './users/entities/user.entity';
 import { UsersModule } from './users/users.module';
 import { AuthModule } from './auth/auth.module';
+import { ExplicitCorsMiddleware } from './cors.middleware';
 // Módulos de la aplicación
 import { CategoriesModule } from './category/categories.module';
 import { ProductModule } from './product/product.module';
@@ -67,4 +68,10 @@ import { PurchaseOrderModule } from './purchase-order/purchase-order.module';
   controllers: [AppController],
   providers: [AppService, SatCatalogService],
 })
-export class AppModule {}
+export class AppModule implements NestModule {
+  configure(consumer: MiddlewareConsumer) {
+    consumer
+      .apply(ExplicitCorsMiddleware)
+      .forRoutes('*');
+  }
+}
