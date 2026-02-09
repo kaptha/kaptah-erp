@@ -25,7 +25,6 @@ interface RequestWithUser extends Request {
 }
 
 @Controller('services')
-@UseGuards(FirebaseAuthGuard)
 export class ServiceController {
   private readonly logger = new Logger(ServiceController.name);
 
