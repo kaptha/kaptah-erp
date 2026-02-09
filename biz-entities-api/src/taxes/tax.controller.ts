@@ -6,22 +6,17 @@ import {
   Put,
   Param,
   Delete,
-  ParseIntPipe,
   UseGuards,
   Req,
-  InternalServerErrorException,
   UnauthorizedException,
-  NotFoundException,
-  Logger,
-  ConflictException,
-  ValidationPipe
+  Logger
 } from '@nestjs/common';
+import { Request } from 'express';
 import { FirebaseAuthGuard } from '../guards/firebase-auth.guard';
 import { TaxService } from './tax.service';
+import { UsersService } from '../users/users.service';
 import { CreateTaxDto } from './dto/create-tax.dto';
 import { UpdateTaxDto } from './dto/update-tax.dto';
-import { Request } from 'express';
-import { UsersService } from 'src/users/users.service';
 
 interface RequestWithUser extends Request {
   user?: {
@@ -39,6 +34,19 @@ export class TaxController {
     private readonly usersService: UsersService
   ) {}
 
+  // ✅ RUTAS ESPECÍFICAS PRIMERO
+  @Get('firebase/:firebaseUid')
+  async findByFirebaseUid(@Param('firebaseUid') firebaseUid: string) {
+    console.log('📋 GET /taxes/firebase/:firebaseUid - firebaseUid:', firebaseUid);
+    return this.taxService.findAllByUser(firebaseUid);
+  }
+
+  // ✅ RUTAS GENÉRICAS AL FINAL
+  @Get(':realtimeDbKey')
+  async findAll(@Param('realtimeDbKey') realtimeDbKey: string) {
+    return this.taxService.findAllByRealtimeDbKey(realtimeDbKey);
+  }
+
   @Post()
   async create(@Body() createTaxDto: CreateTaxDto, @Req() req: RequestWithUser) {
     this.logger.log('Datos recibidos en el backend:', createTaxDto);
@@ -46,16 +54,6 @@ export class TaxController {
       throw new UnauthorizedException('No se pudo obtener el UID de Firebase del usuario');
     }
     return this.taxService.create(createTaxDto, req.user.firebaseUid);
-  }
-  @Get('firebase/:firebaseUid')
-async findByFirebaseUid(@Param('firebaseUid') firebaseUid: string) {
-  console.log('📋 GET /taxes/firebase/:firebaseUid - firebaseUid:', firebaseUid);
-  return this.taxService.findAllByUser(firebaseUid);
-}
-
-  @Get(':realtimeDbKey')
-  async findAll(@Param('realtimeDbKey') realtimeDbKey: string) {
-    return this.taxService.findAllByRealtimeDbKey(realtimeDbKey);
   }
 
   @Put(':id')
