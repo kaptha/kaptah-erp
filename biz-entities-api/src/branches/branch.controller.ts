@@ -30,7 +30,6 @@ interface RequestWithUser extends Request {
 }
 
 @Controller('branches')
-@UseGuards(FirebaseAuthGuard)
 export class BranchController {
   private readonly logger = new Logger(BranchController.name);
   

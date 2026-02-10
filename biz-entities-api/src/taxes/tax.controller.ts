@@ -25,7 +25,6 @@ interface RequestWithUser extends Request {
 }
 
 @Controller('taxes')
-@UseGuards(FirebaseAuthGuard)
 export class TaxController {
   private readonly logger = new Logger(TaxController.name);
   
