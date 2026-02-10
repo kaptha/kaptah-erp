@@ -1,4 +1,4 @@
-﻿import { Injectable } from '@angular/core';
+import { Injectable } from '@angular/core';
 import { HttpClient, HttpHeaders, HttpErrorResponse } from '@angular/common/http';
 import { Observable, throwError, tap } from 'rxjs';
 import { catchError, switchMap } from 'rxjs/operators';
@@ -51,7 +51,7 @@ export class ImpuestosService {
       }
       console.log('Haciendo peticiÃ³n para userId:', user.id); // Agrega este log
       const headers = this.getHeaders();
-      return this.http.get<Impuesto[]>(`${this.apiUrl}/taxes/${user.id}`, { headers });
+      return this.http.get<Impuesto[]>(`${this.apiUrl}/taxes/firebase/${user.firebaseUid}`, { headers });
     }),
     tap(response => console.log('Respuesta del servidor:', response)), // Agrega este log
     catchError(this.handleError)

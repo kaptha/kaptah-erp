@@ -1,4 +1,4 @@
-﻿import { Injectable } from '@angular/core';
+import { Injectable } from '@angular/core';
 import { HttpClient, HttpHeaders, HttpErrorResponse } from '@angular/common/http';
 import { Observable, throwError, tap } from 'rxjs';
 import { catchError, switchMap } from 'rxjs/operators';
@@ -39,7 +39,7 @@ export class SucursalesService {
           throw new Error('No se encontrÃ³ el usuario');
         }
         const headers = this.getHeaders();
-        return this.http.get<Sucursal[]>(`${this.apiUrl}/branches/${user.id}`, { headers });
+        return this.http.get<Sucursal[]>(`${this.apiUrl}/branches/firebase/${user.firebaseUid}`, { headers });
       }),
       catchError(this.handleError)
     );
