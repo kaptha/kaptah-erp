@@ -1,4 +1,4 @@
-﻿import { Injectable } from '@angular/core';
+import { Injectable } from '@angular/core';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Observable, throwError } from 'rxjs';
 import { tap, catchError, switchMap } from 'rxjs/operators';
@@ -54,7 +54,7 @@ export interface CreateCotizacionDto {
   providedIn: 'root'
 })
 export class CotizacionesService {
-  private apiUrl = 'https://extraordinary-beauty-production-78f6.up.railway.app/cotizaciones';
+  private apiUrl = 'https://extraordinary-beauty-production-78f6.up.railway.app/api/cotizaciones';
 
   constructor(private http: HttpClient, private quoteItemResolver: QuoteItemResolverService) { }
 

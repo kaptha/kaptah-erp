@@ -1,4 +1,4 @@
-﻿import { Injectable } from '@angular/core';
+import { Injectable } from '@angular/core';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Observable, throwError, from } from 'rxjs';
 import { switchMap, map } from 'rxjs/operators';
@@ -10,7 +10,7 @@ import { AuthResponse } from '../../../models/auth.model';
   providedIn: 'root'
 })
 export class NoteService {
-  private apiUrl = 'https://extraordinary-beauty-production-78f6.up.railway.app/sale-notes';
+  private apiUrl = 'https://extraordinary-beauty-production-78f6.up.railway.app/api/sale-notes';
 
   constructor(
     private http: HttpClient,
