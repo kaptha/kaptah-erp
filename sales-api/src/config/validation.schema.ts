@@ -35,7 +35,7 @@ export class EnvironmentVariables {
   MYSQL_PASSWORD: string;
 
   @IsString()
-  MYSQL_DB: string;
+  MYSQL_DATABASE: string;
 
   // JWT
   @IsString()
