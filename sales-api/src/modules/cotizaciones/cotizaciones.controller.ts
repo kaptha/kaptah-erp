@@ -91,7 +91,7 @@ export class CotizacionesController {
     @CurrentUser() user: any,
     @Query('sucursal_id') sucursal_id?: string
   ) {
-    this.logger.log(`📬 GET /cotizaciones${sucursal_id ? `?sucursal_id=${sucursal_id}` : ''} - Usuario: ${user.uid}`);
+    this.logger.log(`📬 GET /cotizaciones${sucursal_id ? `?sucursal_id=${sucursal_id}` : ''} - Usuario: ${user.email || user.uid || "unknown"}`);
     
     if (sucursal_id) {
       const id = parseInt(sucursal_id, 10);
@@ -131,7 +131,7 @@ export class CotizacionesController {
     @Param('folio') folio: string,
     @CurrentUser() user: any
   ) {
-    this.logger.log(`📬 GET /cotizaciones/folio/${folio} - Usuario: ${user.uid}`);
+    this.logger.log(`📬 GET /cotizaciones/folio/${folio} - Usuario: ${user.email || user.uid || "unknown"}`);
     
     const cotizacion = await this.cotizacionesService.findByFolio(folio);
     
@@ -156,7 +156,7 @@ export class CotizacionesController {
     @Param('id', ParseIntPipe) id: number,
     @CurrentUser() user?: any
   ) {
-    this.logger.log(`📬 GET /cotizaciones/${id} - Usuario: ${user.uid}`);
+    this.logger.log(`📬 GET /cotizaciones/${id} - Usuario: ${user.email || user.uid || "unknown"}`);
     
     const cotizacion = await this.cotizacionesService.findOne(id);
     
@@ -173,7 +173,7 @@ export class CotizacionesController {
     @Body() updateCotizacionDto: UpdateCotizacionDto,
     @CurrentUser() user?: any
   ) {
-    this.logger.log(`📬 PUT /cotizaciones/${id} - Usuario: ${user.uid}`);
+    this.logger.log(`📬 PUT /cotizaciones/${id} - Usuario: ${user.email || user.uid || "unknown"}`);
     this.logger.log(`Sucursal: ${updateCotizacionDto.sucursal_id || 'Sin cambios'}`);
     
     const cotizacion = await this.cotizacionesService.update(id, updateCotizacionDto);
@@ -192,7 +192,7 @@ export class CotizacionesController {
     @Param('id', ParseIntPipe) id: number,
     @CurrentUser() user?: any
   ) {
-    this.logger.log(`📬 DELETE /cotizaciones/${id} - Usuario: ${user.uid}`);
+    this.logger.log(`📬 DELETE /cotizaciones/${id} - Usuario: ${user.email || user.uid || "unknown"}`);
     
     await this.cotizacionesService.remove(id);
     
@@ -208,7 +208,7 @@ export class CotizacionesController {
     @Param('sucursalId', ParseIntPipe) sucursal_id: number,
     @CurrentUser() user?: any
   ) {
-    this.logger.log(`📬 GET /cotizaciones/sucursal/${sucursal_id} - Usuario: ${user.uid}`);
+    this.logger.log(`📬 GET /cotizaciones/sucursal/${sucursal_id} - Usuario: ${user.email || user.uid || "unknown"}`);
     
     const cotizaciones = await this.cotizacionesService.findBySucursal(sucursal_id);
     
@@ -222,7 +222,7 @@ export class CotizacionesController {
   @Get('sin-sucursal/list')
   @ApiOperation({ summary: 'Obtener cotizaciones sin sucursal' })
   async findWithoutSucursal(@CurrentUser() user?: any) {
-    this.logger.log(`📬 GET /cotizaciones/sin-sucursal/list - Usuario: ${user.uid}`);
+    this.logger.log(`📬 GET /cotizaciones/sin-sucursal/list - Usuario: ${user.email || user.uid || "unknown"}`);
     
     const cotizaciones = await this.cotizacionesService.findWithoutSucursal();
     
@@ -245,7 +245,7 @@ export class CotizacionesController {
     },
     @CurrentUser() user: any,
   ) {
-    this.logger.log(`📬 POST /cotizaciones/${id}/send-email - Usuario: ${user.uid}`);
+    this.logger.log(`📬 POST /cotizaciones/${id}/send-email - Usuario: ${user.email || user.uid || "unknown"}`);
     
     return this.cotizacionesService.sendQuotationByEmail(
       id,
@@ -268,7 +268,7 @@ export class CotizacionesController {
     @Param('id', ParseIntPipe) id: number,
     @CurrentUser() user: any
   ) {
-    this.logger.log(`📬 POST /cotizaciones/${id}/convert-to-order - Usuario: ${user.uid}`);
+    this.logger.log(`📬 POST /cotizaciones/${id}/convert-to-order - Usuario: ${user.email || user.uid || "unknown"}`);
     
     return await this.cotizacionesService.convertToSalesOrder(id, user.uid);
   }
@@ -286,7 +286,7 @@ export class CotizacionesController {
     @Param('id', ParseIntPipe) id: number,
     @CurrentUser() user: any
   ) {
-    this.logger.log(`📬 POST /cotizaciones/${id}/reenviar-email - Usuario: ${user.uid}`);
+    this.logger.log(`📬 POST /cotizaciones/${id}/reenviar-email - Usuario: ${user.email || user.uid || "unknown"}`);
     
     return await this.cotizacionesService.reenviarEmail(id, user.uid);
   }
@@ -304,7 +304,7 @@ export class CotizacionesController {
     @Param('id', ParseIntPipe) id: number,
     @CurrentUser() user: any
   ) {
-    this.logger.log(`📬 POST /cotizaciones/${id}/regenerar-pdf - Usuario: ${user.uid}`);
+    this.logger.log(`📬 POST /cotizaciones/${id}/regenerar-pdf - Usuario: ${user.email || user.uid || "unknown"}`);
     
     return await this.cotizacionesService.regenerarPDF(id, user.uid);
   }
@@ -321,7 +321,7 @@ export class CotizacionesController {
     @Param('id', ParseIntPipe) id: number,
     @CurrentUser() user: any
   ) {
-    this.logger.log(`📬 PUT /cotizaciones/${id}/aprobar - Usuario: ${user.uid}`);
+    this.logger.log(`📬 PUT /cotizaciones/${id}/aprobar - Usuario: ${user.email || user.uid || "unknown"}`);
     
     return await this.cotizacionesService.update(id, { estado: 'aprobada' } as any);
   }
@@ -339,7 +339,7 @@ export class CotizacionesController {
     @Body() body: { motivo?: string },
     @CurrentUser() user: any
   ) {
-    this.logger.log(`📬 PUT /cotizaciones/${id}/rechazar - Usuario: ${user.uid}`);
+    this.logger.log(`📬 PUT /cotizaciones/${id}/rechazar - Usuario: ${user.email || user.uid || "unknown"}`);
     
     return await this.cotizacionesService.update(id, { 
       estado: 'rechazada',
