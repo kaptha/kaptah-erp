@@ -9,6 +9,9 @@ async function bootstrap() {
     logger: ['error', 'warn', 'log', 'debug', 'verbose'],
   });
 
+  // Prefijo global para todas las rutas
+  app.setGlobalPrefix('api');
+
   // Configuración de CORS - ACTUALIZADO
   app.enableCors({
     origin: [
@@ -37,8 +40,9 @@ async function bootstrap() {
     .build();
 
   const document = SwaggerModule.createDocument(app, config);
-  SwaggerModule.setup('api', app, document);
+  SwaggerModule.setup('api-docs', app, document);
 
   await app.listen(process.env.PORT || 4000);
 }
+
 bootstrap();
