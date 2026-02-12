@@ -7,9 +7,13 @@ export class JwtAuthGuard extends AuthGuard('jwt') {
 
   async canActivate(context: ExecutionContext): Promise<boolean> {
     const request = context.switchToHttp().getRequest();
-    
-    this.logger.debug('Token recibido:', request.headers.authorization);
 
+    // Permitir preflight OPTIONS sin autenticacion
+    if (request.method === 'OPTIONS') {
+      return true;
+    }
+
+    this.logger.debug('Token recibido:', request.headers.authorization);
     try {
       const canActivate = await super.canActivate(context);
       this.logger.debug('canActivate result:', canActivate);
@@ -24,11 +28,9 @@ export class JwtAuthGuard extends AuthGuard('jwt') {
     this.logger.debug('handleRequest - User:', JSON.stringify(user));
     this.logger.debug('handleRequest - Error:', err);
     this.logger.debug('handleRequest - Info:', info);
-
     if (err || !user) {
       throw err || new UnauthorizedException();
     }
-
     return user;
   }
 }
