@@ -26,6 +26,7 @@ import { UpdateCotizacionDto } from './dto/update-cotizacion.dto';
 
 @ApiTags('Cotizaciones')
 @ApiBearerAuth()
+@UseGuards(JwtAuthGuard)
 @Controller('cotizaciones')
 export class CotizacionesController {
   private readonly logger = new Logger(CotizacionesController.name);
