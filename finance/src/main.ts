@@ -1,4 +1,4 @@
-﻿import { NestFactory } from '@nestjs/core';
+import { NestFactory } from '@nestjs/core';
 import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger';
 import { ValidationPipe } from '@nestjs/common';
 import { AppModule } from './app.module';
@@ -44,3 +44,4 @@ async function bootstrap() {
   console.log('ðŸ“Š Swagger docs: http://localhost:3003/api');
 }
 bootstrap();
+
