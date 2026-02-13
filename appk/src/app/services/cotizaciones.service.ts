@@ -1,8 +1,11 @@
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
-import { Observable, throwError } from 'rxjs';
-import { tap, catchError, switchMap } from 'rxjs/operators';
+import { Observable, throwError, from } from 'rxjs';
+import { tap, catchError, switchMap, map } from 'rxjs/operators';
 import { QuoteItemResolverService } from './quote-item-resolver.service';
+import { AuthService } from './auth.service';
+import { AuthResponse } from '../models/auth.model';
+
 export interface CotizacionItem {
   id?: number;
   cotizacionId?: number;
@@ -56,13 +59,39 @@ export interface CreateCotizacionDto {
 export class CotizacionesService {
   private apiUrl = 'https://extraordinary-beauty-production-78f6.up.railway.app/api/cotizaciones';
 
-  constructor(private http: HttpClient, private quoteItemResolver: QuoteItemResolverService) { }
+  constructor(
+    private http: HttpClient,
+    private quoteItemResolver: QuoteItemResolverService,
+    private authService: AuthService
+  ) { }
 
-  private getHeaders(): HttpHeaders {
+  /**
+   * ✅ CORREGIDO: Obtiene headers con JWT convertido
+   */
+  private getHeaders(): Observable<HttpHeaders> {
+    const idToken = localStorage.getItem('idToken');
+    if (!idToken) {
+      console.error('No se encontró token de autenticación');
+      throw new Error('No se encontró token de autenticación');
+    }
+
+    return from(this.authService.convertToJWT(idToken)).pipe(
+      map((response: AuthResponse) => {
+        return new HttpHeaders({
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${response.access_token}`
+        });
+      })
+    );
+  }
+
+  /**
+   * Headers con Firebase token directo (para PDF y endpoints @Public)
+   */
+  private getFirebaseHeaders(): HttpHeaders {
     const token = localStorage.getItem('idToken');
     if (!token) {
-      console.error('No se encontrÃ³ token de autenticaciÃ³n');
-      throw new Error('No se encontrÃ³ token de autenticaciÃ³n');
+      throw new Error('No se encontró token de autenticación');
     }
     return new HttpHeaders({
       'Authorization': `Bearer ${token}`,
@@ -70,17 +99,16 @@ export class CotizacionesService {
     });
   }
 
-  // Obtener el ID del usuario del localStorage o de donde lo tengas almacenado
   private getUserId(): number {
-    // Esta es una implementaciÃ³n bÃ¡sica. DeberÃ­as adaptarla segÃºn cÃ³mo almacenes el ID del usuario
-    // Por ejemplo, podrÃ­as descodificar un JWT o usar un servicio de autenticaciÃ³n
     const userId = localStorage.getItem('userId');
-    return userId ? parseInt(userId, 10) : 1; // Valor por defecto 1 si no existe
+    return userId ? parseInt(userId, 10) : 1;
   }
 
   getCotizaciones(): Observable<Cotizacion[]> {
-    const headers = this.getHeaders();
-    return this.http.get<Cotizacion[]>(this.apiUrl, { headers }).pipe(
+    return this.getHeaders().pipe(
+      switchMap((headers: HttpHeaders) => {
+        return this.http.get<Cotizacion[]>(this.apiUrl, { headers });
+      }),
       tap(response => console.log('Cotizaciones recibidas:', response)),
       catchError(error => {
         console.error('Error al obtener cotizaciones:', error);
@@ -89,170 +117,161 @@ export class CotizacionesService {
     );
   }
 
-   getCotizacion(id: number): Observable<Cotizacion> {
-  const headers = this.getHeaders();
-  
-  return this.http.get<Cotizacion>(`${this.apiUrl}/${id}`, { headers }).pipe(
-    tap(cotizacion => {
-      console.log('CotizaciÃ³n recibida del servidor:', cotizacion);
-      
-      // Verificar y normalizar el formato de items
-      if (!cotizacion.items) {
-        console.warn('La cotizaciÃ³n no tiene items, inicializando array vacÃ­o');
-        cotizacion.items = [];
-      } else if (typeof cotizacion.items === 'string') {
-        try {
-          cotizacion.items = JSON.parse(cotizacion.items);
-          console.log('Items parseados correctamente de string:', cotizacion.items);
-        } catch (e) {
-          console.error('Error al parsear items como JSON:', e);
+  getCotizacion(id: number): Observable<Cotizacion> {
+    return this.getHeaders().pipe(
+      switchMap((headers: HttpHeaders) => {
+        return this.http.get<Cotizacion>(`${this.apiUrl}/${id}`, { headers });
+      }),
+      tap(cotizacion => {
+        console.log('Cotización recibida del servidor:', cotizacion);
+        
+        if (!cotizacion.items) {
+          console.warn('La cotización no tiene items, inicializando array vacío');
+          cotizacion.items = [];
+        } else if (typeof cotizacion.items === 'string') {
+          try {
+            cotizacion.items = JSON.parse(cotizacion.items);
+            console.log('Items parseados correctamente de string:', cotizacion.items);
+          } catch (e) {
+            console.error('Error al parsear items como JSON:', e);
+            cotizacion.items = [];
+          }
+        }
+        
+        if (!Array.isArray(cotizacion.items)) {
+          console.warn('Items no es un array después de procesamiento, inicializando array vacío');
           cotizacion.items = [];
         }
-      }
-      
-      // Verificar nuevamente que items sea un array
-      if (!Array.isArray(cotizacion.items)) {
-        console.warn('Items no es un array despuÃ©s de procesamiento, inicializando array vacÃ­o');
-        cotizacion.items = [];
-      }
-      
-      // Si los items estÃ¡n vacÃ­os (como [{}]), inicializar correctamente
-      if (cotizacion.items.length === 1 && 
-          typeof cotizacion.items[0] === 'object' && 
-          cotizacion.items[0] !== null &&
-          Object.keys(cotizacion.items[0]).length === 0) {
-        console.warn('Items recibidos como [{}], inicializando array vacÃ­o');
-        cotizacion.items = [];
-      }
-    }),
-    switchMap(cotizacion => this.quoteItemResolver.resolveItemsInfo(cotizacion)),
-    tap(cotizacion => {
-      console.log('CotizaciÃ³n despuÃ©s de enriquecer items:', cotizacion);
-      console.log('Items enriquecidos:', cotizacion.items);
-    }),
-    catchError(error => {
-      console.error(`Error al obtener cotizaciÃ³n ${id}:`, error);
-      return throwError(() => error);
-    })
-  );
-}
+        
+        if (cotizacion.items.length === 1 && 
+            typeof cotizacion.items[0] === 'object' && 
+            cotizacion.items[0] !== null &&
+            Object.keys(cotizacion.items[0]).length === 0) {
+          console.warn('Items recibidos como [{}], inicializando array vacío');
+          cotizacion.items = [];
+        }
+      }),
+      switchMap(cotizacion => this.quoteItemResolver.resolveItemsInfo(cotizacion)),
+      tap(cotizacion => {
+        console.log('Cotización después de enriquecer items:', cotizacion);
+        console.log('Items enriquecidos:', cotizacion.items);
+      }),
+      catchError(error => {
+        console.error(`Error al obtener cotización ${id}:`, error);
+        return throwError(() => error);
+      })
+    );
+  }
 
   createCotizacion(cotizacion: CreateCotizacionDto): Observable<Cotizacion> {
-    const headers = this.getHeaders();
-    
-    // Asegurar que se incluya el ID del usuario
     const cotizacionConUsuario = {
       ...cotizacion,
       usuarioId: cotizacion.usuarioId || this.getUserId()
     };
     
-    console.log('Datos enviados al crear cotizaciÃ³n:', JSON.stringify(cotizacionConUsuario));
+    console.log('Datos enviados al crear cotización:', JSON.stringify(cotizacionConUsuario));
     
-    return this.http.post<Cotizacion>(this.apiUrl, cotizacionConUsuario, { headers }).pipe(
-      tap(response => console.log('CotizaciÃ³n creada:', response)),
+    return this.getHeaders().pipe(
+      switchMap((headers: HttpHeaders) => {
+        return this.http.post<Cotizacion>(this.apiUrl, cotizacionConUsuario, { headers });
+      }),
+      tap(response => console.log('Cotización creada:', response)),
       catchError(error => {
-        console.error('Error al crear cotizaciÃ³n:', error);
+        console.error('Error al crear cotización:', error);
         return throwError(() => error);
       })
     );
   }
 
   updateCotizacion(id: number, cotizacion: CreateCotizacionDto): Observable<Cotizacion> {
-    const headers = this.getHeaders();
-    
-    // Asegurar que se incluya el ID del usuario
     const cotizacionConUsuario = {
       ...cotizacion,
       usuarioId: cotizacion.usuarioId || this.getUserId()
     };
     
-    return this.http.put<Cotizacion>(`${this.apiUrl}/${id}`, cotizacionConUsuario, { headers }).pipe(
-      tap(response => console.log('CotizaciÃ³n actualizada:', response)),
+    return this.getHeaders().pipe(
+      switchMap((headers: HttpHeaders) => {
+        return this.http.put<Cotizacion>(`${this.apiUrl}/${id}`, cotizacionConUsuario, { headers });
+      }),
+      tap(response => console.log('Cotización actualizada:', response)),
       catchError(error => {
-        console.error(`Error al actualizar cotizaciÃ³n ${id}:`, error);
+        console.error(`Error al actualizar cotización ${id}:`, error);
         return throwError(() => error);
       })
     );
   }
 
   deleteCotizacion(id: number): Observable<void> {
-    const headers = this.getHeaders();
-    return this.http.delete<void>(`${this.apiUrl}/${id}`, { headers }).pipe(
-      tap(() => console.log(`CotizaciÃ³n ${id} eliminada`)),
+    return this.getHeaders().pipe(
+      switchMap((headers: HttpHeaders) => {
+        return this.http.delete<void>(`${this.apiUrl}/${id}`, { headers });
+      }),
+      tap(() => console.log(`Cotización ${id} eliminada`)),
       catchError(error => {
-        console.error(`Error al eliminar cotizaciÃ³n ${id}:`, error);
+        console.error(`Error al eliminar cotización ${id}:`, error);
         return throwError(() => error);
       })
     );
   }
 
   /**
-   * Descarga un PDF de cotizaciÃ³n generado en el backend con Puppeteer
-   * @param cotizacionId - ID de la cotizaciÃ³n
-   * @param estilo - Estilo del template (ej: 'minimal', 'classic', 'modern', 'professional')
-   * @returns Observable<Blob> - El archivo PDF como Blob
+   * Descarga PDF - usa Firebase token directo porque el endpoint de PDF es @Public
    */
   descargarPDF(cotizacionId: number, estilo: string): Observable<Blob> {
     const token = localStorage.getItem('idToken');
     if (!token) {
-      console.error('No se encontrÃ³ token de autenticaciÃ³n');
-      return throwError(() => new Error('No se encontrÃ³ token de autenticaciÃ³n'));
+      return throwError(() => new Error('No se encontró token de autenticación'));
     }
 
     const headers = new HttpHeaders({
       'Authorization': `Bearer ${token}`
     });
 
-    // âœ… CORRECCIÃ“N: Estilo como parÃ¡metro de ruta, no query parameter
     const url = `${this.apiUrl}/${cotizacionId}/pdf/${estilo}`;
     
-    console.log('ðŸ“„ Solicitando PDF de cotizaciÃ³n:', {
-      cotizacionId,
-      estilo,
-      url
-    });
+    console.log('📄 Solicitando PDF de cotización:', { cotizacionId, estilo, url });
 
     return this.http.get(url, {
       responseType: 'blob',
       headers: headers
     }).pipe(
       tap(blob => {
-        console.log('âœ… PDF de cotizaciÃ³n recibido:', {
-          size: blob.size,
-          type: blob.type
-        });
+        console.log('✅ PDF de cotización recibido:', { size: blob.size, type: blob.type });
       }),
       catchError(error => {
-        console.error('âŒ Error al descargar PDF de cotizaciÃ³n:', error);
+        console.error('❌ Error al descargar PDF de cotización:', error);
         return throwError(() => error);
       })
     );
   }
+
   /**
- * Enviar cotizaciÃ³n por email
- */
-sendQuotationByEmail(cotizacionId: number, emailData: {
-  recipientEmail: string;
-  customMessage?: string;
-  pdfStyle?: string;
-}): Observable<any> {
-  const headers = this.getHeaders();
-  const url = `${this.apiUrl}/${cotizacionId}/send-email`;
-  
-  console.log('ðŸ“§ Enviando cotizaciÃ³n por email:', {
-    cotizacionId,
-    recipientEmail: emailData.recipientEmail,
-    pdfStyle: emailData.pdfStyle || 'modern'
-  });
-  
-  return this.http.post(url, emailData, { headers }).pipe(
-    tap(response => {
-      console.log('âœ… CotizaciÃ³n enviada por email:', response);
-    }),
-    catchError(error => {
-      console.error('âŒ Error al enviar cotizaciÃ³n por email:', error);
-      return throwError(() => error);
-    })
-  );
-}
+   * Enviar cotización por email
+   */
+  sendQuotationByEmail(cotizacionId: number, emailData: {
+    recipientEmail: string;
+    customMessage?: string;
+    pdfStyle?: string;
+  }): Observable<any> {
+    const url = `${this.apiUrl}/${cotizacionId}/send-email`;
+    
+    console.log('📧 Enviando cotización por email:', {
+      cotizacionId,
+      recipientEmail: emailData.recipientEmail,
+      pdfStyle: emailData.pdfStyle || 'modern'
+    });
+    
+    return this.getHeaders().pipe(
+      switchMap((headers: HttpHeaders) => {
+        return this.http.post(url, emailData, { headers });
+      }),
+      tap(response => {
+        console.log('✅ Cotización enviada por email:', response);
+      }),
+      catchError(error => {
+        console.error('❌ Error al enviar cotización por email:', error);
+        return throwError(() => error);
+      })
+    );
+  }
 }
