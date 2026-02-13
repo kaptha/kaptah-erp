@@ -11,7 +11,7 @@ import { AuthResponse } from '../models/auth.model';
   providedIn: 'root'
 })
 export class CFDIService {
-  private apiUrl = `${environment.apiUrl}/cfdi`;
+  private apiUrl = `${environment.apiUrl}/api/cfdi`;
   private certVaultUrl = environment.certVaultUrl;
 
   constructor(
@@ -291,3 +291,4 @@ export class CFDIService {
     return throwError(() => new Error(errorMessage));
   }
 }
+
