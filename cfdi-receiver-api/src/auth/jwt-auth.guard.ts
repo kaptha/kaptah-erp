@@ -7,6 +7,9 @@ export class JwtAuthGuard extends AuthGuard('jwt') {
 
   async canActivate(context: ExecutionContext): Promise<boolean> {
     const request = context.switchToHttp().getRequest();
+    if (request.method === 'OPTIONS') {
+      return true;
+    }
     
     const authHeader = request.headers.authorization;
     this.logger.debug('====== JWT AUTH GUARD ======');
