@@ -89,6 +89,28 @@
         </mat-form-field>
   
         <mat-form-field appearance="fill">
+          <mat-label>Plan</mat-label>
+          <mat-select formControlName="plan" required>
+            <mat-option value="starter">
+              <mat-icon>rocket_launch</mat-icon> Kaptah Básico
+            </mat-option>
+            <mat-option value="pro">
+              <mat-icon>trending_up</mat-icon> Kaptah Fiscal
+            </mat-option>
+            <mat-option value="business">
+              <mat-icon>business_center</mat-icon> Kaptah ERP
+            </mat-option>
+            <mat-option value="enterprise">
+              <mat-icon>diamond</mat-icon> Kaptah Ilimitado
+            </mat-option>
+          </mat-select>
+          <mat-icon matPrefix>workspace_premium</mat-icon>
+          <mat-error *ngIf="registroForm.get('plan')?.hasError('required') && registroForm.get('plan')?.touched">
+            Selecciona un plan
+          </mat-error>
+        </mat-form-field>
+
+        <mat-form-field appearance="fill">
           <mat-label>Contraseña</mat-label>
           <input matInput [type]="hidePassword ? 'password' : 'text'" formControlName="password" required>
           <mat-icon matPrefix>lock</mat-icon>

@@ -61,6 +61,7 @@ export class RegisterComponent implements OnInit {
         Validators.minLength(8),
         Validators.pattern(/^(?=.*[a-z])(?=.*[!@#$%^&*])/)
       ]],
+      plan: ['', Validators.required],
       terms: [false, Validators.requiredTrue]
     });
 
@@ -215,7 +216,8 @@ export class RegisterComponent implements OnInit {
       nombre: String(formData.nombre), 
       email: authResp.email,
       rfc: formData.rfc,
-      telefono: formData.phone
+      telefono: formData.phone,
+      plan: formData.plan
     };
 
     // Datos completos para MySQL (CON tipo_persona y fiscalReg)
