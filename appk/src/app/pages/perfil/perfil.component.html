@@ -87,7 +87,78 @@
             <mat-icon>save</mat-icon> Guardar
           </button>
         </div>
-      </form>    
+      </form>
+
+      <!-- Sección Mi Plan -->
+      <div class="mi-plan-section">
+        <h2>Mi Plan</h2>
+        
+        <div class="plan-card" [ngClass]="'plan-' + planActual">
+          <div class="plan-header">
+            <div class="plan-icon">
+              <mat-icon *ngIf="planActual === 'starter'">rocket_launch</mat-icon>
+              <mat-icon *ngIf="planActual === 'pro'">trending_up</mat-icon>
+              <mat-icon *ngIf="planActual === 'business'">business_center</mat-icon>
+              <mat-icon *ngIf="planActual === 'enterprise'">diamond</mat-icon>
+            </div>
+            <div class="plan-info">
+              <h3 class="plan-name">{{ planNombre }}</h3>
+              <span class="plan-badge" [ngClass]="'badge-' + planActual">{{ planActual | uppercase }}</span>
+            </div>
+          </div>
+
+          <!-- Trial banner -->
+          <div class="trial-banner" *ngIf="enPeriodoPrueba">
+            <div class="trial-text">
+              <mat-icon>hourglass_top</mat-icon>
+              <span>Te quedan <strong>{{ diasRestantesTrial }}</strong> de 8 días de prueba</span>
+            </div>
+            <mat-progress-bar mode="determinate" [value]="progresoTrial" color="accent"></mat-progress-bar>
+          </div>
+
+          <!-- Plan expirado -->
+          <div class="trial-expired" *ngIf="!enPeriodoPrueba && !suscripcionActiva">
+            <mat-icon>warning</mat-icon>
+            <span>Tu periodo de prueba ha terminado. Activa tu plan para seguir usando todas las funciones.</span>
+          </div>
+
+          <!-- Precios -->
+          <div class="pricing-section">
+            <div class="billing-toggle">
+              <span [class.active]="cicloFacturacion === 'mensual'">Mensual</span>
+              <mat-slide-toggle 
+                [checked]="cicloFacturacion === 'anual'" 
+                (change)="toggleCicloFacturacion()"
+                color="primary"
+                *ngIf="planActual !== 'starter'">
+              </mat-slide-toggle>
+              <span [class.active]="cicloFacturacion === 'anual'" *ngIf="planActual !== 'starter'">
+                Anual <span class="ahorro-badge">Ahorra {{ ahorroAnual | currency:'MXN':'symbol-narrow':'1.0-0' }}</span>
+              </span>
+              <span class="solo-anual" *ngIf="planActual === 'starter'">Pago único anual</span>
+            </div>
+
+            <div class="precio-display">
+              <span class="precio-cantidad">{{ precioMostrado | currency:'MXN':'symbol-narrow':'1.0-0' }}</span>
+              <span class="precio-periodo">/{{ planActual === 'starter' ? 'año' : (cicloFacturacion === 'mensual' ? 'mes' : 'año') }}</span>
+            </div>
+            <p class="precio-equivalente" *ngIf="planActual === 'starter'">Equivalente a $49.92/mes</p>
+          </div>
+
+          <!-- Botón de pago -->
+          <div class="plan-actions">
+            <button mat-raised-button class="btn-activar" 
+              (click)="iniciarPago()" 
+              [disabled]="suscripcionActiva">
+              <mat-icon>{{ suscripcionActiva ? 'check_circle' : 'payment' }}</mat-icon>
+              {{ suscripcionActiva ? 'Plan activo' : 'Activar plan' }}
+            </button>
+            <button mat-stroked-button class="btn-cambiar" (click)="cambiarPlan()" *ngIf="!enPeriodoPrueba">
+              <mat-icon>swap_horiz</mat-icon> Cambiar plan
+            </button>
+          </div>
+        </div>
+      </div>    
     </mat-tab>
 
     <mat-tab label="Sucursales">

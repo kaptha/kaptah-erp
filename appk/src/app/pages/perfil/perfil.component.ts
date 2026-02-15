@@ -19,6 +19,14 @@ import { Sucursal } from '../../models/sucursal.model';
 import { HttpEventType } from '@angular/common/http';
 import Swal from 'sweetalert2';
 
+interface PlanInfo {
+  nombre: string;
+  mensual: number;
+  anual: number;
+  ahorro: number;
+  soloAnual?: boolean;
+}
+
 interface Impuesto {
   id?: number;
   alias: string;
@@ -76,6 +84,24 @@ export class PerfilComponent implements OnInit {
   // Propiedad para los términos
   terminosCondiciones: string = '';
   terminosOriginal: string = '';
+  
+  // Plan
+  planActual: string = 'starter';
+  planNombre: string = 'Kaptah Básico';
+  enPeriodoPrueba: boolean = true;
+  diasRestantesTrial: number = 8;
+  progresoTrial: number = 100;
+  suscripcionActiva: boolean = false;
+  cicloFacturacion: 'mensual' | 'anual' = 'anual';
+  precioMostrado: number = 599;
+  ahorroAnual: number = 0;
+
+  planes: { [key: string]: PlanInfo } = {
+    starter: { nombre: 'Kaptah Básico', mensual: 0, anual: 599, ahorro: 0, soloAnual: true },
+    pro: { nombre: 'Kaptah Fiscal', mensual: 299, anual: 2990, ahorro: 598 },
+    business: { nombre: 'Kaptah ERP', mensual: 599, anual: 5990, ahorro: 1198 },
+    enterprise: { nombre: 'Kaptah Ilimitado', mensual: 999, anual: 9990, ahorro: 1998 }
+  };
   constructor(
     public dialog: MatDialog,
     private fb: FormBuilder,
@@ -101,6 +127,7 @@ export class PerfilComponent implements OnInit {
     this.loadCsdData();
     this.loadLogoData();
     this.cargarTerminosCondiciones();
+    this.loadPlanData();
   }
   /**
    * Navega al componente de selección de plantillas de facturas
@@ -738,4 +765,63 @@ guardarTerminosCondiciones() {
 get terminosModificados(): boolean {
   return this.terminosCondiciones !== this.terminosOriginal;
 }
+  // ===== MÉTODOS DE PLAN =====
+
+  /**
+   * Carga los datos del plan del usuario desde Firebase
+   */
+  loadPlanData(): void {
+    // TODO: Cargar plan desde Firebase
+    this.actualizarInfoPlan();
+  }
+
+  /**
+   * Actualiza la información mostrada del plan
+   */
+  actualizarInfoPlan(): void {
+    const plan = this.planes[this.planActual];
+    if (plan) {
+      this.planNombre = plan.nombre;
+      if (plan.soloAnual) {
+        this.cicloFacturacion = 'anual';
+        this.precioMostrado = plan.anual;
+        this.ahorroAnual = 0;
+      } else {
+        this.ahorroAnual = plan.ahorro;
+        this.precioMostrado = this.cicloFacturacion === 'mensual' ? plan.mensual : plan.anual;
+      }
+    }
+  }
+
+  /**
+   * Toggle entre facturación mensual y anual
+   */
+  toggleCicloFacturacion(): void {
+    this.cicloFacturacion = this.cicloFacturacion === 'mensual' ? 'anual' : 'mensual';
+    this.actualizarInfoPlan();
+  }
+
+  /**
+   * Inicia el proceso de pago con Conekta
+   */
+  iniciarPago(): void {
+    Swal.fire({
+      icon: 'info',
+      title: 'Próximamente',
+      text: 'La integración de pagos con Conekta estará disponible pronto.',
+      confirmButtonColor: '#8e24aa'
+    });
+  }
+
+  /**
+   * Abre el modal para cambiar de plan
+   */
+  cambiarPlan(): void {
+    Swal.fire({
+      icon: 'info',
+      title: 'Cambiar plan',
+      text: 'La opción de cambiar de plan estará disponible pronto.',
+      confirmButtonColor: '#8e24aa'
+    });
+  }
 }

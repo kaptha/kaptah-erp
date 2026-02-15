@@ -488,3 +488,243 @@ button {
   font-family: inherit;
   line-height: 1.6;
 }
+/* ===== MI PLAN SECTION ===== */
+.mi-plan-section {
+  margin-top: 30px;
+  padding-top: 30px;
+  border-top: 1px solid rgba(142, 36, 170, 0.3);
+}
+
+.mi-plan-section h2 {
+  font-size: 18px;
+  margin-bottom: 20px;
+  color: #333;
+}
+
+.plan-card {
+  background: #fafafa;
+  border-radius: 12px;
+  padding: 24px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+  border-left: 4px solid #8e24aa;
+}
+
+.plan-card.plan-starter { border-left-color: #43a047; }
+.plan-card.plan-pro { border-left-color: #1e88e5; }
+.plan-card.plan-business { border-left-color: #8e24aa; }
+.plan-card.plan-enterprise { border-left-color: #f57c00; }
+
+.plan-header {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin-bottom: 20px;
+}
+
+.plan-icon {
+  width: 48px;
+  height: 48px;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(135deg, #8e24aa, #ce93d8);
+  color: white;
+}
+
+.plan-starter .plan-icon { background: linear-gradient(135deg, #43a047, #81c784); }
+.plan-pro .plan-icon { background: linear-gradient(135deg, #1e88e5, #64b5f6); }
+.plan-business .plan-icon { background: linear-gradient(135deg, #8e24aa, #ce93d8); }
+.plan-enterprise .plan-icon { background: linear-gradient(135deg, #f57c00, #ffb74d); }
+
+.plan-icon mat-icon {
+  font-size: 28px;
+  width: 28px;
+  height: 28px;
+}
+
+.plan-info {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.plan-name {
+  font-size: 20px;
+  font-weight: 600;
+  margin: 0;
+  color: #333;
+}
+
+.plan-badge {
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 1px;
+  padding: 2px 8px;
+  border-radius: 4px;
+  width: fit-content;
+  color: white;
+}
+
+.badge-starter { background-color: #43a047; }
+.badge-pro { background-color: #1e88e5; }
+.badge-business { background-color: #8e24aa; }
+.badge-enterprise { background-color: #f57c00; }
+
+/* Trial banner */
+.trial-banner {
+  background: linear-gradient(135deg, rgba(255, 193, 7, 0.1), rgba(255, 152, 0, 0.1));
+  border: 1px solid rgba(255, 152, 0, 0.3);
+  border-radius: 8px;
+  padding: 16px;
+  margin-bottom: 20px;
+}
+
+.trial-text {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 10px;
+  color: #e65100;
+  font-size: 14px;
+}
+
+.trial-text mat-icon {
+  color: #ff9800;
+  font-size: 20px;
+  width: 20px;
+  height: 20px;
+}
+
+.trial-banner .mat-progress-bar {
+  margin: 0;
+  border-radius: 4px;
+}
+
+.trial-expired {
+  background: linear-gradient(135deg, rgba(244, 67, 54, 0.08), rgba(244, 67, 54, 0.15));
+  border: 1px solid rgba(244, 67, 54, 0.3);
+  border-radius: 8px;
+  padding: 16px;
+  margin-bottom: 20px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  color: #c62828;
+  font-size: 14px;
+}
+
+.trial-expired mat-icon {
+  color: #f44336;
+}
+
+/* Pricing */
+.pricing-section {
+  margin-bottom: 20px;
+}
+
+.billing-toggle {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 16px;
+  font-size: 14px;
+  color: #757575;
+}
+
+.billing-toggle span.active {
+  color: #333;
+  font-weight: 600;
+}
+
+.ahorro-badge {
+  background-color: #e8f5e9;
+  color: #2e7d32;
+  font-size: 11px;
+  font-weight: 600;
+  padding: 2px 8px;
+  border-radius: 12px;
+  margin-left: 4px;
+}
+
+.solo-anual {
+  color: #8e24aa;
+  font-weight: 500;
+  font-size: 13px;
+}
+
+.precio-display {
+  display: flex;
+  align-items: baseline;
+  gap: 4px;
+}
+
+.precio-cantidad {
+  font-size: 36px;
+  font-weight: 700;
+  color: #333;
+}
+
+.precio-periodo {
+  font-size: 16px;
+  color: #757575;
+}
+
+.precio-equivalente {
+  font-size: 13px;
+  color: #757575;
+  margin-top: 4px;
+  border-bottom: none;
+}
+
+/* Plan actions */
+.plan-actions {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.btn-activar {
+  background: linear-gradient(135deg, #8e24aa, #7b1fa2) !important;
+  color: white !important;
+  border-radius: 8px !important;
+  padding: 0 24px !important;
+  height: 44px !important;
+  font-weight: 600 !important;
+  margin-top: 0 !important;
+}
+
+.btn-activar:disabled {
+  background: #e0e0e0 !important;
+  color: #9e9e9e !important;
+}
+
+.btn-cambiar {
+  border-color: #8e24aa !important;
+  color: #8e24aa !important;
+  border-radius: 8px !important;
+  height: 44px !important;
+  margin-top: 0 !important;
+}
+
+@media (max-width: 768px) {
+  .plan-card {
+    padding: 16px;
+  }
+
+  .precio-cantidad {
+    font-size: 28px;
+  }
+
+  .plan-actions {
+    flex-direction: column;
+  }
+
+  .btn-activar, .btn-cambiar {
+    width: 100% !important;
+  }
+
+  .billing-toggle {
+    flex-wrap: wrap;
+  }
+}
