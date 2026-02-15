@@ -365,3 +365,29 @@ a:hover {
 }
 
   
+/* Link de registro */
+.register-link {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 0.4rem;
+  margin-top: 1.5rem;
+}
+
+.register-link span {
+  color: rgba(255, 255, 255, 0.7);
+  font-size: 0.9rem;
+}
+
+.register-link a {
+  color: #ce93d8;
+  font-weight: 600;
+  font-size: 0.9rem;
+  margin-top: 0;
+  transition: color 0.3s ease;
+}
+
+.register-link a:hover {
+  color: #fff;
+  text-decoration: underline;
+}
