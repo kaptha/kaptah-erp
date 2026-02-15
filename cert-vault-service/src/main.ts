@@ -1,27 +1,21 @@
-﻿import { NestFactory } from '@nestjs/core';
+import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
 import { ValidationPipe } from '@nestjs/common';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import helmet from 'helmet';
 import * as compression from 'compression';
-import { ConfigService } from '@nestjs/config';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
-  const configService = app.get(ConfigService);
 
   app.use((req, res, next) => {
-    console.log(\🔥 Request recibido: \ \\);
-    console.log(\📍 Origin: \\);
-    console.log(\🎫 Auth: \...\);
+    console.log('Request recibido:', req.method, req.url);
+    console.log('Origin:', req.headers.origin);
+    console.log('Auth:', req.headers.authorization ? 'present' : 'undefined...');
     next();
   });
 
-  // Configuración de seguridad básica
-  app.use(helmet());
-  app.use(compression());
-
-  // Configuración de CORS - ACTUALIZADO
+  // CORS ANTES de helmet
   app.enableCors({
     origin: [
       'http://localhost:4200',
@@ -38,7 +32,9 @@ async function bootstrap() {
     exposedHeaders: ['Content-Disposition']
   });
 
-  // Validación global
+  app.use(helmet());
+  app.use(compression());
+
   app.useGlobalPipes(new ValidationPipe({
     whitelist: true,
     transform: true,
@@ -49,40 +45,23 @@ async function bootstrap() {
     disableErrorMessages: process.env.NODE_ENV === 'production',
   }));
 
-  // Prefijo global para la API
   app.setGlobalPrefix('api');
 
-  // Configuración de Swagger
   if (process.env.NODE_ENV !== 'production') {
     const config = new DocumentBuilder()
       .setTitle('Certificados API')
-      .setDescription('API para gestión de certificados FIEL y CSD')
+      .setDescription('API para gestion de certificados FIEL y CSD')
       .setVersion('1.0')
       .addBearerAuth()
       .build();
-
     const document = SwaggerModule.createDocument(app, config);
     SwaggerModule.setup('api/docs', app, document);
   }
 
-  // Configuración de límites para archivos
-  app.use(compression());
-  app.use((req: any, res: any, next: any) => {
-    req.setTimeout(300000); // 5 minutos
-    res.setTimeout(300000);
-    next();
-  });
-
-  // Puerto desde configuración
-  const port = configService.get('PORT', 3004);
+  const port = process.env.PORT || 3004;
   await app.listen(port);
-
-  console.log(\Application running on port \\);
-  if (process.env.NODE_ENV !== 'production') {
-    console.log(\Swagger documentation available at http://localhost:\/api/docs\);
-  }
+  console.log('Cert Vault Service running on port:', port);
 }
-
 bootstrap().catch(err => {
   console.error('Error starting the application:', err);
   process.exit(1);
