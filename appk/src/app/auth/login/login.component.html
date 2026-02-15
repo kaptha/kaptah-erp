@@ -47,8 +47,11 @@
           <button mat-flat-button class="btn-in" type="submit" [disabled]="loginForm.invalid">
             <span *ngIf="!isLoading">Ingresar</span>
             <mat-spinner *ngIf="isLoading" diameter="24"></mat-spinner>
-          </button>       
-          
+          </button>
+        </div>
+        <div class="register-link">
+          <span>¿No tienes cuenta?</span>
+          <a routerLink="/auth/register">Regístrate aquí</a>
         </div>
       </form>
     </mat-card-content>
