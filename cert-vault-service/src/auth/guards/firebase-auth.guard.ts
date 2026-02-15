@@ -7,10 +7,16 @@ export class FirebaseAuthGuard implements CanActivate {
 
   async canActivate(context: ExecutionContext): Promise<boolean> {
     const request = context.switchToHttp().getRequest();
+
+    // Permitir preflight OPTIONS sin autenticacion
+    if (request.method === 'OPTIONS') {
+      return true;
+    }
+
     const authHeader = request.headers.authorization;
 
     if (!authHeader || !authHeader.startsWith('Bearer ')) {
-      console.log('❌ Token no válido o no presente');
+      console.log('No token provided');
       throw new UnauthorizedException('No token provided');
     }
 
@@ -21,7 +27,6 @@ export class FirebaseAuthGuard implements CanActivate {
       request.user = {
         id: decodedToken.uid,
         email: decodedToken.email,
-        // otros campos que necesites
       };
       return true;
     } catch (error) {
