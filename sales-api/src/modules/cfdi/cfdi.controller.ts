@@ -43,7 +43,7 @@ export class CfdiController {
     private readonly cfdiService: CfdiService,
     private readonly signService: SignService,
   ) {
-    this.logger.log('CfdiController inicializado con certificados dinámicos');
+    this.logger.log('CfdiController inicializado v2');
   }
 
   /**
@@ -496,3 +496,4 @@ export class CfdiController {
     };
   }
 }
+
