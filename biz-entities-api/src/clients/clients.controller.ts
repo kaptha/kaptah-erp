@@ -21,6 +21,7 @@ import { ClientsService } from './clients.service';
 import { CreateClientDto } from './dto/create-client.dto';
 import { UpdateClientDto } from './dto/update-client.dto';
 import { Request } from 'express';
+import { InternalApiKeyGuard } from '../guards/internal-api-key.guard';
 import { UsersService } from 'src/users/users.service';
 
 interface RequestWithUser extends Request {
@@ -57,6 +58,7 @@ export class ClientsController {
     }
     return this.clientsService.findAllByUser(req.user.firebaseUid);
   }
+  @UseGuards(InternalApiKeyGuard)
   @Get('by-rfc/:rfc')
   async findByRfc(@Param('rfc') rfc: string, @Req() req: RequestWithUser) {
     console.log('📋 Buscando cliente por RFC:', rfc);

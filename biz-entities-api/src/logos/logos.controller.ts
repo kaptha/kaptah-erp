@@ -18,6 +18,7 @@ import { FileInterceptor } from '@nestjs/platform-express';
 import { memoryStorage } from 'multer';
 import { resolve, extname } from 'path';
 import { v4 as uuidv4 } from 'uuid';
+import { InternalApiKeyGuard } from '../guards/internal-api-key.guard';
 import { LogosService } from './logos.service';
 import { Request, Response } from 'express';
 import { FirebaseAuthGuard } from '../guards/firebase-auth.guard';
@@ -40,6 +41,7 @@ export class LogosController {
     private readonly usersService: UsersService
   ) {}
 
+  @UseGuards(InternalApiKeyGuard)
   @Get('current')
   async getCurrentLogo(@Req() req: RequestWithUser, @Res() res: Response) {
     try {
