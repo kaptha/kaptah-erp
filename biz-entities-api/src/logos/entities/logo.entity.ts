@@ -14,7 +14,7 @@ export class Logo {
   filename: string;
 
   @Column({ nullable: true })
-  path: string;
+  path: string | null;
 
   // Campos nuevos para Cloudinary
   @Column({ nullable: true })
