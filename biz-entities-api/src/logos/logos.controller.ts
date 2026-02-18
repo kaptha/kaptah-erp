@@ -15,7 +15,7 @@ import {
 } from '@nestjs/common';
 import { existsSync, accessSync, constants } from 'fs';
 import { FileInterceptor } from '@nestjs/platform-express';
-import { diskStorage } from 'multer';
+import { memoryStorage } from 'multer';
 import { resolve, extname } from 'path';
 import { v4 as uuidv4 } from 'uuid';
 import { LogosService } from './logos.service';
@@ -88,19 +88,7 @@ export class LogosController {
   @Post()
   @UseInterceptors(
     FileInterceptor('logo', {
-      storage: diskStorage({
-        destination: './uploads/logos',
-        filename: (req, file, callback) => {
-          const uniqueSuffix = uuidv4();
-          const extension = extname(file.originalname);
-          const filename = `${uniqueSuffix}${extension}`;
-          
-          // Guardar el filename en el request
-          req['uploadedFilename'] = filename;
-          
-          callback(null, filename);
-        },
-      }),
+      storage: memoryStorage(),
       fileFilter: (req, file, callback) => {
         const allowedMimeTypes = ['image/png', 'image/jpeg', 'image/svg+xml'];
         if (allowedMimeTypes.includes(file.mimetype)) {
