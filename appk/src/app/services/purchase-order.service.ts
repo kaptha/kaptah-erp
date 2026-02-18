@@ -1,8 +1,9 @@
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Observable, throwError } from 'rxjs';
-import { catchError, map } from 'rxjs/operators';
+import { catchError, map, tap, switchMap } from 'rxjs/operators';
 import { environment } from '../../environments/environment';
+import { UsersService } from './users.service';
 
 export interface PurchaseOrder {
   id?: number;
@@ -84,7 +85,10 @@ export interface ReceiveOrderDto {
 export class PurchaseOrderService {
   private apiUrl = `${environment.inventoryApiUrl}/purchase-orders`;
 
-  constructor(private http: HttpClient) {}
+  constructor(
+    private http: HttpClient,
+    private usersService: UsersService
+  ) {}
 
   private getHeaders(): HttpHeaders {
     const token = localStorage.getItem('idToken');
@@ -99,10 +103,7 @@ export class PurchaseOrderService {
 
   descargarPDF(orderId: number, estilo: string = 'minimal'): Observable<Blob> {
     const url = `${this.apiUrl}/${orderId}/pdf/${estilo}`;
-    const token = localStorage.getItem('idToken');
-    const headers = new HttpHeaders({
-      'Authorization': `Bearer ${token}`
-    });
+    const headers = this.getHeaders();
 
     return this.http.get(url, {
       responseType: 'blob',
@@ -129,8 +130,25 @@ export class PurchaseOrderService {
   }
 
   getAll(): Observable<PurchaseOrder[]> {
-    return this.http.get<PurchaseOrder[]>(this.apiUrl, { headers: this.getHeaders() }).pipe(
-      catchError(this.handleError)
+    const idToken = localStorage.getItem('idToken');
+    if (!idToken) {
+      return throwError(() => new Error('No se encontro el token de autenticacion'));
+    }
+
+    return this.usersService.getUserByToken(idToken).pipe(
+      switchMap(user => {
+        if (!user) {
+          throw new Error('No se encontro el usuario');
+        }
+        console.log('userId:', user.id);
+        const headers = this.getHeaders();
+        return this.http.get<PurchaseOrder[]>(`${this.apiUrl}/firebase/${user.id}`, { headers });
+      }),
+      tap(response => console.log('Ordenes recibidas:', response)),
+      catchError(error => {
+        console.error('Error al obtener ordenes:', error);
+        return throwError(() => error);
+      })
     );
   }
 
