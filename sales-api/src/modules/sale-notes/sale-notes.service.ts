@@ -67,7 +67,8 @@ private async obtenerLogoUsuario(userId: string, token: string): Promise<string 
     
     const response = await axios.get<LogoResponse>(logoApiUrl, {
       headers: {
-        'Authorization': token
+        'Authorization': token,
+        'x-internal-api-key': process.env.INTERNAL_API_KEY
       }
     });
     
