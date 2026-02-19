@@ -262,8 +262,8 @@ private async obtenerLogoUsuario(userId: string, token: string): Promise<string 
       
       if (cliente) {
         clienteTelefono = cliente.Telefono || 'N/A';
-        clienteCiudad = cliente.ciudad || cliente.Colonia || 'N/A';
-        clienteDireccion = cliente.direccion || 'Dirección del cliente';
+        clienteCiudad = cliente.Ciudad || cliente.Colonia || 'N/A';
+        clienteDireccion = cliente.Direccion || 'Dirección del cliente';
         
         console.log('✅ Datos del cliente aplicados:', {
           telefono: clienteTelefono,
