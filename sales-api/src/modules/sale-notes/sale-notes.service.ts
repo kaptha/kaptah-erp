@@ -30,8 +30,8 @@ interface ClientResponse {
   Nombre: string;
   Email: string;
   Telefono?: string;
-  direccion?: string;
-  ciudad?: string;
+  Direccion?: string;
+  Ciudad?: string;
   Rfc?: string;
   RegFiscal?: string;
   Copostal?: number;
@@ -128,8 +128,8 @@ private async obtenerLogoUsuario(userId: string, token: string): Promise<string 
           nombre: response.data.Nombre,
           rfc: response.data.Rfc,
           telefono: response.data.Telefono,
-          direccion: response.data.direccion,
-          ciudad: response.data.ciudad,
+          direccion: response.data.Direccion,
+          ciudad: response.data.Ciudad,
         });
         return response.data;
       }
