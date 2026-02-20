@@ -16,6 +16,8 @@ import { ServiceCategoryModule } from './service-category/service-category.modul
 import { SatCatalogService } from './common/services/sat-catalog/sat-catalog.service';
 import { SatCatalogModule } from './common/modules/sat-catalog/sat-catalog.module';
 import { PurchaseOrderModule } from './purchase-order/purchase-order.module';
+import { BranchInventoryModule } from './branch-inventory/branch-inventory.module';
+import { BranchTransferModule } from './branch-transfer/branch-transfer.module';
 
 @Module({
   imports: [
@@ -64,6 +66,8 @@ import { PurchaseOrderModule } from './purchase-order/purchase-order.module';
     ServiceCategoryModule,
     SatCatalogModule,
     PurchaseOrderModule,
+    BranchInventoryModule,
+    BranchTransferModule,
   ],
   controllers: [AppController],
   providers: [AppService, SatCatalogService],
