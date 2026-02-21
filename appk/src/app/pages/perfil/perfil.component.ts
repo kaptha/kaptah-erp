@@ -188,6 +188,12 @@ export class PerfilComponent implements OnInit {
               fiscalReg: user.fiscalReg || ''
             });
             this.email = user.email || '';
+
+            // Cargar datos del plan desde Firebase
+            this.planActual = user.plan || 'starter';
+            this.suscripcionActiva = user.suscripcionActiva || false;
+            this.cicloFacturacion = user.cicloFacturacion || 'anual';
+            this.actualizarInfoPlan();
             
             // Actualizar regímenes fiscales filtrados
             this.regimenesFiscalesFiltrados = this.regimenFiscalService.getRegimenesPorTipo(tipoPersonaDeterminado);
