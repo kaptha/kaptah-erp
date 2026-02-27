@@ -1,0 +1,56 @@
+mat-card {
+  margin-bottom: 1rem;
+}
+
+.display-6 {
+  font-size: 2rem;
+  font-weight: 300;
+  margin: 0;
+}
+
+h3 {
+  font-size: 0.9rem;
+  color: #666;
+  margin-bottom: 0.5rem;
+}
+
+.status-card.pending {
+  border-left: 4px solid #ff9800;
+}
+
+.status-card.in-transit {
+  border-left: 4px solid #2196f3;
+}
+
+.status-card.completed {
+  border-left: 4px solid #4caf50;
+}
+
+.table-responsive {
+  overflow-x: auto;
+}
+
+table {
+  width: 100%;
+}
+
+th.mat-header-cell {
+  font-weight: 600;
+  color: #333;
+}
+
+.text-danger {
+  color: #f44336;
+}
+
+.align-middle {
+  vertical-align: middle;
+}
+
+.me-1 {
+  margin-right: 0.25rem;
+}
+
+mat-spinner {
+  margin: 2rem auto;
+}

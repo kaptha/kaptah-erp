@@ -1,6 +1,8 @@
 import { Routes, RouterModule } from '@angular/router';
 import { NgModule } from '@angular/core';
+
 import { authGuard } from '../guards/auth.guard';
+
 import { PagesComponent } from './pages.component';
 import { DashboardComponent } from './dashboard/dashboard.component';
 import { PerfilComponent } from './perfil/perfil.component';
@@ -22,12 +24,12 @@ import { InvoiceDesignSelectorComponent } from './invoice-design-selector/invoic
 import { CFDIComponent } from './cfdi/cfdi.component';
 
 const routes: Routes = [
-    {
-        path: 'dashboard',
+    { 
+        path: 'dashboard', 
         component: PagesComponent,
-        canActivate: [authGuard],
+        canActivate: [authGuard],        
         children: [
-            { path: '', component: DashboardComponent },
+            { path: '', component: DashboardComponent },            
             { path: 'perfil', component: PerfilComponent },
             { path: 'clientes', component: ClientesComponent },
             { path: 'categorias', component: CategoriasComponent },
@@ -45,15 +47,10 @@ const routes: Routes = [
             { path: 'empleados', component: EmpleadosComponent },
             { path: 'cfdi', component: CFDIComponent },
             { path: 'invoice-design-selector', component: InvoiceDesignSelectorComponent },
-            {
-                path: 'compras/purchase-orders',
+            { 
+                path: 'compras/purchase-orders', 
                 loadChildren: () => import('./compras/purchase-orders/purchase-orders.module')
                     .then(m => m.PurchaseOrdersModule)
-            },
-            {
-                path: 'inventario',
-                loadChildren: () => import('./inventario/inventario.module')
-                    .then(m => m.InventarioModule)
             },
         ]
     },

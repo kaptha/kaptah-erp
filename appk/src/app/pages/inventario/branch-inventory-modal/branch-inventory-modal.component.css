@@ -1,0 +1,17 @@
+mat-dialog-content {
+  min-width: 500px;
+  padding: 20px 24px;
+}
+
+.w-100 {
+  width: 100%;
+}
+
+mat-spinner {
+  display: inline-block;
+  vertical-align: middle;
+}
+
+.me-2 {
+  margin-right: 0.5rem;
+}

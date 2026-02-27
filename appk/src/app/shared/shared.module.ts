@@ -2,7 +2,6 @@ import { NgModule, CUSTOM_ELEMENTS_SCHEMA, NO_ERRORS_SCHEMA } from '@angular/cor
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
-
 import { MaterialModule } from './material.module';
 
 // Importa componentes compartidos
@@ -13,13 +12,11 @@ import { HeaderComponent } from './header/header.component';
   declarations: [
     SidebarComponent,
     HeaderComponent
-    // Otros componentes compartidos
   ],
   exports: [
     // Exporta componentes
     SidebarComponent,
     HeaderComponent,
-    
     // Exporta módulos para que estén disponibles en módulos que importan SharedModule
     CommonModule,
     RouterModule,
@@ -29,11 +26,11 @@ import { HeaderComponent } from './header/header.component';
   ],
   imports: [
     CommonModule,
-    RouterModule, // Necesario para routerLink en componentes compartidos
+    RouterModule,
     FormsModule,
     ReactiveFormsModule,
-    MaterialModule // Incluye todos los componentes de Angular Material
+    MaterialModule
   ],
-  schemas: [CUSTOM_ELEMENTS_SCHEMA, NO_ERRORS_SCHEMA] // Para prevenir errores con componentes desconocidos
+  schemas: [CUSTOM_ELEMENTS_SCHEMA, NO_ERRORS_SCHEMA]
 })
 export class SharedModule { }

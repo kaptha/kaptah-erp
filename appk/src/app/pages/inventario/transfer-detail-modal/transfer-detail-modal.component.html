@@ -1,0 +1,140 @@
+<h2 mat-dialog-title *ngIf="transfer">
+  Transferencia {{ transfer.transfer_number }}
+  <mat-chip [color]="getStatusColor(transfer.status)" selected class="ms-2">
+    {{ getStatusLabel(transfer.status) }}
+  </mat-chip>
+</h2>
+
+<mat-dialog-content>
+  <div *ngIf="loading" class="text-center py-5">
+    <mat-spinner class="mx-auto"></mat-spinner>
+  </div>
+
+  <div *ngIf="!loading && transfer">
+    <!-- Información General -->
+    <mat-card class="mb-3">
+      <mat-card-content>
+        <div class="row">
+          <div class="col-md-6">
+            <h3>Información de la Transferencia</h3>
+            <p><strong>Número:</strong> {{ transfer.transfer_number }}</p>
+            <p><strong>Estado:</strong> {{ getStatusLabel(transfer.status) }}</p>
+            <p><strong>Fecha de Creación:</strong> {{ transfer.created_at | date:'dd/MM/yyyy HH:mm' }}</p>
+            <p *ngIf="transfer.shipped_date">
+              <strong>Fecha de Envío:</strong> {{ transfer.shipped_date | date:'dd/MM/yyyy HH:mm' }}
+            </p>
+            <p *ngIf="transfer.received_date">
+              <strong>Fecha de Recepción:</strong> {{ transfer.received_date | date:'dd/MM/yyyy HH:mm' }}
+            </p>
+          </div>
+
+          <div class="col-md-6">
+            <h3>Sucursales</h3>
+            <div class="transfer-flow">
+              <div class="branch-box origin">
+                <mat-icon>store</mat-icon>
+                <p><strong>Origen</strong></p>
+                <p>{{ transfer.from_branch_alias }}</p>
+              </div>
+              <div class="arrow">
+                <mat-icon>arrow_forward</mat-icon>
+              </div>
+              <div class="branch-box destination">
+                <mat-icon>store</mat-icon>
+                <p><strong>Destino</strong></p>
+                <p>{{ transfer.to_branch_alias }}</p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="row mt-3" *ngIf="transfer.notes">
+          <div class="col-12">
+            <h3>Notas</h3>
+            <p>{{ transfer.notes }}</p>
+          </div>
+        </div>
+
+        <div class="row mt-3">
+          <div class="col-md-6">
+            <p><strong>Solicitado por:</strong> {{ transfer.requested_by }}</p>
+          </div>
+          <div class="col-md-6" *ngIf="transfer.approved_by">
+            <p><strong>Aprobado por:</strong> {{ transfer.approved_by }}</p>
+          </div>
+        </div>
+      </mat-card-content>
+    </mat-card>
+
+    <!-- Items -->
+    <mat-card>
+      <mat-card-content>
+        <h3 class="mb-3">Productos ({{ transfer.total_products }})</h3>
+        
+        <div class="table-responsive">
+          <table mat-table [dataSource]="transfer.items" class="w-100">
+
+            <!-- Código -->
+            <ng-container matColumnDef="product_code">
+              <th mat-header-cell *matHeaderCellDef>Código</th>
+              <td mat-cell *matCellDef="let item">{{ item.product_code }}</td>
+            </ng-container>
+
+            <!-- Producto -->
+            <ng-container matColumnDef="product_name">
+              <th mat-header-cell *matHeaderCellDef>Producto</th>
+              <td mat-cell *matCellDef="let item">{{ item.product_name }}</td>
+            </ng-container>
+
+            <!-- Cantidad -->
+            <ng-container matColumnDef="quantity">
+              <th mat-header-cell *matHeaderCellDef>Cantidad</th>
+              <td mat-cell *matCellDef="let item">
+                <strong>{{ item.quantity }}</strong>
+              </td>
+            </ng-container>
+
+            <!-- Costo -->
+            <ng-container matColumnDef="cost">
+              <th mat-header-cell *matHeaderCellDef>Costo Unit.</th>
+              <td mat-cell *matCellDef="let item">
+                {{ item.cost | currency:'MXN':'symbol':'1.2-2' }}
+              </td>
+            </ng-container>
+
+            <!-- Total -->
+            <ng-container matColumnDef="total">
+              <th mat-header-cell *matHeaderCellDef>Total</th>
+              <td mat-cell *matCellDef="let item">
+                <strong>{{ (item.quantity * item.cost) | currency:'MXN':'symbol':'1.2-2' }}</strong>
+              </td>
+            </ng-container>
+
+            <!-- Notas -->
+            <ng-container matColumnDef="notes">
+              <th mat-header-cell *matHeaderCellDef>Notas</th>
+              <td mat-cell *matCellDef="let item">{{ item.notes || '-' }}</td>
+            </ng-container>
+
+            <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+            <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
+          </table>
+        </div>
+
+        <!-- Totales -->
+        <div class="totals-section mt-3">
+          <div class="d-flex justify-content-end">
+            <div class="totals-box">
+              <p><strong>Valor Total:</strong></p>
+              <p class="total-amount">{{ transfer.total_value | currency:'MXN':'symbol':'1.2-2' }}</p>
+            </div>
+          </div>
+        </div>
+      </mat-card-content>
+    </mat-card>
+  </div>
+</mat-dialog-content>
+
+<mat-dialog-actions align="end">
+  <button mat-raised-button color="primary" (click)="onClose()">Cerrar</button>
+</mat-dialog-actions>
