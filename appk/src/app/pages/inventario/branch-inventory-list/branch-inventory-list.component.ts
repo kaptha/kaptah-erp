@@ -1,12 +1,40 @@
 import { Component, OnInit } from '@angular/core';
-import { MatDialog } from '@angular/material/dialog';
-import { MatSnackBar } from '@angular/material/snack-bar';
+import { CommonModule } from '@angular/common';
+import { FormsModule } from '@angular/forms';
+import { MatDialog, MatDialogModule } from '@angular/material/dialog';
+import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
+import { MatTableModule } from '@angular/material/table';
+import { MatCardModule } from '@angular/material/card';
+import { MatButtonModule } from '@angular/material/button';
+import { MatIconModule } from '@angular/material/icon';
+import { MatFormFieldModule } from '@angular/material/form-field';
+import { MatInputModule } from '@angular/material/input';
+import { MatSelectModule } from '@angular/material/select';
+import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
+import { MatMenuModule } from '@angular/material/menu';
+import { MatChipsModule } from '@angular/material/chips';
 import { BranchInventoryService, BranchInventoryWithDetails } from '../../../services/inventory/branch-inventory.service';
 import { SucursalesService } from '../../../services/sucursales.service';
-import { BranchInventoryModalComponent } from '../branch-inventory-modal/branch-inventory-modal.component';
 
 @Component({
   selector: 'app-branch-inventory-list',
+  standalone: true,
+  imports: [
+    CommonModule,
+    FormsModule,
+    MatTableModule,
+    MatCardModule,
+    MatButtonModule,
+    MatIconModule,
+    MatFormFieldModule,
+    MatInputModule,
+    MatSelectModule,
+    MatDialogModule,
+    MatSnackBarModule,
+    MatProgressSpinnerModule,
+    MatMenuModule,
+    MatChipsModule
+  ],
   templateUrl: './branch-inventory-list.component.html',
   styleUrls: ['./branch-inventory-list.component.css']
 })
@@ -67,11 +95,11 @@ export class BranchInventoryListComponent implements OnInit {
   loadInventory(): void {
     this.loading = true;
     const filters: any = {};
-    
+
     if (this.selectedBranchId) {
       filters.branch_id = this.selectedBranchId;
     }
-    
+
     if (this.selectedStockStatus !== 'all') {
       filters.stock_status = this.selectedStockStatus;
     }
@@ -111,47 +139,6 @@ export class BranchInventoryListComponent implements OnInit {
     this.loadInventory();
   }
 
-  openAddModal(): void {
-    const dialogRef = this.dialog.open(BranchInventoryModalComponent, {
-      width: '600px',
-      data: { mode: 'create' }
-    });
-
-    dialogRef.afterClosed().subscribe(result => {
-      if (result) {
-        this.loadInventory();
-      }
-    });
-  }
-
-  openEditModal(item: BranchInventoryWithDetails): void {
-    const dialogRef = this.dialog.open(BranchInventoryModalComponent, {
-      width: '600px',
-      data: { mode: 'edit', item }
-    });
-
-    dialogRef.afterClosed().subscribe(result => {
-      if (result) {
-        this.loadInventory();
-      }
-    });
-  }
-
-  deleteItem(item: BranchInventoryWithDetails): void {
-    if (confirm(`¿Estás seguro de eliminar el inventario de ${item.product_name} en ${item.branch_alias}?`)) {
-      this.branchInventoryService.deleteInventory(item.id).subscribe({
-        next: () => {
-          this.snackBar.open('Inventario eliminado correctamente', 'Cerrar', { duration: 3000 });
-          this.loadInventory();
-        },
-        error: (error) => {
-          console.error('Error al eliminar:', error);
-          this.snackBar.open('Error al eliminar inventario', 'Cerrar', { duration: 3000 });
-        }
-      });
-    }
-  }
-
   getStockStatusColor(status: string): string {
     switch (status) {
       case 'ok': return 'primary';
@@ -169,6 +156,38 @@ export class BranchInventoryListComponent implements OnInit {
       case 'critical': return 'Crítico';
       case 'out': return 'Agotado';
       default: return status;
+    }
+  }
+
+  getCriticalCount(): number {
+    return this.filteredItems.filter(item => 
+      item.stock_status === 'critical' || item.stock_status === 'out'
+    ).length;
+  }
+
+  openAddModal(): void {
+    // TODO: Implementar modal
+    this.snackBar.open('Modal de agregar - En desarrollo', 'Cerrar', { duration: 3000 });
+  }
+
+  openEditModal(item: BranchInventoryWithDetails): void {
+    // TODO: Implementar modal
+    this.snackBar.open('Modal de editar - En desarrollo', 'Cerrar', { duration: 3000 });
+  }
+
+  deleteItem(item: BranchInventoryWithDetails): void {
+    const message = 'Eliminar inventario de ' + item.product_name + ' en ' + item.branch_alias + '?';
+    if (confirm(message)) {
+      this.branchInventoryService.deleteInventory(item.id).subscribe({
+        next: () => {
+          this.snackBar.open('Inventario eliminado', 'Cerrar', { duration: 3000 });
+          this.loadInventory();
+        },
+        error: (error) => {
+          console.error('Error:', error);
+          this.snackBar.open('Error al eliminar', 'Cerrar', { duration: 3000 });
+        }
+      });
     }
   }
 }

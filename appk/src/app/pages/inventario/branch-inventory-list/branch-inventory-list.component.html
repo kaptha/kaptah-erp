@@ -71,7 +71,7 @@
         <mat-card-content>
           <h3>Alertas</h3>
           <p class="display-6 text-danger">
-            {{ (filteredItems | filter:'stock_status':'critical').length + (filteredItems | filter:'stock_status':'out').length }}
+            {{ getCriticalCount() }}
           </p>
         </mat-card-content>
       </mat-card>
