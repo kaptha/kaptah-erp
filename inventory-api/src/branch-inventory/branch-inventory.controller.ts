@@ -38,7 +38,7 @@ export class BranchInventoryController {
     }
 
     // Obtener userId de MySQL usando firebaseUid
-    const user = await this.usersService.getUserByFirebaseUid(req.user.firebaseUid);
+    const user = await this.usersService.findByFirebaseUid(req.user.firebaseUid);
     if (!user) {
       throw new UnauthorizedException('Usuario no encontrado');
     }
@@ -54,7 +54,7 @@ export class BranchInventoryController {
     }
 
     // Obtener userId de MySQL usando firebaseUid
-    const user = await this.usersService.getUserByFirebaseUid(req.user.firebaseUid);
+    const user = await this.usersService.findByFirebaseUid(req.user.firebaseUid);
     if (!user) {
       throw new UnauthorizedException('Usuario no encontrado');
     }
@@ -72,7 +72,7 @@ export class BranchInventoryController {
       throw new UnauthorizedException('Usuario no autenticado');
     }
 
-    const user = await this.usersService.getUserByFirebaseUid(req.user.firebaseUid);
+    const user = await this.usersService.findByFirebaseUid(req.user.firebaseUid);
     if (!user) {
       throw new UnauthorizedException('Usuario no encontrado');
     }
@@ -86,7 +86,7 @@ export class BranchInventoryController {
       throw new UnauthorizedException('Usuario no autenticado');
     }
 
-    const user = await this.usersService.getUserByFirebaseUid(req.user.firebaseUid);
+    const user = await this.usersService.findByFirebaseUid(req.user.firebaseUid);
     if (!user) {
       throw new UnauthorizedException('Usuario no encontrado');
     }
@@ -104,7 +104,7 @@ export class BranchInventoryController {
       throw new UnauthorizedException('Usuario no autenticado');
     }
 
-    const user = await this.usersService.getUserByFirebaseUid(req.user.firebaseUid);
+    const user = await this.usersService.findByFirebaseUid(req.user.firebaseUid);
     if (!user) {
       throw new UnauthorizedException('Usuario no encontrado');
     }
@@ -118,7 +118,7 @@ export class BranchInventoryController {
       throw new UnauthorizedException('Usuario no autenticado');
     }
 
-    const user = await this.usersService.getUserByFirebaseUid(req.user.firebaseUid);
+    const user = await this.usersService.findByFirebaseUid(req.user.firebaseUid);
     if (!user) {
       throw new UnauthorizedException('Usuario no encontrado');
     }
