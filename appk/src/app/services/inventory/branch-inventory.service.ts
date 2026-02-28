@@ -62,7 +62,7 @@ export class BranchInventoryService {
     const token = localStorage.getItem('idToken');
     return new HttpHeaders({
       'Content-Type': 'application/json',
-      'Authorization': \Bearer \\
+      'Authorization': `Bearer ${token}`
     });
   }
 
@@ -70,14 +70,13 @@ export class BranchInventoryService {
     const headers = this.getHeaders();
     const params: any = {};
 
-    // IMPORTANTE: Agregar userId a los parámetros
     if (filters?.userId) params.userId = filters.userId;
     if (filters?.branch_id) params.branch_id = filters.branch_id.toString();
     if (filters?.product_id) params.product_id = filters.product_id.toString();
     if (filters?.stock_status) params.stock_status = filters.stock_status;
     if (filters?.search) params.search = filters.search;
 
-    return this.http.get<BranchInventoryWithDetails[]>(\\/branch-inventory\, { 
+    return this.http.get<BranchInventoryWithDetails[]>(`${this.apiUrl}/branch-inventory`, { 
       headers, 
       params 
     }).pipe(
@@ -95,7 +94,7 @@ export class BranchInventoryService {
 
   getInventoryItem(id: number): Observable<BranchInventory> {
     const headers = this.getHeaders();
-    return this.http.get<BranchInventory>(\\/branch-inventory/\\, { headers }).pipe(
+    return this.http.get<BranchInventory>(`${this.apiUrl}/branch-inventory/${id}`, { headers }).pipe(
       tap(response => console.log('Item de inventario:', response)),
       catchError(error => {
         console.error('Error al obtener item de inventario:', error);
@@ -106,8 +105,8 @@ export class BranchInventoryService {
 
   getInventoryValue(branchId: number): Observable<number> {
     const headers = this.getHeaders();
-    return this.http.get<number>(\\/branch-inventory/value/\\, { headers }).pipe(
-      tap(response => console.log(\Valor total sucursal \:\, response)),
+    return this.http.get<number>(`${this.apiUrl}/branch-inventory/value/${branchId}`, { headers }).pipe(
+      tap(response => console.log(`Valor total sucursal ${branchId}:`, response)),
       catchError(error => {
         console.error('Error al obtener valor de inventario:', error);
         return throwError(() => error);
@@ -118,7 +117,7 @@ export class BranchInventoryService {
   createInventory(data: CreateBranchInventoryDto): Observable<BranchInventory> {
     const headers = this.getHeaders();
     console.log('Creando inventario:', data);
-    return this.http.post<BranchInventory>(\\/branch-inventory\, data, { headers }).pipe(
+    return this.http.post<BranchInventory>(`${this.apiUrl}/branch-inventory`, data, { headers }).pipe(
       tap(response => console.log('Inventario creado:', response)),
       catchError(error => {
         console.error('Error al crear inventario:', error);
@@ -129,8 +128,8 @@ export class BranchInventoryService {
 
   updateInventory(id: number, data: UpdateBranchInventoryDto): Observable<BranchInventory> {
     const headers = this.getHeaders();
-    console.log(\Actualizando inventario \:\, data);
-    return this.http.patch<BranchInventory>(\\/branch-inventory/\\, data, { headers }).pipe(
+    console.log(`Actualizando inventario ${id}:`, data);
+    return this.http.patch<BranchInventory>(`${this.apiUrl}/branch-inventory/${id}`, data, { headers }).pipe(
       tap(response => console.log('Inventario actualizado:', response)),
       catchError(error => {
         console.error('Error al actualizar inventario:', error);
@@ -141,8 +140,8 @@ export class BranchInventoryService {
 
   deleteInventory(id: number): Observable<void> {
     const headers = this.getHeaders();
-    return this.http.delete<void>(\\/branch-inventory/\\, { headers }).pipe(
-      tap(() => console.log(\Inventario \ eliminado\)),
+    return this.http.delete<void>(`${this.apiUrl}/branch-inventory/${id}`, { headers }).pipe(
+      tap(() => console.log(`Inventario ${id} eliminado`)),
       catchError(error => {
         console.error('Error al eliminar inventario:', error);
         return throwError(() => error);
