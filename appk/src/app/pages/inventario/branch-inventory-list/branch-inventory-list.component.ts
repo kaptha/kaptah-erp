@@ -15,6 +15,7 @@ import { MatMenuModule } from '@angular/material/menu';
 import { MatChipsModule } from '@angular/material/chips';
 import { BranchInventoryService, BranchInventoryWithDetails } from '../../../services/inventory/branch-inventory.service';
 import { SucursalesService } from '../../../services/sucursales.service';
+import { UsersService } from '../../../services/users.service';
 
 @Component({
   selector: 'app-branch-inventory-list',
@@ -47,6 +48,7 @@ export class BranchInventoryListComponent implements OnInit {
   searchTerm: string = '';
   loading: boolean = false;
   totalValue: number = 0;
+  userId: string = '';
 
   displayedColumns: string[] = [
     'product_code',
@@ -71,13 +73,33 @@ export class BranchInventoryListComponent implements OnInit {
   constructor(
     private branchInventoryService: BranchInventoryService,
     private sucursalesService: SucursalesService,
+    private usersService: UsersService,
     private dialog: MatDialog,
     private snackBar: MatSnackBar
   ) {}
 
   ngOnInit(): void {
-    this.loadBranches();
-    this.loadInventory();
+    this.loadUserAndData();
+  }
+
+  loadUserAndData(): void {
+    const idToken = localStorage.getItem('idToken');
+    if (!idToken) {
+      this.snackBar.open('No se encontró token de autenticación', 'Cerrar', { duration: 3000 });
+      return;
+    }
+
+    this.usersService.getUserByToken(idToken).subscribe({
+      next: (user) => {
+        this.userId = user.id;
+        this.loadBranches();
+        this.loadInventory();
+      },
+      error: (error) => {
+        console.error('Error al obtener usuario:', error);
+        this.snackBar.open('Error al cargar datos del usuario', 'Cerrar', { duration: 3000 });
+      }
+    });
   }
 
   loadBranches(): void {
@@ -93,8 +115,12 @@ export class BranchInventoryListComponent implements OnInit {
   }
 
   loadInventory(): void {
+    if (!this.userId) {
+      return;
+    }
+
     this.loading = true;
-    const filters: any = {};
+    const filters: any = { userId: this.userId };
 
     if (this.selectedBranchId) {
       filters.branch_id = this.selectedBranchId;
@@ -166,12 +192,10 @@ export class BranchInventoryListComponent implements OnInit {
   }
 
   openAddModal(): void {
-    // TODO: Implementar modal
     this.snackBar.open('Modal de agregar - En desarrollo', 'Cerrar', { duration: 3000 });
   }
 
   openEditModal(item: BranchInventoryWithDetails): void {
-    // TODO: Implementar modal
     this.snackBar.open('Modal de editar - En desarrollo', 'Cerrar', { duration: 3000 });
   }
 
