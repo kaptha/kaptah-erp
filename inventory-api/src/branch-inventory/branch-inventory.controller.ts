@@ -15,55 +15,87 @@ import { BranchInventoryService } from './branch-inventory.service';
 import { CreateBranchInventoryDto } from './dto/create-branch-inventory.dto';
 import { UpdateBranchInventoryDto } from './dto/update-branch-inventory.dto';
 import { FilterBranchInventoryDto } from './dto/filter-branch-inventory.dto';
+import { UsersService } from '../users/users.service';
 
 interface RequestWithUser extends Request {
   user?: {
     firebaseUid: string;
+    ID?: number; // Agregar el ID de MySQL si está disponible
   };
 }
 
 @Controller('branch-inventory')
 export class BranchInventoryController {
-  constructor(private readonly branchInventoryService: BranchInventoryService) {}
+  constructor(
+    private readonly branchInventoryService: BranchInventoryService,
+    private readonly usersService: UsersService
+  ) {}
 
   @Post()
-  create(@Body() createDto: CreateBranchInventoryDto, @Req() req: RequestWithUser) {
+  async create(@Body() createDto: CreateBranchInventoryDto, @Req() req: RequestWithUser) {
     if (!req.user?.firebaseUid) {
       throw new UnauthorizedException('Usuario no autenticado');
     }
-    return this.branchInventoryService.create(createDto, req.user.firebaseUid);
+
+    // Obtener userId de MySQL usando firebaseUid
+    const user = await this.usersService.getUserByFirebaseUid(req.user.firebaseUid);
+    if (!user) {
+      throw new UnauthorizedException('Usuario no encontrado');
+    }
+
+    createDto.userId = String(user.ID);
+    return this.branchInventoryService.create(createDto, String(user.ID));
   }
 
   @Get()
-  findAll(@Query() filterDto: FilterBranchInventoryDto, @Req() req: RequestWithUser) {
+  async findAll(@Query() filterDto: FilterBranchInventoryDto, @Req() req: RequestWithUser) {
     if (!req.user?.firebaseUid) {
       throw new UnauthorizedException('Usuario no autenticado');
     }
-    filterDto.userId = req.user.firebaseUid;
-    return this.branchInventoryService.findAll(filterDto, req.user.firebaseUid);
+
+    // Obtener userId de MySQL usando firebaseUid
+    const user = await this.usersService.getUserByFirebaseUid(req.user.firebaseUid);
+    if (!user) {
+      throw new UnauthorizedException('Usuario no encontrado');
+    }
+
+    filterDto.userId = String(user.ID);
+    return this.branchInventoryService.findAll(filterDto, String(user.ID));
   }
 
   @Get('value/:branch_id')
-  getInventoryValue(
+  async getInventoryValue(
     @Param('branch_id', ParseIntPipe) branch_id: number,
     @Req() req: RequestWithUser
   ) {
     if (!req.user?.firebaseUid) {
       throw new UnauthorizedException('Usuario no autenticado');
     }
-    return this.branchInventoryService.getInventoryValue(branch_id, req.user.firebaseUid);
+
+    const user = await this.usersService.getUserByFirebaseUid(req.user.firebaseUid);
+    if (!user) {
+      throw new UnauthorizedException('Usuario no encontrado');
+    }
+
+    return this.branchInventoryService.getInventoryValue(branch_id, String(user.ID));
   }
 
   @Get(':id')
-  findOne(@Param('id', ParseIntPipe) id: number, @Req() req: RequestWithUser) {
+  async findOne(@Param('id', ParseIntPipe) id: number, @Req() req: RequestWithUser) {
     if (!req.user?.firebaseUid) {
       throw new UnauthorizedException('Usuario no autenticado');
     }
-    return this.branchInventoryService.findOne(id, req.user.firebaseUid);
+
+    const user = await this.usersService.getUserByFirebaseUid(req.user.firebaseUid);
+    if (!user) {
+      throw new UnauthorizedException('Usuario no encontrado');
+    }
+
+    return this.branchInventoryService.findOne(id, String(user.ID));
   }
 
   @Patch(':id')
-  update(
+  async update(
     @Param('id', ParseIntPipe) id: number,
     @Body() updateDto: UpdateBranchInventoryDto,
     @Req() req: RequestWithUser
@@ -71,14 +103,26 @@ export class BranchInventoryController {
     if (!req.user?.firebaseUid) {
       throw new UnauthorizedException('Usuario no autenticado');
     }
-    return this.branchInventoryService.update(id, updateDto, req.user.firebaseUid);
+
+    const user = await this.usersService.getUserByFirebaseUid(req.user.firebaseUid);
+    if (!user) {
+      throw new UnauthorizedException('Usuario no encontrado');
+    }
+
+    return this.branchInventoryService.update(id, updateDto, String(user.ID));
   }
 
   @Delete(':id')
-  remove(@Param('id', ParseIntPipe) id: number, @Req() req: RequestWithUser) {
+  async remove(@Param('id', ParseIntPipe) id: number, @Req() req: RequestWithUser) {
     if (!req.user?.firebaseUid) {
       throw new UnauthorizedException('Usuario no autenticado');
     }
-    return this.branchInventoryService.remove(id, req.user.firebaseUid);
+
+    const user = await this.usersService.getUserByFirebaseUid(req.user.firebaseUid);
+    if (!user) {
+      throw new UnauthorizedException('Usuario no encontrado');
+    }
+
+    return this.branchInventoryService.remove(id, String(user.ID));
   }
 }
