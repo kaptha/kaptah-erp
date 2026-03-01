@@ -67,26 +67,36 @@ export class BranchInventoryService {
   }
 
   getInventory(filters?: FilterBranchInventoryDto): Observable<BranchInventoryWithDetails[]> {
-    const headers = this.getHeaders();
-    const params: any = {};
+  const headers = this.getHeaders();
+  const params: any = {};
 
-    if (filters?.userId) params.userId = filters.userId;
-    if (filters?.branch_id) params.branch_id = filters.branch_id.toString();
-    if (filters?.product_id) params.product_id = filters.product_id.toString();
-    if (filters?.stock_status) params.stock_status = filters.stock_status;
-    if (filters?.search) params.search = filters.search;
+  if (filters?.branch_id) params.branch_id = filters.branch_id.toString();
+  if (filters?.product_id) params.product_id = filters.product_id.toString();
+  if (filters?.stock_status) params.stock_status = filters.stock_status;
+  if (filters?.search) params.search = filters.search;
 
-    return this.http.get<BranchInventoryWithDetails[]>(`${this.apiUrl}/branch-inventory`, { 
-      headers, 
-      params 
-    }).pipe(
-      tap(response => console.log('Inventario recibido:', response)),
-      catchError(error => {
-        console.error('Error al obtener inventario:', error);
-        return throwError(() => error);
-      })
-    );
+  // Obtener firebaseUid del token
+  const token = localStorage.getItem('idToken');
+  if (!token) {
+    return throwError(() => new Error('No token found'));
   }
+
+  // Decodificar el token para obtener el firebaseUid
+  const payload = JSON.parse(atob(token.split('.')[1]));
+  const firebaseUid = payload.user_id;
+
+  // CAMBIAR ESTA URL
+  return this.http.get<BranchInventoryWithDetails[]>(
+    `${this.apiUrl}/branch-inventory/firebase/${firebaseUid}`,  // ← NUEVA URL
+    { headers, params }
+  ).pipe(
+    tap(response => console.log('Inventario recibido:', response)),
+    catchError(error => {
+      console.error('Error al obtener inventario:', error);
+      return throwError(() => error);
+    })
+  );
+}
 
   getInventoryByBranch(branchId: number): Observable<BranchInventoryWithDetails[]> {
     return this.getInventory({ branch_id: branchId });
