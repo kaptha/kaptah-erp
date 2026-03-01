@@ -99,12 +99,12 @@ export class BranchInventoryService {
   
   for (const item of items) {
     try {
-      // Query para obtener producto usando el manager de inventory_db
+      // Query para obtener producto - CAMBIAR code por sku
       const productQuery = `
-        SELECT p.id, p.name, p.code 
+        SELECT p.id, p.name, p.sku as code 
         FROM products p 
         WHERE p.id = ? AND p.active = 1
-        ${search ? 'AND (p.name LIKE ? OR p.code LIKE ?)' : ''}
+        ${search ? 'AND (p.name LIKE ? OR p.sku LIKE ?)' : ''}
       `;
       
       const params = search 
@@ -114,7 +114,7 @@ export class BranchInventoryService {
       const products = await inventoryManager.query(productQuery, params);
       const product = products[0];
       
-      // Query para obtener sucursal usando dataSource (biz_entities_db)
+      // Query para obtener sucursal
       const branchQuery = `
         SELECT s.id, s.alias, s.nombre
         FROM sucursales s 
