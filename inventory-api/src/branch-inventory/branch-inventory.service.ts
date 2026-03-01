@@ -94,12 +94,10 @@ export class BranchInventoryService {
   private async findWithProductDetails(items: BranchInventory[], search?: string) {
   const results = [];
   
-  // Obtener el EntityManager de la conexión 'inventory'
   const inventoryManager = this.branchInventoryRepository.manager;
   
   for (const item of items) {
     try {
-      // Query para obtener producto - CAMBIAR code por sku
       const productQuery = `
         SELECT p.id, p.name, p.sku as code 
         FROM products p 
@@ -114,9 +112,8 @@ export class BranchInventoryService {
       const products = await inventoryManager.query(productQuery, params);
       const product = products[0];
       
-      // Query para obtener sucursal
       const branchQuery = `
-        SELECT s.id, s.alias, s.nombre
+        SELECT s.id, s.alias
         FROM sucursales s 
         WHERE s.id = ?
       `;
@@ -127,13 +124,12 @@ export class BranchInventoryService {
         ...item,
         product_name: product?.name || 'N/A',
         product_code: product?.code || 'N/A',
-        branch_alias: branch?.alias || branch?.nombre || 'N/A',
+        branch_alias: branch?.alias || 'N/A',
         total_value: Number(item.quantity) * Number(item.cost),
         stock_status: this.getStockStatus(item)
       });
     } catch (error) {
       this.logger.error(`Error procesando item ${item.id}:`, error.message);
-      // Agregar sin detalles si falla
       results.push({
         ...item,
         product_name: 'Error',
