@@ -17,7 +17,6 @@ import { CreateBranchInventoryDto } from './dto/create-branch-inventory.dto';
 import { UpdateBranchInventoryDto } from './dto/update-branch-inventory.dto';
 import { FilterBranchInventoryDto } from './dto/filter-branch-inventory.dto';
 import { UsersService } from '../users/users.service';
-import { FirebaseAuthGuard } from '../guards/firebase-auth.guard';
 
 interface RequestWithUser extends Request {
   user?: {
@@ -27,7 +26,6 @@ interface RequestWithUser extends Request {
 }
 
 @Controller('branch-inventory')
-@UseGuards(FirebaseAuthGuard)
 export class BranchInventoryController {
   constructor(
     private readonly branchInventoryService: BranchInventoryService,
