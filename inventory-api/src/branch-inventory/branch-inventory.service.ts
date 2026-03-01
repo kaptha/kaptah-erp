@@ -50,49 +50,46 @@ export class BranchInventoryService {
     return await this.branchInventoryRepository.save(inventory);
   }
 
-  async findAll(filterDto: FilterBranchInventoryDto, firebaseUid: string) {
-    const user = await this.usersService.findByFirebaseUid(firebaseUid);
-    if (!user) {
-      throw new NotFoundException('Usuario no encontrado');
-    }
-
-    const queryBuilder = this.branchInventoryRepository
-      .createQueryBuilder('bi')
-      .where('bi.userId = :userId', { userId: String(user.ID) });
-
-    if (filterDto.branch_id) {
-      queryBuilder.andWhere('bi.branch_id = :branch_id', { branch_id: filterDto.branch_id });
-    }
-
-    if (filterDto.product_id) {
-      queryBuilder.andWhere('bi.product_id = :product_id', { product_id: filterDto.product_id });
-    }
-
-    if (filterDto.stock_status) {
-      switch (filterDto.stock_status) {
-        case 'out':
-          queryBuilder.andWhere('bi.quantity = 0');
-          break;
-        case 'critical':
-          queryBuilder.andWhere('bi.quantity > 0 AND bi.quantity < bi.min_stock * 0.5');
-          break;
-        case 'low':
-          queryBuilder.andWhere('bi.quantity >= bi.min_stock * 0.5 AND bi.quantity < bi.min_stock');
-          break;
-        case 'ok':
-          queryBuilder.andWhere('bi.quantity >= bi.min_stock');
-          break;
-      }
-    }
-
-    const items = await queryBuilder.getMany();
-
-    if (filterDto.search) {
-      return await this.findWithProductDetails(items, filterDto.search);
-    }
-
-    return items;
+ async findAll(filterDto: FilterBranchInventoryDto, firebaseUid: string) {
+  const user = await this.usersService.findByFirebaseUid(firebaseUid);
+  if (!user) {
+    throw new NotFoundException('Usuario no encontrado');
   }
+
+  const queryBuilder = this.branchInventoryRepository
+    .createQueryBuilder('bi')
+    .where('bi.userId = :userId', { userId: String(user.ID) });
+
+  if (filterDto.branch_id) {
+    queryBuilder.andWhere('bi.branch_id = :branch_id', { branch_id: filterDto.branch_id });
+  }
+
+  if (filterDto.product_id) {
+    queryBuilder.andWhere('bi.product_id = :product_id', { product_id: filterDto.product_id });
+  }
+
+  if (filterDto.stock_status) {
+    switch (filterDto.stock_status) {
+      case 'out':
+        queryBuilder.andWhere('bi.quantity = 0');
+        break;
+      case 'critical':
+        queryBuilder.andWhere('bi.quantity > 0 AND bi.quantity < bi.min_stock * 0.5');
+        break;
+      case 'low':
+        queryBuilder.andWhere('bi.quantity >= bi.min_stock * 0.5 AND bi.quantity < bi.min_stock');
+        break;
+      case 'ok':
+        queryBuilder.andWhere('bi.quantity >= bi.min_stock');
+        break;
+    }
+  }
+
+  const items = await queryBuilder.getMany();
+
+  // CAMBIO: SIEMPRE agregar detalles de producto y sucursal, no solo cuando hay search
+  return await this.findWithProductDetails(items, filterDto.search);
+}
 
   private async findWithProductDetails(items: BranchInventory[], search?: string) {
     const results = [];
