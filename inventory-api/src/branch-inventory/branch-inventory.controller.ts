@@ -33,7 +33,22 @@ export class BranchInventoryController {
     private readonly branchInventoryService: BranchInventoryService,
     private readonly usersService: UsersService
   ) {}
+// NUEVO ENDPOINT
+  @Get('firebase/:firebaseUid')
+  async findByFirebaseUid(
+    @Param('firebaseUid') firebaseUid: string,
+    @Query() filterDto: FilterBranchInventoryDto
+  ) {
+    console.log('📋 GET /branch-inventory/firebase/:firebaseUid - firebaseUid:', firebaseUid);
+    
+    const user = await this.usersService.findByFirebaseUid(firebaseUid);
+    if (!user) {
+      throw new UnauthorizedException('Usuario no encontrado');
+    }
 
+    filterDto.userId = String(user.ID);
+    return this.branchInventoryService.findAll(filterDto, String(user.ID));
+  }
   @Post()
   async create(@Body() createDto: CreateBranchInventoryDto, @Req() req: RequestWithUser) {
     if (!req.user?.firebaseUid) {
