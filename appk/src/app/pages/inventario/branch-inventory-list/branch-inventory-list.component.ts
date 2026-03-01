@@ -14,6 +14,7 @@ import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatMenuModule } from '@angular/material/menu';
 import { MatChipsModule } from '@angular/material/chips';
 import { BranchInventoryService, BranchInventoryWithDetails } from '../../../services/inventory/branch-inventory.service';
+import { BranchInventoryModalComponent } from '../branch-inventory-modal/branch-inventory-modal.component';
 import { SucursalesService } from '../../../services/sucursales.service';
 
 @Component({
@@ -166,12 +167,32 @@ export class BranchInventoryListComponent implements OnInit {
   }
 
   openAddModal(): void {
-    this.snackBar.open('Modal de agregar - En desarrollo', 'Cerrar', { duration: 3000 });
-  }
+  const dialogRef = this.dialog.open(BranchInventoryModalComponent, {
+    width: '600px',
+    data: { mode: 'create' }
+  });
 
-  openEditModal(item: BranchInventoryWithDetails): void {
-    this.snackBar.open('Modal de editar - En desarrollo', 'Cerrar', { duration: 3000 });
-  }
+  dialogRef.afterClosed().subscribe(result => {
+    if (result) {
+      this.loadInventory();
+    }
+  });
+}
+
+openEditModal(item: BranchInventoryWithDetails): void {
+  const dialogRef = this.dialog.open(BranchInventoryModalComponent, {
+    width: '600px',
+    data: { mode: 'edit', item }
+  });
+
+  dialogRef.afterClosed().subscribe(result => {
+    if (result) {
+      this.loadInventory();
+    }
+  });
+}
+
+  
 
   deleteItem(item: BranchInventoryWithDetails): void {
     const message = 'Eliminar inventario de ' + item.product_name + ' en ' + item.branch_alias + '?';
