@@ -10,9 +10,10 @@ import {
   Query,
   ParseIntPipe,
   UnauthorizedException,
-  UseGuards  // ← AGREGAR
+  UseGuards,
+  SetMetadata
 } from '@nestjs/common';
-import { FirebaseAuthGuard } from '../guards/firebase-auth.guard';  // ← AGREGAR
+import { FirebaseAuthGuard } from '../guards/firebase-auth.guard';
 import { BranchInventoryService } from './branch-inventory.service';
 import { CreateBranchInventoryDto } from './dto/create-branch-inventory.dto';
 import { UpdateBranchInventoryDto } from './dto/update-branch-inventory.dto';
@@ -27,28 +28,24 @@ interface RequestWithUser extends Request {
 }
 
 @Controller('branch-inventory')
-@UseGuards(FirebaseAuthGuard)  // ← AGREGAR
 export class BranchInventoryController {
   constructor(
     private readonly branchInventoryService: BranchInventoryService,
     private readonly usersService: UsersService
   ) {}
-// NUEVO ENDPOINT
+
+  // ESTE ENDPOINT NO DEBE TENER GUARD
   @Get('firebase/:firebaseUid')
   async findByFirebaseUid(
     @Param('firebaseUid') firebaseUid: string,
     @Query() filterDto: FilterBranchInventoryDto
   ) {
     console.log('📋 GET /branch-inventory/firebase/:firebaseUid - firebaseUid:', firebaseUid);
-    
-    const user = await this.usersService.findByFirebaseUid(firebaseUid);
-    if (!user) {
-      throw new UnauthorizedException('Usuario no encontrado');
-    }
-
-    filterDto.userId = String(user.ID);
-    return this.branchInventoryService.findAll(filterDto, String(user.ID));
+    return this.branchInventoryService.findAll(filterDto, firebaseUid);
   }
+
+  // ESTOS SÍ USAN GUARD
+  @UseGuards(FirebaseAuthGuard)
   @Post()
   async create(@Body() createDto: CreateBranchInventoryDto, @Req() req: RequestWithUser) {
     if (!req.user?.firebaseUid) {
@@ -64,21 +61,7 @@ export class BranchInventoryController {
     return this.branchInventoryService.create(createDto, String(user.ID));
   }
 
-  @Get()
-  async findAll(@Query() filterDto: FilterBranchInventoryDto, @Req() req: RequestWithUser) {
-    if (!req.user?.firebaseUid) {
-      throw new UnauthorizedException('Usuario no autenticado');
-    }
-
-    const user = await this.usersService.findByFirebaseUid(req.user.firebaseUid);
-    if (!user) {
-      throw new UnauthorizedException('Usuario no encontrado');
-    }
-
-    filterDto.userId = String(user.ID);
-    return this.branchInventoryService.findAll(filterDto, String(user.ID));
-  }
-
+  @UseGuards(FirebaseAuthGuard)
   @Get('value/:branch_id')
   async getInventoryValue(
     @Param('branch_id', ParseIntPipe) branch_id: number,
@@ -96,6 +79,7 @@ export class BranchInventoryController {
     return this.branchInventoryService.getInventoryValue(branch_id, String(user.ID));
   }
 
+  @UseGuards(FirebaseAuthGuard)
   @Get(':id')
   async findOne(@Param('id', ParseIntPipe) id: number, @Req() req: RequestWithUser) {
     if (!req.user?.firebaseUid) {
@@ -110,6 +94,23 @@ export class BranchInventoryController {
     return this.branchInventoryService.findOne(id, String(user.ID));
   }
 
+  @UseGuards(FirebaseAuthGuard)
+  @Get()
+  async findAll(@Query() filterDto: FilterBranchInventoryDto, @Req() req: RequestWithUser) {
+    if (!req.user?.firebaseUid) {
+      throw new UnauthorizedException('Usuario no autenticado');
+    }
+
+    const user = await this.usersService.findByFirebaseUid(req.user.firebaseUid);
+    if (!user) {
+      throw new UnauthorizedException('Usuario no encontrado');
+    }
+
+    filterDto.userId = String(user.ID);
+    return this.branchInventoryService.findAll(filterDto, String(user.ID));
+  }
+
+  @UseGuards(FirebaseAuthGuard)
   @Patch(':id')
   async update(
     @Param('id', ParseIntPipe) id: number,
@@ -128,6 +129,7 @@ export class BranchInventoryController {
     return this.branchInventoryService.update(id, updateDto, String(user.ID));
   }
 
+  @UseGuards(FirebaseAuthGuard)
   @Delete(':id')
   async remove(@Param('id', ParseIntPipe) id: number, @Req() req: RequestWithUser) {
     if (!req.user?.firebaseUid) {
