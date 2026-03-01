@@ -94,10 +94,12 @@ export class BranchInventoryService {
   private async findWithProductDetails(items: BranchInventory[], search?: string) {
   const results = [];
   
+  // Obtener el EntityManager de la conexión 'inventory'
+  const inventoryManager = this.branchInventoryRepository.manager;
+  
   for (const item of items) {
     try {
-      // Query para obtener producto - SIN especificar base de datos
-      // TypeORM ya sabe que products está en inventory_db
+      // Query para obtener producto usando el manager de inventory_db
       const productQuery = `
         SELECT p.id, p.name, p.code 
         FROM products p 
@@ -109,30 +111,37 @@ export class BranchInventoryService {
         ? [item.product_id, `%${search}%`, `%${search}%`]
         : [item.product_id];
 
-      const products = await this.dataSource.query(productQuery, params);
+      const products = await inventoryManager.query(productQuery, params);
       const product = products[0];
       
-      if (product) {
-        // Query para obtener sucursal - ESPECIFICAR la base de datos correcta
-        const branchQuery = `
-          SELECT s.id, s.alias, s.nombre
-          FROM biz_entities_db.sucursales s 
-          WHERE s.id = ?
-        `;
-        const branches = await this.dataSource.query(branchQuery, [item.branch_id]);
-        const branch = branches[0];
+      // Query para obtener sucursal usando dataSource (biz_entities_db)
+      const branchQuery = `
+        SELECT s.id, s.alias, s.nombre
+        FROM sucursales s 
+        WHERE s.id = ?
+      `;
+      const branches = await this.dataSource.query(branchQuery, [item.branch_id]);
+      const branch = branches[0];
 
-        results.push({
-          ...item,
-          product_name: product.name || 'N/A',
-          product_code: product.code || 'N/A',
-          branch_alias: branch?.alias || branch?.nombre || 'N/A',
-          total_value: Number(item.quantity) * Number(item.cost),
-          stock_status: this.getStockStatus(item)
-        });
-      }
+      results.push({
+        ...item,
+        product_name: product?.name || 'N/A',
+        product_code: product?.code || 'N/A',
+        branch_alias: branch?.alias || branch?.nombre || 'N/A',
+        total_value: Number(item.quantity) * Number(item.cost),
+        stock_status: this.getStockStatus(item)
+      });
     } catch (error) {
       this.logger.error(`Error procesando item ${item.id}:`, error.message);
+      // Agregar sin detalles si falla
+      results.push({
+        ...item,
+        product_name: 'Error',
+        product_code: 'Error',
+        branch_alias: 'Error',
+        total_value: Number(item.quantity) * Number(item.cost),
+        stock_status: this.getStockStatus(item)
+      });
     }
   }
 
