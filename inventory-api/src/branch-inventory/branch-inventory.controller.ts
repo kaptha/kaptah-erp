@@ -10,8 +10,9 @@ import {
   Query,
   ParseIntPipe,
   UnauthorizedException,
-  UseGuards
+  UseGuards  // ← AGREGAR
 } from '@nestjs/common';
+import { FirebaseAuthGuard } from '../guards/firebase-auth.guard';  // ← AGREGAR
 import { BranchInventoryService } from './branch-inventory.service';
 import { CreateBranchInventoryDto } from './dto/create-branch-inventory.dto';
 import { UpdateBranchInventoryDto } from './dto/update-branch-inventory.dto';
@@ -21,11 +22,12 @@ import { UsersService } from '../users/users.service';
 interface RequestWithUser extends Request {
   user?: {
     firebaseUid: string;
-    ID?: number; // Agregar el ID de MySQL si está disponible
+    ID?: number;
   };
 }
 
 @Controller('branch-inventory')
+@UseGuards(FirebaseAuthGuard)  // ← AGREGAR
 export class BranchInventoryController {
   constructor(
     private readonly branchInventoryService: BranchInventoryService,
@@ -38,7 +40,6 @@ export class BranchInventoryController {
       throw new UnauthorizedException('Usuario no autenticado');
     }
 
-    // Obtener userId de MySQL usando firebaseUid
     const user = await this.usersService.findByFirebaseUid(req.user.firebaseUid);
     if (!user) {
       throw new UnauthorizedException('Usuario no encontrado');
@@ -54,7 +55,6 @@ export class BranchInventoryController {
       throw new UnauthorizedException('Usuario no autenticado');
     }
 
-    // Obtener userId de MySQL usando firebaseUid
     const user = await this.usersService.findByFirebaseUid(req.user.firebaseUid);
     if (!user) {
       throw new UnauthorizedException('Usuario no encontrado');
