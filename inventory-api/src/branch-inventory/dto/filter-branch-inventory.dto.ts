@@ -5,7 +5,8 @@ export type StockStatus = 'ok' | 'low' | 'critical' | 'out';
 
 export class FilterBranchInventoryDto {
   @IsString()
-  userId: string;
+  @IsOptional()  
+  userId?: string;  
 
   @IsInt()
   @IsOptional()

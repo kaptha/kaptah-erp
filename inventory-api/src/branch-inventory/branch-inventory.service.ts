@@ -50,88 +50,99 @@ export class BranchInventoryService {
     return await this.branchInventoryRepository.save(inventory);
   }
 
-  async findAll(filterDto: FilterBranchInventoryDto, firebaseUid: string) {
-    const user = await this.usersService.findByFirebaseUid(firebaseUid);
-    if (!user) {
-      throw new NotFoundException('Usuario no encontrado');
-    }
-
-    const queryBuilder = this.branchInventoryRepository
-      .createQueryBuilder('bi')
-      .where('bi.userId = :userId', { userId: String(user.ID) });
-
-    if (filterDto.branch_id) {
-      queryBuilder.andWhere('bi.branch_id = :branch_id', { branch_id: filterDto.branch_id });
-    }
-
-    if (filterDto.product_id) {
-      queryBuilder.andWhere('bi.product_id = :product_id', { product_id: filterDto.product_id });
-    }
-
-    if (filterDto.stock_status) {
-      switch (filterDto.stock_status) {
-        case 'out':
-          queryBuilder.andWhere('bi.quantity = 0');
-          break;
-        case 'critical':
-          queryBuilder.andWhere('bi.quantity > 0 AND bi.quantity < bi.min_stock * 0.5');
-          break;
-        case 'low':
-          queryBuilder.andWhere('bi.quantity >= bi.min_stock * 0.5 AND bi.quantity < bi.min_stock');
-          break;
-        case 'ok':
-          queryBuilder.andWhere('bi.quantity >= bi.min_stock');
-          break;
-      }
-    }
-
-    const items = await queryBuilder.getMany();
-
-    if (filterDto.search) {
-      return await this.findWithProductDetails(items, filterDto.search);
-    }
-
-    return items;
+ async findAll(filterDto: FilterBranchInventoryDto, firebaseUid: string) {
+  const user = await this.usersService.findByFirebaseUid(firebaseUid);
+  if (!user) {
+    throw new NotFoundException('Usuario no encontrado');
   }
 
+  const queryBuilder = this.branchInventoryRepository
+    .createQueryBuilder('bi')
+    .where('bi.userId = :userId', { userId: String(user.ID) });
+
+  if (filterDto.branch_id) {
+    queryBuilder.andWhere('bi.branch_id = :branch_id', { branch_id: filterDto.branch_id });
+  }
+
+  if (filterDto.product_id) {
+    queryBuilder.andWhere('bi.product_id = :product_id', { product_id: filterDto.product_id });
+  }
+
+  if (filterDto.stock_status) {
+    switch (filterDto.stock_status) {
+      case 'out':
+        queryBuilder.andWhere('bi.quantity = 0');
+        break;
+      case 'critical':
+        queryBuilder.andWhere('bi.quantity > 0 AND bi.quantity < bi.min_stock * 0.5');
+        break;
+      case 'low':
+        queryBuilder.andWhere('bi.quantity >= bi.min_stock * 0.5 AND bi.quantity < bi.min_stock');
+        break;
+      case 'ok':
+        queryBuilder.andWhere('bi.quantity >= bi.min_stock');
+        break;
+    }
+  }
+
+  const items = await queryBuilder.getMany();
+
+  // CAMBIO: SIEMPRE agregar detalles de producto y sucursal, no solo cuando hay search
+  return await this.findWithProductDetails(items, filterDto.search);
+}
+
   private async findWithProductDetails(items: BranchInventory[], search?: string) {
-    const results = [];
-    
-    for (const item of items) {
+  const results = [];
+  
+  const inventoryManager = this.branchInventoryRepository.manager;
+  
+  for (const item of items) {
+    try {
       const productQuery = `
-        SELECT p.id, p.name, p.code 
+        SELECT p.id, p.name, p.sku as code 
         FROM products p 
         WHERE p.id = ? AND p.active = 1
-        ${search ? 'AND (p.name LIKE ? OR p.code LIKE ?)' : ''}
+        ${search ? 'AND (p.name LIKE ? OR p.sku LIKE ?)' : ''}
       `;
       
       const params = search 
         ? [item.product_id, `%${search}%`, `%${search}%`]
         : [item.product_id];
 
-      const [product] = await this.dataSource.query(productQuery, params);
+      const products = await inventoryManager.query(productQuery, params);
+      const product = products[0];
       
-      if (product) {
-        const branchQuery = `
-          SELECT s.id, s.alias 
-          FROM biz_entities_db.sucursales s 
-          WHERE s.id = ?
-        `;
-        const [branch] = await this.dataSource.query(branchQuery, [item.branch_id]);
+      const branchQuery = `
+        SELECT s.id, s.alias
+        FROM sucursales s 
+        WHERE s.id = ?
+      `;
+      const branches = await this.dataSource.query(branchQuery, [item.branch_id]);
+      const branch = branches[0];
 
-        results.push({
-          ...item,
-          product_name: product.name,
-          product_code: product.code,
-          branch_alias: branch?.alias || 'N/A',
-          total_value: Number(item.quantity) * Number(item.cost),
-          stock_status: this.getStockStatus(item)
-        });
-      }
+      results.push({
+        ...item,
+        product_name: product?.name || 'N/A',
+        product_code: product?.code || 'N/A',
+        branch_alias: branch?.alias || 'N/A',
+        total_value: Number(item.quantity) * Number(item.cost),
+        stock_status: this.getStockStatus(item)
+      });
+    } catch (error) {
+      this.logger.error(`Error procesando item ${item.id}:`, error.message);
+      results.push({
+        ...item,
+        product_name: 'Error',
+        product_code: 'Error',
+        branch_alias: 'Error',
+        total_value: Number(item.quantity) * Number(item.cost),
+        stock_status: this.getStockStatus(item)
+      });
     }
-
-    return results;
   }
+
+  return results;
+}
 
   private getStockStatus(item: BranchInventory): 'ok' | 'low' | 'critical' | 'out' {
     const qty = Number(item.quantity);
