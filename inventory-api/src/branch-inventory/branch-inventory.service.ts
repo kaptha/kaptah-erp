@@ -92,9 +92,12 @@ export class BranchInventoryService {
 }
 
   private async findWithProductDetails(items: BranchInventory[], search?: string) {
-    const results = [];
-    
-    for (const item of items) {
+  const results = [];
+  
+  for (const item of items) {
+    try {
+      // Query para obtener producto - SIN especificar base de datos
+      // TypeORM ya sabe que products está en inventory_db
       const productQuery = `
         SELECT p.id, p.name, p.code 
         FROM products p 
@@ -106,29 +109,35 @@ export class BranchInventoryService {
         ? [item.product_id, `%${search}%`, `%${search}%`]
         : [item.product_id];
 
-      const [product] = await this.dataSource.query(productQuery, params);
+      const products = await this.dataSource.query(productQuery, params);
+      const product = products[0];
       
       if (product) {
+        // Query para obtener sucursal - ESPECIFICAR la base de datos correcta
         const branchQuery = `
-          SELECT s.id, s.alias 
+          SELECT s.id, s.alias, s.nombre
           FROM biz_entities_db.sucursales s 
           WHERE s.id = ?
         `;
-        const [branch] = await this.dataSource.query(branchQuery, [item.branch_id]);
+        const branches = await this.dataSource.query(branchQuery, [item.branch_id]);
+        const branch = branches[0];
 
         results.push({
           ...item,
-          product_name: product.name,
-          product_code: product.code,
-          branch_alias: branch?.alias || 'N/A',
+          product_name: product.name || 'N/A',
+          product_code: product.code || 'N/A',
+          branch_alias: branch?.alias || branch?.nombre || 'N/A',
           total_value: Number(item.quantity) * Number(item.cost),
           stock_status: this.getStockStatus(item)
         });
       }
+    } catch (error) {
+      this.logger.error(`Error procesando item ${item.id}:`, error.message);
     }
-
-    return results;
   }
+
+  return results;
+}
 
   private getStockStatus(item: BranchInventory): 'ok' | 'low' | 'critical' | 'out' {
     const qty = Number(item.quantity);
