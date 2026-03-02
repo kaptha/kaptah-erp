@@ -360,6 +360,129 @@ table.mat-table {
   width: 100%;
   margin: 20px 0;
 }
+/* ===== ESTADÍSTICAS ===== */
+.btn-stats {
+  border-color: #667eea !important;
+  color: #667eea !important;
+}
+
+.btn-stats mat-icon {
+  font-size: 20px;
+}
+
+/* Panel del menú (override global) */
+::ng-deep .stats-menu-panel .mat-mdc-menu-content {
+  padding: 0 !important;
+}
+
+.stats-menu-content {
+  padding: 16px;
+  min-width: 280px;
+}
+
+.stats-menu-title {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-weight: 600;
+  font-size: 14px;
+  color: #333;
+  margin-bottom: 14px;
+  padding-bottom: 10px;
+  border-bottom: 1px solid #eee;
+}
+
+.stats-menu-title mat-icon {
+  color: #667eea;
+  font-size: 20px;
+}
+
+/* Chips de periodo */
+.stats-period-chips {
+  display: flex;
+  gap: 6px;
+  margin-bottom: 16px;
+  flex-wrap: wrap;
+}
+
+.period-chip {
+  padding: 4px 12px;
+  border-radius: 16px;
+  border: 1px solid #ddd;
+  font-size: 12px;
+  font-weight: 500;
+  cursor: pointer;
+  color: #666;
+  transition: all 0.2s;
+  user-select: none;
+}
+
+.period-chip:hover {
+  border-color: #667eea;
+  color: #667eea;
+}
+
+.period-chip.active {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  border-color: transparent;
+}
+
+/* Cards de métricas */
+.stats-cards-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  background: #f9f9fc;
+  border-radius: 10px;
+  padding: 14px;
+}
+
+.stat-card {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex: 1;
+}
+
+.stat-divider {
+  width: 1px;
+  height: 40px;
+  background: #ddd;
+}
+
+.stat-icon {
+  font-size: 28px;
+  width: 28px;
+  height: 28px;
+}
+
+.notes-icon {
+  color: #667eea;
+}
+
+.total-icon {
+  color: #4caf50;
+}
+
+.stat-info {
+  display: flex;
+  flex-direction: column;
+}
+
+.stat-value {
+  font-size: 18px;
+  font-weight: 700;
+  color: #333;
+  line-height: 1.2;
+}
+
+.stat-label {
+  font-size: 11px;
+  color: #888;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
 
 /* Estilos específicos para los métodos de pago */
 .payment-method {
