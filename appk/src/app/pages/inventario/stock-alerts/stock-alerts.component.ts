@@ -8,6 +8,8 @@ import { MatSelectModule } from '@angular/material/select';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatIconModule } from '@angular/material/icon';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
+import { MatInputModule } from '@angular/material/input';
+import { MatButtonModule } from '@angular/material/button';
 import { BranchInventoryService, BranchInventoryWithDetails } from '../../../services/inventory/branch-inventory.service';
 import { SucursalesService } from '../../../services/sucursales.service';
 
@@ -17,11 +19,13 @@ import { SucursalesService } from '../../../services/sucursales.service';
   imports: [
     CommonModule,
     FormsModule,
-    MatCardModule,
+    MatCardModule,          
     MatTableModule,
     MatSelectModule,
     MatFormFieldModule,
-    MatIconModule,
+    MatInputModule,         
+    MatButtonModule,        
+    MatIconModule,          
     MatSnackBarModule,
     MatProgressSpinnerModule
   ],
