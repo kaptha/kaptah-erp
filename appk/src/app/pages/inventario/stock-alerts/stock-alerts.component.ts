@@ -1,10 +1,30 @@
 import { Component, OnInit } from '@angular/core';
-import { MatSnackBar } from '@angular/material/snack-bar';
+import { CommonModule } from '@angular/common';
+import { FormsModule } from '@angular/forms';
+import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
+import { MatCardModule } from '@angular/material/card';
+import { MatTableModule } from '@angular/material/table';
+import { MatSelectModule } from '@angular/material/select';
+import { MatFormFieldModule } from '@angular/material/form-field';
+import { MatIconModule } from '@angular/material/icon';
+import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { BranchInventoryService, BranchInventoryWithDetails } from '../../../services/inventory/branch-inventory.service';
 import { SucursalesService } from '../../../services/sucursales.service';
 
 @Component({
   selector: 'app-stock-alerts',
+  standalone: true,
+  imports: [
+    CommonModule,
+    FormsModule,
+    MatCardModule,
+    MatTableModule,
+    MatSelectModule,
+    MatFormFieldModule,
+    MatIconModule,
+    MatSnackBarModule,
+    MatProgressSpinnerModule
+  ],
   templateUrl: './stock-alerts.component.html',
   styleUrls: ['./stock-alerts.component.css']
 })
@@ -51,7 +71,10 @@ export class StockAlertsComponent implements OnInit {
     this.loading = true;
 
     // Cargar items críticos
-    this.branchInventoryService.getCriticalStockItems(this.selectedBranchId || undefined).subscribe({
+    this.branchInventoryService.getInventory({ 
+      stock_status: 'critical',
+      branch_id: this.selectedBranchId || undefined
+    }).subscribe({
       next: (items) => {
         this.criticalItems = items;
       },
@@ -61,17 +84,23 @@ export class StockAlertsComponent implements OnInit {
     });
 
     // Cargar items con stock bajo
-    this.branchInventoryService.getLowStockItems(this.selectedBranchId || undefined).subscribe({
+    this.branchInventoryService.getInventory({ 
+      stock_status: 'low',
+      branch_id: this.selectedBranchId || undefined
+    }).subscribe({
       next: (items) => {
         this.lowItems = items;
       },
       error: (error) => {
-        console.error('Error al cargar items bajos:', error);
+        console.error('Error al cargar items con stock bajo:', error);
       }
     });
 
     // Cargar items agotados
-    this.branchInventoryService.getOutOfStockItems(this.selectedBranchId || undefined).subscribe({
+    this.branchInventoryService.getInventory({ 
+      stock_status: 'out',
+      branch_id: this.selectedBranchId || undefined
+    }).subscribe({
       next: (items) => {
         this.outItems = items;
         this.loading = false;
@@ -90,22 +119,5 @@ export class StockAlertsComponent implements OnInit {
   getTotalAlerts(): number {
     return this.criticalItems.length + this.lowItems.length + this.outItems.length;
   }
-
-  getStockStatusColor(status: string): string {
-    switch (status) {
-      case 'critical': return 'warn';
-      case 'low': return 'accent';
-      case 'out': return 'warn';
-      default: return '';
-    }
-  }
-
-  getStockStatusLabel(status: string): string {
-    switch (status) {
-      case 'critical': return 'Crítico';
-      case 'low': return 'Bajo';
-      case 'out': return 'Agotado';
-      default: return status;
-    }
-  }
+}
 }
