@@ -43,6 +43,21 @@ export class BranchInventoryController {
     console.log('📋 GET /branch-inventory/firebase/:firebaseUid - firebaseUid:', firebaseUid);
     return this.branchInventoryService.findAll(filterDto, firebaseUid);
   }
+  @Post('firebase/:firebaseUid')
+async createByFirebaseUid(
+  @Param('firebaseUid') firebaseUid: string,
+  @Body() createDto: CreateBranchInventoryDto
+) {
+  console.log('📝 POST /branch-inventory/firebase/:firebaseUid - firebaseUid:', firebaseUid);
+  
+  const user = await this.usersService.findByFirebaseUid(firebaseUid);
+  if (!user) {
+    throw new UnauthorizedException('Usuario no encontrado');
+  }
+
+  createDto.userId = String(user.ID);
+  return this.branchInventoryService.create(createDto, firebaseUid);
+}
 
   // ESTOS SÍ USAN GUARD
   @UseGuards(FirebaseAuthGuard)
