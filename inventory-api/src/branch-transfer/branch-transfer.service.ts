@@ -1,229 +1,98 @@
-import { Injectable } from '@angular/core';
-import { HttpClient, HttpHeaders } from '@angular/common/http';
-import { Observable, throwError } from 'rxjs';
-import { tap, catchError } from 'rxjs/operators';
+import {
+  Injectable,
+  NotFoundException,
+  BadRequestException,
+  Logger
+} from '@nestjs/common';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Repository, DataSource } from 'typeorm';
+import { BranchTransfer } from './entities/branch-transfer.entity';
+import { BranchTransferItem } from './entities/branch-transfer-item.entity';
+import { CreateBranchTransferDto } from './dto/create-branch-transfer.dto';
+import { UpdateTransferStatusDto } from './dto/update-transfer-status.dto';
+import { FilterBranchTransferDto } from './dto/filter-branch-transfer.dto';
+import { BranchInventoryService } from '../branch-inventory/branch-inventory.service';
+import { UsersService } from '../users/users.service';
 
-export type TransferStatus = 'pending' | 'in_transit' | 'completed' | 'cancelled';
-
-export interface BranchTransferItem {
-  id: number;
-  transfer_id: number;
-  product_id: number;
-  quantity: number;
-  cost: number;
-  notes?: string;
-  product_name?: string;
-  product_code?: string;
-}
-
-export interface BranchTransfer {
-  id: number;
-  userId: string;
-  from_branch_id: number;
-  to_branch_id: number;
-  transfer_number: string;
-  status: TransferStatus;
-  requested_by: string;
-  approved_by?: string;
-  approved_at?: Date;
-  completed_at?: Date;
-  cancelled_at?: Date;
-  cancellation_reason?: string;
-  notes?: string;
-  created_at: Date;
-  updated_at: Date;
-}
-
-export interface BranchTransferWithItems extends BranchTransfer {
-  items: BranchTransferItem[];
-  from_branch_alias?: string;
-  to_branch_alias?: string;
-  total_items: number;
-  total_value: number;
-}
-
-export interface CreateTransferItemDto {
-  product_id: number;
-  quantity: number;
-  cost: number;
-  notes?: string;
-}
-
-export interface CreateBranchTransferDto {
-  userId: string;
-  from_branch_id: number;
-  to_branch_id: number;
-  requested_by: string;
-  notes?: string;
-  items: CreateTransferItemDto[];
-}
-
-export interface UpdateTransferStatusDto {
-  status: TransferStatus;
-  approved_by?: string;
-  cancellation_reason?: string;
-}
-
-export interface FilterBranchTransferDto {
-  from_branch_id?: number;
-  to_branch_id?: number;
-  status?: TransferStatus;
-}
-
-@Injectable({
-  providedIn: 'root'
-})
+@Injectable()
 export class BranchTransferService {
-  private apiUrl = 'https://selfless-analysis-production.up.railway.app/api';
+  private readonly logger = new Logger(BranchTransferService.name);
 
-  constructor(private http: HttpClient) {}
+  constructor(
+    @InjectRepository(BranchTransfer, 'inventory')
+    private branchTransferRepository: Repository<BranchTransfer>,
+    @InjectRepository(BranchTransferItem, 'inventory')
+    private transferItemRepository: Repository<BranchTransferItem>,
+    private branchInventoryService: BranchInventoryService,
+    private usersService: UsersService,
+    private dataSource: DataSource,
+  ) {}
 
-  private getHeaders(): HttpHeaders {
-    const token = localStorage.getItem('idToken');
-    return new HttpHeaders({
-      'Content-Type': 'application/json',
-      'Authorization': `Bearer ${token}`
-    });
-  }
+  async findAll(filterDto: FilterBranchTransferDto, firebaseUid: string) {
+    const user = await this.usersService.findByFirebaseUid(firebaseUid);
+    if (!user) {
+      throw new NotFoundException('Usuario no encontrado');
+    }
 
-  private getFirebaseUid(): string {
-    const token = localStorage.getItem('idToken');
-    if (!token) throw new Error('No token found');
-    const payload = JSON.parse(atob(token.split('.')[1]));
-    return payload.user_id;
-  }
+    const queryBuilder = this.branchTransferRepository
+      .createQueryBuilder('bt')
+      .leftJoinAndSelect('bt.items', 'items')
+      .where('bt.userId = :userId', { userId: String(user.ID) });
 
-  getTransfers(filters?: FilterBranchTransferDto): Observable<BranchTransferWithItems[]> {
-    const headers = this.getHeaders();
-    const firebaseUid = this.getFirebaseUid();
-    const params: any = {};
+    if (filterDto.from_branch_id) {
+      queryBuilder.andWhere('bt.from_branch_id = :from_branch_id', {
+        from_branch_id: filterDto.from_branch_id,
+      });
+    }
 
-    if (filters?.from_branch_id) params.from_branch_id = filters.from_branch_id.toString();
-    if (filters?.to_branch_id) params.to_branch_id = filters.to_branch_id.toString();
-    if (filters?.status) params.status = filters.status;
+    if (filterDto.to_branch_id) {
+      queryBuilder.andWhere('bt.to_branch_id = :to_branch_id', {
+        to_branch_id: filterDto.to_branch_id,
+      });
+    }
 
-    return this.http.get<BranchTransferWithItems[]>(
-      `${this.apiUrl}/branch-transfers/firebase/${firebaseUid}`,
-      { headers, params }
-    ).pipe(
-      tap(response => console.log('Transferencias recibidas:', response)),
-      catchError(error => {
-        console.error('Error al obtener transferencias:', error);
-        return throwError(() => error);
-      })
-    );
-  }
+    if (filterDto.status) {
+      queryBuilder.andWhere('bt.status = :status', { status: filterDto.status });
+    }
 
-  getTransfer(id: number): Observable<BranchTransferWithItems> {
-    const headers = this.getHeaders();
-    const firebaseUid = this.getFirebaseUid();
+    queryBuilder.orderBy('bt.created_at', 'DESC');
 
-    return this.http.get<BranchTransferWithItems>(
-      `${this.apiUrl}/branch-transfers/firebase/${firebaseUid}/${id}`,
-      { headers }
-    ).pipe(
-      tap(response => console.log('Transferencia:', response)),
-      catchError(error => {
-        console.error('Error al obtener transferencia:', error);
-        return throwError(() => error);
-      })
-    );
-  }
+    const transfers = await queryBuilder.getMany();
 
-  createTransfer(data: CreateBranchTransferDto): Observable<BranchTransfer> {
-    const headers = this.getHeaders();
-    const firebaseUid = this.getFirebaseUid();
+    const result = [];
+    for (const transfer of transfers) {
+      const fromBranchQuery = 'SELECT s.id, s.alias FROM sucursales s WHERE s.id = ?';
+      const toBranchQuery = 'SELECT s.id, s.alias FROM sucursales s WHERE s.id = ?';
 
-    console.log('Creando transferencia:', data);
-    return this.http.post<BranchTransfer>(
-      `${this.apiUrl}/branch-transfers/firebase/${firebaseUid}`,
-      data,
-      { headers }
-    ).pipe(
-      tap(response => console.log('Transferencia creada:', response)),
-      catchError(error => {
-        console.error('Error al crear transferencia:', error);
-        return throwError(() => error);
-      })
-    );
-  }
+      const [fromBranch] = await this.dataSource.query(fromBranchQuery, [transfer.from_branch_id]);
+      const [toBranch] = await this.dataSource.query(toBranchQuery, [transfer.to_branch_id]);
 
-  approveTransfer(id: number, approvedBy: string): Observable<BranchTransfer> {
-    const headers = this.getHeaders();
-    const firebaseUid = this.getFirebaseUid();
+      const itemsWithDetails = [];
+      if (transfer.items && transfer.items.length > 0) {
+        for (const item of transfer.items) {
+          const productQuery = 'SELECT p.id, p.name, p.sku as code FROM products p WHERE p.id = ?';
+          const inventoryManager = this.branchTransferRepository.manager;
+          const products = await inventoryManager.query(productQuery, [item.product_id]);
+          const product = products[0];
 
-    return this.http.patch<BranchTransfer>(
-      `${this.apiUrl}/branch-transfers/firebase/${firebaseUid}/${id}/approve`,
-      { approved_by: approvedBy },
-      { headers }
-    ).pipe(
-      tap(response => console.log('Transferencia aprobada:', response)),
-      catchError(error => {
-        console.error('Error al aprobar transferencia:', error);
-        return throwError(() => error);
-      })
-    );
-  }
+          itemsWithDetails.push({
+            ...item,
+            product_name: product?.name || 'N/A',
+            product_code: product?.code || 'N/A'
+          });
+        }
+      }
 
-  completeTransfer(id: number): Observable<BranchTransfer> {
-    const headers = this.getHeaders();
-    const firebaseUid = this.getFirebaseUid();
+      result.push({
+        ...transfer,
+        items: itemsWithDetails,
+        from_branch_alias: fromBranch?.alias || 'N/A',
+        to_branch_alias: toBranch?.alias || 'N/A',
+        total_items: itemsWithDetails.length,
+        total_value: itemsWithDetails.reduce((sum, item) => sum + (Number(item.quantity) * Number(item.cost)), 0)
+      });
+    }
 
-    return this.http.patch<BranchTransfer>(
-      `${this.apiUrl}/branch-transfers/firebase/${firebaseUid}/${id}/complete`,
-      {},
-      { headers }
-    ).pipe(
-      tap(response => console.log('Transferencia completada:', response)),
-      catchError(error => {
-        console.error('Error al completar transferencia:', error);
-        return throwError(() => error);
-      })
-    );
-  }
-
-  cancelTransfer(id: number, reason: string): Observable<BranchTransfer> {
-    const headers = this.getHeaders();
-    const firebaseUid = this.getFirebaseUid();
-
-    return this.http.patch<BranchTransfer>(
-      `${this.apiUrl}/branch-transfers/firebase/${firebaseUid}/${id}/cancel`,
-      { reason },
-      { headers }
-    ).pipe(
-      tap(response => console.log('Transferencia cancelada:', response)),
-      catchError(error => {
-        console.error('Error al cancelar transferencia:', error);
-        return throwError(() => error);
-      })
-    );
-  }
-
-  deleteTransfer(id: number): Observable<void> {
-    const headers = this.getHeaders();
-    const firebaseUid = this.getFirebaseUid();
-
-    return this.http.delete<void>(
-      `${this.apiUrl}/branch-transfers/firebase/${firebaseUid}/${id}`,
-      { headers }
-    ).pipe(
-      tap(() => console.log(`Transferencia ${id} eliminada`)),
-      catchError(error => {
-        console.error('Error al eliminar transferencia:', error);
-        return throwError(() => error);
-      })
-    );
-  }
-
-  getPendingTransfers(): Observable<BranchTransferWithItems[]> {
-    return this.getTransfers({ status: 'pending' });
-  }
-
-  getInTransitTransfers(): Observable<BranchTransferWithItems[]> {
-    return this.getTransfers({ status: 'in_transit' });
-  }
-
-  getCompletedTransfers(): Observable<BranchTransferWithItems[]> {
-    return this.getTransfers({ status: 'completed' });
+    return result;
   }
 }
