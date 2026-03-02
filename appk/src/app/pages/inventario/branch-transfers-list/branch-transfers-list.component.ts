@@ -117,17 +117,25 @@ export class BranchTransfersListComponent implements OnInit {
     this.loadTransfers();
   }
 
+  getBranchName(branchId: number): string {
+    const branch = this.branches.find(b => b.id === branchId);
+    return branch?.alias || 'N/A';
+  }
+
   openCreateModal(): void {
     this.snackBar.open('Modal de crear transferencia - En desarrollo', 'Cerrar', { duration: 3000 });
   }
 
-  viewDetails(transfer: BranchTransferWithItems): void {
+  openDetailModal(transfer: BranchTransferWithItems): void {
     this.snackBar.open('Modal de detalle - En desarrollo', 'Cerrar', { duration: 3000 });
+  }
+
+  viewDetails(transfer: BranchTransferWithItems): void {
+    this.openDetailModal(transfer);
   }
 
   approveTransfer(transfer: BranchTransferWithItems): void {
     if (confirm(`¿Aprobar transferencia ${transfer.transfer_number}?`)) {
-      // TODO: Obtener el usuario actual
       const approvedBy = 'Usuario Actual';
       
       this.branchTransferService.approveTransfer(transfer.id, approvedBy).subscribe({
