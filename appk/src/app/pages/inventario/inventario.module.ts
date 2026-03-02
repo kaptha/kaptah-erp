@@ -30,7 +30,8 @@ const routes: Routes = [
   imports: [
     RouterModule.forChild(routes),
     BranchInventoryListComponent,
-    BranchTransfersListComponent
+    BranchTransfersListComponent,
+    StockAlertsComponent
   ],
   providers: [
     BranchInventoryService,
