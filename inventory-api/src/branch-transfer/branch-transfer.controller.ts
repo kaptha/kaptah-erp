@@ -6,68 +6,113 @@ import {
   Patch,
   Param,
   Delete,
-  Req,
   Query,
   ParseIntPipe,
   UnauthorizedException
 } from '@nestjs/common';
 import { BranchTransferService } from './branch-transfer.service';
-import { CreateBranchTransferDto } from './dto/create-transfer.dto';
+import { CreateBranchTransferDto } from './dto/create-branch-transfer.dto';
 import { UpdateTransferStatusDto } from './dto/update-transfer-status.dto';
-import { FilterBranchTransferDto } from './dto/filter-transfer.dto';
-
-interface RequestWithUser extends Request {
-  user?: {
-    firebaseUid: string;
-  };
-}
+import { FilterBranchTransferDto } from './dto/filter-branch-transfer.dto';
+import { UsersService } from '../users/users.service';
 
 @Controller('branch-transfers')
 export class BranchTransferController {
-  constructor(private readonly branchTransferService: BranchTransferService) {}
+  constructor(
+    private readonly branchTransferService: BranchTransferService,
+    private readonly usersService: UsersService
+  ) {}
 
-  @Post()
-  create(@Body() createDto: CreateBranchTransferDto, @Req() req: RequestWithUser) {
-    if (!req.user?.firebaseUid) {
-      throw new UnauthorizedException('Usuario no autenticado');
-    }
-    return this.branchTransferService.create(createDto, req.user.firebaseUid);
-  }
-
-  @Get()
-  findAll(@Query() filterDto: FilterBranchTransferDto, @Req() req: RequestWithUser) {
-    if (!req.user?.firebaseUid) {
-      throw new UnauthorizedException('Usuario no autenticado');
-    }
-    filterDto.userId = req.user.firebaseUid;
-    return this.branchTransferService.findAll(filterDto, req.user.firebaseUid);
-  }
-
-  @Get(':id')
-  findOne(@Param('id', ParseIntPipe) id: number, @Req() req: RequestWithUser) {
-    if (!req.user?.firebaseUid) {
-      throw new UnauthorizedException('Usuario no autenticado');
-    }
-    return this.branchTransferService.findOne(id, req.user.firebaseUid);
-  }
-
-  @Patch(':id/status')
-  updateStatus(
-    @Param('id', ParseIntPipe) id: number,
-    @Body() updateDto: UpdateTransferStatusDto,
-    @Req() req: RequestWithUser
+  // Obtener todas las transferencias
+  @Get('firebase/:firebaseUid')
+  async findAll(
+    @Param('firebaseUid') firebaseUid: string,
+    @Query() filterDto: FilterBranchTransferDto
   ) {
-    if (!req.user?.firebaseUid) {
-      throw new UnauthorizedException('Usuario no autenticado');
+    console.log('📋 GET /branch-transfers/firebase/:firebaseUid - firebaseUid:', firebaseUid);
+    
+    const user = await this.usersService.findByFirebaseUid(firebaseUid);
+    if (!user) {
+      throw new UnauthorizedException('Usuario no encontrado');
     }
-    return this.branchTransferService.updateStatus(id, updateDto, req.user.firebaseUid);
+
+    return this.branchTransferService.findAll(filterDto, firebaseUid);
   }
 
-  @Delete(':id')
-  remove(@Param('id', ParseIntPipe) id: number, @Req() req: RequestWithUser) {
-    if (!req.user?.firebaseUid) {
-      throw new UnauthorizedException('Usuario no autenticado');
+  // Crear transferencia
+  @Post('firebase/:firebaseUid')
+  async create(
+    @Param('firebaseUid') firebaseUid: string,
+    @Body() createDto: CreateBranchTransferDto
+  ) {
+    console.log('📝 POST /branch-transfers/firebase/:firebaseUid');
+    
+    const user = await this.usersService.findByFirebaseUid(firebaseUid);
+    if (!user) {
+      throw new UnauthorizedException('Usuario no encontrado');
     }
-    return this.branchTransferService.remove(id, req.user.firebaseUid);
+
+    return this.branchTransferService.create(createDto, firebaseUid);
+  }
+
+  // Obtener transferencia por ID
+  @Get('firebase/:firebaseUid/:id')
+  async findOne(
+    @Param('firebaseUid') firebaseUid: string,
+    @Param('id', ParseIntPipe) id: number
+  ) {
+    return this.branchTransferService.findOne(id, firebaseUid);
+  }
+
+  // Aprobar transferencia
+  @Patch('firebase/:firebaseUid/:id/approve')
+  async approve(
+    @Param('firebaseUid') firebaseUid: string,
+    @Param('id', ParseIntPipe) id: number,
+    @Body('approved_by') approved_by: string
+  ) {
+    console.log(`✅ PATCH /branch-transfers/firebase/${firebaseUid}/${id}/approve`);
+    return this.branchTransferService.approveTransfer(id, approved_by, firebaseUid);
+  }
+
+  // Completar transferencia
+  @Patch('firebase/:firebaseUid/:id/complete')
+  async complete(
+    @Param('firebaseUid') firebaseUid: string,
+    @Param('id', ParseIntPipe) id: number
+  ) {
+    console.log(`✅ PATCH /branch-transfers/firebase/${firebaseUid}/${id}/complete`);
+    return this.branchTransferService.completeTransfer(id, firebaseUid);
+  }
+
+  // Cancelar transferencia
+  @Patch('firebase/:firebaseUid/:id/cancel')
+  async cancel(
+    @Param('firebaseUid') firebaseUid: string,
+    @Param('id', ParseIntPipe) id: number,
+    @Body('reason') reason: string
+  ) {
+    console.log(`❌ PATCH /branch-transfers/firebase/${firebaseUid}/${id}/cancel`);
+    return this.branchTransferService.cancelTransfer(id, reason, firebaseUid);
+  }
+
+  // Actualizar estado
+  @Patch('firebase/:firebaseUid/:id/status')
+  async updateStatus(
+    @Param('firebaseUid') firebaseUid: string,
+    @Param('id', ParseIntPipe) id: number,
+    @Body() updateStatusDto: UpdateTransferStatusDto
+  ) {
+    return this.branchTransferService.updateTransferStatus(id, updateStatusDto, firebaseUid);
+  }
+
+  // Eliminar transferencia
+  @Delete('firebase/:firebaseUid/:id')
+  async remove(
+    @Param('firebaseUid') firebaseUid: string,
+    @Param('id', ParseIntPipe) id: number
+  ) {
+    console.log(`🗑️ DELETE /branch-transfers/firebase/${firebaseUid}/${id}`);
+    return this.branchTransferService.remove(id, firebaseUid);
   }
 }
