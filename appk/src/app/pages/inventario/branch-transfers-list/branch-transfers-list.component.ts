@@ -1,18 +1,43 @@
 import { Component, OnInit } from '@angular/core';
-import { MatDialog } from '@angular/material/dialog';
-import { MatSnackBar } from '@angular/material/snack-bar';
-import { BranchTransferService, BranchTransfer, TransferStatus } from '../../../services/inventory/branch-transfer.service';
+import { CommonModule } from '@angular/common';
+import { FormsModule } from '@angular/forms';
+import { MatDialog, MatDialogModule } from '@angular/material/dialog';
+import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
+import { MatTableModule } from '@angular/material/table';
+import { MatCardModule } from '@angular/material/card';
+import { MatButtonModule } from '@angular/material/button';
+import { MatIconModule } from '@angular/material/icon';
+import { MatFormFieldModule } from '@angular/material/form-field';
+import { MatSelectModule } from '@angular/material/select';
+import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
+import { MatMenuModule } from '@angular/material/menu';
+import { MatChipsModule } from '@angular/material/chips';
+import { BranchTransferService, BranchTransferWithItems, TransferStatus } from '../../../services/inventory/branch-transfer.service';
 import { SucursalesService } from '../../../services/sucursales.service';
-import { TransferFormModalComponent } from '../transfer-form-modal/transfer-form-modal.component';
-import { TransferDetailModalComponent } from '../transfer-detail-modal/transfer-detail-modal.component';
 
 @Component({
   selector: 'app-branch-transfers-list',
+  standalone: true,
+  imports: [
+    CommonModule,
+    FormsModule,
+    MatDialogModule,
+    MatTableModule,
+    MatCardModule,
+    MatButtonModule,
+    MatIconModule,
+    MatFormFieldModule,
+    MatSelectModule,
+    MatSnackBarModule,
+    MatProgressSpinnerModule,
+    MatMenuModule,
+    MatChipsModule
+  ],
   templateUrl: './branch-transfers-list.component.html',
   styleUrls: ['./branch-transfers-list.component.css']
 })
 export class BranchTransfersListComponent implements OnInit {
-  transfers: BranchTransfer[] = [];
+  transfers: BranchTransferWithItems[] = [];
   branches: any[] = [];
   selectedStatus: string = 'all';
   selectedBranchId: number | null = null;
@@ -30,14 +55,14 @@ export class BranchTransfersListComponent implements OnInit {
 
   statusOptions = [
     { value: 'all', label: 'Todos' },
-    { value: 'pending', label: 'Pendiente' },
+    { value: 'pending', label: 'Pendientes' },
     { value: 'in_transit', label: 'En Tránsito' },
-    { value: 'completed', label: 'Completada' },
-    { value: 'cancelled', label: 'Cancelada' }
+    { value: 'completed', label: 'Completadas' },
+    { value: 'cancelled', label: 'Canceladas' }
   ];
 
   constructor(
-    private transferService: BranchTransferService,
+    private branchTransferService: BranchTransferService,
     private sucursalesService: SucursalesService,
     private dialog: MatDialog,
     private snackBar: MatSnackBar
@@ -63,15 +88,15 @@ export class BranchTransfersListComponent implements OnInit {
     this.loading = true;
     const filters: any = {};
 
-    if (this.selectedStatus !== 'all') {
-      filters.status = this.selectedStatus as TransferStatus;
-    }
-
     if (this.selectedBranchId) {
       filters.from_branch_id = this.selectedBranchId;
     }
 
-    this.transferService.getTransfers(filters).subscribe({
+    if (this.selectedStatus !== 'all') {
+      filters.status = this.selectedStatus as TransferStatus;
+    }
+
+    this.branchTransferService.getTransfers(filters).subscribe({
       next: (transfers) => {
         this.transfers = transfers;
         this.loading = false;
@@ -93,109 +118,99 @@ export class BranchTransfersListComponent implements OnInit {
   }
 
   openCreateModal(): void {
-    const dialogRef = this.dialog.open(TransferFormModalComponent, {
-      width: '800px',
-      maxHeight: '90vh'
-    });
-
-    dialogRef.afterClosed().subscribe(result => {
-      if (result) {
-        this.loadTransfers();
-      }
-    });
+    this.snackBar.open('Modal de crear transferencia - En desarrollo', 'Cerrar', { duration: 3000 });
   }
 
-  openDetailModal(transfer: BranchTransfer): void {
-    const dialogRef = this.dialog.open(TransferDetailModalComponent, {
-      width: '900px',
-      maxHeight: '90vh',
-      data: { transferId: transfer.id }
-    });
-
-    dialogRef.afterClosed().subscribe(result => {
-      if (result) {
-        this.loadTransfers();
-      }
-    });
+  viewDetails(transfer: BranchTransferWithItems): void {
+    this.snackBar.open('Modal de detalle - En desarrollo', 'Cerrar', { duration: 3000 });
   }
 
-  approveTransfer(transfer: BranchTransfer): void {
+  approveTransfer(transfer: BranchTransferWithItems): void {
     if (confirm(`¿Aprobar transferencia ${transfer.transfer_number}?`)) {
-      const idToken = localStorage.getItem('idToken');
-      this.transferService.approveTransfer(transfer.id, idToken!).subscribe({
+      // TODO: Obtener el usuario actual
+      const approvedBy = 'Usuario Actual';
+      
+      this.branchTransferService.approveTransfer(transfer.id, approvedBy).subscribe({
         next: () => {
           this.snackBar.open('Transferencia aprobada', 'Cerrar', { duration: 3000 });
           this.loadTransfers();
         },
         error: (error) => {
-          console.error('Error al aprobar:', error);
+          console.error('Error:', error);
           this.snackBar.open('Error al aprobar transferencia', 'Cerrar', { duration: 3000 });
         }
       });
     }
   }
 
-  completeTransfer(transfer: BranchTransfer): void {
+  completeTransfer(transfer: BranchTransferWithItems): void {
     if (confirm(`¿Completar transferencia ${transfer.transfer_number}? Esto actualizará el inventario.`)) {
-      this.transferService.completeTransfer(transfer.id).subscribe({
+      this.branchTransferService.completeTransfer(transfer.id).subscribe({
         next: () => {
-          this.snackBar.open('Transferencia completada exitosamente', 'Cerrar', { duration: 3000 });
+          this.snackBar.open('Transferencia completada e inventario actualizado', 'Cerrar', { duration: 3000 });
           this.loadTransfers();
         },
         error: (error) => {
-          console.error('Error al completar:', error);
-          this.snackBar.open(
-            error.error?.message || 'Error al completar transferencia',
-            'Cerrar',
-            { duration: 5000 }
-          );
+          console.error('Error:', error);
+          this.snackBar.open('Error al completar transferencia', 'Cerrar', { duration: 3000 });
         }
       });
     }
   }
 
-  cancelTransfer(transfer: BranchTransfer): void {
-    const reason = prompt('Razón de la cancelación:');
-    if (reason !== null) {
-      this.transferService.cancelTransfer(transfer.id, reason).subscribe({
+  cancelTransfer(transfer: BranchTransferWithItems): void {
+    const reason = prompt(`Cancelar transferencia ${transfer.transfer_number}. Ingresa el motivo:`);
+    if (reason) {
+      this.branchTransferService.cancelTransfer(transfer.id, reason).subscribe({
         next: () => {
           this.snackBar.open('Transferencia cancelada', 'Cerrar', { duration: 3000 });
           this.loadTransfers();
         },
         error: (error) => {
-          console.error('Error al cancelar:', error);
+          console.error('Error:', error);
           this.snackBar.open('Error al cancelar transferencia', 'Cerrar', { duration: 3000 });
         }
       });
     }
   }
 
-  deleteTransfer(transfer: BranchTransfer): void {
+  deleteTransfer(transfer: BranchTransferWithItems): void {
     if (confirm(`¿Eliminar transferencia ${transfer.transfer_number}?`)) {
-      this.transferService.deleteTransfer(transfer.id).subscribe({
+      this.branchTransferService.deleteTransfer(transfer.id).subscribe({
         next: () => {
           this.snackBar.open('Transferencia eliminada', 'Cerrar', { duration: 3000 });
           this.loadTransfers();
         },
         error: (error) => {
-          console.error('Error al eliminar:', error);
+          console.error('Error:', error);
           this.snackBar.open('Error al eliminar transferencia', 'Cerrar', { duration: 3000 });
         }
       });
     }
   }
 
-  getBranchName(branchId: number): string {
-    const branch = this.branches.find(b => b.id === branchId);
-    return branch ? branch.alias : `Sucursal ${branchId}`;
+  canApprove(transfer: BranchTransferWithItems): boolean {
+    return transfer.status === 'pending';
+  }
+
+  canComplete(transfer: BranchTransferWithItems): boolean {
+    return transfer.status === 'in_transit' || transfer.status === 'pending';
+  }
+
+  canCancel(transfer: BranchTransferWithItems): boolean {
+    return transfer.status === 'pending' || transfer.status === 'in_transit';
+  }
+
+  canDelete(transfer: BranchTransferWithItems): boolean {
+    return transfer.status === 'cancelled';
   }
 
   getStatusColor(status: TransferStatus): string {
     switch (status) {
-      case 'pending': return 'accent';
-      case 'in_transit': return 'primary';
+      case 'pending': return 'warn';
+      case 'in_transit': return 'accent';
       case 'completed': return 'primary';
-      case 'cancelled': return 'warn';
+      case 'cancelled': return '';
       default: return '';
     }
   }
@@ -210,19 +225,15 @@ export class BranchTransfersListComponent implements OnInit {
     }
   }
 
-  canApprove(transfer: BranchTransfer): boolean {
-    return transfer.status === 'pending';
+  getPendingCount(): number {
+    return this.transfers.filter(t => t.status === 'pending').length;
   }
 
-  canComplete(transfer: BranchTransfer): boolean {
-    return transfer.status === 'in_transit';
+  getInTransitCount(): number {
+    return this.transfers.filter(t => t.status === 'in_transit').length;
   }
 
-  canCancel(transfer: BranchTransfer): boolean {
-    return transfer.status === 'pending' || transfer.status === 'in_transit';
-  }
-
-  canDelete(transfer: BranchTransfer): boolean {
-    return transfer.status !== 'completed';
+  getCompletedCount(): number {
+    return this.transfers.filter(t => t.status === 'completed').length;
   }
 }

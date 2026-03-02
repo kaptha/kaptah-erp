@@ -125,39 +125,76 @@ export class BranchInventoryService {
   }
 
   createInventory(data: CreateBranchInventoryDto): Observable<BranchInventory> {
-    const headers = this.getHeaders();
-    console.log('Creando inventario:', data);
-    return this.http.post<BranchInventory>(`${this.apiUrl}/branch-inventory`, data, { headers }).pipe(
-      tap(response => console.log('Inventario creado:', response)),
-      catchError(error => {
-        console.error('Error al crear inventario:', error);
-        return throwError(() => error);
-      })
-    );
+  const headers = this.getHeaders();
+  
+  // Obtener firebaseUid del token
+  const token = localStorage.getItem('idToken');
+  if (!token) {
+    return throwError(() => new Error('No token found'));
   }
+
+  const payload = JSON.parse(atob(token.split('.')[1]));
+  const firebaseUid = payload.user_id;
+
+  console.log('Creando inventario:', data);
+  return this.http.post<BranchInventory>(
+    `${this.apiUrl}/branch-inventory/firebase/${firebaseUid}`,
+    data,
+    { headers }
+  ).pipe(
+    tap(response => console.log('Inventario creado:', response)),
+    catchError(error => {
+      console.error('Error al crear inventario:', error);
+      return throwError(() => error);
+    })
+  );
+}
 
   updateInventory(id: number, data: UpdateBranchInventoryDto): Observable<BranchInventory> {
-    const headers = this.getHeaders();
-    console.log(`Actualizando inventario ${id}:`, data);
-    return this.http.patch<BranchInventory>(`${this.apiUrl}/branch-inventory/${id}`, data, { headers }).pipe(
-      tap(response => console.log('Inventario actualizado:', response)),
-      catchError(error => {
-        console.error('Error al actualizar inventario:', error);
-        return throwError(() => error);
-      })
-    );
+  const headers = this.getHeaders();
+  const token = localStorage.getItem('idToken');
+  if (!token) {
+    return throwError(() => new Error('No token found'));
   }
 
-  deleteInventory(id: number): Observable<void> {
-    const headers = this.getHeaders();
-    return this.http.delete<void>(`${this.apiUrl}/branch-inventory/${id}`, { headers }).pipe(
-      tap(() => console.log(`Inventario ${id} eliminado`)),
-      catchError(error => {
-        console.error('Error al eliminar inventario:', error);
-        return throwError(() => error);
-      })
-    );
+  const payload = JSON.parse(atob(token.split('.')[1]));
+  const firebaseUid = payload.user_id;
+
+  console.log(`Actualizando inventario ${id}:`, data);
+  return this.http.patch<BranchInventory>(
+    `${this.apiUrl}/branch-inventory/firebase/${firebaseUid}/${id}`,
+    data,
+    { headers }
+  ).pipe(
+    tap(response => console.log('Inventario actualizado:', response)),
+    catchError(error => {
+      console.error('Error al actualizar inventario:', error);
+      return throwError(() => error);
+    })
+  );
+}
+
+deleteInventory(id: number): Observable<void> {
+  const headers = this.getHeaders();
+  const token = localStorage.getItem('idToken');
+  if (!token) {
+    return throwError(() => new Error('No token found'));
   }
+
+  const payload = JSON.parse(atob(token.split('.')[1]));
+  const firebaseUid = payload.user_id;
+
+  return this.http.delete<void>(
+    `${this.apiUrl}/branch-inventory/firebase/${firebaseUid}/${id}`,
+    { headers }
+  ).pipe(
+    tap(() => console.log(`Inventario ${id} eliminado`)),
+    catchError(error => {
+      console.error('Error al eliminar inventario:', error);
+      return throwError(() => error);
+    })
+  );
+}
 
   getLowStockItems(branchId?: number): Observable<BranchInventoryWithDetails[]> {
     return this.getInventory({ 

@@ -81,6 +81,53 @@ export class NotesComponent implements OnInit, AfterViewInit {
   checkScreenSize() {
     this.isMobile = window.innerWidth < 600;
   }
+  // --- Estadísticas ---
+selectedPeriod: string = 'month';
+stats = { count: 0, total: 0 };
+statsLoading = false;
+
+loadStats() {
+  this.statsLoading = true;
+  
+  const now = new Date();
+  let startDate: Date;
+  
+  switch (this.selectedPeriod) {
+    case 'today':
+      startDate = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+      break;
+    case 'week':
+      startDate = new Date(now);
+      startDate.setDate(now.getDate() - 7);
+      break;
+    case 'month':
+      startDate = new Date(now.getFullYear(), now.getMonth(), 1);
+      break;
+    case 'year':
+      startDate = new Date(now.getFullYear(), 0, 1);
+      break;
+    default:
+      startDate = new Date(now.getFullYear(), now.getMonth(), 1);
+  }
+
+  // Calcular desde los datos ya cargados (sin llamada extra al backend)
+  const filtered = this.dataSource.data.filter(note => {
+    const noteDate = new Date(note.saleDate);
+    return noteDate >= startDate && noteDate <= now;
+  });
+
+  this.stats = {
+    count: filtered.length,
+    total: filtered.reduce((sum, note) => sum + this.getSafeTotal(note.total), 0)
+  };
+  
+  this.statsLoading = false;
+}
+
+onPeriodChange(period: string) {
+  this.selectedPeriod = period;
+  this.loadStats();
+}
 
   /**
    * Carga las notas desde el servicio
@@ -98,6 +145,7 @@ export class NotesComponent implements OnInit, AfterViewInit {
     ).subscribe((notes) => {
       this.dataSource.data = notes;
       this.dataSource.filterPredicate = this.createFilter();
+      this.loadStats();
       
       // Resetear el paginador móvil
       this.mobilePaginator.pageIndex = 0;
