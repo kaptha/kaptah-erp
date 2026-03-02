@@ -125,24 +125,27 @@ async createByFirebaseUid(
     return this.branchInventoryService.findAll(filterDto, String(user.ID));
   }
 
-  @UseGuards(FirebaseAuthGuard)
-  @Patch(':id')
-  async update(
-    @Param('id', ParseIntPipe) id: number,
-    @Body() updateDto: UpdateBranchInventoryDto,
-    @Req() req: RequestWithUser
-  ) {
-    if (!req.user?.firebaseUid) {
-      throw new UnauthorizedException('Usuario no autenticado');
-    }
 
-    const user = await this.usersService.findByFirebaseUid(req.user.firebaseUid);
-    if (!user) {
-      throw new UnauthorizedException('Usuario no encontrado');
-    }
+@Patch('firebase/:firebaseUid/:id')
+async updateByFirebaseUid(
+  @Param('firebaseUid') firebaseUid: string,
+  @Param('id', ParseIntPipe) id: number,
+  @Body() updateDto: UpdateBranchInventoryDto
+) {
+  console.log(`🔄 PATCH /branch-inventory/firebase/${firebaseUid}/${id}`);
+  return this.branchInventoryService.update(id, updateDto, firebaseUid);
+}
 
-    return this.branchInventoryService.update(id, updateDto, String(user.ID));
-  }
+// Eliminar inventario sin guard
+@Delete('firebase/:firebaseUid/:id')
+async removeByFirebaseUid(
+  @Param('firebaseUid') firebaseUid: string,
+  @Param('id', ParseIntPipe) id: number
+) {
+  console.log(`🗑️ DELETE /branch-inventory/firebase/${firebaseUid}/${id}`);
+  await this.branchInventoryService.remove(id, firebaseUid);
+  return { message: 'Inventario eliminado correctamente' };
+}
 
   @UseGuards(FirebaseAuthGuard)
   @Delete(':id')
