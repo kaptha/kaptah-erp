@@ -1,4 +1,13 @@
-import { Entity, Column, PrimaryGeneratedColumn, CreateDateColumn, Index } from 'typeorm';
+import {
+  Entity,
+  Column,
+  PrimaryGeneratedColumn,
+  CreateDateColumn,
+  Index,
+  ManyToOne,
+  JoinColumn
+} from 'typeorm';
+import { BranchTransfer } from './branch-transfer.entity';
 
 @Entity('branch_transfer_items')
 export class BranchTransferItem {
@@ -24,4 +33,8 @@ export class BranchTransferItem {
 
   @CreateDateColumn({ type: 'timestamp' })
   created_at: Date;
+
+  @ManyToOne(() => BranchTransfer, (transfer) => transfer.items)
+  @JoinColumn({ name: 'transfer_id' })
+  transfer: BranchTransfer;
 }
