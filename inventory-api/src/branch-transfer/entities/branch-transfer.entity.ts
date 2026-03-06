@@ -1,4 +1,13 @@
-import { Entity, Column, PrimaryGeneratedColumn, CreateDateColumn, UpdateDateColumn, Index } from 'typeorm';
+import {
+  Entity,
+  Column,
+  PrimaryGeneratedColumn,
+  CreateDateColumn,
+  UpdateDateColumn,
+  Index,
+  OneToMany
+} from 'typeorm';
+import { BranchTransferItem } from './branch-transfer-item.entity';
 
 export type TransferStatus = 'pending' | 'in_transit' | 'completed' | 'cancelled';
 
@@ -51,4 +60,7 @@ export class BranchTransfer {
 
   @UpdateDateColumn({ type: 'timestamp' })
   updated_at: Date;
+
+  @OneToMany(() => BranchTransferItem, (item) => item.transfer, { eager: false })
+  items: BranchTransferItem[];
 }
