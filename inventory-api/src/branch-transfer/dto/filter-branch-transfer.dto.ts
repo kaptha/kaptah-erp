@@ -3,9 +3,11 @@ import { Type } from 'class-transformer';
 import { TransferStatus } from '../interfaces/branch-transfer.interface';
 
 export class FilterBranchTransferDto {
+ 
   @IsString()
-  userId: string;
-
+  @IsOptional()
+  userId?: string;
+  
   @IsEnum(['pending', 'in_transit', 'completed', 'cancelled'])
   @IsOptional()
   status?: TransferStatus;
