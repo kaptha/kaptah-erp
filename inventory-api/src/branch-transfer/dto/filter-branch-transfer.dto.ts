@@ -28,3 +28,4 @@ export class FilterBranchTransferDto {
   @IsOptional()
   date_to?: string;
 }
+
