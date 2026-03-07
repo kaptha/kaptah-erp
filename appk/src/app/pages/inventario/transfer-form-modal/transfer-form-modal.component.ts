@@ -1,51 +1,115 @@
-import { Component, OnInit } from '@angular/core';
-import { FormBuilder, FormGroup, Validators, FormArray } from '@angular/forms';
-import { MatDialogRef } from '@angular/material/dialog';
-import { MatSnackBar } from '@angular/material/snack-bar';
-import { BranchTransferService } from '../../../services/inventory/branch-transfer.service';
-import { BranchInventoryService } from '../../../services/inventory/branch-inventory.service';
-import { ProductService } from '../../../services/inventory/product.service';
+import { Component, Inject, OnInit } from '@angular/core';
+import { CommonModule } from '@angular/common';
+import { FormBuilder, FormGroup, Validators, ReactiveFormsModule, FormsModule } from '@angular/forms';
+import { MAT_DIALOG_DATA, MatDialogRef, MatDialogModule } from '@angular/material/dialog';
+import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
+import { MatFormFieldModule } from '@angular/material/form-field';
+import { MatInputModule } from '@angular/material/input';
+import { MatSelectModule } from '@angular/material/select';
+import { MatButtonModule } from '@angular/material/button';
+import { MatIconModule } from '@angular/material/icon';
+import { MatTableModule } from '@angular/material/table';
+import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
+import { MatDividerModule } from '@angular/material/divider';
+import { MatTooltipModule } from '@angular/material/tooltip';
+import { BranchTransferService, CreateBranchTransferDto } from '../../../services/inventory/branch-transfer.service';
+import { BranchInventoryService, BranchInventoryWithDetails } from '../../../services/inventory/branch-inventory.service';
 import { SucursalesService } from '../../../services/sucursales.service';
 import { UsersService } from '../../../services/users.service';
 
+interface TransferItem {
+  product_id: number;
+  product_name: string;
+  product_code: string;
+  quantity: number;
+  available_stock: number;
+  cost: number;
+}
+
 @Component({
   selector: 'app-transfer-form-modal',
+  standalone: true,
+  imports: [
+    CommonModule,
+    ReactiveFormsModule,
+    FormsModule,
+    MatDialogModule,
+    MatFormFieldModule,
+    MatInputModule,
+    MatSelectModule,
+    MatButtonModule,
+    MatIconModule,
+    MatTableModule,
+    MatSnackBarModule,
+    MatProgressSpinnerModule,
+    MatDividerModule,
+    MatTooltipModule
+  ],
   templateUrl: './transfer-form-modal.component.html',
   styleUrls: ['./transfer-form-modal.component.css']
 })
 export class TransferFormModalComponent implements OnInit {
-  form: FormGroup;
+  transferForm: FormGroup;
+  loading = false;
+  loadingProducts = false;
   branches: any[] = [];
-  products: any[] = [];
-  availableStock: { [key: number]: number } = {};
-  loading: boolean = false;
+  sourceInventory: BranchInventoryWithDetails[] = [];
+  transferItems: TransferItem[] = [];
+  userName: string = '';
+
+  // Para agregar productos
+  selectedProductId: number | null = null;
+  selectedQuantity: number = 1;
+
+  displayedColumns: string[] = ['product', 'available', 'quantity', 'cost', 'subtotal', 'actions'];
 
   constructor(
     private fb: FormBuilder,
     private dialogRef: MatDialogRef<TransferFormModalComponent>,
-    private transferService: BranchTransferService,
+    @Inject(MAT_DIALOG_DATA) public data: any,
+    private branchTransferService: BranchTransferService,
     private branchInventoryService: BranchInventoryService,
-    private productService: ProductService,
     private sucursalesService: SucursalesService,
     private usersService: UsersService,
     private snackBar: MatSnackBar
   ) {
-    this.form = this.fb.group({
-      from_branch_id: [null, Validators.required],
-      to_branch_id: [null, Validators.required],
-      notes: [''],
-      items: this.fb.array([], Validators.minLength(1))
+    this.transferForm = this.fb.group({
+      from_branch_id: ['', Validators.required],
+      to_branch_id: ['', Validators.required],
+      notes: ['']
     });
   }
 
   ngOnInit(): void {
-    this.loadBranches();
-    this.loadProducts();
-    this.addItem(); // Agregar primer item por defecto
+    this.loadUserAndBranches();
+
+    // Cuando cambia la sucursal origen, cargar su inventario
+    this.transferForm.get('from_branch_id')?.valueChanges.subscribe(branchId => {
+      if (branchId) {
+        this.loadSourceInventory(branchId);
+        this.transferItems = [];
+        this.selectedProductId = null;
+      }
+    });
   }
 
-  get items(): FormArray {
-    return this.form.get('items') as FormArray;
+  loadUserAndBranches(): void {
+    const idToken = localStorage.getItem('idToken');
+    if (!idToken) {
+      this.snackBar.open('No se encontró token de autenticación', 'Cerrar', { duration: 3000 });
+      return;
+    }
+
+    this.usersService.getUserByToken(idToken).subscribe({
+      next: (user) => {
+        this.userName = user.name || user.email || 'Usuario';
+        this.loadBranches();
+      },
+      error: (error) => {
+        console.error('Error al obtener usuario:', error);
+        this.snackBar.open('Error al cargar datos del usuario', 'Cerrar', { duration: 3000 });
+      }
+    });
   }
 
   loadBranches(): void {
@@ -55,150 +119,144 @@ export class TransferFormModalComponent implements OnInit {
       },
       error: (error) => {
         console.error('Error al cargar sucursales:', error);
+        this.snackBar.open('Error al cargar sucursales', 'Cerrar', { duration: 3000 });
       }
     });
   }
 
-  loadProducts(): void {
-    this.productService.getProducts().subscribe({
-      next: (products) => {
-        this.products = products;
-      },
-      error: (error) => {
-        console.error('Error al cargar productos:', error);
-      }
-    });
-  }
+  loadSourceInventory(branchId: number): void {
+    this.loadingProducts = true;
+    this.sourceInventory = [];
 
-  onFromBranchChange(): void {
-    const fromBranchId = this.form.get('from_branch_id')?.value;
-    if (fromBranchId) {
-      this.loadAvailableStock(fromBranchId);
-    }
-  }
-
-  loadAvailableStock(branchId: number): void {
     this.branchInventoryService.getInventoryByBranch(branchId).subscribe({
       next: (inventory) => {
-        this.availableStock = {};
-        inventory.forEach(item => {
-          this.availableStock[item.product_id] = item.quantity;
-        });
+        // Solo mostrar productos con stock > 0
+        this.sourceInventory = inventory.filter(item => item.quantity > 0);
+        this.loadingProducts = false;
       },
       error: (error) => {
-        console.error('Error al cargar stock disponible:', error);
+        console.error('Error al cargar inventario:', error);
+        this.snackBar.open('Error al cargar inventario de la sucursal', 'Cerrar', { duration: 3000 });
+        this.loadingProducts = false;
       }
     });
   }
 
-  createItemFormGroup(): FormGroup {
-    return this.fb.group({
-      product_id: [null, Validators.required],
-      quantity: [1, [Validators.required, Validators.min(1)]],
-      cost: [0, [Validators.required, Validators.min(0)]],
-      notes: ['']
-    });
+  get availableProducts(): BranchInventoryWithDetails[] {
+    const addedIds = this.transferItems.map(item => item.product_id);
+    return this.sourceInventory.filter(inv => !addedIds.includes(inv.product_id));
   }
 
-  addItem(): void {
-    this.items.push(this.createItemFormGroup());
+  get destinationBranches(): any[] {
+    const fromId = this.transferForm.get('from_branch_id')?.value;
+    return this.branches.filter(b => b.id !== fromId);
   }
 
-  removeItem(index: number): void {
-    if (this.items.length > 1) {
-      this.items.removeAt(index);
-    } else {
-      this.snackBar.open('Debe haber al menos un producto', 'Cerrar', { duration: 3000 });
+  addProduct(): void {
+    if (!this.selectedProductId || this.selectedQuantity <= 0) {
+      this.snackBar.open('Selecciona un producto y cantidad válida', 'Cerrar', { duration: 3000 });
+      return;
     }
-  }
 
-  onProductChange(index: number): void {
-    const item = this.items.at(index);
-    const productId = item.get('product_id')?.value;
-    
-    if (productId) {
-      const product = this.products.find(p => p.id === productId);
-      if (product) {
-        item.patchValue({ cost: product.unitPrice || 0 });
-      }
+    const inventoryItem = this.sourceInventory.find(inv => inv.product_id === this.selectedProductId);
+    if (!inventoryItem) return;
+
+    if (this.selectedQuantity > inventoryItem.quantity) {
+      this.snackBar.open(
+        `Stock insuficiente. Disponible: ${inventoryItem.quantity}`,
+        'Cerrar',
+        { duration: 3000 }
+      );
+      return;
     }
+
+    this.transferItems = [...this.transferItems, {
+      product_id: inventoryItem.product_id,
+      product_name: inventoryItem.product_name,
+      product_code: inventoryItem.product_code,
+      quantity: this.selectedQuantity,
+      available_stock: inventoryItem.quantity,
+      cost: inventoryItem.cost
+    }];
+
+    this.selectedProductId = null;
+    this.selectedQuantity = 1;
   }
 
-  getAvailableStock(productId: number): number {
-    return this.availableStock[productId] || 0;
+  removeProduct(index: number): void {
+    this.transferItems = this.transferItems.filter((_, i) => i !== index);
   }
 
-  hasInsufficientStock(index: number): boolean {
-    const item = this.items.at(index);
-    const productId = item.get('product_id')?.value;
-    const quantity = item.get('quantity')?.value;
-    
-    if (!productId || !quantity) return false;
-    
-    const available = this.getAvailableStock(productId);
-    return quantity > available;
+  updateQuantity(index: number, quantity: number): void {
+    const item = this.transferItems[index];
+    if (quantity <= 0) {
+      this.snackBar.open('La cantidad debe ser mayor a 0', 'Cerrar', { duration: 2000 });
+      return;
+    }
+    if (quantity > item.available_stock) {
+      this.snackBar.open(
+        `Stock insuficiente. Disponible: ${item.available_stock}`,
+        'Cerrar',
+        { duration: 2000 }
+      );
+      return;
+    }
+    this.transferItems[index] = { ...item, quantity };
+    this.transferItems = [...this.transferItems];
+  }
+
+  getTotalItems(): number {
+    return this.transferItems.reduce((sum, item) => sum + item.quantity, 0);
+  }
+
+  getTotalValue(): number {
+    return this.transferItems.reduce((sum, item) => sum + (item.quantity * item.cost), 0);
   }
 
   onSubmit(): void {
-    if (this.form.invalid) {
-      this.snackBar.open('Por favor completa todos los campos requeridos', 'Cerrar', { duration: 3000 });
+    if (this.transferForm.invalid) {
+      this.snackBar.open('Completa los campos requeridos', 'Cerrar', { duration: 3000 });
       return;
     }
 
-    const fromBranchId = this.form.get('from_branch_id')?.value;
-    const toBranchId = this.form.get('to_branch_id')?.value;
-
-    if (fromBranchId === toBranchId) {
-      this.snackBar.open('La sucursal origen y destino deben ser diferentes', 'Cerrar', { duration: 3000 });
+    if (this.transferItems.length === 0) {
+      this.snackBar.open('Agrega al menos un producto a la transferencia', 'Cerrar', { duration: 3000 });
       return;
     }
 
-    // Validar stock insuficiente
-    for (let i = 0; i < this.items.length; i++) {
-      if (this.hasInsufficientStock(i)) {
-        this.snackBar.open('Hay productos con stock insuficiente', 'Cerrar', { duration: 3000 });
-        return;
-      }
+    const formValue = this.transferForm.getRawValue();
+
+    if (formValue.from_branch_id === formValue.to_branch_id) {
+      this.snackBar.open('La sucursal origen y destino no pueden ser la misma', 'Cerrar', { duration: 3000 });
+      return;
     }
 
     this.loading = true;
 
-    const idToken = localStorage.getItem('idToken');
-    if (!idToken) {
-      this.snackBar.open('No se encontró token de autenticación', 'Cerrar', { duration: 3000 });
-      this.loading = false;
-      return;
-    }
+    const createDto: CreateBranchTransferDto = {
+      from_branch_id: formValue.from_branch_id,
+      to_branch_id: formValue.to_branch_id,
+      requested_by: this.userName,
+      notes: formValue.notes || undefined,
+      items: this.transferItems.map(item => ({
+        product_id: item.product_id,
+        quantity: item.quantity,
+        cost: item.cost
+      }))
+    };
 
-    this.usersService.getUserByToken(idToken).subscribe({
-      next: (user) => {
-        const payload = {
-          ...this.form.value,
-          userId: user.id
-        };
-
-        this.transferService.createTransfer(payload).subscribe({
-          next: (response) => {
-            this.snackBar.open(
-              `Transferencia ${response.transfer_number} creada correctamente`, 
-              'Cerrar', 
-              { duration: 3000 }
-            );
-            this.dialogRef.close(true);
-          },
-          error: (error) => {
-            console.error('Error al crear transferencia:', error);
-            this.snackBar.open(
-              error.error?.message || 'Error al crear transferencia',
-              'Cerrar',
-              { duration: 3000 }
-            );
-            this.loading = false;
-          }
-        });
+    this.branchTransferService.createTransfer(createDto).subscribe({
+      next: (result) => {
+        this.snackBar.open('Transferencia creada exitosamente', 'Cerrar', { duration: 3000 });
+        this.dialogRef.close(true);
       },
       error: (error) => {
-        console.error('Error al obtener usuario:', error);
+        console.error('Error al crear transferencia:', error);
+        this.snackBar.open(
+          error.error?.message || 'Error al crear transferencia',
+          'Cerrar',
+          { duration: 3000 }
+        );
         this.loading = false;
       }
     });
@@ -206,20 +264,5 @@ export class TransferFormModalComponent implements OnInit {
 
   onCancel(): void {
     this.dialogRef.close(false);
-  }
-
-  getProductName(productId: number): string {
-    const product = this.products.find(p => p.id === productId);
-    return product ? `${product.code} - ${product.name}` : '';
-  }
-
-  getTotalItems(): number {
-    return this.items.value.reduce((sum: number, item: any) => sum + (item.quantity || 0), 0);
-  }
-
-  getTotalValue(): number {
-    return this.items.value.reduce((sum: number, item: any) => {
-      return sum + ((item.quantity || 0) * (item.cost || 0));
-    }, 0);
   }
 }
