@@ -14,6 +14,7 @@ import { MatMenuModule } from '@angular/material/menu';
 import { MatChipsModule } from '@angular/material/chips';
 import { BranchTransferService, BranchTransferWithItems, TransferStatus } from '../../../services/inventory/branch-transfer.service';
 import { SucursalesService } from '../../../services/sucursales.service';
+import { TransferFormModalComponent } from '../transfer-form-modal/transfer-form-modal.component';
 
 @Component({
   selector: 'app-branch-transfers-list',
@@ -123,8 +124,17 @@ export class BranchTransfersListComponent implements OnInit {
   }
 
   openCreateModal(): void {
-    this.snackBar.open('Modal de crear transferencia - En desarrollo', 'Cerrar', { duration: 3000 });
-  }
+  const dialogRef = this.dialog.open(TransferFormModalComponent, {
+    width: '800px',
+    disableClose: true
+  });
+
+  dialogRef.afterClosed().subscribe(result => {
+    if (result) {
+      this.loadTransfers();
+    }
+  });
+}
 
   openDetailModal(transfer: BranchTransferWithItems): void {
     this.snackBar.open('Modal de detalle - En desarrollo', 'Cerrar', { duration: 3000 });
