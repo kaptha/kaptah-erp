@@ -1,11 +1,20 @@
+/* ========================================
+   MODAL AGREGAR / EDITAR INVENTARIO
+   ======================================== */
+
 mat-dialog-content {
   min-width: 500px;
   padding: 20px 24px;
 }
 
+.full-width,
 .w-100 {
   width: 100%;
 }
+
+/* ========================================
+   SPINNER
+   ======================================== */
 
 mat-spinner {
   display: inline-block;
@@ -14,4 +23,20 @@ mat-spinner {
 
 .me-2 {
   margin-right: 0.5rem;
+}
+
+/* ========================================
+   RESPONSIVE
+   ======================================== */
+
+@media (max-width: 768px) {
+  mat-dialog-content {
+    min-width: unset;
+    width: 100%;
+    padding: 16px;
+  }
+
+  .row > [class*='col-'] {
+    width: 100%;
+  }
 }
