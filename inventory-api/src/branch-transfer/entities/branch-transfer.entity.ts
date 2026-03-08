@@ -61,6 +61,6 @@ export class BranchTransfer {
   @UpdateDateColumn({ type: 'timestamp' })
   updated_at: Date;
 
-  @OneToMany(() => BranchTransferItem, (item) => item.transfer, { eager: false })
+  @OneToMany(() => BranchTransferItem, (item) => item.transfer, { eager: false, cascade: false })
   items: BranchTransferItem[];
 }
