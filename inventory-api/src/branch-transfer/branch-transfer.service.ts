@@ -171,16 +171,20 @@ export class BranchTransferService {
 
     const savedTransfer = await this.branchTransferRepository.save(transfer);
 
-    // Crear los items
+    // Crear los items con query directa
+    const inventoryManager = this.branchTransferRepository.manager;
     for (const itemDto of createDto.items) {
-      const item = this.transferItemRepository.create({
-        transfer_id: savedTransfer.id,
-        product_id: itemDto.product_id,
-        quantity: itemDto.quantity,
-        cost: itemDto.cost || 0,
-        notes: itemDto.notes || null,
-      });
-      await this.transferItemRepository.save(item);
+      await inventoryManager.query(
+        `INSERT INTO branch_transfer_items (transfer_id, product_id, quantity, cost, notes, created_at)
+         VALUES (?, ?, ?, ?, ?, NOW())`,
+        [
+          savedTransfer.id,
+          itemDto.product_id,
+          itemDto.quantity,
+          itemDto.cost || 0,
+          itemDto.notes || null
+        ]
+      );
     }
 
     this.logger.log(`Transferencia ${transferNumber} creada por usuario ${userId}`);
