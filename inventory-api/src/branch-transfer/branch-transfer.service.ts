@@ -159,27 +159,29 @@ export class BranchTransferService {
 
     const transferNumber = await this.generateTransferNumber(userId);
 
-    // Crear la transferencia
-    const transfer = this.branchTransferRepository.create({
-      userId,
-      transfer_number: transferNumber,
-      from_branch_id: createDto.from_branch_id,
-      to_branch_id: createDto.to_branch_id,
-      requested_by: createDto.userId || 'Sistema',
-      notes: createDto.notes || null,
-      status: 'pending' as TransferStatus,
-    });
+    // Crear la transferencia con query directa
+    const result = await this.inventoryDataSource.query(
+      `INSERT INTO branch_transfers (userId, transfer_number, from_branch_id, to_branch_id, status, requested_by, notes, created_at, updated_at)
+       VALUES (?, ?, ?, ?, 'pending', ?, ?, NOW(), NOW())`,
+      [
+        userId,
+        transferNumber,
+        createDto.from_branch_id,
+        createDto.to_branch_id,
+        createDto.requested_by || 'Sistema',
+        createDto.notes || null
+      ]
+    );
 
-    const savedTransfer = await this.branchTransferRepository.save(transfer);
+    const transferId = result.insertId;
 
     // Crear los items con query directa
-    const inventoryManager = this.inventoryDataSource;
     for (const itemDto of createDto.items) {
-      await inventoryManager.query(
+      await this.inventoryDataSource.query(
         `INSERT INTO branch_transfer_items (transfer_id, product_id, quantity, cost, notes, created_at)
          VALUES (?, ?, ?, ?, ?, NOW())`,
         [
-          savedTransfer.id,
+          transferId,
           itemDto.product_id,
           itemDto.quantity,
           itemDto.cost || 0,
@@ -190,9 +192,8 @@ export class BranchTransferService {
 
     this.logger.log(`Transferencia ${transferNumber} creada por usuario ${userId}`);
 
-    return this.findOne(savedTransfer.id, firebaseUid);
+    return this.findOne(transferId, firebaseUid);
   }
-
   // ==================== APPROVE ====================
 
   async approveTransfer(id: number, approved_by: string, firebaseUid: string) {
