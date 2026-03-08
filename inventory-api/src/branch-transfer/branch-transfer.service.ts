@@ -4,7 +4,7 @@ import {
   BadRequestException,
   Logger
 } from '@nestjs/common';
-import { InjectRepository } from '@nestjs/typeorm';
+import { InjectRepository, InjectDataSource } from '@nestjs/typeorm';
 import { Repository, DataSource } from 'typeorm';
 import { BranchTransfer, TransferStatus } from './entities/branch-transfer.entity';
 import { BranchTransferItem } from './entities/branch-transfer-item.entity';
@@ -23,7 +23,8 @@ export class BranchTransferService {
     @InjectRepository(BranchTransferItem, 'inventory')
     private transferItemRepository: Repository<BranchTransferItem>,
     private usersService: UsersService,
-    private dataSource: DataSource,
+    @InjectDataSource('inventory')
+    private inventoryDataSource: DataSource,
   ) {}
 
   // ==================== HELPERS ====================
@@ -46,7 +47,7 @@ export class BranchTransferService {
 
   private async enrichTransfer(transfer: BranchTransfer) {
     // Obtener alias de sucursales
-    const inventoryManager = this.branchTransferRepository.manager;
+    const inventoryManager = this.inventoryDataSource;
 
     const fromBranchResult = await inventoryManager.query(
       'SELECT s.id, s.alias FROM sucursales s WHERE s.id = ?',
@@ -172,7 +173,7 @@ export class BranchTransferService {
     const savedTransfer = await this.branchTransferRepository.save(transfer);
 
     // Crear los items con query directa
-    const inventoryManager = this.branchTransferRepository.manager;
+    const inventoryManager = this.inventoryDataSource;
     for (const itemDto of createDto.items) {
       await inventoryManager.query(
         `INSERT INTO branch_transfer_items (transfer_id, product_id, quantity, cost, notes, created_at)
@@ -242,7 +243,7 @@ export class BranchTransferService {
 
     // Actualizar inventario: restar de origen, sumar a destino
     if (transfer.items && transfer.items.length > 0) {
-      const inventoryManager = this.branchTransferRepository.manager;
+      const inventoryManager = this.inventoryDataSource;
 
       for (const item of transfer.items) {
         // Restar del inventario de origen
