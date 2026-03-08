@@ -1,3 +1,16 @@
+/* ===== TRANSFERENCIAS ENTRE SUCURSALES ===== */
+
+.container-fluid {
+  padding: 0 10px;
+}
+
+h2 {
+  margin-bottom: 10px;
+  color: #333;
+  font-size: 24px;
+}
+
+/* ===== TARJETAS DE RESUMEN ===== */
 mat-card {
   margin-bottom: 1rem;
 }
@@ -8,37 +21,84 @@ mat-card {
   margin: 0;
 }
 
-h3 {
+h6.text-muted {
   font-size: 0.9rem;
   color: #666;
   margin-bottom: 0.5rem;
 }
 
+/* Bordes de color por estado */
 .status-card.pending {
   border-left: 4px solid #ff9800;
 }
-
 .status-card.in-transit {
   border-left: 4px solid #2196f3;
 }
-
 .status-card.completed {
   border-left: 4px solid #4caf50;
 }
 
+/* ===== TABLA ===== */
 .table-responsive {
+  width: 100%;
   overflow-x: auto;
+  margin-bottom: 20px;
+  position: relative;
 }
 
 table {
   width: 100%;
+  min-width: 800px;
 }
 
 th.mat-header-cell {
-  font-weight: 600;
-  color: #333;
+  font-weight: bold;
+  color: rgba(0, 0, 0, 0.7);
+  background-color: #f5f5f5;
 }
 
+tr.mat-row:hover {
+  background-color: rgba(142, 36, 170, 0.05);
+}
+
+/* Anchos de columnas */
+.mat-column-transfer_number {
+  width: 130px;
+  min-width: 100px;
+}
+
+.mat-column-from_branch,
+.mat-column-to_branch {
+  width: 150px;
+}
+
+.mat-column-status {
+  width: 120px;
+  text-align: center;
+}
+
+.mat-column-requested_by {
+  width: 140px;
+}
+
+.mat-column-created_at {
+  width: 120px;
+}
+
+.mat-column-actions {
+  width: 60px;
+  text-align: right;
+}
+
+/* ===== ESTADO VACÍO ===== */
+.mat-row .mat-cell.text-center {
+  padding: 30px;
+  text-align: center;
+  color: #666;
+  font-style: italic;
+}
+
+/* ===== UTILIDADES ===== */
 .text-danger {
   color: #f44336;
 }
@@ -51,6 +111,43 @@ th.mat-header-cell {
   margin-right: 0.25rem;
 }
 
+/* ===== SPINNER ===== */
 mat-spinner {
   margin: 2rem auto;
+}
+
+/* ===== RESPONSIVE ===== */
+@media screen and (max-width: 1024px) {
+  h2 {
+    font-size: 22px;
+  }
+}
+
+@media screen and (max-width: 768px) {
+  h2 {
+    font-size: 20px;
+  }
+
+  .col-md-4.d-flex {
+    width: 100%;
+  }
+
+  .col-md-4.d-flex button {
+    width: 100%;
+  }
+}
+
+@media screen and (max-width: 600px) {
+  .container-fluid {
+    padding: 0 10px;
+  }
+
+  h2 {
+    font-size: 18px;
+    margin-top: 10px;
+  }
+
+  .display-6 {
+    font-size: 1.5rem;
+  }
 }
