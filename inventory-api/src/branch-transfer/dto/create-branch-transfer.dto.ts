@@ -21,13 +21,18 @@ export class CreateTransferItemDto {
 
 export class CreateBranchTransferDto {
   @IsString()
-  userId: string;
+  @IsOptional()
+  userId?: string;
 
   @IsInt()
   from_branch_id: number;
 
   @IsInt()
   to_branch_id: number;
+
+  @IsString()
+  @IsOptional()
+  requested_by?: string;
 
   @IsString()
   @IsOptional()
