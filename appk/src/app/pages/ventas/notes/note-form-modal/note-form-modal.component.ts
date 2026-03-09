@@ -374,7 +374,8 @@ private initializeTaxesForItem(itemIndex: number): void {
       status: ['COMPLETED'], // ✨ CAMBIADO: De PENDING a COMPLETED
       subtotal: [0],
       taxesTotal: [0],
-      total: [0]
+      total: [0],
+      notes: ['']
     });
   }
 
@@ -844,7 +845,8 @@ private initializeTaxesForItem(itemIndex: number): void {
       customerRfc: data.customerRfc,
       saleDate: new Date(data.saleDate),
       paymentMethod: data.paymentMethod,
-      status: validStatus
+      status: validStatus,
+      notes: data.notes || ''
     });
 
     // Limpiar los ítems existentes
