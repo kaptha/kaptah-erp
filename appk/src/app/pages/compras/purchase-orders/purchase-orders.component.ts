@@ -219,15 +219,6 @@ export class PurchaseOrdersComponent implements OnInit {
   }
 
   eliminarOrden(order: PurchaseOrder): void {
-    if (order.status !== 'DRAFT') {
-      Swal.fire({
-        icon: 'warning',
-        title: 'Aviso',
-        text: 'Solo se pueden eliminar órdenes en estado BORRADOR',
-        confirmButtonText: 'Aceptar'
-      });
-      return;
-    }
 
     Swal.fire({
       title: '¿Eliminar orden?',
