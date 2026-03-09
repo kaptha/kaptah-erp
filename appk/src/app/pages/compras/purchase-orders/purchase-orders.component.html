@@ -111,8 +111,7 @@
               <mat-icon>cancel</mat-icon>
               <span>Cancelar Orden</span>
             </button>
-            <mat-divider *ngIf="order.status === 'DRAFT'"></mat-divider>
-            <button mat-menu-item (click)="eliminarOrden(order)" *ngIf="order.status === 'DRAFT'" class="delete-action">
+            <button mat-menu-item (click)="eliminarOrden(order)" class="delete-action">
               <mat-icon>delete</mat-icon>
               <span>Eliminar</span>
             </button>
