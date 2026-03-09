@@ -307,3 +307,8 @@
     align-items: flex-start;
   }
 }
+/* Observaciones */
+.w-full textarea {
+  resize: vertical;
+  min-height: 80px;
+}
