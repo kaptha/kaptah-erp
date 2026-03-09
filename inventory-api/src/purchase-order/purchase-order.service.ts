@@ -338,13 +338,6 @@ export class PurchaseOrderService {
   async remove(id: number, firebaseUid: string): Promise<void> {
     const purchaseOrder = await this.findOne(id, firebaseUid);
 
-    // Solo se puede eliminar si está en DRAFT
-    if (purchaseOrder.status !== PurchaseOrderStatus.DRAFT) {
-      throw new BadRequestException(
-        'Solo se pueden eliminar órdenes en estado DRAFT',
-      );
-    }
-
     await this.purchaseOrderRepository.remove(purchaseOrder);
   }
 
