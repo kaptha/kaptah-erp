@@ -9,10 +9,9 @@ export class CfdiTemplateService {
   private readonly templatesPath: string; // ⭐ AGREGAR ESTA LÍNEA
 
   constructor() {
-    // ⭐ INICIALIZAR EN EL CONSTRUCTOR
-    this.templatesPath = path.join(process.cwd(), 'src', 'templates', 'cfdi');
+    this.templatesPath = path.join(__dirname, '..', '..', '..', 'templates', 'cfdi');
     this.logger.log(`📁 Templates path: ${this.templatesPath}`);
-  }
+}
 
   /**
    * Genera HTML del CFDI con estilo personalizado
