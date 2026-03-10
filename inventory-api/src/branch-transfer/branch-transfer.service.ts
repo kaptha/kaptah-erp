@@ -50,11 +50,11 @@ export class BranchTransferService {
     const inventoryManager = this.inventoryDataSource;
 
     const fromBranchResult = await inventoryManager.query(
-      'SELECT s.id, s.alias FROM sucursales s WHERE s.id = ?',
+      'SELECT s.id, s.alias FROM biz_entities_db.sucursales s WHERE s.id = ?',
       [transfer.from_branch_id]
     );
     const toBranchResult = await inventoryManager.query(
-      'SELECT s.id, s.alias FROM sucursales s WHERE s.id = ?',
+      'SELECT s.id, s.alias FROM biz_entities_db.sucursales s WHERE s.id = ?',
       [transfer.to_branch_id]
     );
 
