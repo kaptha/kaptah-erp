@@ -375,7 +375,7 @@ private initializeTaxesForItem(itemIndex: number): void {
       subtotal: [0],
       taxesTotal: [0],
       total: [0],
-      notes: ['']
+      observaciones: ['']
     });
   }
 
