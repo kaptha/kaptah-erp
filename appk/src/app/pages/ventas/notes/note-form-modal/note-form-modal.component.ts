@@ -846,7 +846,7 @@ private initializeTaxesForItem(itemIndex: number): void {
       saleDate: new Date(data.saleDate),
       paymentMethod: data.paymentMethod,
       status: validStatus,
-      notes: data.notes || ''
+      observaciones: data.observaciones || ''
     });
 
     // Limpiar los ítems existentes
@@ -938,7 +938,7 @@ private initializeTaxesForItem(itemIndex: number): void {
     subtotal: Number(formData.subtotal) || 0,
     taxesTotal: Number(formData.taxesTotal) || 0,  // ✅ Total de impuestos
     total: Number(formData.total) || 0,
-    notes: formData.notes || ''
+    observaciones: formData.observaciones || ''
   };
 
   console.log('📤 DTO FINAL:', noteDto);
