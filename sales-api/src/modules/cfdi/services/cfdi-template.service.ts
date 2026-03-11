@@ -9,7 +9,7 @@ export class CfdiTemplateService {
   private readonly templatesPath: string; // ⭐ AGREGAR ESTA LÍNEA
 
   constructor() {
-    this.templatesPath = path.join(__dirname, '..', '..', '..', 'templates', 'cfdi');
+    this.templatesPath = path.join(__dirname, '..', '..', '..', '..', 'templates', 'cfdi');
     this.logger.log(`📁 Templates path: ${this.templatesPath}`);
 }
 
