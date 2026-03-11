@@ -13,7 +13,7 @@ export interface SaleNote {
   createdBy: string;
   paymentMethod: string;
   status: 'COMPLETED' | 'PENDING' | 'CANCELLED';
-  notes?: string;
+  observaciones?: string;
 }
 
 export interface SaleNoteItem {
