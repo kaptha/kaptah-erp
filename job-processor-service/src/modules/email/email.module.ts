@@ -14,7 +14,7 @@ import { TemplatesModule } from '../templates/templates.module';
   imports: [
     TypeOrmModule.forFeature([EmailLog, EmailAttachment, ScheduledEmail]),
     BullModule.registerQueue({
-      name: 'email',
+      name: 'email-queue',
     }),
     ProvidersModule,
     TemplatesModule,
