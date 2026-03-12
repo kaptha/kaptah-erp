@@ -13,7 +13,7 @@ export class EmailService {
   private readonly logger = new Logger(EmailService.name);
 
   constructor(
-    @InjectQueue('email') private emailQueue: Queue,
+    @InjectQueue('email-queue') private emailQueue: Queue,
     @InjectRepository(EmailLog)
     private emailLogRepository: Repository<EmailLog>,
     @InjectRepository(ScheduledEmail)
