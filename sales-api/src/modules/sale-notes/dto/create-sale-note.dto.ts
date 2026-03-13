@@ -63,7 +63,7 @@ export class CreateSaleNoteDto {
   @IsOptional()
   @IsNumber()
   sucursalId?: number;
-  // 👇 AGREGAR ESTAS PROPIEDADES
+ 
   @IsBoolean()
   @IsOptional()
   afectaInventario?: boolean;
@@ -79,6 +79,11 @@ export class CreateSaleNoteDto {
   @IsEmail()
   @IsOptional()
   clienteEmail?: string;
+
+  @ApiProperty({ description: 'Observaciones de la nota', required: false })
+  @IsOptional()
+  @IsString()
+  observaciones?: string;
 
   @ApiProperty({ description: 'Lista de productos' })
   @IsArray()
