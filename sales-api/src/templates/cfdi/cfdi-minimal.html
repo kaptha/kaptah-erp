@@ -15,7 +15,7 @@
       font-family: 'Arial', 'Helvetica', sans-serif;
       background-color: #ffffff;
       color: #2c5f6f;
-      line-height: 1.5;
+      line-height: 1.4;
       font-size: 11px;
     }
 
@@ -28,17 +28,15 @@
       overflow: hidden;
     }
 
-    /* HEADER CON FORMAS GEOMÉTRICAS */
+    /* HEADER */
     .header {
       position: relative;
       background: linear-gradient(135deg, #2c5f6f 0%, #3a7a8a 60%, #e8b54d 100%);
-      padding: 30px 35px;
+      padding: 18px 30px;
       color: white;
-      min-height: 140px;
       overflow: hidden;
     }
 
-    /* Forma diagonal superior */
     .header::before {
       content: '';
       position: absolute;
@@ -51,21 +49,20 @@
       z-index: 0;
     }
 
-    /* Círculos decorativos amarillos en la esquina inferior derecha */
     .dots-decoration {
       position: absolute;
-      bottom: 20px;
-      right: 20px;
+      bottom: 10px;
+      right: 15px;
       display: grid;
-      grid-template-columns: repeat(4, 8px);
-      grid-template-rows: repeat(8, 8px);
-      gap: 8px;
+      grid-template-columns: repeat(4, 6px);
+      grid-template-rows: repeat(4, 6px);
+      gap: 6px;
       z-index: 1;
     }
 
     .dot {
-      width: 8px;
-      height: 8px;
+      width: 6px;
+      height: 6px;
       background: #e8b54d;
       border-radius: 50%;
       opacity: 0.8;
@@ -76,25 +73,25 @@
       z-index: 2;
       display: flex;
       justify-content: space-between;
-      align-items: flex-start;
+      align-items: center;
     }
 
     .logo-section {
       display: flex;
       align-items: center;
-      gap: 15px;
+      gap: 12px;
     }
 
     .logo-container {
-      width: 60px;
-      height: 60px;
+      width: 45px;
+      height: 45px;
       background: rgba(255, 255, 255, 0.15);
       border: 2px solid rgba(255, 255, 255, 0.3);
       border-radius: 50%;
       display: flex;
       align-items: center;
       justify-content: center;
-      padding: 8px;
+      padding: 6px;
     }
 
     .logo-container img {
@@ -105,59 +102,54 @@
     }
 
     .company-name {
-      font-size: 22px;
+      font-size: 18px;
       font-weight: 300;
       letter-spacing: 2px;
       text-transform: uppercase;
     }
 
     .company-subtitle {
-      font-size: 11px;
+      font-size: 10px;
       opacity: 0.9;
       font-weight: 300;
-      margin-top: 3px;
-    }
-
-    .title-section {
-      text-align: right;
+      margin-top: 2px;
     }
 
     .title-section h1 {
-      font-size: 32px;
+      font-size: 26px;
       font-weight: 700;
       letter-spacing: 1px;
-      margin-bottom: 5px;
       color: #2c5f6f;
       background: white;
-      padding: 8px 20px;
+      padding: 6px 16px;
       display: inline-block;
       border-radius: 4px;
     }
 
     /* CONTENIDO */
     .content {
-      padding: 30px 35px;
+      padding: 20px 30px;
     }
 
     /* UUID */
     .uuid-section {
       background: #f7f9fa;
       border-left: 4px solid #2c5f6f;
-      padding: 10px 15px;
-      margin-bottom: 20px;
+      padding: 8px 14px;
+      margin-bottom: 14px;
       border-radius: 3px;
     }
 
     .uuid-label {
-      font-size: 10px;
+      font-size: 9px;
       color: #666;
       text-transform: uppercase;
       font-weight: 600;
-      margin-bottom: 4px;
+      margin-bottom: 2px;
     }
 
     .uuid-value {
-      font-size: 12px;
+      font-size: 11px;
       font-weight: 700;
       color: #2c5f6f;
       font-family: 'Courier New', monospace;
@@ -167,8 +159,8 @@
     /* INFORMACIÓN EN DOS COLUMNAS */
     .info-grid {
       display: flex;
-      gap: 30px;
-      margin-bottom: 25px;
+      gap: 25px;
+      margin-bottom: 16px;
     }
 
     .info-column {
@@ -176,16 +168,16 @@
     }
 
     .info-title {
-      font-size: 12px;
+      font-size: 11px;
       font-weight: 700;
       color: #2c5f6f;
       text-transform: uppercase;
-      margin-bottom: 10px;
+      margin-bottom: 6px;
       letter-spacing: 0.5px;
     }
 
     .info-item {
-      margin-bottom: 8px;
+      margin-bottom: 4px;
       font-size: 10px;
     }
 
@@ -198,9 +190,9 @@
       color: #333;
     }
 
-    /* TABLA MINIMALISTA */
+    /* TABLA */
     .tabla-section {
-      margin: 25px 0;
+      margin: 16px 0;
     }
 
     .tabla {
@@ -214,7 +206,7 @@
     }
 
     .tabla thead th {
-      padding: 10px 8px;
+      padding: 8px 8px;
       text-align: left;
       font-weight: 600;
       font-size: 10px;
@@ -222,15 +214,15 @@
       letter-spacing: 0.5px;
     }
 
-    .tabla thead th:nth-child(1) { width: 5%; text-align: center; }
-    .tabla thead th:nth-child(2) { width: 12%; }
-    .tabla thead th:nth-child(3) { width: 43%; }
-    .tabla thead th:nth-child(4) { width: 13%; text-align: right; }
-    .tabla thead th:nth-child(5) { width: 13%; text-align: right; }
-    .tabla thead th:nth-child(6) { width: 14%; text-align: right; }
+    .tabla thead th.col-cant { width: 8%; text-align: center; }
+    .tabla thead th.col-unidad { width: 10%; text-align: center; }
+    .tabla thead th.col-desc { width: 36%; }
+    .tabla thead th.col-precio { width: 16%; text-align: right; }
+    .tabla thead th.col-impuesto { width: 14%; text-align: right; }
+    .tabla thead th.col-total { width: 16%; text-align: right; }
 
     .tabla tbody td {
-      padding: 10px 8px;
+      padding: 8px 8px;
       border-bottom: 1px solid #e5e7eb;
       font-size: 10px;
       color: #555;
@@ -240,19 +232,28 @@
       border-bottom: 2px solid #2c5f6f;
     }
 
-    .tabla tbody td:nth-child(1) {
+    .tabla tbody td.td-cant {
       text-align: center;
       font-weight: 600;
       color: #2c5f6f;
     }
 
-    .tabla tbody td:nth-child(4),
-    .tabla tbody td:nth-child(5),
-    .tabla tbody td:nth-child(6) {
-      text-align: right;
+    .tabla tbody td.td-unidad {
+      text-align: center;
     }
 
-    .tabla tbody td:nth-child(6) {
+    .tabla tbody td.td-desc {
+      font-weight: 500;
+    }
+
+    .tabla tbody td.td-precio,
+    .tabla tbody td.td-impuesto,
+    .tabla tbody td.td-total {
+      text-align: right;
+      font-family: 'Courier New', monospace;
+    }
+
+    .tabla tbody td.td-total {
       font-weight: 700;
       color: #333;
     }
@@ -261,11 +262,11 @@
     .totales-container {
       display: flex;
       justify-content: flex-end;
-      margin: 20px 0;
+      margin: 14px 0;
     }
 
     .totales-box {
-      min-width: 300px;
+      min-width: 270px;
       background: #f7f9fa;
       border: 1px solid #e5e7eb;
       border-radius: 4px;
@@ -275,7 +276,7 @@
     .total-line {
       display: flex;
       justify-content: space-between;
-      padding: 8px 15px;
+      padding: 7px 12px;
       font-size: 12px;
       border-bottom: 1px solid #e5e7eb;
     }
@@ -288,14 +289,15 @@
     .total-line .value {
       font-weight: 700;
       color: #333;
+      font-family: 'Courier New', monospace;
     }
 
     .total-line.final {
       background: #2c5f6f;
       color: white;
       border: none;
-      padding: 12px 15px;
-      font-size: 15px;
+      padding: 10px 12px;
+      font-size: 14px;
     }
 
     .total-line.final .label,
@@ -306,10 +308,10 @@
     /* QR Y CERTIFICACIÓN */
     .qr-cert-section {
       display: flex;
-      gap: 25px;
-      margin: 25px 0;
+      gap: 20px;
+      margin: 16px 0;
       background: #f7f9fa;
-      padding: 20px;
+      padding: 14px;
       border-radius: 4px;
     }
 
@@ -319,26 +321,26 @@
     }
 
     .qr-box img {
-      width: 110px;
-      height: 110px;
+      width: 95px;
+      height: 95px;
       border: 3px solid #2c5f6f;
       border-radius: 4px;
-      padding: 8px;
+      padding: 6px;
       background: white;
     }
 
     .qr-label {
-      font-size: 9px;
+      font-size: 8px;
       font-weight: 700;
       color: #2c5f6f;
-      margin-top: 8px;
+      margin-top: 5px;
       text-transform: uppercase;
     }
 
     .qr-hint {
       font-size: 8px;
       color: #666;
-      margin-top: 3px;
+      margin-top: 2px;
     }
 
     .cert-info {
@@ -346,15 +348,15 @@
     }
 
     .cert-info h3 {
-      font-size: 12px;
+      font-size: 11px;
       font-weight: 700;
       color: #2c5f6f;
-      margin-bottom: 10px;
+      margin-bottom: 8px;
       text-transform: uppercase;
     }
 
     .cert-item {
-      margin-bottom: 6px;
+      margin-bottom: 4px;
       font-size: 10px;
     }
 
@@ -367,39 +369,40 @@
 
     .cert-item .cert-value {
       color: #333;
+      font-family: 'Courier New', monospace;
     }
 
-    /* SELLOS - MUY COMPACTOS */
+    /* SELLOS */
     .seals-section {
-      margin: 20px 0;
+      margin: 14px 0;
     }
 
     .seal-box {
       background: #fffbf0;
       border-left: 3px solid #e8b54d;
-      padding: 10px;
-      margin-bottom: 10px;
+      padding: 8px 10px;
+      margin-bottom: 8px;
       border-radius: 3px;
     }
 
     .seal-title {
-      font-size: 9px;
+      font-size: 8px;
       font-weight: 700;
       color: #92400e;
-      margin-bottom: 5px;
+      margin-bottom: 4px;
       text-transform: uppercase;
     }
 
     .seal-text {
-      font-size: 7.5px;
+      font-size: 7px;
       color: #78350f;
       font-family: 'Courier New', monospace;
       word-break: break-all;
-      line-height: 1.5;
+      line-height: 1.4;
       background: rgba(255, 255, 255, 0.6);
-      padding: 6px;
+      padding: 5px;
       border-radius: 2px;
-      max-height: 50px;
+      max-height: 36px;
       overflow: hidden;
     }
 
@@ -407,29 +410,29 @@
     .chain-box {
       background: #f0fdf4;
       border-left: 3px solid #10b981;
-      padding: 10px;
-      margin: 20px 0;
+      padding: 8px 10px;
+      margin: 14px 0;
       border-radius: 3px;
     }
 
     .chain-title {
-      font-size: 9px;
+      font-size: 8px;
       font-weight: 700;
       color: #065f46;
-      margin-bottom: 5px;
+      margin-bottom: 4px;
       text-transform: uppercase;
     }
 
     .chain-text {
-      font-size: 7.5px;
+      font-size: 7px;
       color: #064e3b;
       font-family: 'Courier New', monospace;
       word-break: break-all;
-      line-height: 1.5;
+      line-height: 1.4;
       background: rgba(255, 255, 255, 0.6);
-      padding: 6px;
+      padding: 5px;
       border-radius: 2px;
-      max-height: 40px;
+      max-height: 34px;
       overflow: hidden;
     }
 
@@ -437,14 +440,13 @@
     .footer {
       background: linear-gradient(135deg, #2c5f6f 0%, #3a7a8a 100%);
       color: white;
-      padding: 15px 35px;
+      padding: 10px 30px;
       text-align: center;
       font-size: 9px;
-      margin-top: 25px;
     }
 
     .footer p {
-      margin: 3px 0;
+      margin: 2px 0;
     }
 
     /* PRINT STYLES */
@@ -457,12 +459,6 @@
         width: 100%;
         max-width: none;
       }
-
-      .header,
-      .content,
-      .footer {
-        page-break-inside: avoid;
-      }
     }
   </style>
 </head>
@@ -470,40 +466,11 @@
   <div class="container">
     <!-- HEADER -->
     <div class="header">
-      <!-- Decoración de puntos -->
       <div class="dots-decoration">
-        <div class="dot"></div>
-        <div class="dot"></div>
-        <div class="dot"></div>
-        <div class="dot"></div>
-        <div class="dot"></div>
-        <div class="dot"></div>
-        <div class="dot"></div>
-        <div class="dot"></div>
-        <div class="dot"></div>
-        <div class="dot"></div>
-        <div class="dot"></div>
-        <div class="dot"></div>
-        <div class="dot"></div>
-        <div class="dot"></div>
-        <div class="dot"></div>
-        <div class="dot"></div>
-        <div class="dot"></div>
-        <div class="dot"></div>
-        <div class="dot"></div>
-        <div class="dot"></div>
-        <div class="dot"></div>
-        <div class="dot"></div>
-        <div class="dot"></div>
-        <div class="dot"></div>
-        <div class="dot"></div>
-        <div class="dot"></div>
-        <div class="dot"></div>
-        <div class="dot"></div>
-        <div class="dot"></div>
-        <div class="dot"></div>
-        <div class="dot"></div>
-        <div class="dot"></div>
+        <div class="dot"></div><div class="dot"></div><div class="dot"></div><div class="dot"></div>
+        <div class="dot"></div><div class="dot"></div><div class="dot"></div><div class="dot"></div>
+        <div class="dot"></div><div class="dot"></div><div class="dot"></div><div class="dot"></div>
+        <div class="dot"></div><div class="dot"></div><div class="dot"></div><div class="dot"></div>
       </div>
 
       <div class="header-content">
@@ -532,7 +499,6 @@
 
       <!-- INFORMACIÓN PRINCIPAL -->
       <div class="info-grid">
-        <!-- Columna izquierda: Datos del comprobante -->
         <div class="info-column">
           <div class="info-title">Datos del Comprobante</div>
           <div class="info-item">
@@ -559,9 +525,20 @@
             <span class="label">Moneda:</span>
             <span class="value">{{moneda}}</span>
           </div>
+          <div class="info-item">
+            <span class="label">Exportación:</span>
+            <span class="value">{{exportacion}}</span>
+          </div>
+          <div class="info-item">
+            <span class="label">Régimen Fiscal:</span>
+            <span class="value">{{regimenFiscal}}</span>
+          </div>
+          <div class="info-item">
+            <span class="label">Lugar Expedición:</span>
+            <span class="value">{{lugarExpedicion}}</span>
+          </div>
         </div>
 
-        <!-- Columna derecha: Receptor -->
         <div class="info-column">
           <div class="info-title">Receptor</div>
           <div class="info-item">
@@ -592,12 +569,12 @@
         <table class="tabla">
           <thead>
             <tr>
-              <th>No</th>
-              <th>Unidad</th>
-              <th>Descripción</th>
-              <th>P. Unit.</th>
-              <th>Impuestos</th>
-              <th>Total</th>
+              <th class="col-cant">CANT.</th>
+              <th class="col-unidad">UNIDAD</th>
+              <th class="col-desc">DESCRIPCIÓN</th>
+              <th class="col-precio">P. UNITARIO</th>
+              <th class="col-impuesto">IMPUESTO</th>
+              <th class="col-total">TOTAL</th>
             </tr>
           </thead>
           <tbody>
@@ -655,18 +632,18 @@
       <!-- SELLOS DIGITALES -->
       <div class="seals-section">
         <div class="seal-box">
-          <div class="seal-title"> Sello Digital del CFDI</div>
+          <div class="seal-title">Sello Digital del CFDI</div>
           <div class="seal-text">{{selloCFD}}</div>
         </div>
         <div class="seal-box">
-          <div class="seal-title"> Sello Digital del SAT</div>
+          <div class="seal-title">Sello Digital del SAT</div>
           <div class="seal-text">{{selloSAT}}</div>
         </div>
       </div>
 
       <!-- CADENA ORIGINAL -->
       <div class="chain-box">
-        <div class="chain-title">⛓️ Cadena Original del Complemento de Certificación Digital del SAT</div>
+        <div class="chain-title">Cadena Original del Complemento de Certificación Digital del SAT</div>
         <div class="chain-text">{{cadenaOriginal}}</div>
       </div>
     </div>
