@@ -356,7 +356,7 @@ export class EmailProcessor {
   // Enviar nota de venta
   @Process({ name: 'enviar-nota-venta', concurrency: 5 })
   async sendSaleNote(job: Job): Promise<any> {
-    const { notaId, clienteEmail, folio, customerName, total, saleDate, empresaNombre, customMessage } = job.data;
+    const { notaId, clienteEmail, folio, customerName, total, saleDate, empresaNombre, customMessage, pdfBase64 } = job.data;
 
     this.logger.log(
       `📧 Procesando envio de nota de venta ${folio || notaId} a ${clienteEmail}`,
@@ -376,10 +376,22 @@ export class EmailProcessor {
         customMessage,
       });
 
+      // Preparar attachments si hay PDF
+      const attachments = [];
+      if (pdfBase64) {
+        attachments.push({
+          filename: `Nota-de-Venta-${folio || notaId}.pdf`,
+          content: Buffer.from(pdfBase64, 'base64'),
+          contentType: 'application/pdf',
+        });
+        this.logger.log(`📎 PDF adjunto incluido para nota ${folio}`);
+      }
+
       const result = await this.resendService.send({
         to: clienteEmail,
         subject: `Nota de Venta #${folio || notaId} - ${empresaNombre || 'Kaptah'}`,
         html,
+        attachments: attachments.length > 0 ? attachments : undefined,
       });
 
       this.logger.log(
