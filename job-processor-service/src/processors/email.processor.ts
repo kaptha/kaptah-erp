@@ -1,8 +1,13 @@
-import { Processor, Process, OnQueueCompleted, OnQueueFailed } from '@nestjs/bull';
+import {
+  Processor,
+  Process,
+  OnQueueCompleted,
+  OnQueueFailed,
+} from '@nestjs/bull';
 import { Job } from 'bull';
-import { Logger, Injectable } from '@nestjs/common';
+import { Logger } from '@nestjs/common';
 import { QueueName } from '../config/queue.config';
-import { MailerService } from '@nestjs-modules/mailer';
+import { ResendService } from '../modules/providers/resend.service';
 import { InjectQueue } from '@nestjs/bull';
 import { Queue } from 'bull';
 
@@ -17,10 +22,14 @@ interface EmailJob {
     content?: Buffer | string;
     contentType?: string;
   }>;
-  // Datos adicionales para tracking
   userId: string;
   empresaId: string;
-  relatedEntityType: 'cfdi' | 'nota-venta' | 'cotizacion' | 'orden-venta' | 'complemento-pago';
+  relatedEntityType:
+    | 'cfdi'
+    | 'nota-venta'
+    | 'cotizacion'
+    | 'orden-venta'
+    | 'complemento-pago';
   relatedEntityId: string;
   priority?: number;
 }
@@ -30,49 +39,267 @@ export class EmailProcessor {
   private readonly logger = new Logger(EmailProcessor.name);
 
   constructor(
-    private readonly mailerService: MailerService,
+    private readonly resendService: ResendService,
     @InjectQueue(QueueName.NOTIFICATION) private notificationQueue: Queue,
-    // private readonly emailLogService: EmailLogService,
   ) {}
 
-  @Process({ 
-    name: 'enviar-email', 
-    concurrency: 10 // 10 emails en paralelo
+  // ========== GENERADOR DE HTML ==========
+
+  private generateEmailHtml(template: string, context: any): string {
+    switch (template) {
+      case 'nota-venta':
+        return this.generateSaleNoteHtml(context);
+      case 'cfdi-timbrado':
+        return this.generateCFDIHtml(context);
+      case 'batch-summary':
+        return this.generateBatchSummaryHtml(context);
+      case 'recordatorio-pago':
+        return this.generatePaymentReminderHtml(context);
+      default:
+        return this.generateGenericHtml(context);
+    }
+  }
+
+  private generateSaleNoteHtml(context: any): string {
+    return `
+    <!DOCTYPE html>
+    <html>
+    <head>
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    </head>
+    <body style="margin:0;padding:0;background-color:#f4f4f7;font-family:Arial,Helvetica,sans-serif;">
+      <table width="100%" cellpadding="0" cellspacing="0" style="background-color:#f4f4f7;padding:40px 0;">
+        <tr>
+          <td align="center">
+            <table width="600" cellpadding="0" cellspacing="0" style="background-color:#ffffff;border-radius:8px;overflow:hidden;box-shadow:0 2px 8px rgba(0,0,0,0.08);">
+              <!-- Header -->
+              <tr>
+                <td style="background: linear-gradient(135deg, #8e24aa 0%, #667eea 100%);padding:30px 40px;text-align:center;">
+                  <h1 style="color:#ffffff;margin:0;font-size:24px;">${context.empresaNombre || 'Kaptah'}</h1>
+                </td>
+              </tr>
+              <!-- Body -->
+              <tr>
+                <td style="padding:40px;">
+                  <h2 style="color:#333333;margin:0 0 20px;">Nota de Venta #${context.folio}</h2>
+                  <p style="color:#555555;font-size:15px;line-height:1.6;">
+                    Estimado/a <strong>${context.cliente || 'Cliente'}</strong>,
+                  </p>
+                  <p style="color:#555555;font-size:15px;line-height:1.6;">
+                    Adjunto encontrara su nota de venta con los siguientes datos:
+                  </p>
+                  <!-- Datos -->
+                  <table width="100%" cellpadding="8" cellspacing="0" style="margin:20px 0;border:1px solid #e8e8e8;border-radius:6px;">
+                    <tr style="background-color:#f8f9fa;">
+                      <td style="color:#666;font-size:14px;border-bottom:1px solid #e8e8e8;"><strong>Folio</strong></td>
+                      <td style="color:#333;font-size:14px;border-bottom:1px solid #e8e8e8;">${context.folio}</td>
+                    </tr>
+                    <tr>
+                      <td style="color:#666;font-size:14px;border-bottom:1px solid #e8e8e8;"><strong>Fecha</strong></td>
+                      <td style="color:#333;font-size:14px;border-bottom:1px solid #e8e8e8;">${context.fecha || new Date().toLocaleDateString('es-MX')}</td>
+                    </tr>
+                    <tr style="background-color:#f8f9fa;">
+                      <td style="color:#666;font-size:14px;"><strong>Total</strong></td>
+                      <td style="color:#8e24aa;font-size:18px;font-weight:bold;">$${context.total ? Number(context.total).toLocaleString('es-MX', { minimumFractionDigits: 2 }) : '0.00'} MXN</td>
+                    </tr>
+                  </table>
+                  ${context.customMessage ? `<p style="color:#555555;font-size:15px;line-height:1.6;background:#f8f9fa;padding:15px;border-radius:6px;border-left:4px solid #8e24aa;">${context.customMessage}</p>` : ''}
+                  <p style="color:#555555;font-size:14px;line-height:1.6;margin-top:30px;">
+                    Si tiene alguna pregunta, no dude en contactarnos.
+                  </p>
+                </td>
+              </tr>
+              <!-- Footer -->
+              <tr>
+                <td style="background-color:#f8f9fa;padding:20px 40px;text-align:center;border-top:1px solid #e8e8e8;">
+                  <p style="color:#999999;font-size:12px;margin:0;">
+                    Este correo fue enviado por <strong>${context.empresaNombre || 'Kaptah'}</strong>
+                  </p>
+                  <p style="color:#bbbbbb;font-size:11px;margin:8px 0 0;">
+                    Powered by Kaptah &bull; ${new Date().getFullYear()}
+                  </p>
+                </td>
+              </tr>
+            </table>
+          </td>
+        </tr>
+      </table>
+    </body>
+    </html>`;
+  }
+
+  private generateCFDIHtml(context: any): string {
+    return `
+    <!DOCTYPE html>
+    <html>
+    <head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"></head>
+    <body style="margin:0;padding:0;background-color:#f4f4f7;font-family:Arial,Helvetica,sans-serif;">
+      <table width="100%" cellpadding="0" cellspacing="0" style="background-color:#f4f4f7;padding:40px 0;">
+        <tr><td align="center">
+          <table width="600" cellpadding="0" cellspacing="0" style="background-color:#ffffff;border-radius:8px;overflow:hidden;box-shadow:0 2px 8px rgba(0,0,0,0.08);">
+            <tr><td style="background:linear-gradient(135deg,#8e24aa 0%,#667eea 100%);padding:30px 40px;text-align:center;">
+              <h1 style="color:#ffffff;margin:0;font-size:24px;">${context.emisorNombre || 'Kaptah'}</h1>
+            </td></tr>
+            <tr><td style="padding:40px;">
+              <h2 style="color:#333;margin:0 0 20px;">Factura Electronica ${context.serie}-${context.folio}</h2>
+              <p style="color:#555;font-size:15px;line-height:1.6;">Estimado/a <strong>${context.cliente || 'Cliente'}</strong>,</p>
+              <p style="color:#555;font-size:15px;line-height:1.6;">Adjunto encontrara su CFDI (PDF y XML).</p>
+              <table width="100%" cellpadding="8" cellspacing="0" style="margin:20px 0;border:1px solid #e8e8e8;border-radius:6px;">
+                <tr style="background-color:#f8f9fa;">
+                  <td style="color:#666;font-size:14px;border-bottom:1px solid #e8e8e8;"><strong>UUID</strong></td>
+                  <td style="color:#333;font-size:13px;border-bottom:1px solid #e8e8e8;font-family:monospace;">${context.uuid}</td>
+                </tr>
+                <tr>
+                  <td style="color:#666;font-size:14px;border-bottom:1px solid #e8e8e8;"><strong>Fecha</strong></td>
+                  <td style="color:#333;font-size:14px;border-bottom:1px solid #e8e8e8;">${context.fecha || ''}</td>
+                </tr>
+                <tr style="background-color:#f8f9fa;">
+                  <td style="color:#666;font-size:14px;"><strong>Total</strong></td>
+                  <td style="color:#8e24aa;font-size:18px;font-weight:bold;">$${context.total ? Number(context.total).toLocaleString('es-MX', { minimumFractionDigits: 2 }) : '0.00'} MXN</td>
+                </tr>
+              </table>
+            </td></tr>
+            <tr><td style="background-color:#f8f9fa;padding:20px 40px;text-align:center;border-top:1px solid #e8e8e8;">
+              <p style="color:#999;font-size:12px;margin:0;">Enviado por <strong>${context.emisorNombre || 'Kaptah'}</strong></p>
+              <p style="color:#bbb;font-size:11px;margin:8px 0 0;">Powered by Kaptah &bull; ${new Date().getFullYear()}</p>
+            </td></tr>
+          </table>
+        </td></tr>
+      </table>
+    </body></html>`;
+  }
+
+  private generateBatchSummaryHtml(context: any): string {
+    return `
+    <!DOCTYPE html>
+    <html>
+    <head><meta charset="utf-8"></head>
+    <body style="margin:0;padding:0;background-color:#f4f4f7;font-family:Arial,Helvetica,sans-serif;">
+      <table width="100%" cellpadding="0" cellspacing="0" style="background-color:#f4f4f7;padding:40px 0;">
+        <tr><td align="center">
+          <table width="600" cellpadding="0" cellspacing="0" style="background-color:#fff;border-radius:8px;overflow:hidden;">
+            <tr><td style="background:linear-gradient(135deg,#8e24aa,#667eea);padding:30px 40px;text-align:center;">
+              <h1 style="color:#fff;margin:0;">Resumen de Procesamiento</h1>
+            </td></tr>
+            <tr><td style="padding:40px;">
+              <p style="color:#555;font-size:15px;">Hola <strong>${context.userName}</strong>,</p>
+              <p style="color:#555;font-size:15px;">El procesamiento del batch <strong>${context.batchId}</strong> ha finalizado:</p>
+              <table width="100%" cellpadding="12" cellspacing="0" style="margin:20px 0;">
+                <tr><td style="background:#e8f5e9;border-radius:6px;text-align:center;"><strong style="color:#2e7d32;font-size:24px;">${context.exitosos}</strong><br><span style="color:#666;font-size:13px;">Exitosos</span></td>
+                <td style="width:10px;"></td>
+                <td style="background:#ffebee;border-radius:6px;text-align:center;"><strong style="color:#c62828;font-size:24px;">${context.fallidos}</strong><br><span style="color:#666;font-size:13px;">Fallidos</span></td>
+                <td style="width:10px;"></td>
+                <td style="background:#e3f2fd;border-radius:6px;text-align:center;"><strong style="color:#1565c0;font-size:24px;">${context.total}</strong><br><span style="color:#666;font-size:13px;">Total</span></td></tr>
+              </table>
+            </td></tr>
+            <tr><td style="background-color:#f8f9fa;padding:20px 40px;text-align:center;border-top:1px solid #e8e8e8;">
+              <p style="color:#bbb;font-size:11px;margin:0;">Powered by Kaptah &bull; ${new Date().getFullYear()}</p>
+            </td></tr>
+          </table>
+        </td></tr>
+      </table>
+    </body></html>`;
+  }
+
+  private generatePaymentReminderHtml(context: any): string {
+    return `
+    <!DOCTYPE html>
+    <html>
+    <head><meta charset="utf-8"></head>
+    <body style="margin:0;padding:0;background-color:#f4f4f7;font-family:Arial,Helvetica,sans-serif;">
+      <table width="100%" cellpadding="0" cellspacing="0" style="background-color:#f4f4f7;padding:40px 0;">
+        <tr><td align="center">
+          <table width="600" cellpadding="0" cellspacing="0" style="background-color:#fff;border-radius:8px;overflow:hidden;">
+            <tr><td style="background:linear-gradient(135deg,#e65100,#ff9800);padding:30px 40px;text-align:center;">
+              <h1 style="color:#fff;margin:0;">Recordatorio de Pago</h1>
+            </td></tr>
+            <tr><td style="padding:40px;">
+              <p style="color:#555;font-size:15px;">Estimado/a <strong>${context.cliente}</strong>,</p>
+              <p style="color:#555;font-size:15px;">Le recordamos que tiene un saldo pendiente:</p>
+              <table width="100%" cellpadding="8" cellspacing="0" style="margin:20px 0;border:1px solid #e8e8e8;border-radius:6px;">
+                <tr style="background-color:#f8f9fa;">
+                  <td style="color:#666;font-size:14px;border-bottom:1px solid #e8e8e8;"><strong>Factura</strong></td>
+                  <td style="color:#333;font-size:14px;border-bottom:1px solid #e8e8e8;">${context.folio}</td>
+                </tr>
+                <tr>
+                  <td style="color:#666;font-size:14px;border-bottom:1px solid #e8e8e8;"><strong>Vencimiento</strong></td>
+                  <td style="color:#c62828;font-size:14px;border-bottom:1px solid #e8e8e8;">${context.fechaVencimiento} (${context.diasVencido} dias)</td>
+                </tr>
+                <tr style="background-color:#f8f9fa;">
+                  <td style="color:#666;font-size:14px;"><strong>Saldo</strong></td>
+                  <td style="color:#e65100;font-size:18px;font-weight:bold;">$${context.monto ? Number(context.monto).toLocaleString('es-MX', { minimumFractionDigits: 2 }) : '0.00'} MXN</td>
+                </tr>
+              </table>
+              <p style="color:#555;font-size:14px;">Agradecemos su pronta atencion.</p>
+            </td></tr>
+            <tr><td style="background-color:#f8f9fa;padding:20px 40px;text-align:center;border-top:1px solid #e8e8e8;">
+              <p style="color:#999;font-size:12px;margin:0;">Enviado por <strong>${context.empresaNombre}</strong></p>
+              <p style="color:#bbb;font-size:11px;margin:8px 0 0;">Powered by Kaptah &bull; ${new Date().getFullYear()}</p>
+            </td></tr>
+          </table>
+        </td></tr>
+      </table>
+    </body></html>`;
+  }
+
+  private generateGenericHtml(context: any): string {
+    return `
+    <!DOCTYPE html>
+    <html>
+    <head><meta charset="utf-8"></head>
+    <body style="margin:0;padding:0;background-color:#f4f4f7;font-family:Arial,Helvetica,sans-serif;">
+      <table width="100%" cellpadding="0" cellspacing="0" style="background-color:#f4f4f7;padding:40px 0;">
+        <tr><td align="center">
+          <table width="600" cellpadding="0" cellspacing="0" style="background-color:#fff;border-radius:8px;overflow:hidden;">
+            <tr><td style="background:linear-gradient(135deg,#8e24aa,#667eea);padding:30px 40px;text-align:center;">
+              <h1 style="color:#fff;margin:0;">Kaptah</h1>
+            </td></tr>
+            <tr><td style="padding:40px;">
+              <p style="color:#555;font-size:15px;">${context.message || context.customMessage || 'Se adjunta el documento solicitado.'}</p>
+            </td></tr>
+            <tr><td style="background-color:#f8f9fa;padding:20px 40px;text-align:center;">
+              <p style="color:#bbb;font-size:11px;margin:0;">Powered by Kaptah &bull; ${new Date().getFullYear()}</p>
+            </td></tr>
+          </table>
+        </td></tr>
+      </table>
+    </body></html>`;
+  }
+
+  // ========== PROCESSORS ==========
+
+  @Process({
+    name: 'enviar-email',
+    concurrency: 10,
   })
   async sendEmail(job: Job<EmailJob>): Promise<any> {
-    const { 
-      to, 
-      subject, 
-      template, 
-      context, 
-      attachments, 
-      userId, 
+    const {
+      to,
+      subject,
+      template,
+      context,
+      attachments,
+      userId,
       empresaId,
       relatedEntityType,
-      relatedEntityId 
+      relatedEntityId,
     } = job.data;
 
     this.logger.log(`Enviando email: ${subject} a ${to}`);
 
     try {
-      // 1. Si hay attachments con path, esperar a que estén listos
-      const processedAttachments = await this.processAttachments(attachments, relatedEntityId);
+      const processedAttachments = this.processAttachments(attachments);
+      const html = this.generateEmailHtml(template, context);
+      const recipient = Array.isArray(to) ? to[0] : to;
 
-      // 2. Enviar email
-      const result = await this.mailerService.sendMail({
-        to,
+      const result = await this.resendService.send({
+        to: recipient,
         subject,
-        template,
-        context: {
-          ...context,
-          // Variables globales disponibles en todos los templates
-          appUrl: process.env.APP_URL,
-          year: new Date().getFullYear()
-        },
-        attachments: processedAttachments
+        html,
+        attachments: processedAttachments,
       });
 
-      // 3. Guardar log de envío
       await this.saveEmailLog({
         to: Array.isArray(to) ? to.join(',') : to,
         subject,
@@ -83,107 +310,31 @@ export class EmailProcessor {
         relatedEntityId,
         status: 'enviado',
         messageId: result.messageId,
-        sentAt: new Date()
+        sentAt: new Date(),
       });
 
-      // 4. Enviar notificación in-app (opcional)
-      await this.notificationQueue.add('email-enviado', {
-        userId,
-        empresaId,
-        entityType: relatedEntityType,
-        entityId: relatedEntityId,
-        emailTo: to
-      }, { priority: 10 }); // Baja prioridad
-
-      return {
-        success: true,
-        messageId: result.messageId,
-        to
-      };
-
-    } catch (error) {
-      this.logger.error(`Error enviando email: ${error.message}`, error.stack);
-
-      // Guardar log de fallo
-      await this.saveEmailLog({
-        to: Array.isArray(to) ? to.join(',') : to,
-        subject,
-        template,
-        userId,
-        empresaId,
-        relatedEntityType,
-        relatedEntityId,
-        status: 'fallido',
-        error: error.message,
-        failedAt: new Date()
-      });
-
-      throw error; // Re-lanzar para que BullMQ reintente
-    }
-  }
-private async sendEmailInternal(data: EmailJob): Promise<any> {
-    const { 
-      to, 
-      subject, 
-      template, 
-      context, 
-      attachments, 
-      userId, 
-      empresaId,
-      relatedEntityType,
-      relatedEntityId 
-    } = data;
-
-    this.logger.log(`Enviando email interno: ${subject} a ${to}`);
-
-    try {
-      // 1. Procesar attachments
-      const processedAttachments = await this.processAttachments(attachments, relatedEntityId);
-
-      // 2. Enviar email
-      const result = await this.mailerService.sendMail({
-        to,
-        subject,
-        template,
-        context: {
-          ...context,
-          appUrl: process.env.APP_URL,
-          year: new Date().getFullYear()
+      await this.notificationQueue.add(
+        'email-enviado',
+        {
+          userId,
+          empresaId,
+          entityType: relatedEntityType,
+          entityId: relatedEntityId,
+          emailTo: to,
         },
-        attachments: processedAttachments
-      });
-
-      // 3. Guardar log
-      await this.saveEmailLog({
-        to: Array.isArray(to) ? to.join(',') : to,
-        subject,
-        template,
-        userId,
-        empresaId,
-        relatedEntityType,
-        relatedEntityId,
-        status: 'enviado',
-        messageId: result.messageId,
-        sentAt: new Date()
-      });
-
-      // 4. Notificar (opcional)
-      await this.notificationQueue.add('email-enviado', {
-        userId,
-        empresaId,
-        entityType: relatedEntityType,
-        entityId: relatedEntityId,
-        emailTo: to
-      }, { priority: 10 });
+        { priority: 10 },
+      );
 
       return {
         success: true,
         messageId: result.messageId,
-        to
+        to,
       };
-
     } catch (error) {
-      this.logger.error(`Error enviando email: ${error.message}`, error.stack);
+      this.logger.error(
+        `Error enviando email: ${error.message}`,
+        error.stack,
+      );
 
       await this.saveEmailLog({
         to: Array.isArray(to) ? to.join(',') : to,
@@ -195,91 +346,58 @@ private async sendEmailInternal(data: EmailJob): Promise<any> {
         relatedEntityId,
         status: 'fallido',
         error: error.message,
-        failedAt: new Date()
+        failedAt: new Date(),
       });
 
       throw error;
     }
   }
- @Process({ 
-  name: 'enviar-email-batch', 
-  concurrency: 2 
-})
-async sendBatchEmails(job: Job<{ emails: EmailJob[] }>): Promise<any> {
-  const { emails } = job.data; // 👈 Ahora TypeScript sabe que es EmailJob[]
-  
-  this.logger.log(`Enviando batch de ${emails.length} emails`);
 
-  const results = {
-    total: emails.length,
-    exitosos: 0,
-    fallidos: 0,
-    detalles: []
-  };
-
-  const chunks = this.chunkArray(emails, 50);
-
-  for (const chunk of chunks) {
-    const promises = chunk.map((emailData: EmailJob) => 
-      this.sendEmailInternal(emailData)
-        .then(result => {
-          results.exitosos++;
-          return { success: true, to: emailData.to };
-        })
-        .catch((error: Error) => {
-          results.fallidos++;
-          return { success: false, to: emailData.to, error: error.message };
-        })
-    );
-
-    const chunkResults = await Promise.allSettled(promises);
-    results.detalles.push(...chunkResults);
-
-    await this.sleep(1000);
-  }
-
-  return results;
-}
-  // Enviar email con nota de venta
+  // Enviar nota de venta
   @Process({ name: 'enviar-nota-venta', concurrency: 5 })
   async sendSaleNote(job: Job): Promise<any> {
     const { notaId, clienteEmail } = job.data;
 
-    // 1. Esperar a que el PDF esté listo (con timeout)
-    const pdfPath = await this.waitForPDF(notaId, 'nota-venta', 30000);
+    this.logger.log(
+      `📧 Procesando envio de nota de venta ${notaId} a ${clienteEmail}`,
+    );
 
-    if (!pdfPath) {
-      throw new Error(`PDF de nota ${notaId} no generado en tiempo esperado`);
-    }
+    try {
+      // 1. Obtener datos de la nota
+      const nota = await this.getSaleNoteData(notaId);
 
-    // 2. Obtener datos de la nota
-    const nota = await this.getSaleNoteData(notaId);
+      // 2. Generar HTML del email
+      const html = this.generateSaleNoteHtml({
+        folio: nota.folio,
+        fecha: nota.fecha,
+        cliente: nota.clienteNombre,
+        total: nota.total,
+        empresaNombre: nota.empresaNombre,
+      });
 
-    // 3. Enviar email
-    return await this.sendEmail({
-      data: {
+      // 3. Enviar via Resend
+      const result = await this.resendService.send({
         to: clienteEmail,
         subject: `Nota de Venta #${nota.folio} - ${nota.empresaNombre}`,
-        template: 'nota-venta',
-        context: {
-          folio: nota.folio,
-          fecha: nota.fecha,
-          cliente: nota.clienteNombre,
-          total: nota.total,
-          empresaNombre: nota.empresaNombre
-        },
-        attachments: [
-          {
-            filename: `nota-venta-${nota.folio}.pdf`,
-            path: pdfPath
-          }
-        ],
-        userId: nota.userId,
-        empresaId: nota.empresaId,
-        relatedEntityType: 'nota-venta',
-        relatedEntityId: notaId
-      }
-    } as Job<EmailJob>);
+        html,
+      });
+
+      this.logger.log(
+        `✅ Nota de venta ${notaId} enviada exitosamente: ${result.messageId}`,
+      );
+
+      return {
+        success: true,
+        messageId: result.messageId,
+        to: clienteEmail,
+      };
+    } catch (error) {
+      this.logger.error(
+        `❌ Error enviando nota de venta ${notaId}: ${error.message}`,
+        error.stack,
+      );
+      throw error;
+    }
   }
 
   // Enviar CFDI timbrado
@@ -287,80 +405,72 @@ async sendBatchEmails(job: Job<{ emails: EmailJob[] }>): Promise<any> {
   async sendCFDI(job: Job): Promise<any> {
     const { cfdiId, clienteEmail } = job.data;
 
-    // 1. Esperar PDF y XML
-    const [pdfPath, xmlPath] = await Promise.all([
-      this.waitForPDF(cfdiId, 'cfdi', 30000),
-      this.waitForXML(cfdiId, 30000)
-    ]);
+    this.logger.log(`📧 Procesando envio de CFDI ${cfdiId} a ${clienteEmail}`);
 
-    if (!pdfPath || !xmlPath) {
-      throw new Error(`Archivos de CFDI ${cfdiId} no están listos`);
-    }
+    try {
+      const cfdi = await this.getCFDIData(cfdiId);
 
-    // 2. Obtener datos del CFDI
-    const cfdi = await this.getCFDIData(cfdiId);
+      const html = this.generateCFDIHtml({
+        serie: cfdi.serie,
+        folio: cfdi.folio,
+        uuid: cfdi.uuid,
+        fecha: cfdi.fecha,
+        cliente: cfdi.receptorNombre,
+        total: cfdi.total,
+        emisorNombre: cfdi.emisorNombre,
+      });
 
-    // 3. Enviar email
-    return await this.sendEmail({
-      data: {
+      const result = await this.resendService.send({
         to: clienteEmail,
-        subject: `Factura Electrónica ${cfdi.serie}-${cfdi.folio} - ${cfdi.emisorNombre}`,
-        template: 'cfdi-timbrado',
-        context: {
-          serie: cfdi.serie,
-          folio: cfdi.folio,
-          uuid: cfdi.uuid,
-          fecha: cfdi.fecha,
-          cliente: cfdi.receptorNombre,
-          total: cfdi.total,
-          emisorNombre: cfdi.emisorNombre
-        },
-        attachments: [
-          {
-            filename: `${cfdi.uuid}.pdf`,
-            path: pdfPath
-          },
-          {
-            filename: `${cfdi.uuid}.xml`,
-            path: xmlPath
-          }
-        ],
-        userId: cfdi.userId,
-        empresaId: cfdi.empresaId,
-        relatedEntityType: 'cfdi',
-        relatedEntityId: cfdiId
-      }
-    } as Job<EmailJob>);
+        subject: `Factura Electronica ${cfdi.serie}-${cfdi.folio} - ${cfdi.emisorNombre}`,
+        html,
+      });
+
+      this.logger.log(
+        `✅ CFDI ${cfdiId} enviado exitosamente: ${result.messageId}`,
+      );
+
+      return {
+        success: true,
+        messageId: result.messageId,
+        to: clienteEmail,
+      };
+    } catch (error) {
+      this.logger.error(
+        `❌ Error enviando CFDI ${cfdiId}: ${error.message}`,
+        error.stack,
+      );
+      throw error;
+    }
   }
 
-  // Enviar resumen de batch procesado
+  // Enviar resumen de batch
   @Process({ name: 'enviar-resumen-batch', concurrency: 2 })
   async sendBatchSummary(job: Job): Promise<any> {
     const { userId, batchId, stats } = job.data;
 
-    // Obtener datos del usuario
-    const user = await this.getUserData(userId);
+    try {
+      const user = await this.getUserData(userId);
 
-    return await this.sendEmail({
-      data: {
+      const html = this.generateBatchSummaryHtml({
+        userName: user.nombre,
+        batchId,
+        total: stats.total,
+        exitosos: stats.exitosos,
+        fallidos: stats.fallidos,
+      });
+
+      const result = await this.resendService.send({
         to: user.email,
-        subject: `Procesamiento de XMLs completado - Batch ${batchId}`,
-        template: 'batch-summary',
-        context: {
-          userName: user.nombre,
-          batchId,
-          total: stats.total,
-          exitosos: stats.exitosos,
-          fallidos: stats.fallidos,
-          porcentajeExito: ((stats.exitosos / stats.total) * 100).toFixed(2),
-          detalles: stats.detalles
-        },
-        userId,
-        empresaId: user.empresaId,
-        relatedEntityType: 'cfdi',
-        relatedEntityId: batchId
-      }
-    } as Job<EmailJob>);
+        subject: `Procesamiento completado - Batch ${batchId}`,
+        html,
+      });
+
+      return { success: true, messageId: result.messageId };
+    } catch (error) {
+      this.logger.error(`Error enviando resumen batch: ${error.message}`);
+      throw error;
+    }
   }
 
   // Recordatorio de pago
@@ -368,162 +478,188 @@ async sendBatchEmails(job: Job<{ emails: EmailJob[] }>): Promise<any> {
   async sendPaymentReminder(job: Job): Promise<any> {
     const { cxcId, clienteEmail, diasVencido } = job.data;
 
-    const cxc = await this.getCxCData(cxcId);
+    try {
+      const cxc = await this.getCxCData(cxcId);
 
-    return await this.sendEmail({
-      data: {
+      const html = this.generatePaymentReminderHtml({
+        folio: cxc.folio,
+        fechaVencimiento: cxc.fechaVencimiento,
+        diasVencido,
+        monto: cxc.saldo,
+        cliente: cxc.clienteNombre,
+        empresaNombre: cxc.empresaNombre,
+      });
+
+      const result = await this.resendService.send({
         to: clienteEmail,
         subject: `Recordatorio de Pago - Factura ${cxc.folio}`,
-        template: 'recordatorio-pago',
-        context: {
-          folio: cxc.folio,
-          fechaVencimiento: cxc.fechaVencimiento,
-          diasVencido,
-          monto: cxc.saldo,
-          cliente: cxc.clienteNombre,
-          empresaNombre: cxc.empresaNombre
-        },
-        userId: cxc.userId,
-        empresaId: cxc.empresaId,
-        relatedEntityType: 'cfdi',
-        relatedEntityId: cxc.cfdiId
-      }
-    } as Job<EmailJob>);
+        html,
+      });
+
+      return { success: true, messageId: result.messageId };
+    } catch (error) {
+      this.logger.error(`Error enviando recordatorio: ${error.message}`);
+      throw error;
+    }
   }
 
-  // ========== MÉTODOS AUXILIARES ==========
+  // Enviar batch de emails
+  @Process({
+    name: 'enviar-email-batch',
+    concurrency: 2,
+  })
+  async sendBatchEmails(job: Job<{ emails: EmailJob[] }>): Promise<any> {
+    const { emails } = job.data;
 
-  private async processAttachments(attachments: any[], entityId: string): Promise<any[]> {
+    this.logger.log(`Enviando batch de ${emails.length} emails`);
+
+    const results = {
+      total: emails.length,
+      exitosos: 0,
+      fallidos: 0,
+      detalles: [] as any[],
+    };
+
+    const chunks = this.chunkArray(emails, 50);
+
+    for (const chunk of chunks) {
+      const promises = chunk.map((emailData: EmailJob) => {
+        const html = this.generateEmailHtml(
+          emailData.template,
+          emailData.context,
+        );
+        const recipient = Array.isArray(emailData.to)
+          ? emailData.to[0]
+          : emailData.to;
+
+        return this.resendService
+          .send({
+            to: recipient,
+            subject: emailData.subject,
+            html,
+            attachments: this.processAttachments(emailData.attachments),
+          })
+          .then((result) => {
+            results.exitosos++;
+            return { success: true, to: emailData.to };
+          })
+          .catch((error: Error) => {
+            results.fallidos++;
+            return {
+              success: false,
+              to: emailData.to,
+              error: error.message,
+            };
+          });
+      });
+
+      const chunkResults = await Promise.allSettled(promises);
+      results.detalles.push(...chunkResults);
+
+      await this.sleep(1000);
+    }
+
+    return results;
+  }
+
+  // ========== METODOS AUXILIARES ==========
+
+  private processAttachments(
+    attachments: any[],
+  ): Array<{ filename: string; content: string | Buffer; contentType: string }> {
     if (!attachments || attachments.length === 0) return [];
 
-    return await Promise.all(
-      attachments.map(async (att) => {
-        // Si tiene path, verificar que exista
-        if (att.path) {
-          const fs = require('fs').promises;
-          try {
-            await fs.access(att.path);
-            return att;
-          } catch {
-            this.logger.warn(`Archivo no encontrado: ${att.path}`);
-            return null;
-          }
-        }
-        return att;
-      })
-    ).then(results => results.filter(r => r !== null));
-  }
-
-  private async waitForPDF(
-    entityId: string, 
-    entityType: string, 
-    timeout: number
-  ): Promise<string | null> {
-    // Implementar lógica para esperar que el PDF esté listo
-    // Puede ser polling a Redis o esperar evento
-    const startTime = Date.now();
-    const checkInterval = 1000; // Check cada segundo
-
-    while (Date.now() - startTime < timeout) {
-      const pdfPath = await this.checkPDFExists(entityId, entityType);
-      if (pdfPath) return pdfPath;
-      
-      await this.sleep(checkInterval);
-    }
-
-    return null;
-  }
-
-  private async waitForXML(entityId: string, timeout: number): Promise<string | null> {
-    // Similar a waitForPDF
-    return `/path/to/xmls/${entityId}.xml`; // Mock
-  }
-
-  private async checkPDFExists(entityId: string, entityType: string): Promise<string | null> {
-    // Verificar en filesystem o S3
-    const expectedPath = `/path/to/pdfs/${entityType}/${entityId}.pdf`;
-    
-    const fs = require('fs').promises;
-    try {
-      await fs.access(expectedPath);
-      return expectedPath;
-    } catch {
-      return null;
-    }
+    return attachments
+      .filter((att) => att && (att.content || att.path))
+      .map((att) => ({
+        filename: att.filename,
+        content: att.content || '',
+        contentType: att.contentType || 'application/octet-stream',
+      }));
   }
 
   private async saveEmailLog(data: any): Promise<void> {
-    // Guardar en DB usando EmailLogService
-    this.logger.log(`Email log guardado: ${data.status} - ${data.to}`);
+    this.logger.log(`Email log: ${data.status} - ${data.to}`);
+    // TODO: Implementar guardado en DB via EmailLogService
   }
 
   private async getSaleNoteData(notaId: string): Promise<any> {
-    // Obtener desde sales-api o directamente de DB
+    // TODO: Obtener datos reales desde sales-api via HTTP o DB directa
+    // Por ahora retorna mock - NECESITA IMPLEMENTACION REAL
+    this.logger.warn(
+      `getSaleNoteData: usando datos mock para nota ${notaId} - implementar llamada real`,
+    );
     return {
       folio: 'NV-001',
-      fecha: new Date(),
-      clienteNombre: 'Cliente Test',
-      total: 1000,
-      empresaNombre: 'Mi Empresa',
-      userId: 'user-123',
-      empresaId: 'emp-123'
-    }; // Mock
+      fecha: new Date().toLocaleDateString('es-MX'),
+      clienteNombre: 'Cliente',
+      total: 0,
+      empresaNombre: 'Empresa',
+      userId: 'unknown',
+      empresaId: 'unknown',
+    };
   }
 
   private async getCFDIData(cfdiId: string): Promise<any> {
+    // TODO: Obtener datos reales
+    this.logger.warn(
+      `getCFDIData: usando datos mock para CFDI ${cfdiId} - implementar llamada real`,
+    );
     return {
       serie: 'A',
-      folio: '123',
-      uuid: '12345678-1234-1234-1234-123456789012',
-      fecha: new Date(),
-      receptorNombre: 'Cliente Test',
-      total: 1160,
-      emisorNombre: 'Mi Empresa',
-      userId: 'user-123',
-      empresaId: 'emp-123'
-    }; // Mock
+      folio: '000',
+      uuid: cfdiId,
+      fecha: new Date().toLocaleDateString('es-MX'),
+      receptorNombre: 'Cliente',
+      total: 0,
+      emisorNombre: 'Empresa',
+      userId: 'unknown',
+      empresaId: 'unknown',
+    };
   }
 
   private async getCxCData(cxcId: string): Promise<any> {
+    this.logger.warn(`getCxCData: usando datos mock para CxC ${cxcId}`);
     return {
-      folio: 'A-123',
-      fechaVencimiento: new Date(),
-      saldo: 1160,
-      clienteNombre: 'Cliente Test',
-      empresaNombre: 'Mi Empresa',
-      userId: 'user-123',
-      empresaId: 'emp-123',
-      cfdiId: 'cfdi-123'
-    }; // Mock
+      folio: 'A-000',
+      fechaVencimiento: new Date().toLocaleDateString('es-MX'),
+      saldo: 0,
+      clienteNombre: 'Cliente',
+      empresaNombre: 'Empresa',
+      userId: 'unknown',
+      empresaId: 'unknown',
+      cfdiId: cxcId,
+    };
   }
 
   private async getUserData(userId: string): Promise<any> {
+    this.logger.warn(`getUserData: usando datos mock para user ${userId}`);
     return {
       email: 'user@example.com',
-      nombre: 'Usuario Test',
-      empresaId: 'emp-123'
-    }; // Mock
+      nombre: 'Usuario',
+      empresaId: 'unknown',
+    };
   }
 
   private chunkArray<T>(array: T[], size: number): T[][] {
-  const chunks: T[][] = [];
-  for (let i = 0; i < array.length; i += size) {
-    chunks.push(array.slice(i, i + size));
+    const chunks: T[][] = [];
+    for (let i = 0; i < array.length; i += size) {
+      chunks.push(array.slice(i, i + size));
+    }
+    return chunks;
   }
-  return chunks;
-}
 
   private sleep(ms: number): Promise<void> {
-    return new Promise(resolve => setTimeout(resolve, ms));
+    return new Promise((resolve) => setTimeout(resolve, ms));
   }
 
   @OnQueueCompleted()
   onCompleted(job: Job, result: any) {
-    this.logger.log(`✓ Email enviado: Job ${job.id} - ${result.to}`);
+    this.logger.log(`✅ Email completado: Job ${job.id} - ${result?.to || 'N/A'}`);
   }
 
   @OnQueueFailed()
   onFailed(job: Job, error: Error) {
-    this.logger.error(`✗ Email falló: Job ${job.id} - ${error.message}`);
+    this.logger.error(`❌ Email fallo: Job ${job.id} - ${error.message}`);
   }
 }
