@@ -356,34 +356,34 @@ export class EmailProcessor {
   // Enviar nota de venta
   @Process({ name: 'enviar-nota-venta', concurrency: 5 })
   async sendSaleNote(job: Job): Promise<any> {
-    const { notaId, clienteEmail } = job.data;
+    const { notaId, clienteEmail, folio, customerName, total, saleDate, empresaNombre, customMessage } = job.data;
 
     this.logger.log(
-      `📧 Procesando envio de nota de venta ${notaId} a ${clienteEmail}`,
+      `📧 Procesando envio de nota de venta ${folio || notaId} a ${clienteEmail}`,
     );
 
     try {
-      // 1. Obtener datos de la nota
-      const nota = await this.getSaleNoteData(notaId);
+      const fecha = saleDate
+        ? new Date(saleDate).toLocaleDateString('es-MX')
+        : new Date().toLocaleDateString('es-MX');
 
-      // 2. Generar HTML del email
       const html = this.generateSaleNoteHtml({
-        folio: nota.folio,
-        fecha: nota.fecha,
-        cliente: nota.clienteNombre,
-        total: nota.total,
-        empresaNombre: nota.empresaNombre,
+        folio: folio || 'S/N',
+        fecha,
+        cliente: customerName || 'Cliente',
+        total: total || 0,
+        empresaNombre: empresaNombre || 'Kaptah',
+        customMessage,
       });
 
-      // 3. Enviar via Resend
       const result = await this.resendService.send({
         to: clienteEmail,
-        subject: `Nota de Venta #${nota.folio} - ${nota.empresaNombre}`,
+        subject: `Nota de Venta #${folio || notaId} - ${empresaNombre || 'Kaptah'}`,
         html,
       });
 
       this.logger.log(
-        `✅ Nota de venta ${notaId} enviada exitosamente: ${result.messageId}`,
+        `✅ Nota de venta ${folio} enviada exitosamente: ${result.messageId}`,
       );
 
       return {
@@ -393,7 +393,7 @@ export class EmailProcessor {
       };
     } catch (error) {
       this.logger.error(
-        `❌ Error enviando nota de venta ${notaId}: ${error.message}`,
+        `❌ Error enviando nota de venta ${folio}: ${error.message}`,
         error.stack,
       );
       throw error;
