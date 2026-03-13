@@ -64,4 +64,7 @@ export class SaleNote {
 
   @Column({ type: 'varchar', length: 128, nullable: true })
   createdBy: string;
+
+  @Column({ type: 'text', nullable: true })
+  observaciones?: string;
 }
