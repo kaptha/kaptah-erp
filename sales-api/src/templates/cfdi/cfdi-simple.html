@@ -15,7 +15,7 @@
       font-family: 'Arial', 'Helvetica', sans-serif;
       background-color: #ffffff;
       color: #2c2c2c;
-      line-height: 1.6;
+      line-height: 1.5;
       font-size: 11px;
     }
 
@@ -24,34 +24,34 @@
       max-width: 210mm;
       margin: 0 auto;
       background: #ffffff;
-      padding: 50px 60px;
+      padding: 30px 40px;
     }
 
     /* HEADER */
     .header {
-      margin-bottom: 50px;
+      margin-bottom: 25px;
     }
 
     .invoice-title {
-      font-size: 36px;
+      font-size: 30px;
       font-weight: 300;
       letter-spacing: 8px;
       color: #2c2c2c;
-      margin-bottom: 15px;
+      margin-bottom: 10px;
     }
 
     .header-line {
       width: 100%;
       height: 1px;
       background: #d4c5b9;
-      margin-bottom: 40px;
+      margin-bottom: 20px;
     }
 
     /* INFORMACIÓN BÁSICA */
     .basic-info {
       display: flex;
       justify-content: space-between;
-      margin-bottom: 50px;
+      margin-bottom: 25px;
     }
 
     .info-left,
@@ -62,7 +62,7 @@
     .info-label {
       font-size: 10px;
       color: #666;
-      margin-bottom: 5px;
+      margin-bottom: 3px;
       font-weight: 400;
     }
 
@@ -70,7 +70,7 @@
       font-size: 12px;
       color: #2c2c2c;
       font-weight: 600;
-      margin-bottom: 20px;
+      margin-bottom: 12px;
       font-family: 'Courier New', monospace;
     }
 
@@ -79,40 +79,40 @@
     }
 
     .info-block {
-      margin-bottom: 15px;
+      margin-bottom: 10px;
     }
 
     .info-block-title {
       font-size: 10px;
       color: #666;
-      margin-bottom: 5px;
+      margin-bottom: 4px;
       font-weight: 400;
     }
 
     .info-block-content {
       font-size: 10px;
       color: #2c2c2c;
-      line-height: 1.6;
+      line-height: 1.5;
     }
 
     /* UUID SECTION */
     .uuid-section {
       background: #faf8f5;
-      padding: 15px 20px;
-      margin-bottom: 40px;
+      padding: 10px 16px;
+      margin-bottom: 20px;
       border-left: 2px solid #d4c5b9;
     }
 
     .uuid-label {
-      font-size: 10px;
+      font-size: 9px;
       color: #666;
       text-transform: uppercase;
-      margin-bottom: 5px;
+      margin-bottom: 3px;
       letter-spacing: 1px;
     }
 
     .uuid-value {
-      font-size: 12px;
+      font-size: 11px;
       color: #2c2c2c;
       font-family: 'Courier New', monospace;
       word-break: break-all;
@@ -122,8 +122,8 @@
     /* DATOS FISCALES */
     .fiscal-section {
       display: flex;
-      gap: 40px;
-      margin-bottom: 40px;
+      gap: 30px;
+      margin-bottom: 20px;
     }
 
     .fiscal-box {
@@ -131,16 +131,16 @@
     }
 
     .fiscal-title {
-      font-size: 12px;
+      font-size: 11px;
       color: #2c2c2c;
       font-weight: 600;
-      margin-bottom: 12px;
+      margin-bottom: 8px;
       text-transform: uppercase;
       letter-spacing: 1px;
     }
 
     .fiscal-item {
-      margin-bottom: 8px;
+      margin-bottom: 5px;
       font-size: 10px;
       display: flex;
     }
@@ -158,7 +158,7 @@
 
     /* TABLA DE CONCEPTOS */
     .table-section {
-      margin: 40px 0;
+      margin: 20px 0;
     }
 
     .tabla {
@@ -172,7 +172,7 @@
     }
 
     .tabla thead th {
-      padding: 15px 12px;
+      padding: 10px 8px;
       text-align: left;
       font-weight: 600;
       font-size: 10px;
@@ -182,38 +182,42 @@
       border: 1px solid #d4c5b9;
     }
 
-    .tabla thead th:nth-child(1) { width: 8%; text-align: center; }
-    .tabla thead th:nth-child(2) { width: 12%; }
-    .tabla thead th:nth-child(3) { width: 40%; }
-    .tabla thead th:nth-child(4) { width: 13%; text-align: right; }
-    .tabla thead th:nth-child(5) { width: 13%; text-align: right; }
-    .tabla thead th:nth-child(6) { width: 14%; text-align: right; }
+    .tabla thead th.col-cant { width: 8%; text-align: center; }
+    .tabla thead th.col-unidad { width: 10%; text-align: center; }
+    .tabla thead th.col-desc { width: 36%; }
+    .tabla thead th.col-precio { width: 16%; text-align: right; }
+    .tabla thead th.col-impuesto { width: 14%; text-align: right; }
+    .tabla thead th.col-total { width: 16%; text-align: right; }
 
     .tabla tbody td {
-      padding: 15px 12px;
+      padding: 10px 8px;
       border: 1px solid #e8e0d8;
       font-size: 10px;
       color: #2c2c2c;
     }
 
-    .tabla tbody td:nth-child(1) {
+    .tabla tbody td.td-cant {
       text-align: center;
       font-weight: 600;
       font-family: 'Courier New', monospace;
     }
 
-    .tabla tbody td:nth-child(3) {
+    .tabla tbody td.td-unidad {
+      text-align: center;
+    }
+
+    .tabla tbody td.td-desc {
       font-weight: 500;
     }
 
-    .tabla tbody td:nth-child(4),
-    .tabla tbody td:nth-child(5),
-    .tabla tbody td:nth-child(6) {
+    .tabla tbody td.td-precio,
+    .tabla tbody td.td-impuesto,
+    .tabla tbody td.td-total {
       text-align: right;
       font-family: 'Courier New', monospace;
     }
 
-    .tabla tbody td:nth-child(6) {
+    .tabla tbody td.td-total {
       font-weight: 700;
     }
 
@@ -223,7 +227,7 @@
     }
 
     .tabla tfoot td {
-      padding: 15px 12px;
+      padding: 10px 8px;
       border: 1px solid #d4c5b9;
       font-size: 12px;
       font-weight: 700;
@@ -239,24 +243,24 @@
     .tabla tfoot td:last-child {
       text-align: right;
       font-family: 'Courier New', monospace;
-      font-size: 14px;
+      font-size: 13px;
     }
 
     /* TOTALES ADICIONALES */
     .totales-section {
       display: flex;
       justify-content: flex-end;
-      margin: 30px 0;
+      margin: 16px 0;
     }
 
     .totales-container {
-      min-width: 300px;
+      min-width: 280px;
     }
 
     .total-row {
       display: flex;
       justify-content: space-between;
-      padding: 10px 0;
+      padding: 7px 0;
       font-size: 12px;
       border-bottom: 1px solid #e8e0d8;
     }
@@ -281,9 +285,9 @@
     /* QR Y CERTIFICACIÓN */
     .cert-section {
       display: flex;
-      gap: 40px;
-      margin: 50px 0;
-      padding: 30px;
+      gap: 25px;
+      margin: 20px 0;
+      padding: 16px;
       background: #faf8f5;
       border: 1px solid #e8e0d8;
     }
@@ -292,23 +296,23 @@
       display: flex;
       flex-direction: column;
       align-items: center;
-      min-width: 150px;
+      min-width: 120px;
     }
 
     .qr-container img {
-      width: 130px;
-      height: 130px;
-      margin-bottom: 10px;
+      width: 100px;
+      height: 100px;
+      margin-bottom: 6px;
       border: 2px solid #d4c5b9;
-      padding: 5px;
+      padding: 4px;
       background: white;
     }
 
     .qr-label {
-      font-size: 9px;
+      font-size: 8px;
       color: #666;
       text-align: center;
-      line-height: 1.4;
+      line-height: 1.3;
     }
 
     .cert-data {
@@ -316,23 +320,23 @@
     }
 
     .cert-title {
-      font-size: 12px;
+      font-size: 11px;
       color: #2c2c2c;
       font-weight: 600;
-      margin-bottom: 15px;
+      margin-bottom: 10px;
       text-transform: uppercase;
       letter-spacing: 1px;
     }
 
     .cert-item {
-      margin-bottom: 8px;
+      margin-bottom: 5px;
       font-size: 10px;
       display: flex;
     }
 
     .cert-item .label {
       color: #666;
-      min-width: 150px;
+      min-width: 140px;
     }
 
     .cert-item .value {
@@ -343,32 +347,32 @@
 
     /* SELLOS DIGITALES */
     .sellos-section {
-      margin: 40px 0;
+      margin: 16px 0;
     }
 
     .sello-box {
       background: #faf8f5;
       border-left: 2px solid #d4c5b9;
-      padding: 15px 20px;
-      margin-bottom: 15px;
+      padding: 10px 14px;
+      margin-bottom: 10px;
     }
 
     .sello-title {
-      font-size: 9px;
+      font-size: 8px;
       color: #666;
       font-weight: 600;
-      margin-bottom: 8px;
+      margin-bottom: 4px;
       text-transform: uppercase;
       letter-spacing: 0.5px;
     }
 
     .sello-content {
-      font-size: 7.5px;
+      font-size: 7px;
       color: #2c2c2c;
       font-family: 'Courier New', monospace;
       word-break: break-all;
-      line-height: 1.6;
-      max-height: 50px;
+      line-height: 1.4;
+      max-height: 38px;
       overflow: hidden;
     }
 
@@ -376,33 +380,33 @@
     .cadena-section {
       background: #faf8f5;
       border-left: 2px solid #d4c5b9;
-      padding: 15px 20px;
-      margin: 40px 0;
+      padding: 10px 14px;
+      margin: 16px 0;
     }
 
     .cadena-title {
-      font-size: 9px;
+      font-size: 8px;
       color: #666;
       font-weight: 600;
-      margin-bottom: 8px;
+      margin-bottom: 4px;
       text-transform: uppercase;
       letter-spacing: 0.5px;
     }
 
     .cadena-content {
-      font-size: 7.5px;
+      font-size: 7px;
       color: #2c2c2c;
       font-family: 'Courier New', monospace;
       word-break: break-all;
-      line-height: 1.6;
-      max-height: 45px;
+      line-height: 1.4;
+      max-height: 38px;
       overflow: hidden;
     }
 
     /* FOOTER */
     .footer {
-      margin-top: 60px;
-      padding-top: 20px;
+      margin-top: 20px;
+      padding-top: 12px;
       border-top: 1px solid #d4c5b9;
       text-align: center;
       font-size: 9px;
@@ -410,7 +414,7 @@
     }
 
     .footer p {
-      margin: 5px 0;
+      margin: 3px 0;
     }
 
     /* PRINT STYLES */
@@ -422,7 +426,7 @@
       .container {
         width: 100%;
         max-width: none;
-        padding: 30px;
+        padding: 20px;
       }
     }
   </style>
@@ -439,11 +443,11 @@
     <div class="basic-info">
       <div class="info-left">
         <div>
-          <div class="info-label">Invoice No:</div>
+          <div class="info-label">Factura No:</div>
           <div class="info-value">{{serie}}-{{folio}}</div>
         </div>
         <div>
-          <div class="info-label">Date Issued:</div>
+          <div class="info-label">Fecha de Emisión:</div>
           <div class="info-value">{{fecha}}</div>
         </div>
         <div>
@@ -454,7 +458,7 @@
 
       <div class="info-right">
         <div class="info-block">
-          <div class="info-block-title">Issued to:</div>
+          <div class="info-block-title">Emitido a:</div>
           <div class="info-block-content">
             <strong>{{receptorNombre}}</strong><br>
             RFC: {{receptorRfc}}<br>
@@ -518,12 +522,12 @@
       <table class="tabla">
         <thead>
           <tr>
-            <th>NO</th>
-            <th>Unidad</th>
-            <th>Descripción</th>
-            <th>Qty</th>
-            <th>Price</th>
-            <th>Subtotal</th>
+            <th class="col-cant">CANT.</th>
+            <th class="col-unidad">UNIDAD</th>
+            <th class="col-desc">DESCRIPCIÓN</th>
+            <th class="col-precio">P. UNITARIO</th>
+            <th class="col-impuesto">IMPUESTO</th>
+            <th class="col-total">TOTAL</th>
           </tr>
         </thead>
         <tbody>
@@ -531,7 +535,7 @@
         </tbody>
         <tfoot>
           <tr>
-            <td colspan="5">Grand Total</td>
+            <td colspan="5">Total</td>
             <td>${{total}}</td>
           </tr>
         </tfoot>
@@ -577,7 +581,7 @@
           <span class="value">{{noCertificadoCSD}}</span>
         </div>
         <div class="cert-item">
-          <span class="label">RFC Proveedor Certificación:</span>
+          <span class="label">RFC Proveedor Cert.:</span>
           <span class="value">SAT970701NN3</span>
         </div>
         <div class="cert-item">
