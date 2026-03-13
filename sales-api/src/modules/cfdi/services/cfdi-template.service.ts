@@ -6,18 +6,17 @@ import * as path from 'path';
 @Injectable()
 export class CfdiTemplateService {
   private readonly logger = new Logger(CfdiTemplateService.name);
-  private readonly templatesPath: string; // ⭐ AGREGAR ESTA LÍNEA
+  private readonly templatesPath: string;
 
   constructor() {
     this.templatesPath = path.join(__dirname, '..', '..', '..', '..', 'templates', 'cfdi');
     this.logger.log(`📁 Templates path: ${this.templatesPath}`);
-}
+  }
 
   /**
    * Genera HTML del CFDI con estilo personalizado
    */
-  generateCfdiHTML(cfdi: Cfdi, qrImage: string, estilo: string = 'classic'): string {
-    // Cargar plantilla HTML
+  generateCfdiHTML(cfdi: Cfdi, qrImage: string, estilo: string = 'classic', logoUrl?: string): string {
     const templatePath = path.join(this.templatesPath, `cfdi-${estilo}.html`);
     
     this.logger.log(`📄 Cargando plantilla: ${templatePath}`);
@@ -32,6 +31,12 @@ export class CfdiTemplateService {
     // Parsear datos del XML
     const xmlData = this.parseBasicXmlData(cfdi.xml);
     
+    // Parsear conceptos del XML
+    const conceptos = this.parseConceptos(cfdi.xml);
+    
+    // Generar HTML de conceptos
+    const conceptosHtml = this.generateConceptosHtml(conceptos);
+    
     // Fecha actual para el footer
     const fechaGeneracion = new Date().toLocaleString('es-MX', {
       year: 'numeric',
@@ -40,10 +45,13 @@ export class CfdiTemplateService {
       hour: '2-digit',
       minute: '2-digit'
     });
+
+    // Logo: usar el proporcionado o placeholder transparente
+    const logo = logoUrl || 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg==';
     
     // Reemplazar variables
     let html = templateHtml
-      .replace(/\{\{uuid\}\}/g, cfdi.uuid)
+      .replace(/\{\{uuid\}\}/g, cfdi.uuid || 'N/A')
       .replace(/\{\{qrImage\}\}/g, qrImage)
       .replace(/\{\{serie\}\}/g, xmlData.serie)
       .replace(/\{\{folio\}\}/g, xmlData.folio)
@@ -62,35 +70,194 @@ export class CfdiTemplateService {
       .replace(/\{\{formaPago\}\}/g, xmlData.formaPago || 'N/A')
       .replace(/\{\{metodoPago\}\}/g, xmlData.metodoPago || 'N/A')
       .replace(/\{\{moneda\}\}/g, xmlData.moneda || 'MXN')
-      .replace(/\{\{exportacion\}\}/g, xmlData.exportacion || 'No aplica')
+      .replace(/\{\{exportacion\}\}/g, xmlData.exportacion || '01')
       .replace(/\{\{noCertificadoCSD\}\}/g, xmlData.noCertificadoCSD || 'N/A')
       .replace(/\{\{total\}\}/g, this.formatCurrency(cfdi.total))
       .replace(/\{\{subtotal\}\}/g, this.formatCurrency(cfdi.subtotal))
       .replace(/\{\{iva\}\}/g, this.formatCurrency(cfdi.total - cfdi.subtotal))
-      .replace(/\{\{selloCFD\}\}/g, cfdi.selloCFD)
-      .replace(/\{\{selloSAT\}\}/g, cfdi.selloSAT)
-      .replace(/\{\{noCertificadoSAT\}\}/g, cfdi.noCertificadoSAT)
+      .replace(/\{\{selloCFD\}\}/g, cfdi.selloCFD || 'N/A')
+      .replace(/\{\{selloSAT\}\}/g, cfdi.selloSAT || 'N/A')
+      .replace(/\{\{noCertificadoSAT\}\}/g, cfdi.noCertificadoSAT || 'N/A')
       .replace(/\{\{fechaTimbrado\}\}/g, this.formatDate(cfdi.fechaTimbrado))
       .replace(/\{\{estado\}\}/g, cfdi.status === 'vigente' ? 'VIGENTE' : 'CANCELADO')
       .replace(/\{\{cadenaOriginal\}\}/g, cfdi.cadenaOriginal || 'N/A')
       .replace(/\{\{fechaGeneracion\}\}/g, fechaGeneracion)
-      .replace(/\{\{telefonoContacto\}\}/g, '(55) 1234-5678') // ⭐ Obtener de la empresa
-      .replace(/\{\{emailContacto\}\}/g, 'contacto@empresa.com') // ⭐ Obtener de la empresa
-      .replace(/\{\{logo\}\}/g, 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg=='); // ⭐ Placeholder por ahora
-    
-    // ⭐ TODO: Agregar tabla de conceptos (por ahora placeholder)
-    html = html.replace(/\{\{conceptos\}\}/g, `
-      <tr>
-        <td>1</td>
-        <td>Pieza</td>
-        <td>Concepto de ejemplo</td>
-        <td>${this.formatCurrency(cfdi.subtotal)}</td>
-        <td>${this.formatCurrency(cfdi.total - cfdi.subtotal)}</td>
-        <td>${this.formatCurrency(cfdi.total)}</td>
-      </tr>
-    `);
+      .replace(/\{\{telefonoContacto\}\}/g, xmlData.telefonoContacto || '')
+      .replace(/\{\{emailContacto\}\}/g, xmlData.emailContacto || '')
+      .replace(/\{\{logo\}\}/g, logo)
+      .replace(/\{\{conceptos\}\}/g, conceptosHtml);
     
     return html;
+  }
+
+  /**
+   * Parsea los conceptos del XML del CFDI
+   */
+  private parseConceptos(xml: string): any[] {
+    const conceptos: any[] = [];
+    
+    try {
+      // Buscar todos los bloques <cfdi:Concepto ... /> o <cfdi:Concepto ...>...</cfdi:Concepto>
+      const conceptoRegex = /<cfdi:Concepto\s([^>]*?)(?:\/>|>([\s\S]*?)<\/cfdi:Concepto>)/gi;
+      let match: RegExpExecArray | null;
+      
+      while ((match = conceptoRegex.exec(xml)) !== null) {
+        const attrs = match[1];
+        const innerContent = match[2] || '';
+        
+        // Extraer atributos del concepto
+        const cantidad = this.getXmlAttr(attrs, 'Cantidad') || '1';
+        const unidad = this.getXmlAttr(attrs, 'ClaveUnidad') || 'PZA';
+        const unidadDesc = this.getXmlAttr(attrs, 'Unidad') || this.getUnidadName(unidad);
+        const descripcion = this.getXmlAttr(attrs, 'Descripcion') || 'Sin descripción';
+        const valorUnitario = this.getXmlAttr(attrs, 'ValorUnitario') || '0';
+        const importe = this.getXmlAttr(attrs, 'Importe') || '0';
+        
+        // Buscar impuestos trasladados dentro del concepto
+        let impuestoTotal = 0;
+        const trasladoRegex = /<cfdi:Traslado\s([^>]*?)\/>/gi;
+        let trasladoMatch: RegExpExecArray | null;
+        
+        while ((trasladoMatch = trasladoRegex.exec(innerContent)) !== null) {
+          const importeImpuesto = this.getXmlAttr(trasladoMatch[1], 'Importe');
+          if (importeImpuesto) {
+            impuestoTotal += parseFloat(importeImpuesto);
+          }
+        }
+        
+        // Si no encontramos impuestos dentro del concepto, calcular con tasa 16%
+        if (impuestoTotal === 0) {
+          impuestoTotal = parseFloat(importe) * 0.16;
+        }
+        
+        const total = parseFloat(importe) + impuestoTotal;
+        
+        conceptos.push({
+          cantidad: parseFloat(cantidad),
+          unidad: unidadDesc,
+          descripcion,
+          valorUnitario: parseFloat(valorUnitario),
+          impuesto: impuestoTotal,
+          total
+        });
+      }
+      
+      // Si no se encontraron conceptos con el namespace cfdi:, intentar sin namespace
+      if (conceptos.length === 0) {
+        const conceptoRegexSimple = /<Concepto\s([^>]*?)(?:\/>|>([\s\S]*?)<\/Concepto>)/gi;
+        
+        while ((match = conceptoRegexSimple.exec(xml)) !== null) {
+          const attrs = match[1];
+          const innerContent = match[2] || '';
+          
+          const cantidad = this.getXmlAttr(attrs, 'Cantidad') || '1';
+          const unidad = this.getXmlAttr(attrs, 'ClaveUnidad') || 'PZA';
+          const unidadDesc = this.getXmlAttr(attrs, 'Unidad') || this.getUnidadName(unidad);
+          const descripcion = this.getXmlAttr(attrs, 'Descripcion') || 'Sin descripción';
+          const valorUnitario = this.getXmlAttr(attrs, 'ValorUnitario') || '0';
+          const importe = this.getXmlAttr(attrs, 'Importe') || '0';
+          
+          let impuestoTotal = 0;
+          const trasladoRegex2 = /<Traslado\s([^>]*?)\/>/gi;
+          let trasladoMatch2: RegExpExecArray | null;
+          
+          while ((trasladoMatch2 = trasladoRegex2.exec(innerContent)) !== null) {
+            const importeImpuesto = this.getXmlAttr(trasladoMatch2[1], 'Importe');
+            if (importeImpuesto) {
+              impuestoTotal += parseFloat(importeImpuesto);
+            }
+          }
+          
+          if (impuestoTotal === 0) {
+            impuestoTotal = parseFloat(importe) * 0.16;
+          }
+          
+          const total = parseFloat(importe) + impuestoTotal;
+          
+          conceptos.push({
+            cantidad: parseFloat(cantidad),
+            unidad: unidadDesc,
+            descripcion,
+            valorUnitario: parseFloat(valorUnitario),
+            impuesto: impuestoTotal,
+            total
+          });
+        }
+      }
+      
+      this.logger.log(`📦 Conceptos parseados del XML: ${conceptos.length}`);
+    } catch (error) {
+      this.logger.error('Error parseando conceptos del XML:', error);
+    }
+    
+    // Si no se encontró nada, devolver un concepto genérico
+    if (conceptos.length === 0) {
+      this.logger.warn('⚠️ No se encontraron conceptos en el XML, usando fallback');
+      conceptos.push({
+        cantidad: 1,
+        unidad: 'Servicio',
+        descripcion: 'Concepto general',
+        valorUnitario: 0,
+        impuesto: 0,
+        total: 0
+      });
+    }
+    
+    return conceptos;
+  }
+
+  /**
+   * Genera el HTML de las filas de conceptos con clases CSS estandarizadas
+   */
+  private generateConceptosHtml(conceptos: any[]): string {
+    return conceptos.map(c => `
+      <tr>
+        <td class="td-cant">${c.cantidad}</td>
+        <td class="td-unidad">${c.unidad}</td>
+        <td class="td-desc">${c.descripcion}</td>
+        <td class="td-precio">$${this.formatCurrency(c.valorUnitario)}</td>
+        <td class="td-impuesto">$${this.formatCurrency(c.impuesto)}</td>
+        <td class="td-total">$${this.formatCurrency(c.total)}</td>
+      </tr>
+    `).join('');
+  }
+
+  /**
+   * Extrae un atributo de un string de atributos XML
+   */
+  private getXmlAttr(attrsString: string, attrName: string): string | null {
+    const regex = new RegExp(`${attrName}="([^"]*)"`, 'i');
+    const match = attrsString.match(regex);
+    return match ? match[1] : null;
+  }
+
+  /**
+   * Obtiene nombre legible de la unidad por clave SAT
+   */
+  private getUnidadName(clave: string): string {
+    const unidades: Record<string, string> = {
+      'H87': 'Pieza',
+      'E48': 'Servicio',
+      'ACT': 'Actividad',
+      'KGM': 'Kilogramo',
+      'LTR': 'Litro',
+      'MTR': 'Metro',
+      'XBX': 'Caja',
+      'XPK': 'Paquete',
+      'XKI': 'Kit',
+      'SET': 'Conjunto',
+      'HUR': 'Hora',
+      'DAY': 'Día',
+      'MON': 'Mes',
+      'ANN': 'Año',
+      'XUN': 'Unidad',
+      'GRM': 'Gramo',
+      'TNE': 'Tonelada',
+      'MLT': 'Mililitro',
+      'MTK': 'Metro cuadrado',
+      'MTQ': 'Metro cúbico',
+    };
+    return unidades[clave] || clave;
   }
 
   /**
@@ -98,19 +265,15 @@ export class CfdiTemplateService {
    */
   private parseBasicXmlData(xml: string): any {
     try {
-      // Serie
       const serieMatch = xml.match(/Serie="([^"]+)"/);
       const serie = serieMatch ? serieMatch[1] : 'N/A';
 
-      // Folio
       const folioMatch = xml.match(/Folio="([^"]+)"/);
       const folio = folioMatch ? folioMatch[1] : 'N/A';
 
-      // Fecha
       const fechaMatch = xml.match(/Fecha="([^"]+)"/);
       const fecha = fechaMatch ? fechaMatch[1] : 'N/A';
 
-      // Emisor
       const emisorNombreMatch = xml.match(/Emisor[^>]+Nombre="([^"]+)"/);
       const emisorNombre = emisorNombreMatch ? emisorNombreMatch[1] : 'N/A';
 
@@ -123,7 +286,6 @@ export class CfdiTemplateService {
       const lugarMatch = xml.match(/LugarExpedicion="([^"]+)"/);
       const lugarExpedicion = lugarMatch ? lugarMatch[1] : 'N/A';
 
-      // Receptor
       const receptorNombreMatch = xml.match(/Receptor[^>]+Nombre="([^"]+)"/);
       const receptorNombre = receptorNombreMatch ? receptorNombreMatch[1] : 'N/A';
 
@@ -139,14 +301,12 @@ export class CfdiTemplateService {
       const receptorCPMatch = xml.match(/DomicilioFiscalReceptor="([^"]+)"/);
       const receptorCP = receptorCPMatch ? receptorCPMatch[1] : 'N/A';
 
-      // Pago
       const metodoPagoMatch = xml.match(/MetodoPago="([^"]+)"/);
       const metodoPago = metodoPagoMatch ? metodoPagoMatch[1] : 'N/A';
 
       const formaPagoMatch = xml.match(/FormaPago="([^"]+)"/);
       const formaPago = formaPagoMatch ? formaPagoMatch[1] : 'N/A';
 
-      // Otros
       const monedaMatch = xml.match(/Moneda="([^"]+)"/);
       const moneda = monedaMatch ? monedaMatch[1] : 'MXN';
 
@@ -174,7 +334,9 @@ export class CfdiTemplateService {
         moneda,
         exportacion,
         noCertificadoCSD,
-        receptorDireccion: 'N/A' // TODO: Extraer del XML si existe
+        receptorDireccion: 'N/A',
+        telefonoContacto: '',
+        emailContacto: ''
       };
     } catch (error) {
       this.logger.error('Error parseando XML:', error);
@@ -200,7 +362,7 @@ export class CfdiTemplateService {
    * Formatea moneda
    */
   private formatCurrency(amount: number): string {
-    if (!amount) return '0.00';
+    if (!amount && amount !== 0) return '0.00';
     return new Intl.NumberFormat('es-MX', {
       minimumFractionDigits: 2,
       maximumFractionDigits: 2
