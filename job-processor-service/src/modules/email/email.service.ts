@@ -36,7 +36,7 @@ export class EmailService {
       subject: this.generateSubject(sendDocumentDto),
       templateUsed: sendDocumentDto.documentType,
       status: 'queued',
-      provider: 'sendgrid',
+      provider: 'resend',
       metadata: {
         documentId: sendDocumentDto.documentId,
         ...sendDocumentDto.metadata,
@@ -181,5 +181,4 @@ export class EmailService {
 
     return subjects[dto.documentType] || 'Documento';
   }
-  
 }
