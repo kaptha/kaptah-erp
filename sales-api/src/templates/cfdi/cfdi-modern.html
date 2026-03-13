@@ -15,7 +15,8 @@
       font-family: 'Arial', 'Helvetica', sans-serif;
       background-color: #f5f5f5;
       color: #333;
-      line-height: 1.6;
+      line-height: 1.4;
+      font-size: 11px;
     }
 
     .container {
@@ -35,6 +36,7 @@
       width: 600px;
       height: 600px;
       z-index: 0;
+      pointer-events: none;
     }
 
     .circle {
@@ -71,7 +73,7 @@
     .content {
       position: relative;
       z-index: 2;
-      padding: 50px 45px;
+      padding: 30px 35px;
     }
 
     /* HEADER */
@@ -79,18 +81,18 @@
       display: flex;
       justify-content: space-between;
       align-items: flex-start;
-      margin-bottom: 40px;
+      margin-bottom: 20px;
     }
 
     .logo-section {
       display: flex;
       align-items: center;
-      gap: 15px;
+      gap: 12px;
     }
 
     .logo-img {
-      max-width: 70px;
-      max-height: 70px;
+      max-width: 55px;
+      max-height: 55px;
       object-fit: contain;
     }
 
@@ -100,7 +102,7 @@
     }
 
     .company-name {
-      font-size: 18px;
+      font-size: 16px;
       font-weight: 700;
       color: #2B8A99;
       text-transform: uppercase;
@@ -108,7 +110,7 @@
     }
 
     .company-subtitle {
-      font-size: 11px;
+      font-size: 10px;
       color: #666;
       margin-top: 2px;
     }
@@ -118,21 +120,21 @@
     }
 
     .title-section h1 {
-      font-size: 36px;
+      font-size: 28px;
       font-weight: 700;
       color: #1a3a44;
       letter-spacing: 2px;
-      margin-bottom: 15px;
+      margin-bottom: 8px;
     }
 
     .invoice-meta {
       text-align: right;
-      font-size: 11px;
+      font-size: 10px;
       color: #666;
     }
 
     .invoice-meta p {
-      margin: 5px 0;
+      margin: 3px 0;
     }
 
     .invoice-meta strong {
@@ -143,8 +145,8 @@
     /* SECCIONES DE INFO */
     .info-sections {
       display: flex;
-      gap: 40px;
-      margin-bottom: 30px;
+      gap: 30px;
+      margin-bottom: 16px;
     }
 
     .info-block {
@@ -152,19 +154,19 @@
     }
 
     .info-block h3 {
-      font-size: 12px;
+      font-size: 11px;
       font-weight: 700;
       color: #1a3a44;
       text-transform: uppercase;
       letter-spacing: 1px;
-      margin-bottom: 12px;
+      margin-bottom: 8px;
     }
 
     .info-block p {
       font-size: 10px;
       color: #555;
-      margin: 6px 0;
-      line-height: 1.7;
+      margin: 3px 0;
+      line-height: 1.5;
     }
 
     .info-block .highlight {
@@ -175,23 +177,23 @@
     /* UUID DESTACADO */
     .uuid-banner {
       background: linear-gradient(135deg, #e0f7fa 0%, #b2ebf2 100%);
-      padding: 15px 20px;
-      margin: 25px 0;
-      border-radius: 8px;
-      border-left: 5px solid #2B8A99;
+      padding: 10px 16px;
+      margin: 14px 0;
+      border-radius: 6px;
+      border-left: 4px solid #2B8A99;
     }
 
     .uuid-banner .label {
-      font-size: 10px;
+      font-size: 9px;
       font-weight: 600;
       color: #1a3a44;
       text-transform: uppercase;
       letter-spacing: 0.5px;
-      margin-bottom: 5px;
+      margin-bottom: 2px;
     }
 
     .uuid-banner .value {
-      font-size: 12px;
+      font-size: 11px;
       font-weight: 700;
       color: #2B8A99;
       font-family: 'Courier New', monospace;
@@ -199,15 +201,15 @@
 
     /* TABLA */
     .tabla-container {
-      margin: 30px 0;
+      margin: 18px 0;
     }
 
     .tabla {
       width: 100%;
       border-collapse: collapse;
       overflow: hidden;
-      border-radius: 12px;
-      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+      border-radius: 8px;
+      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.06);
     }
 
     .tabla thead {
@@ -216,7 +218,7 @@
     }
 
     .tabla thead th {
-      padding: 12px 10px;
+      padding: 8px 8px;
       text-align: left;
       font-weight: 600;
       font-size: 10px;
@@ -224,24 +226,15 @@
       letter-spacing: 0.5px;
     }
 
-    .tabla thead th:first-child {
-      border-radius: 12px 0 0 0;
-    }
-
-    .tabla thead th:last-child {
-      border-radius: 0 12px 0 0;
-      text-align: right;
-    }
-
-    .tabla thead th:nth-child(1) { width: 8%; text-align: center; }
-    .tabla thead th:nth-child(2) { width: 12%; }
-    .tabla thead th:nth-child(3) { width: 35%; }
-    .tabla thead th:nth-child(4) { width: 15%; text-align: right; }
-    .tabla thead th:nth-child(5) { width: 15%; text-align: right; }
-    .tabla thead th:nth-child(6) { width: 15%; text-align: right; }
+    .tabla thead th.col-cant { width: 8%; text-align: center; }
+    .tabla thead th.col-unidad { width: 10%; text-align: center; }
+    .tabla thead th.col-desc { width: 36%; }
+    .tabla thead th.col-precio { width: 16%; text-align: right; }
+    .tabla thead th.col-impuesto { width: 14%; text-align: right; }
+    .tabla thead th.col-total { width: 16%; text-align: right; }
 
     .tabla tbody td {
-      padding: 12px 10px;
+      padding: 8px 8px;
       border-bottom: 1px solid #e8e8e8;
       font-size: 10px;
       color: #555;
@@ -251,19 +244,28 @@
       border-bottom: none;
     }
 
-    .tabla tbody td:nth-child(1) {
+    .tabla tbody td.td-cant {
       text-align: center;
       font-weight: 600;
       color: #2B8A99;
     }
 
-    .tabla tbody td:nth-child(4),
-    .tabla tbody td:nth-child(5),
-    .tabla tbody td:nth-child(6) {
-      text-align: right;
+    .tabla tbody td.td-unidad {
+      text-align: center;
     }
 
-    .tabla tbody td:nth-child(6) {
+    .tabla tbody td.td-desc {
+      font-weight: 500;
+    }
+
+    .tabla tbody td.td-precio,
+    .tabla tbody td.td-impuesto,
+    .tabla tbody td.td-total {
+      text-align: right;
+      font-family: 'Courier New', monospace;
+    }
+
+    .tabla tbody td.td-total {
       font-weight: 700;
       color: #333;
     }
@@ -271,41 +273,18 @@
     /* SECCIÓN INFERIOR */
     .bottom-section {
       display: flex;
-      justify-content: space-between;
-      margin-top: 30px;
-      gap: 50px;
-    }
-
-    .notes-section {
-      flex: 1;
-      max-width: 45%;
-    }
-
-    .notes-section h3 {
-      font-size: 12px;
-      font-weight: 700;
-      color: #1a3a44;
-      text-transform: uppercase;
-      letter-spacing: 1px;
-      margin-bottom: 12px;
-    }
-
-    .notes-section p {
-      font-size: 10px;
-      color: #666;
-      line-height: 1.7;
-      text-align: justify;
+      justify-content: flex-end;
+      margin-top: 16px;
     }
 
     .totales-section {
-      flex: 1;
-      max-width: 400px;
+      min-width: 280px;
     }
 
     .total-line {
       display: flex;
       justify-content: space-between;
-      padding: 10px 0;
+      padding: 7px 0;
       font-size: 12px;
       border-bottom: 1px solid #e8e8e8;
     }
@@ -318,13 +297,14 @@
     .total-line .value {
       font-weight: 700;
       color: #333;
+      font-family: 'Courier New', monospace;
     }
 
     .total-line.grand {
       border: none;
-      margin-top: 10px;
-      padding: 12px 0;
-      font-size: 16px;
+      margin-top: 6px;
+      padding: 8px 0;
+      font-size: 14px;
       color: #2B8A99;
     }
 
@@ -337,11 +317,11 @@
     /* QR Y CERTIFICACIÓN */
     .qr-section {
       display: flex;
-      gap: 30px;
-      margin: 35px 0;
+      gap: 20px;
+      margin: 18px 0;
       background: #f9fafb;
-      padding: 25px;
-      border-radius: 10px;
+      padding: 14px;
+      border-radius: 8px;
     }
 
     .qr-box {
@@ -350,26 +330,26 @@
     }
 
     .qr-box img {
-      width: 140px;
-      height: 140px;
-      border: 4px solid #2B8A99;
-      border-radius: 10px;
-      padding: 10px;
+      width: 95px;
+      height: 95px;
+      border: 3px solid #2B8A99;
+      border-radius: 8px;
+      padding: 6px;
       background: white;
     }
 
     .qr-label {
-      font-size: 10px;
+      font-size: 8px;
       font-weight: 700;
       color: #2B8A99;
-      margin-top: 10px;
+      margin-top: 5px;
       text-transform: uppercase;
     }
 
     .qr-hint {
-      font-size: 9px;
+      font-size: 8px;
       color: #666;
-      margin-top: 5px;
+      margin-top: 2px;
     }
 
     .cert-details {
@@ -377,15 +357,15 @@
     }
 
     .cert-details h3 {
-      font-size: 12px;
+      font-size: 11px;
       font-weight: 700;
       color: #1a3a44;
-      margin-bottom: 15px;
+      margin-bottom: 8px;
       text-transform: uppercase;
     }
 
     .cert-item {
-      margin-bottom: 10px;
+      margin-bottom: 4px;
       font-size: 10px;
     }
 
@@ -393,103 +373,104 @@
       font-weight: 600;
       color: #666;
       display: inline-block;
-      min-width: 170px;
+      min-width: 140px;
     }
 
     .cert-item .cert-value {
       color: #333;
+      font-family: 'Courier New', monospace;
     }
 
     /* SELLOS */
     .seal-section {
-      margin: 25px 0;
+      margin: 14px 0;
     }
 
     .seal-box {
       background: #fffbeb;
-      border-left: 5px solid #f59e0b;
-      padding: 12px;
-      margin-bottom: 12px;
-      border-radius: 5px;
+      border-left: 4px solid #f59e0b;
+      padding: 8px 10px;
+      margin-bottom: 8px;
+      border-radius: 4px;
     }
 
     .seal-title {
-      font-size: 9px;
+      font-size: 8px;
       font-weight: 700;
       color: #78350f;
-      margin-bottom: 8px;
+      margin-bottom: 4px;
       text-transform: uppercase;
     }
 
     .seal-text {
-      font-size: 7.5px;
+      font-size: 7px;
       color: #92400e;
       font-family: 'Courier New', monospace;
       word-break: break-all;
-      line-height: 1.5;
+      line-height: 1.4;
       background: rgba(255, 255, 255, 0.7);
-      padding: 8px;
-      border-radius: 4px;
+      padding: 5px;
+      border-radius: 3px;
+      max-height: 36px;
+      overflow: hidden;
     }
 
     /* CADENA ORIGINAL */
     .chain-section {
       background: #ecfdf5;
-      border-left: 5px solid #10b981;
-      padding: 12px;
-      margin: 25px 0;
-      border-radius: 5px;
+      border-left: 4px solid #10b981;
+      padding: 8px 10px;
+      margin: 14px 0;
+      border-radius: 4px;
     }
 
     .chain-title {
-      font-size: 9px;
+      font-size: 8px;
       font-weight: 700;
       color: #065f46;
-      margin-bottom: 8px;
+      margin-bottom: 4px;
       text-transform: uppercase;
     }
 
     .chain-text {
-      font-size: 7.5px;
+      font-size: 7px;
       color: #064e3b;
       font-family: 'Courier New', monospace;
       word-break: break-all;
-      line-height: 1.5;
+      line-height: 1.4;
       background: rgba(255, 255, 255, 0.7);
-      padding: 8px;
-      border-radius: 4px;
+      padding: 5px;
+      border-radius: 3px;
+      max-height: 34px;
+      overflow: hidden;
     }
 
     /* FOOTER */
     .footer {
       background: linear-gradient(135deg, #2B8A99 0%, #5FB3B3 100%);
       color: white;
-      padding: 20px 45px;
-      margin-top: 40px;
+      padding: 10px 35px;
       display: flex;
       justify-content: center;
       align-items: center;
-      gap: 40px;
+      gap: 30px;
     }
 
     .footer-item {
       display: flex;
       align-items: center;
-      gap: 10px;
-      font-size: 11px;
+      gap: 6px;
+      font-size: 10px;
     }
 
     .footer-icon {
-      width: 20px;
-      height: 20px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
+      font-weight: 700;
+      font-size: 10px;
     }
 
     .footer-legal {
       text-align: center;
-      padding: 15px;
+      padding: 8px;
       font-size: 9px;
       color: #666;
       background: #f9fafb;
@@ -514,14 +495,14 @@
   </style>
 </head>
 <body>
-  <!-- FORMAS DECORATIVAS -->
-  <div class="decorative-shapes">
-    <div class="circle circle-1"></div>
-    <div class="circle circle-2"></div>
-    <div class="circle circle-3"></div>
-  </div>
-
   <div class="container">
+    <!-- FORMAS DECORATIVAS -->
+    <div class="decorative-shapes">
+      <div class="circle circle-1"></div>
+      <div class="circle circle-2"></div>
+      <div class="circle circle-3"></div>
+    </div>
+
     <div class="content">
       <!-- HEADER -->
       <div class="header">
@@ -546,9 +527,10 @@
         <div class="info-block">
           <h3>Receptor</h3>
           <p><span class="highlight">{{receptorNombre}}</span></p>
-          <p>{{receptorDireccion}}</p>
           <p><strong>RFC:</strong> {{receptorRfc}}</p>
+          <p><strong>C.P.:</strong> {{receptorCP}}</p>
           <p><strong>Uso CFDI:</strong> {{usoCfdi}}</p>
+          <p><strong>Régimen Fiscal:</strong> {{receptorRegimen}}</p>
         </div>
         <div class="info-block">
           <h3>Datos del Comprobante</h3>
@@ -556,6 +538,9 @@
           <p><strong>Forma de Pago:</strong> {{formaPago}}</p>
           <p><strong>Método de Pago:</strong> {{metodoPago}}</p>
           <p><strong>Moneda:</strong> {{moneda}}</p>
+          <p><strong>Exportación:</strong> {{exportacion}}</p>
+          <p><strong>Régimen Fiscal:</strong> {{regimenFiscal}}</p>
+          <p><strong>Lugar Expedición:</strong> {{lugarExpedicion}}</p>
         </div>
       </div>
 
@@ -570,12 +555,12 @@
         <table class="tabla">
           <thead>
             <tr>
-              <th>Cant.</th>
-              <th>Unidad</th>
-              <th>Descripción</th>
-              <th>P. Unit.</th>
-              <th>Impuestos</th>
-              <th>Total</th>
+              <th class="col-cant">CANT.</th>
+              <th class="col-unidad">UNIDAD</th>
+              <th class="col-desc">DESCRIPCIÓN</th>
+              <th class="col-precio">P. UNITARIO</th>
+              <th class="col-impuesto">IMPUESTO</th>
+              <th class="col-total">TOTAL</th>
             </tr>
           </thead>
           <tbody>
@@ -584,8 +569,8 @@
         </table>
       </div>
 
-      <!-- SECCIÓN INFERIOR -->
-      <div class="bottom-section">        
+      <!-- TOTALES -->
+      <div class="bottom-section">
         <div class="totales-section">
           <div class="total-line">
             <span class="label">Subtotal:</span>
@@ -633,18 +618,18 @@
       <!-- SELLOS DIGITALES -->
       <div class="seal-section">
         <div class="seal-box">
-          <div class="seal-title"> Sello Digital del CFDI</div>
+          <div class="seal-title">Sello Digital del CFDI</div>
           <div class="seal-text">{{selloCFD}}</div>
         </div>
         <div class="seal-box">
-          <div class="seal-title"> Sello Digital del SAT</div>
+          <div class="seal-title">Sello Digital del SAT</div>
           <div class="seal-text">{{selloSAT}}</div>
         </div>
       </div>
 
       <!-- CADENA ORIGINAL -->
       <div class="chain-section">
-        <div class="chain-title"> Cadena Original del Complemento de Certificación Digital del SAT</div>
+        <div class="chain-title">Cadena Original del Complemento de Certificación Digital del SAT</div>
         <div class="chain-text">{{cadenaOriginal}}</div>
       </div>
     </div>
@@ -652,11 +637,11 @@
     <!-- FOOTER -->
     <div class="footer">
       <div class="footer-item">
-        <span class="footer-icon">📞</span>
+        <span class="footer-icon">Tel:</span>
         <span>{{telefonoContacto}}</span>
       </div>
       <div class="footer-item">
-        <span class="footer-icon">✉️</span>
+        <span class="footer-icon">Email:</span>
         <span>{{emailContacto}}</span>
       </div>
     </div>
