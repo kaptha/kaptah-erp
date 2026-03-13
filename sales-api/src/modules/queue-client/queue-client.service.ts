@@ -45,11 +45,18 @@ export class QueueClientService {
     }
   }
 
-  async sendSaleNoteEmail(notaId: string, clienteEmail: string) {
-    return await this.emailQueue.add('enviar-nota-venta', {
-      notaId,
-      clienteEmail
-    }, { priority: 3 });
+  async sendSaleNoteEmail(data: {
+    notaId: string;
+    clienteEmail: string;
+    folio: string;
+    customerName: string;
+    total: number;
+    saleDate: string;
+    empresaNombre?: string;
+    customMessage?: string;
+    pdfBase64?: string;
+  }) {
+    return await this.emailQueue.add('enviar-nota-venta', data, { priority: 3 });
   }
 
   async sendCFDIEmail(cfdiId: string, clienteEmail: string) {

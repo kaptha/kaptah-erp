@@ -636,42 +636,66 @@ private async obtenerLogoUsuario(userId: string, token: string): Promise<string 
     };
   }
  async sendSaleNoteByEmail(
-  id: string,
-  recipientEmail: string,
-  customMessage: string,
-  userId: string,
-  idToken: string,
-  pdfStyle: string = 'classic',
-): Promise<{ jobId: string; message: string }> {
-  try {
-    this.logger.log(`📧 ===== INICIANDO ENVÍO DE EMAIL VÍA COLA =====`);
-    
-    // 1. Validar que la nota existe
-    const saleNote = await this.findOne(id, userId);
+    id: string,
+    recipientEmail: string,
+    customMessage: string,
+    userId: string,
+    idToken: string,
+    pdfStyle: string = 'classic',
+  ): Promise<{ jobId: string; message: string }> {
+    try {
+      this.logger.log(`📧 ===== INICIANDO ENVÍO DE EMAIL VÍA COLA =====`);
+      
+      // 1. Validar que la nota existe
+      const saleNote = await this.findOne(id, userId);
+      if (!saleNote) {
+        throw new Error(`Nota de venta ${id} no encontrada`);
+      }
 
-    if (!saleNote) {
-      throw new Error(`Nota de venta ${id} no encontrada`);
+      // 2. Obtener nombre de empresa
+      let empresaNombre = 'Kaptah';
+      try {
+        const datosUsuario = await this.usuariosService.findByFirebaseUid(userId);
+        empresaNombre = datosUsuario?.empresa_nombre || datosUsuario?.sucursal_nombre || 'Kaptah';
+      } catch (e) {
+        this.logger.warn('No se pudo obtener nombre de empresa');
+      }
+
+      // 3. Generar PDF
+      let pdfBase64: string | null = null;
+      try {
+        this.logger.log('📄 Generando PDF para adjuntar al email...');
+        const pdfBuffer = await this.generarPdfEstiloRemision(id, userId, idToken);
+        pdfBase64 = pdfBuffer.toString('base64');
+        this.logger.log('✅ PDF generado, tamaño base64: ' + pdfBase64.length);
+      } catch (e) {
+        this.logger.warn('⚠️ No se pudo generar PDF: ' + e.message);
+      }
+
+      // 4. Encolar job con datos completos
+      const job = await this.queueClient.sendSaleNoteEmail({
+        notaId: id,
+        clienteEmail: recipientEmail,
+        folio: saleNote.folio,
+        customerName: saleNote.customerName,
+        total: saleNote.total,
+        saleDate: saleNote.saleDate?.toISOString() || new Date().toISOString(),
+        empresaNombre,
+        customMessage,
+        pdfBase64,
+      });
+
+      this.logger.log(`✅ Job de email creado: ${job.id}`);
+
+      return {
+        jobId: job.id.toString(),
+        message: `Email en cola de envío. Llegará en unos momentos.`
+      };
+    } catch (error) {
+      this.logger.error(`❌ Error encolando email: ${error.message}`, error.stack);
+      throw new Error(`Error encolando email: ${error.message}`);
     }
-
-    // 2. Publicar job a la cola de email
-    // La cola se encargará de generar PDF, obtener logo, etc.
-    const job = await this.queueClient.sendSaleNoteEmail(
-      id,
-      recipientEmail
-    );
-
-    this.logger.log(`✅ Job de email creado: ${job.id}`);
-
-    return {
-      jobId: job.id.toString(),
-      message: `Email en cola de envío. Llegará en unos momentos.`
-    };
-
-  } catch (error) {
-    this.logger.error(`❌ Error encolando email: ${error.message}`, error.stack);
-    throw new Error(`Error encolando email: ${error.message}`);
   }
-}
 
 /**
  * Helper para obtener texto del método de pago
