@@ -43,7 +43,9 @@ export class BranchTransfersListComponent implements OnInit {
   selectedStatus: string = 'all';
   selectedBranchId: number | null = null;
   loading: boolean = false;
-
+  mobilePaginator = { pageIndex: 0, pageSize: 5 };
+  isMobile = false;
+  allTransfers: any[] = [];
   displayedColumns: string[] = [
     'transfer_number',
     'from_branch',
@@ -86,29 +88,28 @@ export class BranchTransfersListComponent implements OnInit {
   }
 
   loadTransfers(): void {
-    this.loading = true;
-    const filters: any = {};
-
-    if (this.selectedBranchId) {
-      filters.from_branch_id = this.selectedBranchId;
-    }
-
-    if (this.selectedStatus !== 'all') {
-      filters.status = this.selectedStatus as TransferStatus;
-    }
-
-    this.branchTransferService.getTransfers(filters).subscribe({
-      next: (transfers) => {
-        this.transfers = transfers;
-        this.loading = false;
-      },
-      error: (error) => {
-        console.error('Error al cargar transferencias:', error);
-        this.snackBar.open('Error al cargar transferencias', 'Cerrar', { duration: 3000 });
-        this.loading = false;
-      }
-    });
+  this.loading = true;
+  const filters: any = {};
+  if (this.selectedBranchId) {
+    filters.from_branch_id = this.selectedBranchId;
   }
+  if (this.selectedStatus !== 'all') {
+    filters.status = this.selectedStatus as TransferStatus;
+  }
+  this.branchTransferService.getTransfers(filters).subscribe({
+    next: (transfers) => {
+      this.allTransfers = transfers;
+      this.transfers = [...transfers];
+      this.mobilePaginator.pageIndex = 0;
+      this.loading = false;
+    },
+    error: (error) => {
+      console.error('Error al cargar transferencias:', error);
+      this.snackBar.open('Error al cargar transferencias', 'Cerrar', { duration: 3000 });
+      this.loading = false;
+    }
+  });
+}
 
   onStatusChange(): void {
     this.loadTransfers();
@@ -254,4 +255,51 @@ export class BranchTransfersListComponent implements OnInit {
   getCompletedCount(): number {
     return this.transfers.filter(t => t.status === 'completed').length;
   }
+  getMobileStartIndex(): number {
+  return this.mobilePaginator.pageIndex * this.mobilePaginator.pageSize;
+}
+
+getMobileEndIndex(): number {
+  const end = this.getMobileStartIndex() + this.mobilePaginator.pageSize;
+  return Math.min(end, this.transfers.length);
+}
+
+isLastMobilePage(): boolean {
+  return this.getMobileEndIndex() >= this.transfers.length;
+}
+
+previousMobilePage(): void {
+  if (this.mobilePaginator.pageIndex > 0) {
+    this.mobilePaginator.pageIndex--;
+  }
+}
+
+nextMobilePage(): void {
+  if (!this.isLastMobilePage()) {
+    this.mobilePaginator.pageIndex++;
+  }
+}
+  this.checkScreenSize();
+window.addEventListener('resize', () => this.checkScreenSize());
+
+private checkScreenSize(): void {
+  this.isMobile = window.innerWidth <= 600;
+}
+  applyFilter(event: Event): void {
+  const filterValue = (event.target as HTMLInputElement).value.trim().toLowerCase();
+
+  if (!filterValue) {
+    this.transfers = [...this.allTransfers];
+  } else {
+    this.transfers = this.allTransfers.filter(t =>
+      (t.transfer_number || '').toLowerCase().includes(filterValue) ||
+      (t.from_branch_alias || '').toLowerCase().includes(filterValue) ||
+      (t.to_branch_alias || '').toLowerCase().includes(filterValue) ||
+      (t.requested_by || '').toLowerCase().includes(filterValue) ||
+      (t.status || '').toLowerCase().includes(filterValue)
+    );
+  }
+
+  this.mobilePaginator.pageIndex = 0;
+}
 }
