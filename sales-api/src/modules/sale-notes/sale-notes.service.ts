@@ -548,11 +548,15 @@ private async obtenerLogoUsuario(userId: string, token: string): Promise<string 
     await this.queueClient.generateSaleNotePDF(savedNote.id);
 
     if (createSaleNoteDto.enviarEmail && createSaleNoteDto.clienteEmail) {
-      await this.queueClient.sendSaleNoteEmail(
-        savedNote.id,
-        createSaleNoteDto.clienteEmail
-      );
-    }
+  await this.queueClient.sendSaleNoteEmail({
+    notaId: savedNote.id,
+    clienteEmail: createSaleNoteDto.clienteEmail,
+    folio: savedNote.folio,
+    customerName: savedNote.customerName,
+    total: savedNote.total,
+    saleDate: savedNote.saleDate.toISOString(),
+      });
+     }
 
     await this.saleNoteRepository.update(savedNote.id, { status: 'COMPLETED' });
 
@@ -666,7 +670,7 @@ private async obtenerLogoUsuario(userId: string, token: string): Promise<string 
       let empresaNombre = 'Kaptah';
       try {
         const datosUsuario = await this.usuariosService.findByFirebaseUid(userId);
-        empresaNombre = datosUsuario?.empresa_nombre || datosUsuario?.sucursal_nombre || 'Kaptah';
+        empresaNombre = (datosUsuario as any)?.empresa_nombre || (datosUsuario as any)?.sucursal_nombre || 'Kaptah';
       } catch (e) {
         this.logger.warn('No se pudo obtener nombre de empresa');
       }
@@ -675,7 +679,7 @@ private async obtenerLogoUsuario(userId: string, token: string): Promise<string 
       let pdfBase64: string | null = null;
       try {
         this.logger.log('📄 Generando PDF para adjuntar al email...');
-        const pdfBuffer = await this.generarPdfEstiloRemision(id, userId, idToken);
+        const pdfBuffer = await this.generarPdfEstiloRemision(id, userId, 'classic', idToken);
         pdfBase64 = pdfBuffer.toString('base64');
         this.logger.log('✅ PDF generado, tamaño base64: ' + pdfBase64.length);
       } catch (e) {
