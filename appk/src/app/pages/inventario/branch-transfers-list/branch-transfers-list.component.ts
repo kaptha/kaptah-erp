@@ -348,6 +348,5 @@ export class BranchTransfersListComponent implements OnInit, OnDestroy {
     }
 
     this.snackBar.open('Archivo exportado exitosamente', 'Cerrar', { duration: 3000 });
-  });
   }
 }
