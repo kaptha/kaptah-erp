@@ -21,31 +21,46 @@ export class TaxItemDto {
 }
 
 export class CreateSaleNoteItemDto {
-  @ApiProperty({ description: 'ID del producto' })
-  @IsUUID()
-  productId: string;  
+  @ApiProperty({ required: false })
+  @IsOptional() 
+  @IsString()
+  productId?: string;  
 
-  @ApiProperty({ description: 'Descripción del producto' })
+  @IsOptional()
+  @IsString()
+  itemId?: string;    
+
+  @IsOptional()
+  @IsString()
+  type?: string;     
+
   @IsNotEmpty()
   @IsString()
   description: string; 
 
-  @ApiProperty({ description: 'Cantidad del producto', minimum: 1 })
   @IsNumber()
   @IsPositive()
   quantity: number;
 
-  @ApiProperty({ description: 'Precio unitario', minimum: 0 })
   @IsNumber()
   @IsPositive()
   unitPrice: number;
 
-  @ApiProperty({ description: 'Lista de impuestos aplicados', required: false, type: [TaxItemDto] })
+  @IsOptional()
+  @IsNumber()
+  subtotal?: number;
+
+  @IsOptional()
+  @IsNumber()
+  taxesTotal?: number;
+
+  @IsOptional()
+  @IsNumber()
+  total?: number;
+
   @IsOptional()
   @IsArray()
-  @ValidateNested({ each: true })
-  @Type(() => TaxItemDto)
-  taxes?: TaxItemDto[];
+  taxes?: any[];       
 }
 
 export class CreateSaleNoteDto {
@@ -80,7 +95,6 @@ export class CreateSaleNoteDto {
   @IsOptional()
   clienteEmail?: string;
 
-  @ApiProperty({ description: 'Observaciones de la nota', required: false })
   @IsOptional()
   @IsString()
   observaciones?: string;
