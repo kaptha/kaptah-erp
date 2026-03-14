@@ -21,22 +21,21 @@ export class TaxItemDto {
 }
 
 export class CreateSaleNoteItemDto {
-  @ApiProperty({ required: false })
-  @IsOptional() 
+  @IsOptional()
   @IsString()
-  productId?: string;  
+  productId?: string;        
 
   @IsOptional()
   @IsString()
-  itemId?: string;    
+  itemId?: string;           
 
   @IsOptional()
   @IsString()
-  type?: string;     
+  type?: string;             
 
   @IsNotEmpty()
   @IsString()
-  description: string; 
+  description: string;
 
   @IsNumber()
   @IsPositive()
@@ -60,7 +59,7 @@ export class CreateSaleNoteItemDto {
 
   @IsOptional()
   @IsArray()
-  taxes?: any[];       
+  taxes?: any[];             
 }
 
 export class CreateSaleNoteDto {
