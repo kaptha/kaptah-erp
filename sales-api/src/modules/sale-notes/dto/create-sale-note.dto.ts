@@ -23,15 +23,15 @@ export class TaxItemDto {
 export class CreateSaleNoteItemDto {
   @IsOptional()
   @IsString()
-  productId?: string;        
+  productId?: string;
 
   @IsOptional()
   @IsString()
-  itemId?: string;           
+  itemId?: string;
 
   @IsOptional()
   @IsString()
-  type?: string;             
+  type?: string;
 
   @IsNotEmpty()
   @IsString()
@@ -59,7 +59,7 @@ export class CreateSaleNoteItemDto {
 
   @IsOptional()
   @IsArray()
-  taxes?: any[];             
+  taxes?: any[];
 }
 
 export class CreateSaleNoteDto {
