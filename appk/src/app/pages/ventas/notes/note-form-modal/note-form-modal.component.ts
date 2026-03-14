@@ -918,26 +918,40 @@ private initializeTaxesForItem(itemIndex: number): void {
     requiresCFDI: formData.requiresCFDI || false,
     
     items: formData.items.map((item: any) => {
-      const itemSubtotal = Number(item.subtotal) || 0;
-      const itemTaxesTotal = Number(item.taxesTotal) || 0;
-      const itemTotal = Number(item.total) || (itemSubtotal + itemTaxesTotal);
-      
+      const quantity = Number(item.quantity) || 1;
+      const unitPrice = Number(item.unitPrice) || 0;
+      const itemSubtotal = quantity * unitPrice;
+      const rawTaxes = item.taxes || [];
+      const selectedTaxes = rawTaxes.filter((t: any) => t.selected === true);
+      const itemTaxesTotal = selectedTaxes.reduce((sum: number, t: any) => {
+        return sum + (itemSubtotal * Number(t.tasa || 0));
+      }, 0);
+      const itemTotal = itemSubtotal + itemTaxesTotal;
       return {
         type: item.type || 'product',
         itemId: item.itemId,
         description: item.description,
-        quantity: Number(item.quantity) || 1,
-        unitPrice: Number(item.unitPrice) || 0,
+        quantity,
+        unitPrice,
         subtotal: itemSubtotal,
-        taxesTotal: itemTaxesTotal,  // ✅ Debe tener valor
-        total: itemTotal,             // ✅ Debe incluir impuestos
-        taxes: item.taxes || []
+        taxesTotal: itemTaxesTotal,
+        total: itemTotal,
+        taxes: selectedTaxes
       };
     }),
-    
-    subtotal: Number(formData.subtotal) || 0,
-    taxesTotal: Number(formData.taxesTotal) || 0,  // ✅ Total de impuestos
-    total: Number(formData.total) || 0,
+
+    subtotal: formData.items.reduce((s: number, item: any) => {
+      return s + ((Number(item.quantity) || 1) * (Number(item.unitPrice) || 0));
+    }, 0),
+    taxesTotal: Number(formData.taxesTotal) || 0,
+    total: formData.items.reduce((s: number, item: any) => {
+      const qty = Number(item.quantity) || 1;
+      const price = Number(item.unitPrice) || 0;
+      const sub = qty * price;
+      const taxes = (item.taxes || []).filter((t: any) => t.selected === true)
+        .reduce((ts: number, t: any) => ts + (sub * Number(t.tasa || 0)), 0);
+      return s + sub + taxes;
+    }, 0),
     observaciones: formData.observaciones || ''
   };
 
