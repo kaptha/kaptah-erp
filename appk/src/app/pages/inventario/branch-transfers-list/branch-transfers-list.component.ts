@@ -326,4 +326,8 @@ export class BranchTransfersListComponent implements OnInit, OnDestroy {
   getCompletedCount(): number {
     return this.transfers.filter(t => t.status === 'completed').length;
   }
+
+  exportTransfers(format: string): void {
+    this.snackBar.open('Exportar como ' + format + ' - En desarrollo', 'Cerrar', { duration: 3000 });
+  }
 }

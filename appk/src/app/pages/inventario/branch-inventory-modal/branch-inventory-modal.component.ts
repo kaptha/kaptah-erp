@@ -7,6 +7,7 @@ import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatSelectModule } from '@angular/material/select';
 import { MatButtonModule } from '@angular/material/button';
+import { MatIconModule } from '@angular/material/icon';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { BranchInventoryService, CreateBranchInventoryDto, UpdateBranchInventoryDto } from '../../../services/inventory/branch-inventory.service';
 import { ProductService } from '../../../services/inventory/product.service';
@@ -29,6 +30,7 @@ interface DialogData {
     MatInputModule,
     MatSelectModule,
     MatButtonModule,
+    MatIconModule,
     MatSnackBarModule,
     MatProgressSpinnerModule
   ],
@@ -54,7 +56,7 @@ export class BranchInventoryModalComponent implements OnInit {
     private snackBar: MatSnackBar
   ) {
     this.mode = data.mode;
-    
+
     this.inventoryForm = this.fb.group({
       branch_id: [{ value: '', disabled: this.mode === 'edit' }, Validators.required],
       product_id: [{ value: '', disabled: this.mode === 'edit' }, Validators.required],
@@ -83,7 +85,7 @@ export class BranchInventoryModalComponent implements OnInit {
   loadUserAndData(): void {
     const idToken = localStorage.getItem('idToken');
     if (!idToken) {
-      this.snackBar.open('No se encontró token de autenticación', 'Cerrar', { duration: 3000 });
+      this.snackBar.open('No se encontr\u00f3 token de autenticaci\u00f3n', 'Cerrar', { duration: 3000 });
       return;
     }
 
@@ -141,7 +143,7 @@ export class BranchInventoryModalComponent implements OnInit {
 
   createInventory(): void {
     const formValue = this.inventoryForm.getRawValue();
-    
+
     const createDto: CreateBranchInventoryDto = {
       userId: this.userId,
       branch_id: formValue.branch_id,
@@ -171,7 +173,7 @@ export class BranchInventoryModalComponent implements OnInit {
 
   updateInventory(): void {
     const formValue = this.inventoryForm.getRawValue();
-    
+
     const updateDto: UpdateBranchInventoryDto = {
       quantity: formValue.quantity,
       min_stock: formValue.min_stock,

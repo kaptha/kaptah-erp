@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { MatDialog, MatDialogModule } from '@angular/material/dialog';
@@ -13,6 +13,7 @@ import { MatSelectModule } from '@angular/material/select';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatMenuModule } from '@angular/material/menu';
 import { MatChipsModule } from '@angular/material/chips';
+import { MatTooltipModule } from '@angular/material/tooltip';
 import { BranchInventoryService, BranchInventoryWithDetails } from '../../../services/inventory/branch-inventory.service';
 import { BranchInventoryModalComponent } from '../branch-inventory-modal/branch-inventory-modal.component';
 import { SucursalesService } from '../../../services/sucursales.service';
@@ -34,12 +35,13 @@ import { SucursalesService } from '../../../services/sucursales.service';
     MatSnackBarModule,
     MatProgressSpinnerModule,
     MatMenuModule,
-    MatChipsModule
+    MatChipsModule,
+    MatTooltipModule
   ],
   templateUrl: './branch-inventory-list.component.html',
   styleUrls: ['./branch-inventory-list.component.css']
 })
-export class BranchInventoryListComponent implements OnInit {
+export class BranchInventoryListComponent implements OnInit, OnDestroy {
   inventoryItems: BranchInventoryWithDetails[] = [];
   filteredItems: BranchInventoryWithDetails[] = [];
   branches: any[] = [];
@@ -48,6 +50,8 @@ export class BranchInventoryListComponent implements OnInit {
   searchTerm: string = '';
   loading: boolean = false;
   totalValue: number = 0;
+  isMobile = false;
+  mobilePaginator = { pageIndex: 0, pageSize: 5 };
 
   displayedColumns: string[] = [
     'product_code',
@@ -69,6 +73,8 @@ export class BranchInventoryListComponent implements OnInit {
     { value: 'out', label: 'Agotado' }
   ];
 
+  private resizeListener = () => this.checkScreenSize();
+
   constructor(
     private branchInventoryService: BranchInventoryService,
     private sucursalesService: SucursalesService,
@@ -79,6 +85,16 @@ export class BranchInventoryListComponent implements OnInit {
   ngOnInit(): void {
     this.loadBranches();
     this.loadInventory();
+    this.checkScreenSize();
+    window.addEventListener('resize', this.resizeListener);
+  }
+
+  ngOnDestroy(): void {
+    window.removeEventListener('resize', this.resizeListener);
+  }
+
+  private checkScreenSize(): void {
+    this.isMobile = window.innerWidth <= 600;
   }
 
   loadBranches(): void {
@@ -114,6 +130,7 @@ export class BranchInventoryListComponent implements OnInit {
         this.inventoryItems = items;
         this.filteredItems = items;
         this.calculateTotalValue();
+        this.mobilePaginator.pageIndex = 0;
         this.loading = false;
       },
       error: (error) => {
@@ -154,45 +171,43 @@ export class BranchInventoryListComponent implements OnInit {
     switch (status) {
       case 'ok': return 'OK';
       case 'low': return 'Bajo';
-      case 'critical': return 'Crítico';
+      case 'critical': return 'Cr\u00edtico';
       case 'out': return 'Agotado';
       default: return status;
     }
   }
 
   getCriticalCount(): number {
-    return this.filteredItems.filter(item => 
+    return this.filteredItems.filter(item =>
       item.stock_status === 'critical' || item.stock_status === 'out'
     ).length;
   }
 
   openAddModal(): void {
-  const dialogRef = this.dialog.open(BranchInventoryModalComponent, {
-    width: '600px',
-    data: { mode: 'create' }
-  });
+    const dialogRef = this.dialog.open(BranchInventoryModalComponent, {
+      width: '600px',
+      data: { mode: 'create' }
+    });
 
-  dialogRef.afterClosed().subscribe(result => {
-    if (result) {
-      this.loadInventory();
-    }
-  });
-}
+    dialogRef.afterClosed().subscribe(result => {
+      if (result) {
+        this.loadInventory();
+      }
+    });
+  }
 
-openEditModal(item: BranchInventoryWithDetails): void {
-  const dialogRef = this.dialog.open(BranchInventoryModalComponent, {
-    width: '600px',
-    data: { mode: 'edit', item }
-  });
+  openEditModal(item: BranchInventoryWithDetails): void {
+    const dialogRef = this.dialog.open(BranchInventoryModalComponent, {
+      width: '600px',
+      data: { mode: 'edit', item }
+    });
 
-  dialogRef.afterClosed().subscribe(result => {
-    if (result) {
-      this.loadInventory();
-    }
-  });
-}
-
-  
+    dialogRef.afterClosed().subscribe(result => {
+      if (result) {
+        this.loadInventory();
+      }
+    });
+  }
 
   deleteItem(item: BranchInventoryWithDetails): void {
     const message = 'Eliminar inventario de ' + item.product_name + ' en ' + item.branch_alias + '?';
@@ -208,5 +223,34 @@ openEditModal(item: BranchInventoryWithDetails): void {
         }
       });
     }
+  }
+
+  getMobileStartIndex(): number {
+    return this.mobilePaginator.pageIndex * this.mobilePaginator.pageSize;
+  }
+
+  getMobileEndIndex(): number {
+    const end = this.getMobileStartIndex() + this.mobilePaginator.pageSize;
+    return Math.min(end, this.filteredItems.length);
+  }
+
+  isLastMobilePage(): boolean {
+    return this.getMobileEndIndex() >= this.filteredItems.length;
+  }
+
+  previousMobilePage(): void {
+    if (this.mobilePaginator.pageIndex > 0) {
+      this.mobilePaginator.pageIndex--;
+    }
+  }
+
+  nextMobilePage(): void {
+    if (!this.isLastMobilePage()) {
+      this.mobilePaginator.pageIndex++;
+    }
+  }
+
+  exportInventory(format: string): void {
+    this.snackBar.open('Exportar como ' + format + ' - En desarrollo', 'Cerrar', { duration: 3000 });
   }
 }
