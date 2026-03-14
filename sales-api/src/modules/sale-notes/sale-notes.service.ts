@@ -477,16 +477,30 @@ private async obtenerLogoUsuario(userId: string, token: string): Promise<string 
   }
 
   async create(createSaleNoteDto: CreateSaleNoteDto, userId: string): Promise<SaleNote> {
-    if (!createSaleNoteDto.items || !Array.isArray(createSaleNoteDto.items)) {
-    throw new Error('Items son requeridos');
+  // Guarda defensiva
+  if (!createSaleNoteDto.items || !Array.isArray(createSaleNoteDto.items)) {
+    throw new Error('Items son requeridos y deben ser un array');
   }
+
   const items = createSaleNoteDto.items.map(item => {
     const subtotal = item.quantity * item.unitPrice;
-    const taxes = item.taxes?.filter((t: any) => t.selected) || [];
-    const taxesTotal = taxes.reduce((sum: number, tax: any) => sum + Number(tax.amount || 0), 0);
     
+    // El frontend manda taxes como array de {selected, id, alias, tasa, amount}
+    // Solo tomar los que tienen amount > 0 o están seleccionados
+    const rawTaxes = item.taxes || [];
+    const taxes = rawTaxes
+      .filter((t: any) => t.selected === true || (t.amount && Number(t.amount) > 0))
+      .map((t: any) => ({
+        taxId: t.id || t.taxId,
+        name: t.alias || t.name || '',
+        rate: String(t.tasa || t.rate || 0),
+        amount: Number(t.amount || 0),
+      }));
+
+    const taxesTotal = taxes.reduce((sum: number, tax: any) => sum + Number(tax.amount), 0);
+
     return {
-      productId: item.productId || item.itemId,
+      productId: item.productId || item.itemId || null,
       quantity: item.quantity,
       unitPrice: item.unitPrice,
       description: item.description,
@@ -508,18 +522,16 @@ private async obtenerLogoUsuario(userId: string, token: string): Promise<string 
     total,
     items,
     paymentMethod: createSaleNoteDto.paymentMethod,
-    status: 'PROCESSING', // 👈 CAMBIAR DE 'COMPLETED' A 'PROCESSING'
+    status: 'PROCESSING',
     userId,
     sucursalId: createSaleNoteDto.sucursalId,
     createdBy: userId,
-    observaciones: createSaleNoteDto.observaciones,
+    observaciones: createSaleNoteDto.observaciones,  // ← nuevo
   });
 
   const savedNote = await this.saleNoteRepository.save(saleNote);
 
-  // 👇 AGREGAR: Jobs asíncronos
   try {
-    // 1. Deducir inventario (si aplica)
     if (createSaleNoteDto.afectaInventario && items.length > 0) {
       await this.queueClient.deductStockForSale({
         notaVentaId: savedNote.id,
@@ -528,15 +540,13 @@ private async obtenerLogoUsuario(userId: string, token: string): Promise<string 
           cantidad: item.quantity
         })),
         almacenId: createSaleNoteDto.almacenId || 'default',
-        empresaId: userId, // O el empresaId real
+        empresaId: userId,
         userId
       });
     }
 
-    // 2. Generar PDF
     await this.queueClient.generateSaleNotePDF(savedNote.id);
 
-    // 3. Enviar email (si se solicita)
     if (createSaleNoteDto.enviarEmail && createSaleNoteDto.clienteEmail) {
       await this.queueClient.sendSaleNoteEmail(
         savedNote.id,
@@ -544,14 +554,10 @@ private async obtenerLogoUsuario(userId: string, token: string): Promise<string 
       );
     }
 
-    // 4. Actualizar estado a COMPLETED
-    await this.saleNoteRepository.update(savedNote.id, { 
-      status: 'COMPLETED' 
-    });
+    await this.saleNoteRepository.update(savedNote.id, { status: 'COMPLETED' });
 
   } catch (error) {
     this.logger.error(`Error en jobs asíncronos: ${error.message}`);
-    // La nota se creó pero los jobs fallaron, se reintentarán automáticamente
   }
 
   return savedNote;
