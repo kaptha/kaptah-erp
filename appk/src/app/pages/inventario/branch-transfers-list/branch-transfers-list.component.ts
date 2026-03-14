@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { MatDialog, MatDialogModule } from '@angular/material/dialog';
@@ -12,6 +12,8 @@ import { MatSelectModule } from '@angular/material/select';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatMenuModule } from '@angular/material/menu';
 import { MatChipsModule } from '@angular/material/chips';
+import { MatInputModule } from '@angular/material/input';
+import { MatTooltipModule } from '@angular/material/tooltip';
 import { BranchTransferService, BranchTransferWithItems, TransferStatus } from '../../../services/inventory/branch-transfer.service';
 import { SucursalesService } from '../../../services/sucursales.service';
 import { TransferFormModalComponent } from '../transfer-form-modal/transfer-form-modal.component';
@@ -32,20 +34,23 @@ import { TransferFormModalComponent } from '../transfer-form-modal/transfer-form
     MatSnackBarModule,
     MatProgressSpinnerModule,
     MatMenuModule,
-    MatChipsModule
+    MatChipsModule,
+    MatInputModule,
+    MatTooltipModule
   ],
   templateUrl: './branch-transfers-list.component.html',
   styleUrls: ['./branch-transfers-list.component.css']
 })
-export class BranchTransfersListComponent implements OnInit {
+export class BranchTransfersListComponent implements OnInit, OnDestroy {
   transfers: BranchTransferWithItems[] = [];
+  allTransfers: BranchTransferWithItems[] = [];
   branches: any[] = [];
   selectedStatus: string = 'all';
   selectedBranchId: number | null = null;
   loading: boolean = false;
-  mobilePaginator = { pageIndex: 0, pageSize: 5 };
   isMobile = false;
-  allTransfers: any[] = [];
+  mobilePaginator = { pageIndex: 0, pageSize: 5 };
+
   displayedColumns: string[] = [
     'transfer_number',
     'from_branch',
@@ -64,6 +69,8 @@ export class BranchTransfersListComponent implements OnInit {
     { value: 'cancelled', label: 'Canceladas' }
   ];
 
+  private resizeListener = () => this.checkScreenSize();
+
   constructor(
     private branchTransferService: BranchTransferService,
     private sucursalesService: SucursalesService,
@@ -75,8 +82,18 @@ export class BranchTransfersListComponent implements OnInit {
     this.loadBranches();
     this.loadTransfers();
     this.checkScreenSize();
-    window.addEventListener('resize', () => this.checkScreenSize());
+    window.addEventListener('resize', this.resizeListener);
   }
+
+  ngOnDestroy(): void {
+    window.removeEventListener('resize', this.resizeListener);
+  }
+
+  private checkScreenSize(): void {
+    this.isMobile = window.innerWidth <= 600;
+  }
+
+  // ===== CARGA DE DATOS =====
 
   loadBranches(): void {
     this.sucursalesService.getSucursales().subscribe({
@@ -90,28 +107,30 @@ export class BranchTransfersListComponent implements OnInit {
   }
 
   loadTransfers(): void {
-  this.loading = true;
-  const filters: any = {};
-  if (this.selectedBranchId) {
-    filters.from_branch_id = this.selectedBranchId;
-  }
-  if (this.selectedStatus !== 'all') {
-    filters.status = this.selectedStatus as TransferStatus;
-  }
-  this.branchTransferService.getTransfers(filters).subscribe({
-    next: (transfers) => {
-      this.allTransfers = transfers;
-      this.transfers = [...transfers];
-      this.mobilePaginator.pageIndex = 0;
-      this.loading = false;
-    },
-    error: (error) => {
-      console.error('Error al cargar transferencias:', error);
-      this.snackBar.open('Error al cargar transferencias', 'Cerrar', { duration: 3000 });
-      this.loading = false;
+    this.loading = true;
+    const filters: any = {};
+    if (this.selectedBranchId) {
+      filters.from_branch_id = this.selectedBranchId;
     }
-  });
-}
+    if (this.selectedStatus !== 'all') {
+      filters.status = this.selectedStatus as TransferStatus;
+    }
+    this.branchTransferService.getTransfers(filters).subscribe({
+      next: (transfers) => {
+        this.allTransfers = transfers;
+        this.transfers = [...transfers];
+        this.mobilePaginator.pageIndex = 0;
+        this.loading = false;
+      },
+      error: (error) => {
+        console.error('Error al cargar transferencias:', error);
+        this.snackBar.open('Error al cargar transferencias', 'Cerrar', { duration: 3000 });
+        this.loading = false;
+      }
+    });
+  }
+
+  // ===== FILTROS =====
 
   onStatusChange(): void {
     this.loadTransfers();
@@ -121,23 +140,72 @@ export class BranchTransfersListComponent implements OnInit {
     this.loadTransfers();
   }
 
+  applyFilter(event: Event): void {
+    const filterValue = (event.target as HTMLInputElement).value.trim().toLowerCase();
+
+    if (!filterValue) {
+      this.transfers = [...this.allTransfers];
+    } else {
+      this.transfers = this.allTransfers.filter(t =>
+        (t.transfer_number || '').toLowerCase().includes(filterValue) ||
+        (t.from_branch_alias || '').toLowerCase().includes(filterValue) ||
+        (t.to_branch_alias || '').toLowerCase().includes(filterValue) ||
+        (t.requested_by || '').toLowerCase().includes(filterValue) ||
+        (t.status || '').toLowerCase().includes(filterValue)
+      );
+    }
+
+    this.mobilePaginator.pageIndex = 0;
+  }
+
+  // ===== PAGINACIÓN MÓVIL =====
+
+  getMobileStartIndex(): number {
+    return this.mobilePaginator.pageIndex * this.mobilePaginator.pageSize;
+  }
+
+  getMobileEndIndex(): number {
+    const end = this.getMobileStartIndex() + this.mobilePaginator.pageSize;
+    return Math.min(end, this.transfers.length);
+  }
+
+  isLastMobilePage(): boolean {
+    return this.getMobileEndIndex() >= this.transfers.length;
+  }
+
+  previousMobilePage(): void {
+    if (this.mobilePaginator.pageIndex > 0) {
+      this.mobilePaginator.pageIndex--;
+    }
+  }
+
+  nextMobilePage(): void {
+    if (!this.isLastMobilePage()) {
+      this.mobilePaginator.pageIndex++;
+    }
+  }
+
+  // ===== HELPERS =====
+
   getBranchName(branchId: number): string {
     const branch = this.branches.find(b => b.id === branchId);
     return branch?.alias || 'N/A';
   }
 
-  openCreateModal(): void {
-  const dialogRef = this.dialog.open(TransferFormModalComponent, {
-    width: '800px',
-    disableClose: true
-  });
+  // ===== ACCIONES =====
 
-  dialogRef.afterClosed().subscribe(result => {
-    if (result) {
-      this.loadTransfers();
-    }
-  });
-}
+  openCreateModal(): void {
+    const dialogRef = this.dialog.open(TransferFormModalComponent, {
+      width: '800px',
+      disableClose: true
+    });
+
+    dialogRef.afterClosed().subscribe(result => {
+      if (result) {
+        this.loadTransfers();
+      }
+    });
+  }
 
   openDetailModal(transfer: BranchTransferWithItems): void {
     this.snackBar.open('Modal de detalle - En desarrollo', 'Cerrar', { duration: 3000 });
@@ -150,7 +218,6 @@ export class BranchTransfersListComponent implements OnInit {
   approveTransfer(transfer: BranchTransferWithItems): void {
     if (confirm(`¿Aprobar transferencia ${transfer.transfer_number}?`)) {
       const approvedBy = 'Usuario Actual';
-      
       this.branchTransferService.approveTransfer(transfer.id, approvedBy).subscribe({
         next: () => {
           this.snackBar.open('Transferencia aprobada', 'Cerrar', { duration: 3000 });
@@ -210,6 +277,8 @@ export class BranchTransfersListComponent implements OnInit {
     }
   }
 
+  // ===== ESTADO =====
+
   canApprove(transfer: BranchTransferWithItems): boolean {
     return transfer.status === 'pending';
   }
@@ -257,50 +326,4 @@ export class BranchTransfersListComponent implements OnInit {
   getCompletedCount(): number {
     return this.transfers.filter(t => t.status === 'completed').length;
   }
-  getMobileStartIndex(): number {
-  return this.mobilePaginator.pageIndex * this.mobilePaginator.pageSize;
-}
-
-getMobileEndIndex(): number {
-  const end = this.getMobileStartIndex() + this.mobilePaginator.pageSize;
-  return Math.min(end, this.transfers.length);
-}
-
-isLastMobilePage(): boolean {
-  return this.getMobileEndIndex() >= this.transfers.length;
-}
-
-previousMobilePage(): void {
-  if (this.mobilePaginator.pageIndex > 0) {
-    this.mobilePaginator.pageIndex--;
-  }
-}
-
-nextMobilePage(): void {
-  if (!this.isLastMobilePage()) {
-    this.mobilePaginator.pageIndex++;
-  }
-}
-  
-
-private checkScreenSize(): void {
-  this.isMobile = window.innerWidth <= 600;
-}
-  applyFilter(event: Event): void {
-  const filterValue = (event.target as HTMLInputElement).value.trim().toLowerCase();
-
-  if (!filterValue) {
-    this.transfers = [...this.allTransfers];
-  } else {
-    this.transfers = this.allTransfers.filter(t =>
-      (t.transfer_number || '').toLowerCase().includes(filterValue) ||
-      (t.from_branch_alias || '').toLowerCase().includes(filterValue) ||
-      (t.to_branch_alias || '').toLowerCase().includes(filterValue) ||
-      (t.requested_by || '').toLowerCase().includes(filterValue) ||
-      (t.status || '').toLowerCase().includes(filterValue)
-    );
-  }
-
-  this.mobilePaginator.pageIndex = 0;
-}
 }
