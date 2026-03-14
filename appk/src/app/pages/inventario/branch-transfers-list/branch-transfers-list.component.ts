@@ -16,6 +16,7 @@ import { MatInputModule } from '@angular/material/input';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { BranchTransferService, BranchTransferWithItems, TransferStatus } from '../../../services/inventory/branch-transfer.service';
 import { SucursalesService } from '../../../services/sucursales.service';
+import { ExportService, ExportColumn } from '../../../services/export.service';
 import { TransferFormModalComponent } from '../transfer-form-modal/transfer-form-modal.component';
 
 @Component({
@@ -75,6 +76,7 @@ export class BranchTransfersListComponent implements OnInit, OnDestroy {
     private branchTransferService: BranchTransferService,
     private sucursalesService: SucursalesService,
     private dialog: MatDialog,
+    private exportService: ExportService,
     private snackBar: MatSnackBar
   ) {}
 
@@ -328,6 +330,24 @@ export class BranchTransfersListComponent implements OnInit, OnDestroy {
   }
 
   exportTransfers(format: string): void {
-    this.snackBar.open('Exportar como ' + format + ' - En desarrollo', 'Cerrar', { duration: 3000 });
+    const columns: ExportColumn[] = [
+      { header: 'Numero', field: 'transfer_number' },
+      { header: 'Desde', field: 'from_branch_alias' },
+      { header: 'Hacia', field: 'to_branch_alias' },
+      { header: 'Estado', field: 'status', transform: (v: string) => this.getStatusLabel(v as any) },
+      { header: 'Solicitado por', field: 'requested_by' },
+      { header: 'Fecha', field: 'created_at', transform: (v: string) => v ? new Date(v).toLocaleDateString('es-MX') : '' }
+    ];
+
+    const fileName = 'transferencias_' + new Date().toISOString().slice(0, 10);
+
+    if (format === 'csv') {
+      this.exportService.exportToCSV(this.transfers, columns, fileName);
+    } else {
+      this.exportService.exportToExcel(this.transfers, columns, fileName);
+    }
+
+    this.snackBar.open('Archivo exportado exitosamente', 'Cerrar', { duration: 3000 });
+  });
   }
 }

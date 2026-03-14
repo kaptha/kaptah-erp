@@ -17,6 +17,7 @@ import { MatTooltipModule } from '@angular/material/tooltip';
 import { BranchInventoryService, BranchInventoryWithDetails } from '../../../services/inventory/branch-inventory.service';
 import { BranchInventoryModalComponent } from '../branch-inventory-modal/branch-inventory-modal.component';
 import { SucursalesService } from '../../../services/sucursales.service';
+import { ExportService, ExportColumn } from '../../../services/export.service';
 
 @Component({
   selector: 'app-branch-inventory-list',
@@ -79,6 +80,7 @@ export class BranchInventoryListComponent implements OnInit, OnDestroy {
     private branchInventoryService: BranchInventoryService,
     private sucursalesService: SucursalesService,
     private dialog: MatDialog,
+    private exportService: ExportService,
     private snackBar: MatSnackBar
   ) {}
 
@@ -251,6 +253,26 @@ export class BranchInventoryListComponent implements OnInit, OnDestroy {
   }
 
   exportInventory(format: string): void {
-    this.snackBar.open('Exportar como ' + format + ' - En desarrollo', 'Cerrar', { duration: 3000 });
+    const columns: ExportColumn[] = [
+      { header: 'Codigo', field: 'product_code' },
+      { header: 'Producto', field: 'product_name' },
+      { header: 'Sucursal', field: 'branch_alias' },
+      { header: 'Cantidad', field: 'quantity' },
+      { header: 'Stock Minimo', field: 'min_stock' },
+      { header: 'Costo Unitario', field: 'cost', transform: (v: number) => v ? v.toFixed(2) : '0.00' },
+      { header: 'Valor Total', field: 'total_value', transform: (v: number) => v ? v.toFixed(2) : '0.00' },
+      { header: 'Estado', field: 'stock_status', transform: (v: string) => this.getStockStatusLabel(v) }
+    ];
+
+    const fileName = 'inventario_' + new Date().toISOString().slice(0, 10);
+
+    if (format === 'csv') {
+      this.exportService.exportToCSV(this.filteredItems, columns, fileName);
+    } else {
+      this.exportService.exportToExcel(this.filteredItems, columns, fileName);
+    }
+
+    this.snackBar.open('Archivo exportado exitosamente', 'Cerrar', { duration: 3000 });
+  });
   }
 }
