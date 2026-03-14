@@ -477,13 +477,16 @@ private async obtenerLogoUsuario(userId: string, token: string): Promise<string 
   }
 
   async create(createSaleNoteDto: CreateSaleNoteDto, userId: string): Promise<SaleNote> {
+    if (!createSaleNoteDto.items || !Array.isArray(createSaleNoteDto.items)) {
+    throw new Error('Items son requeridos');
+  }
   const items = createSaleNoteDto.items.map(item => {
     const subtotal = item.quantity * item.unitPrice;
-    const taxes = item.taxes || [];
-    const taxesTotal = taxes.reduce((sum, tax) => sum + Number(tax.amount), 0);
+    const taxes = item.taxes?.filter((t: any) => t.selected) || [];
+    const taxesTotal = taxes.reduce((sum: number, tax: any) => sum + Number(tax.amount || 0), 0);
     
     return {
-      productId: item.productId,
+      productId: item.productId || item.itemId,
       quantity: item.quantity,
       unitPrice: item.unitPrice,
       description: item.description,
@@ -509,6 +512,7 @@ private async obtenerLogoUsuario(userId: string, token: string): Promise<string 
     userId,
     sucursalId: createSaleNoteDto.sucursalId,
     createdBy: userId,
+    observaciones: createSaleNoteDto.observaciones,
   });
 
   const savedNote = await this.saleNoteRepository.save(saleNote);
