@@ -74,6 +74,8 @@ export class BranchTransfersListComponent implements OnInit {
   ngOnInit(): void {
     this.loadBranches();
     this.loadTransfers();
+    this.checkScreenSize();
+    window.addEventListener('resize', () => this.checkScreenSize());
   }
 
   loadBranches(): void {
@@ -279,8 +281,7 @@ nextMobilePage(): void {
     this.mobilePaginator.pageIndex++;
   }
 }
-  this.checkScreenSize();
-window.addEventListener('resize', () => this.checkScreenSize());
+  
 
 private checkScreenSize(): void {
   this.isMobile = window.innerWidth <= 600;
