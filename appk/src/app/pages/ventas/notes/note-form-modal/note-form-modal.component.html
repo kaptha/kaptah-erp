@@ -224,10 +224,7 @@
       <p><strong>Total impuestos:</strong> ${{noteForm.get('taxesTotal')?.value | number:'1.2-2'}}</p>
       <p><strong>Total:</strong> ${{noteForm.get('total')?.value | number:'1.2-2'}}</p>
     </div>
-  </form>
-</mat-dialog-content>
-
-<!-- Observaciones -->
+   <!-- Observaciones -->
 <mat-form-field appearance="outline" class="w-full">
   <mat-label>Observaciones</mat-label>
   <textarea matInput formControlName="observaciones" rows="3"
@@ -236,6 +233,10 @@
   <mat-icon matSuffix>notes</mat-icon>
   <mat-hint align="end">{{ noteForm.get('notes')?.value?.length || 0 }}/500</mat-hint>
 </mat-form-field>
+  </form>
+</mat-dialog-content>
+
+
 
 <mat-dialog-actions align="end">
   <button mat-button (click)="onClose()" class="btn-danger">Cancelar</button>
