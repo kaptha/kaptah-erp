@@ -897,6 +897,8 @@ private initializeTaxesForItem(itemIndex: number): void {
   const formData = this.noteForm.getRawValue();
   
   console.log('📋 Form data RAW:', formData);
+console.log('🔍 OBSERVACIONES VALUE:', formData.observaciones);
+console.log('🔍 FORM observaciones control:', this.noteForm.get('observaciones')?.value);
 
   // ✅ Validar que los items tengan impuestos
   formData.items.forEach((item: any, i: number) => {
