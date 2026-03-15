@@ -383,6 +383,7 @@ private async obtenerLogoUsuario(userId: string, token: string): Promise<string 
   .replace('{{impuestos}}', impuestosTotal.toFixed(2))
   .replace('{{total}}', total.toFixed(2))
   .replace(/\{\{qr_code\}\}/g, qrCodeImage)
+  .replace(/\{\{observaciones\}\}/g, saleNote.observaciones || '')
   // 👇 AGREGAR ESTOS REEMPLAZOS PARA EL QR
   .replace(/\{\{qr_folio\}\}/g, saleNote.folio)
   .replace(/\{\{qr_fecha\}\}/g, format(fecha, 'dd/MM/yyyy'))
