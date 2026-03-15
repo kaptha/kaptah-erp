@@ -3,6 +3,19 @@ import { FormControl } from '@angular/forms';
 import { forkJoin, of } from 'rxjs';
 import { catchError, finalize } from 'rxjs/operators';
 import { CfdiApiService } from '../../services/cfdi-api.service';
+interface AdvancedSearchFiltersPayload {
+  rfc?: string;
+  nombre?: string;
+  uuid?: string;
+  folio?: string;
+  serie?: string;
+  fechaInicio?: string;
+  fechaFin?: string;
+  montoMin?: number;
+  montoMax?: number;
+  metodoPago?: string;
+  formaPago?: string;
+}
 
 interface ResumenGeneral {
   totalCfdis: number;
@@ -481,55 +494,55 @@ export class IngresosComponent implements OnInit {
       });
   }
 
-  private buildAdvancedFilters(): Record<string, any> {
-    const filtros: Record<string, any> = {};
+  private buildAdvancedFilters(): AdvancedSearchFiltersPayload {
+  const filtros: AdvancedSearchFiltersPayload = {};
 
-    if (this.searchFilters.rfc?.trim()) {
-      filtros.rfc = this.searchFilters.rfc.trim();
-    }
-
-    if (this.searchFilters.nombre?.trim()) {
-      filtros.nombre = this.searchFilters.nombre.trim();
-    }
-
-    if (this.searchFilters.uuid?.trim()) {
-      filtros.uuid = this.searchFilters.uuid.trim();
-    }
-
-    if (this.searchFilters.folio?.trim()) {
-      filtros.folio = this.searchFilters.folio.trim();
-    }
-
-    if (this.searchFilters.serie?.trim()) {
-      filtros.serie = this.searchFilters.serie.trim();
-    }
-
-    if (this.searchFilters.fechaInicio) {
-      filtros.fechaInicio = this.searchFilters.fechaInicio;
-    }
-
-    if (this.searchFilters.fechaFin) {
-      filtros.fechaFin = this.searchFilters.fechaFin;
-    }
-
-    if (this.searchFilters.montoMin !== null && this.searchFilters.montoMin !== undefined) {
-      filtros.montoMin = this.searchFilters.montoMin;
-    }
-
-    if (this.searchFilters.montoMax !== null && this.searchFilters.montoMax !== undefined) {
-      filtros.montoMax = this.searchFilters.montoMax;
-    }
-
-    if (this.searchFilters.metodoPago) {
-      filtros.metodoPago = this.searchFilters.metodoPago;
-    }
-
-    if (this.searchFilters.formaPago) {
-      filtros.formaPago = this.searchFilters.formaPago;
-    }
-
-    return filtros;
+  if (this.searchFilters.rfc?.trim()) {
+    filtros.rfc = this.searchFilters.rfc.trim();
   }
+
+  if (this.searchFilters.nombre?.trim()) {
+    filtros.nombre = this.searchFilters.nombre.trim();
+  }
+
+  if (this.searchFilters.uuid?.trim()) {
+    filtros.uuid = this.searchFilters.uuid.trim();
+  }
+
+  if (this.searchFilters.folio?.trim()) {
+    filtros.folio = this.searchFilters.folio.trim();
+  }
+
+  if (this.searchFilters.serie?.trim()) {
+    filtros.serie = this.searchFilters.serie.trim();
+  }
+
+  if (this.searchFilters.fechaInicio) {
+    filtros.fechaInicio = this.searchFilters.fechaInicio;
+  }
+
+  if (this.searchFilters.fechaFin) {
+    filtros.fechaFin = this.searchFilters.fechaFin;
+  }
+
+  if (this.searchFilters.montoMin !== null && this.searchFilters.montoMin !== undefined) {
+    filtros.montoMin = this.searchFilters.montoMin;
+  }
+
+  if (this.searchFilters.montoMax !== null && this.searchFilters.montoMax !== undefined) {
+    filtros.montoMax = this.searchFilters.montoMax;
+  }
+
+  if (this.searchFilters.metodoPago) {
+    filtros.metodoPago = this.searchFilters.metodoPago;
+  }
+
+  if (this.searchFilters.formaPago) {
+    filtros.formaPago = this.searchFilters.formaPago;
+  }
+
+  return filtros;
+}
 
   // =========================================================
   // CFDI DETAIL
