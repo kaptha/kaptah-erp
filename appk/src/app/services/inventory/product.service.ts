@@ -79,15 +79,26 @@ export class ProductService {
    * Usa el endpoint específico PATCH /products/:id/stock
    */
   updateStock(id: number, quantity: number): Observable<Product> {
-  const token = localStorage.getItem('access_token');
+  const token = localStorage.getItem('idToken');
+  if (!token) {
+    return throwError(() => new Error('No se encontró el token de autenticación'));
+  }
+
   const headers = new HttpHeaders({
     'Content-Type': 'application/json',
     'Authorization': `Bearer ${token}`
   });
-  return this.http.patch<Product>(`${this.apiUrl}/products/${id}/stock`, { quantity }, { headers }).pipe(
+
+  console.log(`Actualizando stock del producto ${id} con cantidad:`, quantity);
+  return this.http.patch<Product>(
+    `${this.apiUrl}/products/${id}/stock`, 
+    { quantity }, 
+    { headers }
+  ).pipe(
     tap(response => console.log('Stock actualizado:', response)),
     catchError(error => {
       console.error('Error al actualizar stock:', error);
+      console.error('URL intentada:', `${this.apiUrl}/products/${id}/stock`);
       return throwError(() => error);
     })
   );
