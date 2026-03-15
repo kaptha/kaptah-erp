@@ -259,63 +259,33 @@ onPeriodChange(period: string) {
    * ✨ MODIFICADO: Ahora descuenta el inventario después de crear la nota
    */
   agregarNota() {
-    const dialogRef = this.dialog.open(NoteFormModalComponent, {
-      width: this.isMobile ? '95%' : '600px',
-      data: null,
-      disableClose: false
-    });
+  const dialogRef = this.dialog.open(NoteFormModalComponent, {
+    width: this.isMobile ? '95%' : '600px',
+    data: null,
+    disableClose: false
+  });
 
-    dialogRef.afterClosed().subscribe(result => {
-      if (result) {
-        this.loading = true;
-        
-        // Primero crear la nota de venta
-        this.saleNotesService.create(result).subscribe({
-          next: async (response) => {
-            console.log('✅ Nota de venta creada:', response);
-            
-            try {
-              // Luego descontar el inventario
-              await this.updateInventory(result.items);
-              
-              Sweetalert.fnc('success', 'Nota creada e inventario actualizado correctamente', null);
-              this.loadNotes();
-            } catch (error) {
-              console.error('Error al actualizar inventario:', error);
-              
-              // La nota ya fue creada, pero hubo un problema con el inventario
-              Sweetalert.fnc('warning', 
-                'Nota creada correctamente, pero hubo un problema al actualizar el inventario. Por favor, verifica el stock manualmente.', 
-                null
-              );
-              this.loadNotes();
-            } finally {
-              this.loading = false;
-            }
-          },
-          error: (error) => {
-            console.error('Error al crear la nota:', error);
-            this.loading = false;
-            
-            // Verificar si el error es de stock insuficiente
-            const errorMsg = error.error?.message || error.message || 'Error desconocido';
-            
-            if (errorMsg.includes('stock') || errorMsg.includes('inventario')) {
-              Sweetalert.fnc('error', 
-                'Stock insuficiente: ' + errorMsg, 
-                null
-              );
-            } else {
-              Sweetalert.fnc('error', 
-                'Error al crear la nota: ' + this.getErrorMessage(error), 
-                null
-              );
-            }
-          }
-        });
-      }
-    });
-  }
+  dialogRef.afterClosed().subscribe(result => {
+    if (result && result.saved) {
+      this.loading = true;
+      
+      // La nota ya fue creada en el modal, solo descontar inventario
+      this.updateInventory(result.note.items).then(() => {
+        Sweetalert.fnc('success', 'Nota creada e inventario actualizado correctamente', null);
+        this.loadNotes();
+        this.loading = false;
+      }).catch((error) => {
+        console.error('Error al actualizar inventario:', error);
+        Sweetalert.fnc('warning', 
+          'Nota creada correctamente, pero hubo un problema al actualizar el inventario. Por favor, verifica el stock manualmente.', 
+          null
+        );
+        this.loadNotes();
+        this.loading = false;
+      });
+    }
+  });
+}
 
     /**
    * Editar una nota de venta existente
