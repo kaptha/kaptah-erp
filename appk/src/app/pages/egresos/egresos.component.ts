@@ -1,87 +1,167 @@
 import { Component, OnInit } from '@angular/core';
-import { CfdiApiService } from '../../services/cfdi-api.service';
 import { FormControl } from '@angular/forms';
+import { forkJoin, of } from 'rxjs';
+import { catchError, finalize } from 'rxjs/operators';
+import { CfdiApiService } from '../../services/cfdi-api.service';
+
+interface ResumenGeneralEgresos {
+  totalCfdis: number;
+  cfdisVigentes: number;
+  cfdisCancelados: number;
+  subtotal: number;
+  ivaTotal: number;
+  total: number;
+  montoCancelados: number;
+  promedioGasto: number;
+  porcentajeVigentes: number;
+}
+
+interface ProveedorResumen {
+  nombre: string;
+  rfc: string;
+  cantidad: number;
+  totalMonto: number;
+  porcentajeParticipacion?: number;
+  ticketPromedio?: number;
+}
+
+interface AnalisisTemporalItem {
+  periodo: string;
+  cantidad: number;
+  subtotal: number;
+  iva: number;
+  total: number;
+}
+
+interface ClasificacionEgreso {
+  cantidad: number;
+  total: number;
+  formaPago?: string;
+  usoCfdi?: string;
+  porcentaje?: number;
+}
+
+interface TipoGastoResumen {
+  deducibles: number;
+  noDeducibles: number;
+  cantidadDeducibles: number;
+  cantidadNoDeducibles: number;
+  porcentajeDeducibles: number;
+}
+
+interface InformacionFiscalEgresos {
+  ivaAcreditable: number;
+  isrRetenido: number;
+  ivaRetenido: number;
+  iepsRetenido: number;
+  cfdisPago: number;
+  totalRetenciones: number;
+}
+
+interface GastoRecurrente {
+  nombre: string;
+  rfc: string;
+  cantidad: number;
+  montoPromedio: number;
+  totalMonto: number;
+}
+
+interface ProveedorNuevo {
+  nombre: string;
+  rfc: string;
+  primeraFactura: string;
+  cantidadFacturas: number;
+  totalMonto: number;
+}
+
+interface ConceptoCfdi {
+  descripcion: string;
+  cantidad: number;
+  valorUnitario: number;
+  importe: number;
+}
+
+interface CfdiEgresoDetalle {
+  folio_fiscal: string;
+  serie?: string;
+  folio?: string;
+  fecha: string;
+  estado_procesamiento?: string;
+  metodo_pago?: string;
+  forma_pago?: string;
+  moneda?: string;
+  tipo_cambio?: number;
+
+  nombre_emisor?: string;
+  rfc_emisor?: string;
+  regimen_fiscal_emisor?: string;
+
+  nombre_receptor?: string;
+  rfc_receptor?: string;
+  uso_cfdi?: string;
+
+  sub_total?: number;
+  descuento?: number;
+  iva_trasladado?: number;
+  total_impuestos_trasladados?: number;
+  total_impuestos_retenidos?: number;
+  iva_retenido?: number;
+  isr_retenido?: number;
+  ieps_retenido?: number;
+  total?: number;
+
+  conceptos_detalle?: ConceptoCfdi[];
+  impuestos?: any[];
+  retenciones?: any[];
+}
+
+interface AdvancedSearchEgresosPayload {
+  rfc?: string;
+  nombre?: string;
+  uuid?: string;
+  folio?: string;
+  fechaInicio?: string;
+  fechaFin?: string;
+  serie?: string;
+  montoMin?: number;
+  montoMax?: number;
+}
+
+interface AnalisisEgresosResponse {
+  resumenGeneral?: Partial<ResumenGeneralEgresos>;
+  topProveedoresPorMonto?: ProveedorResumen[];
+  topProveedoresPorCantidad?: ProveedorResumen[];
+  analisisTemporal?: AnalisisTemporalItem[];
+  porFormaPago?: ClasificacionEgreso[];
+  porUsoCfdi?: ClasificacionEgreso[];
+  porTipoGasto?: Partial<TipoGastoResumen>;
+  informacionFiscal?: Partial<InformacionFiscalEgresos>;
+  gastosRecurrentes?: GastoRecurrente[];
+  proveedoresNuevos?: ProveedorNuevo[];
+}
 
 @Component({
-    selector: 'app-egresos',
-    templateUrl: './egresos.component.html',
-    styleUrls: ['./egresos.component.css'],
-    standalone: false
+  selector: 'app-egresos',
+  templateUrl: './egresos.component.html',
+  styleUrls: ['./egresos.component.css'],
+  standalone: false
 })
 export class EgresosComponent implements OnInit {
-  
-  // Estados
+  // =========================================================
+  // UI STATE
+  // =========================================================
   isLoading = false;
-  
-  // Filtros
+  isSearching = false;
+  sideSheetOpen = false;
+  detailPanelOpen = false;
+
+  // =========================================================
+  // FILTERS
+  // =========================================================
   fechaInicioControl = new FormControl('');
   fechaFinControl = new FormControl('');
-  
-  // Datos del análisis completo
-  analisisCompleto: any = null;
-  
-  // Resumen General
-  resumenGeneral: any = {
-    totalCfdis: 0,
-    cfdisVigentes: 0,
-    cfdisCancelados: 0,
-    subtotal: 0,
-    ivaTotal: 0,
-    total: 0,
-    montoCancelados: 0,
-    promedioGasto: 0,
-    porcentajeVigentes: 0
-  };
-  
-  // Top Proveedores
-  topProveedoresPorMonto: any[] = [];
-  topProveedoresPorCantidad: any[] = [];
-  
-  // Análisis Temporal
-  analisisTemporal: any[] = [];
-  chartDataTemporal: any[] = [];
-  
-  // Clasificaciones
-  porFormaPago: any[] = [];
-  porUsoCfdi: any[] = [];
-  porTipoGasto: any = {
-    deducibles: 0,
-    noDeducibles: 0,
-    cantidadDeducibles: 0,
-    cantidadNoDeducibles: 0,
-    porcentajeDeducibles: 0
-  };
-  
-  // Información Fiscal
-  informacionFiscal: any = {
-    ivaAcreditable: 0,
-    isrRetenido: 0,
-    ivaRetenido: 0,
-    iepsRetenido: 0,
-    cfdisPago: 0,
-    totalRetenciones: 0
-  };
-  
-  // Gastos Recurrentes
-  gastosRecurrentes: any[] = [];
-  
-  // Proveedores Nuevos
-  proveedoresNuevos: any[] = [];
 
-  // Configuración de gráficas
-  colorScheme: any = {
-    domain: ['#FF6B6B', '#4ECDC4', '#45B7D1', '#FFA07A', '#98D8C8']
-  };
-
-  // ====== SIDE SHEET DE BÚSQUEDA AVANZADA ======
-  sideSheetOpen = false;
   searchQuery = '';
-  searchResults: any[] = [];
-  isSearching = false;
-  selectedCfdi: any = null;
-  detailPanelOpen = false;
-  
-  // Filtros de búsqueda avanzada
   searchFilters = {
     rfc: '',
     nombre: '',
@@ -94,131 +174,537 @@ export class EgresosComponent implements OnInit {
     montoMax: null as number | null
   };
 
+  // =========================================================
+  // DATA
+  // =========================================================
+  analisisCompleto: AnalisisEgresosResponse | null = null;
+  searchResults: CfdiEgresoDetalle[] = [];
+  selectedCfdi: CfdiEgresoDetalle | null = null;
+
+  readonly EMPTY_RESUMEN: ResumenGeneralEgresos = {
+    totalCfdis: 0,
+    cfdisVigentes: 0,
+    cfdisCancelados: 0,
+    subtotal: 0,
+    ivaTotal: 0,
+    total: 0,
+    montoCancelados: 0,
+    promedioGasto: 0,
+    porcentajeVigentes: 0
+  };
+
+  readonly EMPTY_TIPO_GASTO: TipoGastoResumen = {
+    deducibles: 0,
+    noDeducibles: 0,
+    cantidadDeducibles: 0,
+    cantidadNoDeducibles: 0,
+    porcentajeDeducibles: 0
+  };
+
+  readonly EMPTY_INFO_FISCAL: InformacionFiscalEgresos = {
+    ivaAcreditable: 0,
+    isrRetenido: 0,
+    ivaRetenido: 0,
+    iepsRetenido: 0,
+    cfdisPago: 0,
+    totalRetenciones: 0
+  };
+
+  resumenGeneral: ResumenGeneralEgresos = { ...this.EMPTY_RESUMEN };
+  porTipoGasto: TipoGastoResumen = { ...this.EMPTY_TIPO_GASTO };
+  informacionFiscal: InformacionFiscalEgresos = { ...this.EMPTY_INFO_FISCAL };
+
+  topProveedoresPorMonto: ProveedorResumen[] = [];
+  topProveedoresPorCantidad: ProveedorResumen[] = [];
+
+  analisisTemporal: AnalisisTemporalItem[] = [];
+  chartDataTemporal: any[] = [];
+
+  porFormaPago: ClasificacionEgreso[] = [];
+  porUsoCfdi: ClasificacionEgreso[] = [];
+
+  gastosRecurrentes: GastoRecurrente[] = [];
+  proveedoresNuevos: ProveedorNuevo[] = [];
+
+  // =========================================================
+  // VISUAL CONFIG
+  // =========================================================
+  colorScheme: any = {
+    domain: ['#FF6B6B', '#4ECDC4', '#45B7D1', '#FFA07A', '#98D8C8']
+  };
+
+  // =========================================================
+  // FORMATTERS
+  // =========================================================
+  private readonly currencyFormatter = new Intl.NumberFormat('es-MX', {
+    style: 'currency',
+    currency: 'MXN',
+    minimumFractionDigits: 2
+  });
+
+  private readonly numberFormatter = new Intl.NumberFormat('es-MX');
+
   constructor(private cfdiApiService: CfdiApiService) {}
 
   ngOnInit(): void {
     this.initializeComponent();
   }
 
-  /**
-   * Inicializa el componente
-   */
+  // =========================================================
+  // INITIALIZATION
+  // =========================================================
   private initializeComponent(): void {
-    // Configurar fechas por defecto (año actual)
     const now = new Date();
     const startOfYear = new Date(now.getFullYear(), 0, 1);
-    this.fechaInicioControl.setValue(startOfYear.toISOString().split('T')[0]);
-    this.fechaFinControl.setValue(now.toISOString().split('T')[0]);
 
-    // Cargar análisis completo
+    this.fechaInicioControl.setValue(this.toInputDate(startOfYear));
+    this.fechaFinControl.setValue(this.toInputDate(now));
+
     this.loadAnalisisCompleto();
   }
 
-  /**
-   * Carga el análisis completo de egresos
-   */
+  private toInputDate(date: Date): string {
+    return date.toISOString().split('T')[0];
+  }
+
+  // =========================================================
+  // MAIN LOAD
+  // =========================================================
   loadAnalisisCompleto(): void {
-    this.isLoading = true;
-    
     const fechaInicio = this.fechaInicioControl.value || '';
     const fechaFin = this.fechaFinControl.value || '';
 
-    console.log('📊 Cargando análisis completo de egresos...');
+    if (!fechaInicio || !fechaFin) {
+      return;
+    }
 
-    this.cfdiApiService.getAnalisisCompletoEgresos(fechaInicio, fechaFin).subscribe({
-      next: (response) => {
-        console.log('✅ Análisis completo cargado:', response);
-        
-        if (response && response.success) {
-          this.analisisCompleto = response.analisis;
-          this.processAnalisisData();
+    this.isLoading = true;
+
+    this.cfdiApiService
+      .getAnalisisCompletoEgresos(fechaInicio, fechaFin)
+      .pipe(finalize(() => (this.isLoading = false)))
+      .subscribe({
+        next: (response: any) => {
+          if (response?.success && response?.analisis) {
+            this.analisisCompleto = response.analisis as AnalisisEgresosResponse;
+            this.processAnalisisData();
+            return;
+          }
+
+          this.resetAnalisisState();
+        },
+        error: (error) => {
+          console.error('❌ Error cargando análisis de egresos:', error);
+          this.resetAnalisisState();
         }
-        
-        this.isLoading = false;
-      },
-      error: (error) => {
-        console.error('❌ Error cargando análisis:', error);
-        this.isLoading = false;
-      }
-    });
+      });
   }
 
-  /**
-   * Procesa los datos del análisis
-   */
-  private processAnalisisData(): void {
-    if (!this.analisisCompleto) return;
-
-    // Resumen General
-    this.resumenGeneral = this.analisisCompleto.resumenGeneral || this.resumenGeneral;
-
-    // Top Proveedores
-    this.topProveedoresPorMonto = this.analisisCompleto.topProveedoresPorMonto || [];
-    this.topProveedoresPorCantidad = this.analisisCompleto.topProveedoresPorCantidad || [];
-
-    // Análisis Temporal
-    this.analisisTemporal = this.analisisCompleto.analisisTemporal || [];
-    this.prepareChartData();
-
-    // Clasificaciones
-    this.porFormaPago = this.analisisCompleto.porFormaPago || [];
-    this.porUsoCfdi = this.analisisCompleto.porUsoCfdi || [];
-    this.porTipoGasto = this.analisisCompleto.porTipoGasto || this.porTipoGasto;
-
-    // Información Fiscal
-    this.informacionFiscal = this.analisisCompleto.informacionFiscal || this.informacionFiscal;
-
-    // Gastos Recurrentes
-    this.gastosRecurrentes = this.analisisCompleto.gastosRecurrentes || [];
-
-    // Proveedores Nuevos
-    this.proveedoresNuevos = this.analisisCompleto.proveedoresNuevos || [];
-  }
-
-  /**
-   * Prepara datos para las gráficas
-   */
-  private prepareChartData(): void {
-    // Gráfica de tendencia temporal
-    this.chartDataTemporal = [{
-      name: 'Egresos',
-      series: this.analisisTemporal.map(item => ({
-        name: this.formatPeriodo(item.periodo),
-        value: item.total
-      }))
-    }];
-  }
-
-  /**
-   * Maneja el cambio de fechas
-   */
   onFechaChange(): void {
     this.loadAnalisisCompleto();
   }
 
-  /**
-   * Exporta a Excel
-   */
+  private processAnalisisData(): void {
+    if (!this.analisisCompleto) {
+      this.resetAnalisisState();
+      return;
+    }
+
+    this.resumenGeneral = {
+      ...this.EMPTY_RESUMEN,
+      ...(this.analisisCompleto.resumenGeneral || {})
+    };
+
+    this.porTipoGasto = {
+      ...this.EMPTY_TIPO_GASTO,
+      ...(this.analisisCompleto.porTipoGasto || {})
+    };
+
+    this.informacionFiscal = {
+      ...this.EMPTY_INFO_FISCAL,
+      ...(this.analisisCompleto.informacionFiscal || {})
+    };
+
+    this.topProveedoresPorMonto = this.enrichProveedores(
+      this.analisisCompleto.topProveedoresPorMonto || []
+    );
+
+    this.topProveedoresPorCantidad = this.enrichProveedores(
+      this.analisisCompleto.topProveedoresPorCantidad || []
+    );
+
+    this.analisisTemporal = this.analisisCompleto.analisisTemporal || [];
+    this.prepareChartData();
+
+    this.porFormaPago = this.enrichClasificaciones(
+      this.analisisCompleto.porFormaPago || []
+    );
+
+    this.porUsoCfdi = this.enrichClasificaciones(
+      this.analisisCompleto.porUsoCfdi || []
+    );
+
+    this.gastosRecurrentes = this.analisisCompleto.gastosRecurrentes || [];
+    this.proveedoresNuevos = this.analisisCompleto.proveedoresNuevos || [];
+  }
+
+  private resetAnalisisState(): void {
+    this.analisisCompleto = null;
+    this.resumenGeneral = { ...this.EMPTY_RESUMEN };
+    this.porTipoGasto = { ...this.EMPTY_TIPO_GASTO };
+    this.informacionFiscal = { ...this.EMPTY_INFO_FISCAL };
+    this.topProveedoresPorMonto = [];
+    this.topProveedoresPorCantidad = [];
+    this.analisisTemporal = [];
+    this.chartDataTemporal = [];
+    this.porFormaPago = [];
+    this.porUsoCfdi = [];
+    this.gastosRecurrentes = [];
+    this.proveedoresNuevos = [];
+  }
+
+  private prepareChartData(): void {
+    this.chartDataTemporal = [
+      {
+        name: 'Egresos',
+        series: this.analisisTemporal.map((item) => ({
+          name: this.formatPeriodo(item.periodo),
+          value: item.total || 0
+        }))
+      }
+    ];
+  }
+
+  // =========================================================
+  // VIEW MODEL HELPERS
+  // =========================================================
+  private enrichClasificaciones<T extends { total: number }>(
+    items: T[]
+  ): (T & { porcentaje: number })[] {
+    const total = this.resumenGeneral.total || 0;
+
+    return items.map((item) => ({
+      ...item,
+      porcentaje: this.getSafePercentage(item.total || 0, total)
+    }));
+  }
+
+  private enrichProveedores<T extends { totalMonto: number; cantidad: number }>(
+    items: T[]
+  ): (T & { porcentajeParticipacion: number; ticketPromedio: number })[] {
+    const total = this.resumenGeneral.total || 0;
+
+    return items.map((item) => ({
+      ...item,
+      porcentajeParticipacion: this.getSafePercentage(item.totalMonto || 0, total),
+      ticketPromedio: item.cantidad ? (item.totalMonto || 0) / item.cantidad : 0
+    }));
+  }
+
+  getSafePercentage(value: number, total: number): number {
+    if (!total || total <= 0) {
+      return 0;
+    }
+
+    return Number(((value / total) * 100).toFixed(2));
+  }
+
+  // =========================================================
+  // EXPORT
+  // =========================================================
   exportToExcel(): void {
-    console.log('📊 Exportando análisis a Excel...');
-    // TODO: Implementar exportación
+    console.log('📊 Exportación de egresos a Excel en desarrollo');
     alert('Funcionalidad de exportación en desarrollo');
   }
 
-  /**
-   * Formatea el período (2025-01 → Ene 2025)
-   */
-  formatPeriodo(periodo: string): string {
-    const [year, month] = periodo.split('-');
-    const meses = ['Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun', 'Jul', 'Ago', 'Sep', 'Oct', 'Nov', 'Dic'];
-    return `${meses[parseInt(month) - 1]} ${year}`;
+  // =========================================================
+  // SEARCH PANEL
+  // =========================================================
+  openSearchPanel(): void {
+    this.sideSheetOpen = true;
+    this.searchQuery = '';
+    this.searchResults = [];
   }
 
-  /**
-   * Formatea una fecha
-   */
-  formatDate(date: string | Date): string {
-    if (!date) return '-';
+  closeSearchPanel(): void {
+    this.sideSheetOpen = false;
+    this.searchQuery = '';
+    this.searchResults = [];
+    this.resetSearchFilters();
+  }
+
+  resetSearchFilters(): void {
+    this.searchFilters = {
+      rfc: '',
+      nombre: '',
+      uuid: '',
+      folio: '',
+      fechaInicio: '',
+      fechaFin: '',
+      serie: '',
+      montoMin: null,
+      montoMax: null
+    };
+  }
+
+  // =========================================================
+  // QUICK SEARCH
+  // =========================================================
+  onSearchChange(): void {
+    const query = this.searchQuery.trim();
+
+    if (query.length < 3) {
+      this.searchResults = [];
+      return;
+    }
+
+    this.isSearching = true;
+
+    this.cfdiApiService
+      .buscarCfdisEgresos(query)
+      .pipe(finalize(() => (this.isSearching = false)))
+      .subscribe({
+        next: (response: any) => {
+          this.searchResults = response?.cfdis || [];
+        },
+        error: (error) => {
+          console.error('❌ Error en búsqueda rápida de egresos:', error);
+          this.searchResults = [];
+        }
+      });
+  }
+
+  // =========================================================
+  // ADVANCED SEARCH
+  // =========================================================
+  buscarAvanzado(): void {
+    const filtros = this.buildAdvancedFilters();
+
+    if (!Object.keys(filtros).length) {
+      alert('Por favor, ingrese al menos un criterio de búsqueda');
+      return;
+    }
+
+    this.isSearching = true;
+
+    this.cfdiApiService
+      .busquedaAvanzadaEgresos(filtros)
+      .pipe(finalize(() => (this.isSearching = false)))
+      .subscribe({
+        next: (response: any) => {
+          this.searchResults = response?.cfdis || [];
+        },
+        error: (error) => {
+          console.error('❌ Error en búsqueda avanzada de egresos:', error);
+          this.searchResults = [];
+        }
+      });
+  }
+
+  private buildAdvancedFilters(): AdvancedSearchEgresosPayload {
+    const filtros: AdvancedSearchEgresosPayload = {};
+
+    if (this.searchFilters.rfc?.trim()) {
+      filtros.rfc = this.searchFilters.rfc.trim();
+    }
+
+    if (this.searchFilters.nombre?.trim()) {
+      filtros.nombre = this.searchFilters.nombre.trim();
+    }
+
+    if (this.searchFilters.uuid?.trim()) {
+      filtros.uuid = this.searchFilters.uuid.trim();
+    }
+
+    if (this.searchFilters.folio?.trim()) {
+      filtros.folio = this.searchFilters.folio.trim();
+    }
+
+    if (this.searchFilters.fechaInicio) {
+      filtros.fechaInicio = this.searchFilters.fechaInicio;
+    }
+
+    if (this.searchFilters.fechaFin) {
+      filtros.fechaFin = this.searchFilters.fechaFin;
+    }
+
+    if (this.searchFilters.serie?.trim()) {
+      filtros.serie = this.searchFilters.serie.trim();
+    }
+
+    if (this.searchFilters.montoMin !== null && this.searchFilters.montoMin !== undefined) {
+      filtros.montoMin = this.searchFilters.montoMin;
+    }
+
+    if (this.searchFilters.montoMax !== null && this.searchFilters.montoMax !== undefined) {
+      filtros.montoMax = this.searchFilters.montoMax;
+    }
+
+    return filtros;
+  }
+
+  // =========================================================
+  // CFDI DETAIL
+  // =========================================================
+  selectCfdi(cfdi: CfdiEgresoDetalle): void {
+    this.selectedCfdi = { ...cfdi };
+    this.detailPanelOpen = true;
+
+    if (cfdi.folio_fiscal) {
+      this.loadCfdiDetails(cfdi.folio_fiscal);
+    }
+  }
+
+  closeDetailPanel(): void {
+    this.detailPanelOpen = false;
+    this.selectedCfdi = null;
+  }
+
+  loadCfdiDetails(uuid: string): void {
+    if (!uuid) {
+      return;
+    }
+
+    forkJoin({
+      impuestos: this.cfdiApiService.getImpuestosCfdi(uuid).pipe(
+        catchError((error) => {
+          console.error('❌ Error cargando impuestos:', error);
+          return of({ success: false, impuestos: [] });
+        })
+      ),
+      retenciones: this.cfdiApiService.getRetencionesCfdi(uuid).pipe(
+        catchError((error) => {
+          console.error('❌ Error cargando retenciones:', error);
+          return of({ success: false, retenciones: [] });
+        })
+      ),
+      partidas: this.cfdiApiService.getPartidasCfdi(uuid).pipe(
+        catchError((error) => {
+          console.error('❌ Error cargando partidas:', error);
+          return of({ success: false, partidas: [] });
+        })
+      )
+    }).subscribe({
+      next: ({ impuestos, retenciones, partidas }) => {
+        if (!this.selectedCfdi) {
+          return;
+        }
+
+        this.selectedCfdi = {
+          ...this.selectedCfdi,
+          impuestos: impuestos?.success ? impuestos.impuestos || [] : [],
+          retenciones: retenciones?.success ? retenciones.retenciones || [] : [],
+          conceptos_detalle: partidas?.success ? partidas.partidas || [] : []
+        };
+      },
+      error: (error) => {
+        console.error('❌ Error cargando detalle del CFDI:', error);
+      }
+    });
+  }
+
+  // =========================================================
+  // DOWNLOADS
+  // =========================================================
+  descargarXml(cfdi: CfdiEgresoDetalle): void {
+    if (!cfdi?.folio_fiscal) {
+      alert('Error: UUID no encontrado en el CFDI');
+      return;
+    }
+
+    this.cfdiApiService.descargarXml(cfdi.folio_fiscal).subscribe({
+      next: (response: BlobPart) => {
+        const blob = new Blob([response], { type: 'application/xml' });
+        const url = window.URL.createObjectURL(blob);
+        const link = document.createElement('a');
+        link.href = url;
+        link.download = `${cfdi.folio_fiscal}.xml`;
+        link.click();
+        window.URL.revokeObjectURL(url);
+      },
+      error: (error) => {
+        console.error('❌ Error al descargar XML:', error);
+        alert(`Error al descargar el XML: ${error?.message || 'Error desconocido'}`);
+      }
+    });
+  }
+
+  descargarPdf(cfdi: CfdiEgresoDetalle): void {
+    if (!cfdi?.folio_fiscal) {
+      alert('Error: El CFDI no tiene UUID (folio_fiscal)');
+      return;
+    }
+
+    this.cfdiApiService.descargarPdf(cfdi.folio_fiscal).subscribe({
+      next: (response: BlobPart) => {
+        const blob = new Blob([response], { type: 'application/pdf' });
+        const url = window.URL.createObjectURL(blob);
+        const link = document.createElement('a');
+        link.href = url;
+        link.download = `${cfdi.folio_fiscal}.pdf`;
+        link.click();
+        window.URL.revokeObjectURL(url);
+      },
+      error: (error) => {
+        console.error('❌ Error descargando PDF:', error);
+        alert(`Error al descargar el PDF: ${error?.message || 'Error desconocido'}`);
+      }
+    });
+  }
+
+  // =========================================================
+  // HELPERS
+  // =========================================================
+  tieneRetenciones(cfdi: CfdiEgresoDetalle | null): boolean {
+    if (!cfdi) {
+      return false;
+    }
+
+    return (
+      (cfdi.iva_retenido || 0) > 0 ||
+      (cfdi.isr_retenido || 0) > 0 ||
+      (cfdi.ieps_retenido || 0) > 0
+    );
+  }
+
+  getEstadoBadgeColor(estado: string | undefined): string {
+    if (!estado) {
+      return 'accent';
+    }
+
+    switch (estado.toUpperCase()) {
+      case 'PROCESADO':
+      case 'VIGENTE':
+        return 'primary';
+      case 'CANCELADO':
+        return 'warn';
+      case 'PENDIENTE':
+        return 'accent';
+      default:
+        return 'accent';
+    }
+  }
+
+  // =========================================================
+  // FORMATTERS
+  // =========================================================
+  formatPeriodo(periodo: string): string {
+    if (!periodo) {
+      return '-';
+    }
+
+    const [year, month] = periodo.split('-');
+    const meses = ['Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun', 'Jul', 'Ago', 'Sep', 'Oct', 'Nov', 'Dic'];
+    const monthIndex = Number(month) - 1;
+
+    return `${meses[monthIndex] || month} ${year}`;
+  }
+
+  formatDate(date: string | Date | null | undefined): string {
+    if (!date) {
+      return '-';
+    }
+
     return new Date(date).toLocaleDateString('es-MX', {
       year: 'numeric',
       month: '2-digit',
@@ -226,36 +712,37 @@ export class EgresosComponent implements OnInit {
     });
   }
 
-  /**
-   * Formatea un número como moneda
-   */
-  formatCurrency(amount: number): string {
-    return new Intl.NumberFormat('es-MX', {
-      style: 'currency',
-      currency: 'MXN',
-      minimumFractionDigits: 2
-    }).format(amount);
+  formatCurrency(amount: number | null | undefined): string {
+    return this.currencyFormatter.format(amount ?? 0);
   }
 
-  /**
-   * Formatea un número
-   */
-  formatNumber(num: number): string {
-    return new Intl.NumberFormat('es-MX').format(num);
+  formatNumber(num: number | null | undefined): string {
+    return this.numberFormatter.format(num ?? 0);
   }
 
-  /**
-   * Formatea un porcentaje
-   */
-  formatPercentage(num: number): string {
-    return `${num.toFixed(2)}%`;
+  formatPercentage(num: number | null | undefined): string {
+    return `${(num ?? 0).toFixed(2)}%`;
   }
 
-  /**
-   * Obtiene la etiqueta de forma de pago
-   */
-  getFormaPagoLabel(codigo: string): string {
-    const formasPago: { [key: string]: string } = {
+  formatRfc(rfc: string): string {
+    if (!rfc || rfc.length < 8) {
+      return rfc;
+    }
+
+    const inicio = rfc.substring(0, 4);
+    const fin = rfc.substring(rfc.length - 3);
+    return `${inicio}***${fin}`;
+  }
+
+  // =========================================================
+  // LABELS
+  // =========================================================
+  getFormaPagoLabel(codigo: string | undefined): string {
+    if (!codigo) {
+      return 'No especificada';
+    }
+
+    const formasPago: Record<string, string> = {
       '01': 'Efectivo',
       '02': 'Cheque',
       '03': 'Transferencia',
@@ -263,344 +750,40 @@ export class EgresosComponent implements OnInit {
       '28': 'Tarjeta de Débito',
       '99': 'Por Definir'
     };
+
     return formasPago[codigo] || codigo;
   }
 
-  /**
-   * Obtiene la etiqueta de uso de CFDI
-   */
-  getUsoCfdiLabel(codigo: string): string {
-    const usos: { [key: string]: string } = {
-      'G01': 'Adquisición de mercancías',
-      'G02': 'Devoluciones, descuentos o bonificaciones',
-      'G03': 'Gastos en general',
-      'I01': 'Construcciones',
-      'I02': 'Mobiliario y equipo de oficina',
-      'I03': 'Equipo de transporte',
-      'I04': 'Equipo de cómputo',
-      'I05': 'Dados, troqueles, moldes',
-      'I06': 'Comunicaciones telefónicas',
-      'I07': 'Comunicaciones satelitales',
-      'I08': 'Otra maquinaria y equipo',
-      'D01': 'Honorarios médicos',
-      'D02': 'Gastos médicos',
-      'D03': 'Gastos funerales',
-      'D04': 'Donativos',
-      'D05': 'Intereses reales',
-      'D06': 'Aportaciones voluntarias',
-      'D07': 'Primas por seguros',
-      'D08': 'Gastos de transportación escolar',
-      'D09': 'Depósitos en cuentas',
-      'D10': 'Pagos por servicios educativos',
-      'P01': 'Por definir'
+  getUsoCfdiLabel(codigo: string | undefined): string {
+    if (!codigo) {
+      return 'No especificado';
+    }
+
+    const usos: Record<string, string> = {
+      G01: 'Adquisición de mercancías',
+      G02: 'Devoluciones, descuentos o bonificaciones',
+      G03: 'Gastos en general',
+      I01: 'Construcciones',
+      I02: 'Mobiliario y equipo de oficina',
+      I03: 'Equipo de transporte',
+      I04: 'Equipo de cómputo',
+      I05: 'Dados, troqueles, moldes',
+      I06: 'Comunicaciones telefónicas',
+      I07: 'Comunicaciones satelitales',
+      I08: 'Otra maquinaria y equipo',
+      D01: 'Honorarios médicos',
+      D02: 'Gastos médicos',
+      D03: 'Gastos funerales',
+      D04: 'Donativos',
+      D05: 'Intereses reales',
+      D06: 'Aportaciones voluntarias',
+      D07: 'Primas por seguros',
+      D08: 'Gastos de transportación escolar',
+      D09: 'Depósitos en cuentas',
+      D10: 'Pagos por servicios educativos',
+      P01: 'Por definir'
     };
+
     return usos[codigo] || codigo;
   }
-
-  // ====== MÉTODOS DEL SIDE SHEET DE BÚSQUEDA AVANZADA ======
-
-/**
- * Abre el side sheet de búsqueda
- */
-openSearchPanel(): void {
-  this.sideSheetOpen = true;
-  this.searchQuery = '';
-  this.searchResults = [];
-}
-
-/**
- * Cierra el side sheet de búsqueda
- */
-closeSearchPanel(): void {
-  this.sideSheetOpen = false;
-  this.searchQuery = '';
-  this.searchResults = [];
-  this.resetSearchFilters();
-}
-
-/**
- * Resetea los filtros de búsqueda
- */
-resetSearchFilters(): void {
-  this.searchFilters = {
-    rfc: '',
-    nombre: '',
-    uuid: '',
-    folio: '',
-    fechaInicio: '',
-    fechaFin: '',
-    serie: '',
-    montoMin: null,
-    montoMax: null
-  };
-}
-
-/**
- * Búsqueda en tiempo real (autocomplete)
- */
-onSearchChange(): void {
-  const query = this.searchQuery.trim();
-  
-  console.log('🔍 onSearchChange - Query:', query);
-  console.log('📏 Longitud:', query.length);
-  
-  if (query.length < 3) {
-    this.searchResults = [];
-    console.log('⚠️ Query muy corto, limpiando resultados');
-    return;
-  }
-
-  this.isSearching = true;
-  console.log('🔄 Iniciando búsqueda...');
-  
-  this.cfdiApiService.buscarCfdisEgresos(query).subscribe({
-    next: (response) => {
-      console.log('✅ Respuesta completa:', response);
-      console.log('📦 Tipo de response:', typeof response);
-      console.log('📦 Claves de response:', Object.keys(response));
-      
-      // ✅ La respuesta viene directamente como { cfdis: [...], total: X }
-      if (response) {
-        this.searchResults = response.cfdis || [];
-        console.log('📊 Total encontrados:', response.total);
-        console.log('📋 Resultados asignados:', this.searchResults.length);
-        
-        if (this.searchResults.length > 0) {
-          console.log('📄 Primer resultado:', this.searchResults[0]);
-          console.log('📄 Tiene folio_fiscal?:', !!this.searchResults[0].folio_fiscal);
-        } else {
-          console.log('⚠️ Array de resultados está vacío');
-        }
-      } else {
-        console.log('⚠️ Response es null o undefined');
-        this.searchResults = [];
-      }
-      
-      this.isSearching = false;
-    },
-    error: (error) => {
-      console.error('❌ Error en búsqueda:', error);
-      console.error('❌ Detalles del error:', {
-        status: error.status,
-        statusText: error.statusText,
-        message: error.message,
-        error: error.error
-      });
-      this.searchResults = [];
-      this.isSearching = false;
-    }
-  });
-}
-
-/**
- * Búsqueda avanzada con filtros
- */
-buscarAvanzado(): void {
-  console.log('🔍 ===== MÉTODO buscarAvanzado LLAMADO (EGRESOS) =====');
-  console.log('🔍 searchFilters COMPLETO:', this.searchFilters);
-  console.log('🔍 searchFilters.rfc:', this.searchFilters.rfc);
-  console.log('🔍 searchFilters.nombre:', this.searchFilters.nombre);
-  console.log('🔍 searchFilters.uuid:', this.searchFilters.uuid);
-  
-  this.isSearching = true;
-  
-  // Construir objeto de filtros (solo los que tienen valor)
-  const filtros: any = {};
-  
-  if (this.searchFilters.rfc && this.searchFilters.rfc.trim()) {
-    filtros.rfc = this.searchFilters.rfc.trim();
-    console.log('✅ RFC agregado:', filtros.rfc);
-  }
-  if (this.searchFilters.nombre && this.searchFilters.nombre.trim()) {
-    filtros.nombre = this.searchFilters.nombre.trim();
-    console.log('✅ Nombre agregado:', filtros.nombre);
-  }
-  if (this.searchFilters.uuid && this.searchFilters.uuid.trim()) {
-    filtros.uuid = this.searchFilters.uuid.trim();
-    console.log('✅ UUID agregado:', filtros.uuid);
-  }
-  if (this.searchFilters.folio && this.searchFilters.folio.trim()) {
-    filtros.folio = this.searchFilters.folio.trim();
-    console.log('✅ Folio agregado:', filtros.folio);
-  }
-  if (this.searchFilters.fechaInicio) {
-    filtros.fechaInicio = this.searchFilters.fechaInicio;
-    console.log('✅ FechaInicio agregada:', filtros.fechaInicio);
-  }
-  if (this.searchFilters.fechaFin) {
-    filtros.fechaFin = this.searchFilters.fechaFin;
-    console.log('✅ FechaFin agregada:', filtros.fechaFin);
-  }
-  if (this.searchFilters.serie && this.searchFilters.serie.trim()) {
-    filtros.serie = this.searchFilters.serie.trim();
-    console.log('✅ Serie agregada:', filtros.serie);
-  }
-  if (this.searchFilters.montoMin !== null && this.searchFilters.montoMin !== undefined) {
-    filtros.montoMin = this.searchFilters.montoMin;
-    console.log('✅ MontoMin agregado:', filtros.montoMin);
-  }
-  if (this.searchFilters.montoMax !== null && this.searchFilters.montoMax !== undefined) {
-    filtros.montoMax = this.searchFilters.montoMax;
-    console.log('✅ MontoMax agregado:', filtros.montoMax);
-  }
-
-  console.log('🔍 Filtros finales a enviar:', filtros);
-  console.log('🔍 Cantidad de filtros:', Object.keys(filtros).length);
-
-  // Validar que haya al menos un filtro
-  if (Object.keys(filtros).length === 0) {
-    console.warn('⚠️ No hay filtros para buscar');
-    this.isSearching = false;
-    alert('Por favor, ingrese al menos un criterio de búsqueda');
-    return;
-  }
-
-  this.cfdiApiService.busquedaAvanzadaEgresos(filtros).subscribe({
-    next: (response) => {
-      console.log('✅ Respuesta búsqueda avanzada:', response);
-      
-      if (response) {
-        this.searchResults = response.cfdis || [];
-        console.log(`✅ Se encontraron ${this.searchResults.length} resultados`);
-      }
-      
-      this.isSearching = false;
-    },
-    error: (error) => {
-      console.error('❌ Error en búsqueda avanzada:', error);
-      this.isSearching = false;
-    }
-  });
-}
-
-/**
- * Selecciona un CFDI de los resultados
- */
-selectCfdi(cfdi: any): void {
-  console.log('📋 CFDI seleccionado:', cfdi);
-  console.log('📋 Tiene folio_fiscal?:', !!cfdi.folio_fiscal);
-  console.log('📋 folio_fiscal value:', cfdi.folio_fiscal);
-  
-  this.selectedCfdi = cfdi;
-  this.detailPanelOpen = true;
-  
-}
-
-/**
- * Cierra el panel de detalles
- */
-closeDetailPanel(): void {
-  this.detailPanelOpen = false;
-  this.selectedCfdi = null;
-}
-
-/**
- * Descarga el XML del CFDI
- */
-descargarXml(cfdi: any): void {
-  console.log('📥 Objeto CFDI completo:', cfdi);
-  console.log('📥 UUID a descargar:', cfdi.folio_fiscal);
-  console.log('📥 Tipo de UUID:', typeof cfdi.folio_fiscal);
-  
-  if (!cfdi.folio_fiscal) {
-    alert('Error: UUID no encontrado en el CFDI');
-    return;
-  }
-  
-  this.cfdiApiService.descargarXml(cfdi.folio_fiscal).subscribe({
-    next: (response) => {
-      console.log('✅ Respuesta del servidor:', response);
-      
-      // Crear blob y descargar
-      const blob = new Blob([response], { type: 'application/xml' });
-      const url = window.URL.createObjectURL(blob);
-      const link = document.createElement('a');
-      link.href = url;
-      link.download = `${cfdi.folio_fiscal}.xml`;
-      link.click();
-      window.URL.revokeObjectURL(url);
-      
-      console.log('✅ XML descargado correctamente');
-    },
-    error: (error) => {
-      console.error('❌ Error completo:', error);
-      console.error('❌ Mensaje de error:', error.message);
-      alert(`Error al descargar el XML: ${error.message || 'Error desconocido'}`);
-    }
-  });
-}
-
-/**
- * Descarga el PDF del CFDI
- */
-descargarPdf(cfdi: any): void {
-  console.log('📥 Descargando PDF');
-  console.log('📦 CFDI completo:', cfdi);
-  console.log('📋 UUID (folio_fiscal):', cfdi.folio_fiscal);  // ✅ Debe ser folio_fiscal
-  
-  if (!cfdi.folio_fiscal) {
-    alert('Error: El CFDI no tiene UUID (folio_fiscal)');
-    console.error('❌ CFDI sin folio_fiscal:', cfdi);
-    return;
-  }
-  
-  this.cfdiApiService.descargarPdf(cfdi.folio_fiscal).subscribe({
-    next: (response) => {
-      console.log('✅ PDF recibido, tamaño:', response.size);
-      
-      // Crear blob y descargar
-      const blob = new Blob([response], { type: 'application/pdf' });
-      const url = window.URL.createObjectURL(blob);
-      const link = document.createElement('a');
-      link.href = url;
-      link.download = `${cfdi.folio_fiscal}.pdf`;
-      link.click();
-      window.URL.revokeObjectURL(url);
-      
-      console.log('✅ PDF descargado correctamente');
-    },
-    error: (error) => {
-      console.error('❌ Error descargando PDF:', error);
-      alert(`Error al descargar el PDF: ${error.message || 'Error desconocido'}`);
-    }
-  });
-}
-
-/**
- * Obtiene el color del badge según el estado
- */
-getEstadoBadgeColor(estado: string): string {
-  if (!estado) return 'accent';
-  
-  switch (estado.toUpperCase()) {
-    case 'PROCESADO':
-      return 'primary';
-    case 'CANCELADO':
-      return 'warn';
-    case 'PENDIENTE':
-      return 'accent';
-    default:
-      return 'accent';
-  }
-}
-
-/**
- * Formatea el RFC (oculta caracteres del medio)
- */
-formatRfc(rfc: string): string {
-  if (!rfc || rfc.length < 8) return rfc;
-  const inicio = rfc.substring(0, 4);
-  const fin = rfc.substring(rfc.length - 3);
-  return `${inicio}***${fin}`;
-}
-/**
- * Verifica si el CFDI tiene retenciones
- */
-tieneRetenciones(cfdi: any): boolean {
-  if (!cfdi) return false;
-  
-  return (cfdi.iva_retenido && cfdi.iva_retenido > 0) ||
-         (cfdi.isr_retenido && cfdi.isr_retenido > 0) ||
-         (cfdi.ieps_retenido && cfdi.ieps_retenido > 0);
-}
 }
