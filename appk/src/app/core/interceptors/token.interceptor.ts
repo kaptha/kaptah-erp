@@ -20,16 +20,14 @@ export class TokenInterceptor implements HttpInterceptor {
     'localhost:3005', 
     'localhost:3001',  // otros backends
     'localhost:3002',
-    'extraordinary-beauty-production-78f6.up.railway.app',
-    'selfless-analysis-production.up.railway.app'
+    'extraordinary-beauty-production-78f6.up.railway.app'
   ];
 
   // ⭐ NUEVO: URLs que deben usar idToken de Firebase en lugar de JWT
   const requiresFirebaseToken = [
     '/pdf/',  // Endpoints de PDF
     'localhost:4005', 
-    'localhost:3004',
-    'selfless-analysis-production.up.railway.app'
+    'localhost:3004'
   ];
 
   // Verificar si la URL requiere token de Firebase
