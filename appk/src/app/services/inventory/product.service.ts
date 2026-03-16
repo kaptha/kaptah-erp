@@ -5,7 +5,7 @@ import { tap, catchError, switchMap } from 'rxjs/operators';
 import { Product } from '../../pages/productos/interfaces/product.interface';
 import { CreateProductDto } from '../../pages/productos/interfaces/create-product.dto';
 import { UsersService } from '../users.service';
-import { getAuth } from 'firebase/auth';
+
 
 @Injectable({
   providedIn: 'root'
