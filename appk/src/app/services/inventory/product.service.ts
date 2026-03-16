@@ -79,7 +79,7 @@ export class ProductService {
    * Actualizar stock de un producto
    * Usa el endpoint específico PATCH /products/:id/stock
    */
-  updateStock(id: number, quantity: number): Observable<Product> {
+ updateStock(id: number, quantity: number): Observable<Product> {
   const idToken = localStorage.getItem('idToken');
   
   if (!idToken) {
@@ -104,6 +104,7 @@ export class ProductService {
     })
   );
 }
+
 
   deleteProduct(id: number): Observable<void> {
     const headers = this.getHeaders();
