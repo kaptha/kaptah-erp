@@ -274,7 +274,7 @@ private handleAuthError(authError: any): void {
   private storeUserData(userData: any, authData: any): void {
     // Almacenamos el Token de seguridad en el localstorage
     localStorage.setItem("idToken", userData["idToken"]);
-    localStorage.setItem("firebaseRefreshToken", userData["refreshToken"]);
+    localStorage.setItem("firebaseRefreshToken", authData["refreshToken"]);
 
     // Almacenamos el email en el localstorage
     localStorage.setItem("email", authData["email"]);
