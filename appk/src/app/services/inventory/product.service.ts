@@ -5,6 +5,7 @@ import { tap, catchError, switchMap } from 'rxjs/operators';
 import { Product } from '../../pages/productos/interfaces/product.interface';
 import { CreateProductDto } from '../../pages/productos/interfaces/create-product.dto';
 import { UsersService } from '../users.service';
+import { getAuth } from 'firebase/auth';
 
 @Injectable({
   providedIn: 'root'
@@ -79,29 +80,41 @@ export class ProductService {
    * Usa el endpoint específico PATCH /products/:id/stock
    */
   updateStock(id: number, quantity: number): Observable<Product> {
-  const token = localStorage.getItem('idToken');
-  if (!token) {
-    return throwError(() => new Error('No se encontró el token de autenticación'));
+  const auth = getAuth();
+  const currentUser = auth.currentUser;
+  
+  if (!currentUser) {
+    return throwError(() => new Error('No hay usuario autenticado'));
   }
 
-  const headers = new HttpHeaders({
-    'Content-Type': 'application/json',
-    'Authorization': `Bearer ${token}`
-  });
+  return new Observable(observer => {
+    currentUser.getIdToken(true) // true = forzar refresh
+      .then(freshToken => {
+        // Guardar el token fresco
+        localStorage.setItem('idToken', freshToken);
+        
+        const headers = new HttpHeaders({
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${freshToken}`
+        });
 
-  console.log(`Actualizando stock del producto ${id} con cantidad:`, quantity);
-  return this.http.patch<Product>(
-    `${this.apiUrl}/products/${id}/stock`, 
-    { quantity }, 
-    { headers }
-  ).pipe(
-    tap(response => console.log('Stock actualizado:', response)),
-    catchError(error => {
-      console.error('Error al actualizar stock:', error);
-      console.error('URL intentada:', `${this.apiUrl}/products/${id}/stock`);
-      return throwError(() => error);
-    })
-  );
+        this.http.patch<Product>(
+          `${this.apiUrl}/products/${id}/stock`,
+          { quantity },
+          { headers }
+        ).pipe(
+          tap(response => console.log('Stock actualizado:', response)),
+          catchError(error => {
+            console.error('Error al actualizar stock:', error);
+            return throwError(() => error);
+          })
+        ).subscribe(observer);
+      })
+      .catch(error => {
+        console.error('Error obteniendo token fresco:', error);
+        observer.error(error);
+      });
+  });
 }
 
   deleteProduct(id: number): Observable<void> {
