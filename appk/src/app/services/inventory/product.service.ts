@@ -5,7 +5,7 @@ import { tap, catchError, switchMap } from 'rxjs/operators';
 import { Product } from '../../pages/productos/interfaces/product.interface';
 import { CreateProductDto } from '../../pages/productos/interfaces/create-product.dto';
 import { UsersService } from '../users.service';
-
+import { RefreshToken } from '../../config';
 
 @Injectable({
   providedIn: 'root'
@@ -80,23 +80,33 @@ export class ProductService {
    * Usa el endpoint específico PATCH /products/:id/stock
    */
  updateStock(id: number, quantity: number): Observable<Product> {
-  const idToken = localStorage.getItem('idToken');
+  const refreshToken = localStorage.getItem('firebaseRefreshToken');
   
-  if (!idToken) {
-    return throwError(() => new Error('No hay token disponible'));
+  if (!refreshToken) {
+    return throwError(() => new Error('No hay refresh token disponible'));
   }
 
-  const headers = new HttpHeaders({
-    'Content-Type': 'application/json',
-    'Authorization': `Bearer ${idToken}`
-  });
+  // Refrescar el idToken antes de llamar al inventory-api
+  return this.http.post<any>(RefreshToken.url, {
+    grant_type: 'refresh_token',
+    refresh_token: refreshToken
+  }).pipe(
+    switchMap(response => {
+      const freshToken = response.id_token;
+      // Guardar el token fresco
+      localStorage.setItem('idToken', freshToken);
+      
+      const headers = new HttpHeaders({
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${freshToken}`
+      });
 
-  console.log(`Actualizando stock del producto ${id} con cantidad:`, quantity);
-  return this.http.patch<Product>(
-    `${this.apiUrl}/products/${id}/stock`,
-    { quantity },
-    { headers }
-  ).pipe(
+      return this.http.patch<Product>(
+        `${this.apiUrl}/products/${id}/stock`,
+        { quantity },
+        { headers }
+      );
+    }),
     tap(response => console.log('✅ Stock actualizado:', response)),
     catchError(error => {
       console.error('❌ Error al actualizar stock:', error);

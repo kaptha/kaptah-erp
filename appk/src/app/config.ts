@@ -60,3 +60,6 @@ EndPoint para enviar la contraseña
 export let ConfirmPasswordReset = {
         url:'https://identitytoolkit.googleapis.com/v1/accounts:resetPassword?key=AIzaSyBo8MXnWkR0b5gMN_UqMKWDhK6JZef2bFA'
 }
+export let RefreshToken = {
+  url: 'https://securetoken.googleapis.com/v1/token?key=AIzaSyBo8MXnWkR0b5gMN_UqMKWDhK6JZef2bFA'
+}
