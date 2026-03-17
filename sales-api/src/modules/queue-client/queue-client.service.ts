@@ -59,27 +59,22 @@ export class QueueClientService {
     return await this.emailQueue.add('enviar-nota-venta', data, { priority: 3 });
   }
 
-  async sendCFDIEmail(cfdiId: string, clienteEmail: string) {
-    return await this.emailQueue.add('enviar-cfdi', {
-      cfdiId,
-      clienteEmail
-    }, { priority: 2 });
-  }
-
-  async sendBatchSummaryEmail(userId: string, batchId: string, stats: any) {
-    return await this.emailQueue.add('enviar-resumen-batch', {
-      userId,
-      batchId,
-      stats
-    }, { priority: 3 });
-  }
-
-  async sendPaymentReminder(cxcId: string, clienteEmail: string, diasVencido: number) {
-    return await this.emailQueue.add('recordatorio-pago', {
-      cxcId,
-      clienteEmail,
-      diasVencido
-    }, { priority: 2 });
+  async sendCotizacionEmail(data: {
+    cotizacionId: string;
+    clienteEmail: string;
+    folio: string;
+    customerName: string;
+    total: number;
+    subtotal: number;
+    impuestos: number;
+    fechaValidez: string;
+    fechaCreacion: string;
+    moneda?: string;
+    empresaNombre?: string;
+    customMessage?: string;
+    pdfBase64?: string;
+  }) {
+    return await this.emailQueue.add('enviar-cotizacion', data, { priority: 3 });
   }
 
   // ========== PDF JOBS ==========

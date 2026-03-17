@@ -615,7 +615,7 @@ private async obtenerLogoUsuario(userId: string, token: string): Promise<string 
     });
   }
 
-  async sendQuotationByEmail(
+ async sendQuotationByEmail(
     id: number,
     recipientEmail: string,
     customMessage: string,
@@ -628,28 +628,49 @@ private async obtenerLogoUsuario(userId: string, token: string): Promise<string 
       const cotizacion = await this.findOne(id);
 
       if (!cotizacion) {
-        throw new NotFoundException('Cotización no encontrada');
+        throw new NotFoundException(`Cotización ${id} no encontrada`);
       }
 
-      // Publicar job de email (el procesador generará el PDF si es necesario)
-      await this.queueClient.sendEmail({
-        to: recipientEmail,
-        subject: `Cotización ${cotizacion.folio} - ${cotizacion.clienteNombre}`,
-        template: 'cotizacion',
-        context: {
-          folio: cotizacion.folio,
-          cliente: cotizacion.clienteNombre,
-          total: cotizacion.total,
-          fechaValidez: cotizacion.fechaValidez,
-          customMessage: customMessage || 'Adjuntamos su cotización. Gracias por su preferencia.'
-        },
-        userId,
-        empresaId: userId,
-        relatedEntityType: 'cotizacion',
-        relatedEntityId: id.toString()
+      // 1. Obtener nombre de empresa
+      let empresaNombre = 'Kaptah';
+      try {
+        const datosUsuario = await this.usuariosService.findByFirebaseUid(userId);
+        empresaNombre = datosUsuario?.empresa_nombre || datosUsuario?.sucursal_nombre || 'Kaptah';
+      } catch (e) {
+        this.logger.warn('No se pudo obtener nombre de empresa');
+      }
+
+      // 2. Generar PDF
+      let pdfBase64: string | null = null;
+      try {
+        this.logger.log('📄 Generando PDF de cotización para adjuntar al email...');
+        const pdfBuffer = await this.generarPdfEstiloCotizacion(id, pdfStyle, null);
+        pdfBase64 = pdfBuffer.toString('base64');
+        this.logger.log('✅ PDF generado, tamaño base64: ' + pdfBase64.length);
+      } catch (e) {
+        this.logger.warn('⚠️ No se pudo generar PDF: ' + e.message);
+      }
+
+      // 3. Encolar job con datos completos
+      const job = await this.queueClient.sendCotizacionEmail({
+        cotizacionId: id.toString(),
+        clienteEmail: recipientEmail,
+        folio: cotizacion.folio,
+        customerName: cotizacion.clienteNombre,
+        total: cotizacion.total,
+        subtotal: cotizacion.subtotal,
+        impuestos: cotizacion.impuestos,
+        fechaValidez: cotizacion.fechaValidez?.toString() || '',
+        fechaCreacion: cotizacion.fechaCreacion?.toISOString() || new Date().toISOString(),
+        moneda: cotizacion.moneda || 'MXN',
+        empresaNombre,
+        customMessage,
+        pdfBase64,
       });
 
-      // Actualizar estado
+      this.logger.log(`✅ Job de email de cotización creado: ${job.id}`);
+
+      // 4. Actualizar estado
       if (cotizacion.estado === 'borrador') {
         await this.cotizacionRepository.update(id, {
           estado: 'enviada',
@@ -665,6 +686,7 @@ private async obtenerLogoUsuario(userId: string, token: string): Promise<string 
 
       return {
         success: true,
+        jobId: job.id.toString(),
         message: `Cotización enviada a ${recipientEmail}. Llegará en unos momentos.`
       };
 
