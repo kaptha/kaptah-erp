@@ -76,6 +76,12 @@ export class QueueClientService {
   }) {
     return await this.emailQueue.add('enviar-cotizacion', data, { priority: 3 });
   }
+async sendCFDIEmail(cfdiId: string, clienteEmail: string) {
+    return await this.emailQueue.add('enviar-cfdi', {
+      cfdiId,
+      clienteEmail
+    }, { priority: 2 });
+  }
 
   // ========== PDF JOBS ==========
 
