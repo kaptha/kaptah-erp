@@ -88,9 +88,9 @@ export class PerfilComponent implements OnInit {
   // Plan
   planActual: string = 'starter';
   planNombre: string = 'Kaptah Básico';
-  enPeriodoPrueba: boolean = true;
-  diasRestantesTrial: number = 8;
-  progresoTrial: number = 100;
+  enPeriodoPrueba: boolean = false;
+  diasRestantesTrial: number = 0;
+  progresoTrial: number = 0;
   suscripcionActiva: boolean = false;
   cicloFacturacion: 'mensual' | 'anual' = 'anual';
   precioMostrado: number = 599;
@@ -771,6 +771,47 @@ guardarTerminosCondiciones() {
 get terminosModificados(): boolean {
   return this.terminosCondiciones !== this.terminosOriginal;
 }
+  /**
+   * Calcula el estado del periodo de prueba basándose en fechaInicioTrial
+   * Trial dura 8 días desde la fecha de inicio
+   */
+  calcularEstadoTrial(fechaInicioTrial: string, suscripcionActiva: boolean): void {
+    if (suscripcionActiva) {
+      this.enPeriodoPrueba = false;
+      this.diasRestantesTrial = 0;
+      this.progresoTrial = 0;
+      return;
+    }
+
+    if (!fechaInicioTrial) {
+      this.enPeriodoPrueba = false;
+      this.diasRestantesTrial = 0;
+      this.progresoTrial = 0;
+      return;
+    }
+
+    const DURACION_TRIAL = 8;
+    const inicio = new Date(fechaInicioTrial);
+    const hoy = new Date();
+
+    inicio.setHours(0, 0, 0, 0);
+    hoy.setHours(0, 0, 0, 0);
+
+    const diffMs = hoy.getTime() - inicio.getTime();
+    const diasTranscurridos = Math.floor(diffMs / (1000 * 60 * 60 * 24));
+    const diasRestantes = DURACION_TRIAL - diasTranscurridos;
+
+    if (diasRestantes > 0) {
+      this.enPeriodoPrueba = true;
+      this.diasRestantesTrial = diasRestantes;
+      this.progresoTrial = (diasRestantes / DURACION_TRIAL) * 100;
+    } else {
+      this.enPeriodoPrueba = false;
+      this.diasRestantesTrial = 0;
+      this.progresoTrial = 0;
+    }
+  }
+
   // ===== MÉTODOS DE PLAN =====
 
   /**
@@ -831,3 +872,6 @@ get terminosModificados(): boolean {
     });
   }
 }
+
+
+
