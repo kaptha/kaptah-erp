@@ -57,6 +57,8 @@ export class EmailProcessor {
         return this.generateCotizacionHtml(context);
       case 'recordatorio-pago':
         return this.generatePaymentReminderHtml(context);
+        case 'nota-entrega':
+        return this.generateDeliveryNoteHtml(context);
       default:
         return this.generateGenericHtml(context);
     }
@@ -316,6 +318,77 @@ export class EmailProcessor {
     </body>
     </html>`;
   }
+  private generateDeliveryNoteHtml(context: any): string {
+    const statusText = {
+      'PENDING': 'Pendiente',
+      'PROCESSING': 'En proceso',
+      'TRANSIT': 'En transito',
+      'DELIVERED': 'Entregado',
+      'CANCELLED': 'Cancelado',
+    };
+    const statusColor = {
+      'PENDING': '#ff9800',
+      'PROCESSING': '#2196f3',
+      'TRANSIT': '#9c27b0',
+      'DELIVERED': '#4caf50',
+      'CANCELLED': '#f44336',
+    };
+    return `
+    <!DOCTYPE html>
+    <html>
+    <head>
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    </head>
+    <body style="margin:0;padding:0;background-color:#f4f4f7;font-family:Arial,Helvetica,sans-serif;">
+      <table width="100%" cellpadding="0" cellspacing="0" style="background-color:#f4f4f7;padding:40px 0;">
+        <tr>
+          <td align="center">
+            <table width="600" cellpadding="0" cellspacing="0" style="background-color:#ffffff;border-radius:8px;overflow:hidden;box-shadow:0 2px 8px rgba(0,0,0,0.08);">
+              <tr>
+                <td style="background: linear-gradient(135deg, #2e7d32 0%, #66bb6a 100%);padding:30px 40px;text-align:center;">
+                  <h1 style="color:#ffffff;margin:0;font-size:24px;">${context.empresaNombre || 'Kaptah'}</h1>
+                </td>
+              </tr>
+              <tr>
+                <td style="padding:40px;">
+                  <h2 style="color:#333;margin:0 0 20px;">Nota de Entrega ${context.folio}</h2>
+                  <p style="color:#555;font-size:15px;line-height:1.6;">
+                    Adjunto encontrara su nota de entrega con los siguientes datos:
+                  </p>
+                  <table width="100%" cellpadding="8" cellspacing="0" style="margin:20px 0;border:1px solid #e8e8e8;border-radius:6px;">
+                    <tr style="background-color:#f8f9fa;">
+                      <td style="color:#666;font-size:14px;border-bottom:1px solid #e8e8e8;"><strong>Folio</strong></td>
+                      <td style="color:#333;font-size:14px;border-bottom:1px solid #e8e8e8;">${context.folio}</td>
+                    </tr>
+                    <tr>
+                      <td style="color:#666;font-size:14px;border-bottom:1px solid #e8e8e8;"><strong>Fecha de entrega</strong></td>
+                      <td style="color:#333;font-size:14px;border-bottom:1px solid #e8e8e8;">${context.fecha}</td>
+                    </tr>
+                    <tr style="background-color:#f8f9fa;">
+                      <td style="color:#666;font-size:14px;"><strong>Estado</strong></td>
+                      <td style="font-size:14px;font-weight:bold;color:${statusColor[context.status] || '#333'};">${statusText[context.status] || context.status}</td>
+                    </tr>
+                  </table>
+                  ${context.customMessage ? `<p style="color:#555;font-size:15px;line-height:1.6;background:#f8f9fa;padding:15px;border-radius:6px;border-left:4px solid #2e7d32;">${context.customMessage}</p>` : ''}
+                  <p style="color:#555;font-size:14px;line-height:1.6;margin-top:30px;">
+                    Si tiene alguna pregunta, no dude en contactarnos.
+                  </p>
+                </td>
+              </tr>
+              <tr>
+                <td style="background-color:#f8f9fa;padding:20px 40px;text-align:center;border-top:1px solid #e8e8e8;">
+                  <p style="color:#999;font-size:12px;margin:0;">Este correo fue enviado por <strong>${context.empresaNombre || 'Kaptah'}</strong></p>
+                  <p style="color:#bbb;font-size:11px;margin:8px 0 0;">Powered by Kaptah &bull; ${new Date().getFullYear()}</p>
+                </td>
+              </tr>
+            </table>
+          </td>
+        </tr>
+      </table>
+    </body>
+    </html>`;
+  }
 
   private generateGenericHtml(context: any): string {
     return `
@@ -545,6 +618,63 @@ export class EmailProcessor {
     } catch (error) {
       this.logger.error(
         `❌ Error enviando cotizacion ${folio}: ${error.message}`,
+        error.stack,
+      );
+      throw error;
+    }
+  }
+  // Enviar nota de entrega
+  @Process({ name: 'enviar-nota-entrega', concurrency: 5 })
+  async sendDeliveryNote(job: Job): Promise<any> {
+    const { deliveryNoteId, clienteEmail, folio, salesOrderId, deliveryDate, status, empresaNombre, customMessage, pdfBase64 } = job.data;
+
+    this.logger.log(
+      `📧 Procesando envio de nota de entrega ${folio || deliveryNoteId} a ${clienteEmail}`,
+    );
+
+    try {
+      const fecha = deliveryDate
+        ? new Date(deliveryDate).toLocaleDateString('es-MX')
+        : new Date().toLocaleDateString('es-MX');
+
+      const html = this.generateDeliveryNoteHtml({
+        folio: folio || 'S/N',
+        fecha,
+        salesOrderId: salesOrderId || '',
+        status: status || 'PENDING',
+        empresaNombre: empresaNombre || 'Kaptah',
+        customMessage,
+      });
+
+      const attachments = [];
+      if (pdfBase64) {
+        attachments.push({
+          filename: `Nota-de-Entrega-${folio || deliveryNoteId}.pdf`,
+          content: Buffer.from(pdfBase64, 'base64'),
+          contentType: 'application/pdf',
+        });
+        this.logger.log(`📎 PDF adjunto incluido para nota de entrega ${folio}`);
+      }
+
+      const result = await this.resendService.send({
+        to: clienteEmail,
+        subject: `Nota de Entrega ${folio || deliveryNoteId} - ${empresaNombre || 'Kaptah'}`,
+        html,
+        attachments: attachments.length > 0 ? attachments : undefined,
+      });
+
+      this.logger.log(
+        `✅ Nota de entrega ${folio} enviada exitosamente: ${result.messageId}`,
+      );
+
+      return {
+        success: true,
+        messageId: result.messageId,
+        to: clienteEmail,
+      };
+    } catch (error) {
+      this.logger.error(
+        `❌ Error enviando nota de entrega ${folio}: ${error.message}`,
         error.stack,
       );
       throw error;
