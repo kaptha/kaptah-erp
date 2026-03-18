@@ -601,60 +601,129 @@ export class PurchaseOrderService {
 
       // 1. Obtener la orden con sus items
       const order = await this.findOne(id, userId);
-
       if (!order) {
         throw new NotFoundException(`Orden de compra ${id} no encontrada`);
       }
 
-      // 2. Mapear items para el email
-      const emailItems = order.items.map(item => ({
-        productName: item.product_name,
-        productSku: item.product_sku,
-        quantity: Number(item.quantity),
-        unitPrice: Number(item.unit_cost),
-        taxRate: Number(item.tax_rate),
-        subtotal: Number(item.subtotal),
-        taxAmount: Number(item.taxAmount),
-        total: Number(item.total),
-      }));
+      // 2. Obtener nombre de empresa
+      let empresaNombre = 'Kaptah';
+      try {
+        const datosUsuario = await this.obtenerDatosUsuario(userId);
+        empresaNombre = datosUsuario?.sucursal_nombre || 'Kaptah';
+      } catch (e) {
+        this.logger.warn('No se pudo obtener nombre de empresa');
+      }
 
-      // 3. Preparar datos para el email
-      const emailData = {
-        userId,
-        organizationId: userId,
-        recipientEmail,
-        purchaseOrderId: order.id,
-        orderNumber: order.orderNumber,
-        supplierName: order.supplierName,
-        orderDate: new Date(order.orderDate).toISOString().split('T')[0],
-        expectedDate: order.expectedDate 
-          ? new Date(order.expectedDate).toISOString().split('T')[0]
-          : 'Por definir',
-        subtotal: Number(order.subtotal),
-        tax: Number(order.tax),
-        total: Number(order.total),
-        currency: order.currency,
-        items: emailItems,
-        notes: order.notes,
-        customMessage: customMessage || `Le enviamos nuestra orden de compra ${order.orderNumber}`,
-      };
+      // 3. Generar PDF
+      let pdfBase64: string | null = null;
+      try {
+        this.logger.log('📄 Generando PDF de orden de compra para adjuntar al email...');
+        const pdfBuffer = await this.generarPdfOrdenCompra(id, userId, 'minimal', null);
+        pdfBase64 = pdfBuffer.toString('base64');
+        this.logger.log('✅ PDF generado, tamaño base64: ' + pdfBase64.length);
+      } catch (e) {
+        this.logger.warn('⚠️ No se pudo generar PDF: ' + e.message);
+      }
 
-      // 4. Enviar email
-      const result = await this.emailClientService.sendPurchaseOrder(emailData);
+      // 4. Enviar directo con Resend
+      const { Resend } = require('resend');
+      const resend = new Resend(process.env.RESEND_API_KEY);
 
-      this.logger.log(
-        `Orden de compra enviada. JobId: ${result.jobId}, LogId: ${result.logId}`,
-      );
+      const fechaOrden = order.orderDate
+        ? new Date(order.orderDate).toLocaleDateString('es-MX')
+        : new Date().toLocaleDateString('es-MX');
+
+      const fechaEsperada = order.expectedDate
+        ? new Date(order.expectedDate).toLocaleDateString('es-MX')
+        : 'No especificada';
+
+      const html = `
+      <!DOCTYPE html>
+      <html>
+      <head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"></head>
+      <body style="margin:0;padding:0;background-color:#f4f4f7;font-family:Arial,Helvetica,sans-serif;">
+        <table width="100%" cellpadding="0" cellspacing="0" style="background-color:#f4f4f7;padding:40px 0;">
+          <tr><td align="center">
+            <table width="600" cellpadding="0" cellspacing="0" style="background-color:#ffffff;border-radius:8px;overflow:hidden;box-shadow:0 2px 8px rgba(0,0,0,0.08);">
+              <tr>
+                <td style="background: linear-gradient(135deg, #e65100 0%, #ff9800 100%);padding:30px 40px;text-align:center;">
+                  <h1 style="color:#ffffff;margin:0;font-size:24px;">${empresaNombre}</h1>
+                </td>
+              </tr>
+              <tr>
+                <td style="padding:40px;">
+                  <h2 style="color:#333;margin:0 0 20px;">Orden de Compra ${order.orderNumber}</h2>
+                  <p style="color:#555;font-size:15px;line-height:1.6;">
+                    Estimado/a <strong>${order.supplierName || 'Proveedor'}</strong>,
+                  </p>
+                  <p style="color:#555;font-size:15px;line-height:1.6;">
+                    Adjunto encontrara nuestra orden de compra con los siguientes datos:
+                  </p>
+                  <table width="100%" cellpadding="8" cellspacing="0" style="margin:20px 0;border:1px solid #e8e8e8;border-radius:6px;">
+                    <tr style="background-color:#f8f9fa;">
+                      <td style="color:#666;font-size:14px;border-bottom:1px solid #e8e8e8;"><strong>No. Orden</strong></td>
+                      <td style="color:#333;font-size:14px;border-bottom:1px solid #e8e8e8;">${order.orderNumber}</td>
+                    </tr>
+                    <tr>
+                      <td style="color:#666;font-size:14px;border-bottom:1px solid #e8e8e8;"><strong>Fecha</strong></td>
+                      <td style="color:#333;font-size:14px;border-bottom:1px solid #e8e8e8;">${fechaOrden}</td>
+                    </tr>
+                    <tr style="background-color:#f8f9fa;">
+                      <td style="color:#666;font-size:14px;border-bottom:1px solid #e8e8e8;"><strong>Entrega esperada</strong></td>
+                      <td style="color:#333;font-size:14px;border-bottom:1px solid #e8e8e8;">${fechaEsperada}</td>
+                    </tr>
+                    <tr>
+                      <td style="color:#666;font-size:14px;"><strong>Total</strong></td>
+                      <td style="color:#e65100;font-size:18px;font-weight:bold;">$${order.total ? Number(order.total).toLocaleString('es-MX', { minimumFractionDigits: 2 }) : '0.00'} ${order.currency || 'MXN'}</td>
+                    </tr>
+                  </table>
+                  ${customMessage ? `<p style="color:#555;font-size:15px;line-height:1.6;background:#f8f9fa;padding:15px;border-radius:6px;border-left:4px solid #e65100;">${customMessage}</p>` : ''}
+                  <p style="color:#555;font-size:14px;line-height:1.6;margin-top:30px;">
+                    Quedamos atentos a su confirmacion.
+                  </p>
+                </td>
+              </tr>
+              <tr>
+                <td style="background-color:#f8f9fa;padding:20px 40px;text-align:center;border-top:1px solid #e8e8e8;">
+                  <p style="color:#999;font-size:12px;margin:0;">Este correo fue enviado por <strong>${empresaNombre}</strong></p>
+                  <p style="color:#bbb;font-size:11px;margin:8px 0 0;">Powered by Kaptah &bull; ${new Date().getFullYear()}</p>
+                </td>
+              </tr>
+            </table>
+          </td></tr>
+        </table>
+      </body>
+      </html>`;
+
+      const attachments = [];
+      if (pdfBase64) {
+        attachments.push({
+          filename: `Orden-de-Compra-${order.orderNumber}.pdf`,
+          content: Buffer.from(pdfBase64, 'base64'),
+        });
+      }
+
+      const { data, error } = await resend.emails.send({
+        from: process.env.RESEND_FROM_EMAIL || 'noreply@kaptah.mx',
+        to: recipientEmail,
+        subject: `Orden de Compra ${order.orderNumber} - ${empresaNombre}`,
+        html,
+        attachments: attachments.length > 0 ? attachments : undefined,
+      });
+
+      if (error) {
+        throw new Error(`Error Resend: ${error.message}`);
+      }
+
+      this.logger.log(`✅ Orden de compra enviada exitosamente: ${data.id}`);
 
       return {
-        ...result,
+        jobId: data.id,
+        logId: data.id,
         message: `Orden de compra enviada exitosamente a ${recipientEmail}`,
       };
     } catch (error) {
-      this.logger.error(
-        `Error enviando orden de compra: ${error.message}`,
-        error.stack,
-      );
+      this.logger.error(`Error enviando orden de compra: ${error.message}`, error.stack);
       throw error;
     }
   }
