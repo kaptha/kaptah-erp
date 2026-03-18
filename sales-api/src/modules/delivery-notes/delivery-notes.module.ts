@@ -7,8 +7,9 @@ import { SucursalesModule } from '../sucursales/sucursales.module';
 import { EmailClientModule } from '../email-client/email-client.module';
 import { LogoClientModule } from '../logo-client/logo-client.module';
 import { QueueClientModule } from '../queue-client/queue-client.module';
+import { UsuariosModule } from '../usuarios/usuarios.module';
 @Module({
-  imports: [TypeOrmModule.forFeature([DeliveryNote]), QueueClientModule, SucursalesModule, EmailClientModule, LogoClientModule],
+  imports: [TypeOrmModule.forFeature([DeliveryNote]), QueueClientModule, SucursalesModule, EmailClientModule, LogoClientModule, UsuariosModule],
   controllers: [DeliveryNotesController],
   providers: [DeliveryNotesService],
   exports: [DeliveryNotesService]

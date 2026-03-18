@@ -82,6 +82,20 @@ async sendCFDIEmail(cfdiId: string, clienteEmail: string) {
       clienteEmail
     }, { priority: 2 });
   }
+async sendDeliveryNoteEmail(data: {
+    deliveryNoteId: string;
+    clienteEmail: string;
+    folio: string;
+    salesOrderId: string;
+    deliveryDate: string;
+    status: string;
+    items: any[];
+    empresaNombre?: string;
+    customMessage?: string;
+    pdfBase64?: string;
+  }) {
+    return await this.emailQueue.add('enviar-nota-entrega', data, { priority: 3 });
+  }
 
   // ========== PDF JOBS ==========
 

@@ -4,6 +4,7 @@ import { Repository } from 'typeorm';
 import { DeliveryNote } from './entities/delivery-note.entity';
 import { CreateDeliveryNoteDto } from './dto/create-delivery-note.dto';
 import { UpdateDeliveryNoteDto } from './dto/update-delivery-note.dto';
+import { UsuariosService } from '../usuarios/usuarios.service';
 import { SucursalesService } from '../sucursales/sucursales.service'; // ✨ NUEVO
 import { EmailClientService } from '../email-client/email-client.service';
 import { QueueClientService } from '../queue-client/queue-client.service';
@@ -33,6 +34,7 @@ export class DeliveryNotesService {
     private sucursalesService: SucursalesService,
     private emailClientService: EmailClientService,
     private readonly queueClient: QueueClientService,
+    private readonly usuariosService: UsuariosService,
   ) {}
 
    /**
@@ -450,33 +452,53 @@ async sendDeliveryNoteByEmail(
       const deliveryNote = await this.findOne(id, userId);
 
       if (!deliveryNote) {
-        throw new NotFoundException('Nota de entrega no encontrada');
+        throw new NotFoundException(`Nota de entrega ${id} no encontrada`);
       }
 
-      // Publicar job de email
-      await this.queueClient.sendEmail({
-        to: recipientEmail,
-        subject: `Nota de Entrega ${deliveryNote.folio}`,
-        template: 'nota-entrega',
-        context: {
-          folio: deliveryNote.folio,
-          fechaEntrega: deliveryNote.deliveryDate,
-          items: deliveryNote.items,
-          customMessage: customMessage || 'Adjuntamos su nota de entrega.'
-        },
-        userId,
-        empresaId: userId,
-        relatedEntityType: 'nota-venta',
-        relatedEntityId: id
+      // 1. Obtener nombre de empresa
+      let empresaNombre = 'Kaptah';
+      try {
+        const datosUsuario = await this.usuariosService.findByFirebaseUid(userId);
+        empresaNombre = datosUsuario?.nombreComercial || datosUsuario?.Nombre || 'Kaptah';
+      } catch (e) {
+        this.logger.warn('No se pudo obtener nombre de empresa');
+      }
+
+      // 2. Generar PDF
+      let pdfBase64: string | null = null;
+      try {
+        this.logger.log('📄 Generando PDF de nota de entrega para adjuntar al email...');
+        const pdfBuffer = await this.generarPdfEstiloRemision(id, userId, 'profesional');
+        pdfBase64 = pdfBuffer.toString('base64');
+        this.logger.log('✅ PDF generado, tamaño base64: ' + pdfBase64.length);
+      } catch (e) {
+        this.logger.warn('⚠️ No se pudo generar PDF: ' + e.message);
+      }
+
+      // 3. Encolar job con datos completos
+      const job = await this.queueClient.sendDeliveryNoteEmail({
+        deliveryNoteId: id,
+        clienteEmail: recipientEmail,
+        folio: deliveryNote.folio,
+        salesOrderId: deliveryNote.salesOrderId,
+        deliveryDate: deliveryNote.deliveryDate?.toISOString() || new Date().toISOString(),
+        status: deliveryNote.status,
+        items: deliveryNote.items || [],
+        empresaNombre,
+        customMessage,
+        pdfBase64,
       });
 
-      // Actualizar estado
+      this.logger.log(`✅ Job de email de nota de entrega creado: ${job.id}`);
+
+      // 4. Actualizar estado
       await this.deliveryNoteRepository.update(id, {
         emailEnviado: true
       });
 
       return {
         success: true,
+        jobId: job.id.toString(),
         message: `Nota de entrega enviada a ${recipientEmail}. Llegará en unos momentos.`
       };
 
