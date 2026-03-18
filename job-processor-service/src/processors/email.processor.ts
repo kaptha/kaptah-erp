@@ -53,6 +53,8 @@ export class EmailProcessor {
         return this.generateCFDIHtml(context);
       case 'batch-summary':
         return this.generateBatchSummaryHtml(context);
+        case 'cotizacion':
+        return this.generateCotizacionHtml(context);
       case 'recordatorio-pago':
         return this.generatePaymentReminderHtml(context);
       default:
@@ -242,6 +244,78 @@ export class EmailProcessor {
       </table>
     </body></html>`;
   }
+  private generateCotizacionHtml(context: any): string {
+    return `
+    <!DOCTYPE html>
+    <html>
+    <head>
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    </head>
+    <body style="margin:0;padding:0;background-color:#f4f4f7;font-family:Arial,Helvetica,sans-serif;">
+      <table width="100%" cellpadding="0" cellspacing="0" style="background-color:#f4f4f7;padding:40px 0;">
+        <tr>
+          <td align="center">
+            <table width="600" cellpadding="0" cellspacing="0" style="background-color:#ffffff;border-radius:8px;overflow:hidden;box-shadow:0 2px 8px rgba(0,0,0,0.08);">
+              <tr>
+                <td style="background: linear-gradient(135deg, #1565c0 0%, #42a5f5 100%);padding:30px 40px;text-align:center;">
+                  <h1 style="color:#ffffff;margin:0;font-size:24px;">${context.empresaNombre || 'Kaptah'}</h1>
+                </td>
+              </tr>
+              <tr>
+                <td style="padding:40px;">
+                  <h2 style="color:#333333;margin:0 0 20px;">Cotizacion ${context.folio}</h2>
+                  <p style="color:#555555;font-size:15px;line-height:1.6;">
+                    Estimado/a <strong>${context.cliente || 'Cliente'}</strong>,
+                  </p>
+                  <p style="color:#555555;font-size:15px;line-height:1.6;">
+                    Adjunto encontrara su cotizacion con los siguientes datos:
+                  </p>
+                  <table width="100%" cellpadding="8" cellspacing="0" style="margin:20px 0;border:1px solid #e8e8e8;border-radius:6px;">
+                    <tr style="background-color:#f8f9fa;">
+                      <td style="color:#666;font-size:14px;border-bottom:1px solid #e8e8e8;"><strong>Folio</strong></td>
+                      <td style="color:#333;font-size:14px;border-bottom:1px solid #e8e8e8;">${context.folio}</td>
+                    </tr>
+                    <tr>
+                      <td style="color:#666;font-size:14px;border-bottom:1px solid #e8e8e8;"><strong>Fecha</strong></td>
+                      <td style="color:#333;font-size:14px;border-bottom:1px solid #e8e8e8;">${context.fecha}</td>
+                    </tr>
+                    <tr style="background-color:#f8f9fa;">
+                      <td style="color:#666;font-size:14px;border-bottom:1px solid #e8e8e8;"><strong>Valida hasta</strong></td>
+                      <td style="color:#333;font-size:14px;border-bottom:1px solid #e8e8e8;">${context.fechaValidez}</td>
+                    </tr>
+                    <tr>
+                      <td style="color:#666;font-size:14px;border-bottom:1px solid #e8e8e8;"><strong>Subtotal</strong></td>
+                      <td style="color:#333;font-size:14px;border-bottom:1px solid #e8e8e8;">$${context.subtotal ? Number(context.subtotal).toLocaleString('es-MX', { minimumFractionDigits: 2 }) : '0.00'} ${context.moneda}</td>
+                    </tr>
+                    <tr style="background-color:#f8f9fa;">
+                      <td style="color:#666;font-size:14px;border-bottom:1px solid #e8e8e8;"><strong>Impuestos</strong></td>
+                      <td style="color:#333;font-size:14px;border-bottom:1px solid #e8e8e8;">$${context.impuestos ? Number(context.impuestos).toLocaleString('es-MX', { minimumFractionDigits: 2 }) : '0.00'} ${context.moneda}</td>
+                    </tr>
+                    <tr>
+                      <td style="color:#666;font-size:14px;"><strong>Total</strong></td>
+                      <td style="color:#1565c0;font-size:18px;font-weight:bold;">$${context.total ? Number(context.total).toLocaleString('es-MX', { minimumFractionDigits: 2 }) : '0.00'} ${context.moneda}</td>
+                    </tr>
+                  </table>
+                  ${context.customMessage ? `<p style="color:#555;font-size:15px;line-height:1.6;background:#f8f9fa;padding:15px;border-radius:6px;border-left:4px solid #1565c0;">${context.customMessage}</p>` : ''}
+                  <p style="color:#555;font-size:14px;line-height:1.6;margin-top:30px;">
+                    Si tiene alguna pregunta o desea proceder, no dude en contactarnos.
+                  </p>
+                </td>
+              </tr>
+              <tr>
+                <td style="background-color:#f8f9fa;padding:20px 40px;text-align:center;border-top:1px solid #e8e8e8;">
+                  <p style="color:#999;font-size:12px;margin:0;">Este correo fue enviado por <strong>${context.empresaNombre || 'Kaptah'}</strong></p>
+                  <p style="color:#bbb;font-size:11px;margin:8px 0 0;">Powered by Kaptah &bull; ${new Date().getFullYear()}</p>
+                </td>
+              </tr>
+            </table>
+          </td>
+        </tr>
+      </table>
+    </body>
+    </html>`;
+  }
 
   private generateGenericHtml(context: any): string {
     return `
@@ -267,7 +341,7 @@ export class EmailProcessor {
     </body></html>`;
   }
 
-  // ========== PROCESSORS ==========
+  // ========== PROCESSORS ALL==========
 
   @Process({
     name: 'enviar-email',
@@ -406,6 +480,71 @@ export class EmailProcessor {
     } catch (error) {
       this.logger.error(
         `❌ Error enviando nota de venta ${folio}: ${error.message}`,
+        error.stack,
+      );
+      throw error;
+    }
+  }
+  // Enviar cotización
+  @Process({ name: 'enviar-cotizacion', concurrency: 5 })
+  async sendCotizacion(job: Job): Promise<any> {
+    const { cotizacionId, clienteEmail, folio, customerName, total, subtotal, impuestos, fechaValidez, fechaCreacion, moneda, empresaNombre, customMessage, pdfBase64 } = job.data;
+
+    this.logger.log(
+      `📧 Procesando envio de cotizacion ${folio || cotizacionId} a ${clienteEmail}`,
+    );
+
+    try {
+      const fecha = fechaCreacion
+        ? new Date(fechaCreacion).toLocaleDateString('es-MX')
+        : new Date().toLocaleDateString('es-MX');
+
+      const validez = fechaValidez
+        ? new Date(fechaValidez).toLocaleDateString('es-MX')
+        : 'No especificada';
+
+      const html = this.generateCotizacionHtml({
+        folio: folio || 'S/N',
+        fecha,
+        fechaValidez: validez,
+        cliente: customerName || 'Cliente',
+        subtotal: subtotal || 0,
+        impuestos: impuestos || 0,
+        total: total || 0,
+        moneda: moneda || 'MXN',
+        empresaNombre: empresaNombre || 'Kaptah',
+        customMessage,
+      });
+
+      const attachments = [];
+      if (pdfBase64) {
+        attachments.push({
+          filename: `Cotizacion-${folio || cotizacionId}.pdf`,
+          content: Buffer.from(pdfBase64, 'base64'),
+          contentType: 'application/pdf',
+        });
+        this.logger.log(`📎 PDF adjunto incluido para cotizacion ${folio}`);
+      }
+
+      const result = await this.resendService.send({
+        to: clienteEmail,
+        subject: `Cotizacion ${folio || cotizacionId} - ${empresaNombre || 'Kaptah'}`,
+        html,
+        attachments: attachments.length > 0 ? attachments : undefined,
+      });
+
+      this.logger.log(
+        `✅ Cotizacion ${folio} enviada exitosamente: ${result.messageId}`,
+      );
+
+      return {
+        success: true,
+        messageId: result.messageId,
+        to: clienteEmail,
+      };
+    } catch (error) {
+      this.logger.error(
+        `❌ Error enviando cotizacion ${folio}: ${error.message}`,
         error.stack,
       );
       throw error;
