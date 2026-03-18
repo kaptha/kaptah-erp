@@ -608,7 +608,7 @@ export class PurchaseOrderService {
       // 2. Obtener nombre de empresa
       let empresaNombre = 'Kaptah';
       try {
-        const datosUsuario = await this.obtenerDatosUsuario(userId);
+        const datosUsuario = await this.obtenerDatosUsuario(userId, null);
         empresaNombre = datosUsuario?.sucursal_nombre || 'Kaptah';
       } catch (e) {
         this.logger.warn('No se pudo obtener nombre de empresa');
