@@ -588,68 +588,65 @@ export class CfdiApiService {
   }
 
   buscarCfdisEgresos(query: string): Observable<CfdiSearchResponse> {
-    const queryTrimmed = query?.trim() || '';
+  const queryTrimmed = query?.trim() || '';
 
-    if (!queryTrimmed) {
-      return of({ cfdis: [], total: 0 });
-    }
-
-    return this.http.get<CfdiSearchResponse>(
-      `${this.baseUrl}/cfdis/egresos/busqueda-rapida`,
-      {
-        params: this.buildHttpParams({
-          query: queryTrimmed,
-          offset: 0,
-          limit: 50
-        }),
-        headers: this.getHeaders()
-      }
-    ).pipe(
-      catchError(this.handleError)
-    );
+  if (!queryTrimmed) {
+    return of({ cfdis: [], total: 0 });
   }
+
+  return this.busquedaRapidaEgresos({
+    query: queryTrimmed,
+    offset: 0,
+    limit: 50
+  });
+}
 
   busquedaAvanzadaEgresos(
-    filtros: AdvancedSearchEgresosPayload
-  ): Observable<CfdiSearchResponse> {
-    const queryParts: string[] = [];
+  filtros: AdvancedSearchEgresosPayload
+): Observable<CfdiSearchResponse> {
+  const queryParts: string[] = [];
 
-    if (filtros.rfc) queryParts.push(filtros.rfc);
-    if (filtros.nombre) queryParts.push(filtros.nombre);
-    if (filtros.uuid) queryParts.push(filtros.uuid);
-    if (filtros.folio) queryParts.push(filtros.folio);
-    if (filtros.serie) queryParts.push(filtros.serie);
+  if (filtros.rfc) queryParts.push(filtros.rfc);
+  if (filtros.nombre) queryParts.push(filtros.nombre);
+  if (filtros.uuid) queryParts.push(filtros.uuid);
+  if (filtros.folio) queryParts.push(filtros.folio);
+  if (filtros.serie) queryParts.push(filtros.serie);
 
-    const query = queryParts.join(' ').trim();
+  const query = queryParts.join(' ').trim();
 
-    if (
-      !query &&
-      !filtros.fechaInicio &&
-      !filtros.fechaFin &&
-      filtros.montoMin === undefined &&
-      filtros.montoMax === undefined
-    ) {
-      return of({ cfdis: [], total: 0 });
-    }
-
-    return this.http.get<CfdiSearchResponse>(
-      `${this.baseUrl}/cfdis/egresos/busqueda-rapida`,
-      {
-        params: this.buildHttpParams({
-          query,
-          fechaInicio: filtros.fechaInicio,
-          fechaFin: filtros.fechaFin,
-          montoMin: filtros.montoMin,
-          montoMax: filtros.montoMax,
-          offset: 0,
-          limit: 100
-        }),
-        headers: this.getHeaders()
-      }
-    ).pipe(
-      catchError(this.handleError)
-    );
+  if (
+    !query &&
+    !filtros.fechaInicio &&
+    !filtros.fechaFin &&
+    filtros.montoMin === undefined &&
+    filtros.montoMax === undefined
+  ) {
+    return of({ cfdis: [], total: 0 });
   }
+
+  return this.busquedaRapidaEgresos({
+    query,
+    fechaInicio: filtros.fechaInicio,
+    fechaFin: filtros.fechaFin,
+    montoMin: filtros.montoMin,
+    montoMax: filtros.montoMax,
+    offset: 0,
+    limit: 100
+  });
+}
+  busquedaRapidaEgresos(
+  params: Record<string, string | number | null | undefined>
+): Observable<CfdiSearchResponse> {
+  return this.http.get<CfdiSearchResponse>(
+    `${this.baseUrl}/cfdis/egresos/busqueda-rapida`,
+    {
+      params: this.buildHttpParams(params),
+      headers: this.getHeaders()
+    }
+  ).pipe(
+    catchError(this.handleError)
+  );
+}
 
   /* =========================================================
      DETALLE CFDI
