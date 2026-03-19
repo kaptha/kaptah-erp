@@ -818,7 +818,7 @@ export class PurchaseOrderService {
   /**
    * 👤 Obtiene datos del usuario para el template
    */
-  private async obtenerDatosUsuario(userId: string, token: string): Promise<UserDataForTemplate | null> {
+  private async obtenerDatosUsuario(userId: string, token: string | null): Promise<UserDataForTemplate | null> {
     try {
       console.log('👤 Obteniendo datos del usuario...');
       
