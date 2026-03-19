@@ -474,6 +474,9 @@ async busquedaRapidaIngresos(
   @Query('montoMin') montoMin?: number,
   @Query('montoMax') montoMax?: number,
   @Query('tipoComprobante') tipoComprobante?: string,
+  @Query('metodoPago') metodoPago?: string,
+  @Query('formaPago') formaPago?: string,
+  @Query('rfcReceptor') rfcReceptor?: string,
   @Query('offset') offset?: number,
   @Query('limit') limit?: number,
   @Req() req?: any
@@ -481,20 +484,36 @@ async busquedaRapidaIngresos(
   this.logger.debug('🔍 Búsqueda rápida de ingresos');
 
   const rfcUsuario = req.user?.rfc;
-  
+
   if (!rfcUsuario) {
     throw new Error('RFC de usuario no encontrado en el token');
   }
 
   this.logger.debug('✅ RFC Usuario:', rfcUsuario);
-
-  const filtros = {
+  this.logger.debug('📌 Filtros recibidos:', {
     query,
     fechaInicio,
     fechaFin,
     montoMin,
     montoMax,
     tipoComprobante,
+    metodoPago,
+    formaPago,
+    rfcReceptor,
+    offset,
+    limit
+  });
+
+  const filtros = {
+    query,
+    fechaInicio,
+    fechaFin,
+    montoMin: montoMin !== undefined ? Number(montoMin) : undefined,
+    montoMax: montoMax !== undefined ? Number(montoMax) : undefined,
+    tipoComprobante,
+    metodoPago,
+    formaPago,
+    rfcReceptor,
     offset: offset ? Number(offset) : 0,
     limit: limit ? Number(limit) : 50
   };

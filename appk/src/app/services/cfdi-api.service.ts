@@ -103,6 +103,8 @@ export interface AdvancedSearchIngresosPayload {
   montoMax?: number;
   metodoPago?: string;
   formaPago?: string;
+  rfcReceptor?: string;
+  tipoComprobante?: string;
 }
 
 export interface AdvancedSearchEgresosPayload {
@@ -466,50 +468,54 @@ export class CfdiApiService {
   }
 
   busquedaAvanzadaIngresos(
-    filtros: AdvancedSearchIngresosPayload
-  ): Observable<CfdiSearchResponse> {
-    const queryParts: string[] = [];
+  filtros: AdvancedSearchIngresosPayload
+): Observable<CfdiSearchResponse> {
+  const queryParts: string[] = [];
 
-    if (filtros.rfc) queryParts.push(filtros.rfc);
-    if (filtros.nombre) queryParts.push(filtros.nombre);
-    if (filtros.uuid) queryParts.push(filtros.uuid);
-    if (filtros.folio) queryParts.push(filtros.folio);
-    if (filtros.serie) queryParts.push(filtros.serie);
+  if (filtros.rfc) queryParts.push(filtros.rfc);
+  if (filtros.nombre) queryParts.push(filtros.nombre);
+  if (filtros.uuid) queryParts.push(filtros.uuid);
+  if (filtros.folio) queryParts.push(filtros.folio);
+  if (filtros.serie) queryParts.push(filtros.serie);
 
-    const query = queryParts.join(' ').trim();
+  const query = queryParts.join(' ').trim();
 
-    if (
-      !query &&
-      !filtros.fechaInicio &&
-      !filtros.fechaFin &&
-      filtros.montoMin === undefined &&
-      filtros.montoMax === undefined &&
-      !filtros.metodoPago &&
-      !filtros.formaPago
-    ) {
-      return of({ cfdis: [], total: 0 });
-    }
-
-    return this.http.get<CfdiSearchResponse>(
-      `${this.baseUrl}/cfdis/ingresos/busqueda-rapida`,
-      {
-        params: this.buildHttpParams({
-          query,
-          fechaInicio: filtros.fechaInicio,
-          fechaFin: filtros.fechaFin,
-          montoMin: filtros.montoMin,
-          montoMax: filtros.montoMax,
-          metodoPago: filtros.metodoPago,
-          formaPago: filtros.formaPago,
-          offset: 0,
-          limit: 100
-        }),
-        headers: this.getHeaders()
-      }
-    ).pipe(
-      catchError(this.handleError)
-    );
+  if (
+    !query &&
+    !filtros.fechaInicio &&
+    !filtros.fechaFin &&
+    filtros.montoMin === undefined &&
+    filtros.montoMax === undefined &&
+    !filtros.metodoPago &&
+    !filtros.formaPago &&
+    !filtros.rfcReceptor &&
+    !filtros.tipoComprobante
+  ) {
+    return of({ cfdis: [], total: 0 });
   }
+
+  return this.http.get<CfdiSearchResponse>(
+    `${this.baseUrl}/cfdis/ingresos/busqueda-rapida`,
+    {
+      params: this.buildHttpParams({
+        query,
+        fechaInicio: filtros.fechaInicio,
+        fechaFin: filtros.fechaFin,
+        montoMin: filtros.montoMin,
+        montoMax: filtros.montoMax,
+        metodoPago: filtros.metodoPago,
+        formaPago: filtros.formaPago,
+        rfcReceptor: filtros.rfcReceptor,
+        tipoComprobante: filtros.tipoComprobante,
+        offset: 0,
+        limit: 100
+      }),
+      headers: this.getHeaders()
+    }
+  ).pipe(
+    catchError(this.handleError)
+  );
+}
 
   getCfdisPendientesPago(fechaInicio?: string, fechaFin?: string): Observable<any> {
     const userRfc = this.getCurrentUserRfc();
