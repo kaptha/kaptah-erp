@@ -27,7 +27,8 @@ export class TokenInterceptor implements HttpInterceptor {
   const requiresFirebaseToken = [
     '/pdf/',  // Endpoints de PDF
     'localhost:4005', 
-    'localhost:3004'
+    'localhost:3004',
+    'selfless-analysis-production'
   ];
 
   // Verificar si la URL requiere token de Firebase
