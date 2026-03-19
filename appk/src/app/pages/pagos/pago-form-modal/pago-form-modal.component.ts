@@ -267,14 +267,14 @@ export class PagoFormModalComponent implements OnInit, OnDestroy {
   if (!providerRfc) {
     this.filteredCfdis = [];
     this.cfdisLoaded = true;
-    this.showCfdiSelector = false; // ✅ AGREGAR
+    this.showCfdiSelector = false;
     return;
   }
 
   console.log(`🔍 Cargando CFDIs de egresos para proveedor RFC: ${providerRfc}`);
   this.cfdisLoaded = false;
-  this.showCfdiSelector = false; // ✅ Ocultar mientras carga
-  
+  this.showCfdiSelector = false;
+
   this.cfdiApiService.busquedaRapidaEgresos({
     query: '',
     offset: 0,
@@ -282,38 +282,31 @@ export class PagoFormModalComponent implements OnInit, OnDestroy {
   }).subscribe({
     next: (response) => {
       console.log('📦 Respuesta completa:', response);
-      
-      let cfdisArray: any[] = [];
-      
-      if (Array.isArray(response)) {
-        cfdisArray = response;
-      } else if (response && typeof response === 'object') {
-        cfdisArray = response.data || response.results || response.cfdis || response.items || [];
-      }
-      
+
+      const cfdisArray = response?.cfdis || [];
+
       console.log(`📊 Total CFDIs obtenidos: ${cfdisArray.length}`);
-      
-      // Filtrar por RFC del emisor (proveedor)
-      this.filteredCfdis = cfdisArray.filter(cfdi => 
+
+      this.filteredCfdis = cfdisArray.filter(cfdi =>
         cfdi.rfc_emisor === providerRfc
       );
-      
+
       this.cfdisLoaded = true;
-      
+
       console.log(`✅ CFDIs filtrados para ${providerRfc}:`, this.filteredCfdis.length);
-      
-      // ✅ ACTIVAR EL SELECTOR SI HAY CFDIs
+
       if (this.filteredCfdis.length > 0) {
-        this.showCfdiSelector = true; // ✅ IMPORTANTE: Mostrar selector
+        this.showCfdiSelector = true;
         console.log('✅ Selector de CFDI activado');
         console.log('📋 Primer CFDI encontrado:', this.filteredCfdis[0]);
       } else {
         this.showCfdiSelector = false;
         console.log(`⚠️ No se encontraron CFDIs para el proveedor ${providerRfc}`);
+
         Swal.fire({
           icon: 'info',
           title: 'Sin facturas',
-          text: `No se encontraron facturas (CFDIs) del proveedor seleccionado.`,
+          text: 'No se encontraron facturas (CFDIs) del proveedor seleccionado.',
           timer: 3000,
           showConfirmButton: false
         });
@@ -323,8 +316,8 @@ export class PagoFormModalComponent implements OnInit, OnDestroy {
       console.error('❌ Error loading CFDIs:', error);
       this.filteredCfdis = [];
       this.cfdisLoaded = true;
-      this.showCfdiSelector = false; // ✅ AGREGAR
-      
+      this.showCfdiSelector = false;
+
       Swal.fire({
         icon: 'error',
         title: 'Error',
