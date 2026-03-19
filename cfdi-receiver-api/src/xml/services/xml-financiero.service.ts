@@ -16,6 +16,19 @@ export interface ProcessingResult {
   detalleErrores: string[];
   yaExistentes: number;
 }
+interface BuscarCfdisIngresosFiltros {
+  query?: string;
+  fechaInicio?: string;
+  fechaFin?: string;
+  montoMin?: number;
+  montoMax?: number;
+  tipoComprobante?: string;
+  metodoPago?: string;
+  formaPago?: string;
+  rfcReceptor?: string;
+  offset?: number;
+  limit?: number;
+}
 
 @Injectable()
 export class XmlFinancieroService {
@@ -1453,82 +1466,113 @@ async buscarCfdisEgresos(
  */
 async buscarCfdisIngresos(
   rfcUsuario: string,
-  filtros: any
-): Promise<{ cfdis: any[], total: number }> {
+  filtros: BuscarCfdisIngresosFiltros
+): Promise<{ cfdis: any[]; total: number }> {
   this.logger.debug('=== INICIO buscarCfdisIngresos ===');
   this.logger.debug('RFC Usuario:', rfcUsuario);
   this.logger.debug('Filtros completos:', JSON.stringify(filtros, null, 2));
-  
+
   try {
-    // ✅ Buscar donde el usuario es el EMISOR (quien vende/factura)
     const query = this.xmlFinancieroRepository
       .createQueryBuilder('cfdi')
       .where('cfdi.rfc_emisor = :rfc', { rfc: rfcUsuario })
-      .andWhere('cfdi.tipo_comprobante = :tipo', { tipo: 'I' });
+      .andWhere('cfdi.tipo_comprobante = :tipoBase', { tipoBase: 'I' });
 
-    // Aplicar filtro de búsqueda si existe
+    // Búsqueda textual libre
     if (filtros.query && filtros.query.trim() !== '') {
-      const searchTerm = `%${filtros.query}%`;
+      const searchTerm = %${filtros.query.trim()}%;
       this.logger.debug('🔍 Aplicando filtro de búsqueda:', searchTerm);
-      
-      // ✅ Usar ILIKE para búsqueda case-insensitive
+
       query.andWhere(
         '(' +
-        'cfdi.folio_fiscal ILIKE :search OR ' +
-        'cfdi.nombre_emisor ILIKE :search OR ' +
-        'cfdi.rfc_emisor ILIKE :search OR ' +
-        'cfdi.nombre_receptor ILIKE :search OR ' +   // Cliente
-        'cfdi.rfc_receptor ILIKE :search OR ' +
-        'cfdi.folio ILIKE :search OR ' +
-        'cfdi.serie ILIKE :search OR ' +
-        'CAST(cfdi.conceptos_detalle AS TEXT) ILIKE :search' +  // ✅ Buscar en conceptos
+          'cfdi.folio_fiscal ILIKE :search OR ' +
+          'cfdi.nombre_emisor ILIKE :search OR ' +
+          'cfdi.rfc_emisor ILIKE :search OR ' +
+          'cfdi.nombre_receptor ILIKE :search OR ' +
+          'cfdi.rfc_receptor ILIKE :search OR ' +
+          'cfdi.folio ILIKE :search OR ' +
+          'cfdi.serie ILIKE :search OR ' +
+          'CAST(cfdi.conceptos_detalle AS TEXT) ILIKE :search' +
         ')',
         { search: searchTerm }
       );
     }
 
-    // Filtro de rango de fechas
-    if (filtros.fechaInicio && filtros.fechaFin) {
-      this.logger.debug('📅 Aplicando filtro de fechas:', { 
-        fechaInicio: filtros.fechaInicio, 
-        fechaFin: filtros.fechaFin 
+    // Filtro explícito por RFC receptor
+    if (filtros.rfcReceptor) {
+      this.logger.debug('👤 Aplicando filtro por RFC receptor:', filtros.rfcReceptor);
+      query.andWhere('cfdi.rfc_receptor = :rfcReceptor', {
+        rfcReceptor: filtros.rfcReceptor
       });
+    }
+
+    // Fechas
+    if (filtros.fechaInicio && filtros.fechaFin) {
+      this.logger.debug('📅 Aplicando filtro de fechas:', {
+        fechaInicio: filtros.fechaInicio,
+        fechaFin: filtros.fechaFin
+      });
+
       query.andWhere('cfdi.fecha BETWEEN :fechaInicio AND :fechaFin', {
         fechaInicio: filtros.fechaInicio,
         fechaFin: filtros.fechaFin
       });
+    } else if (filtros.fechaInicio) {
+      query.andWhere('cfdi.fecha >= :fechaInicio', {
+        fechaInicio: filtros.fechaInicio
+      });
+    } else if (filtros.fechaFin) {
+      query.andWhere('cfdi.fecha <= :fechaFin', {
+        fechaFin: filtros.fechaFin
+      });
     }
 
-    // Filtro de rango de montos
-    if (filtros.montoMin !== undefined) {
+    // Montos
+    if (filtros.montoMin !== undefined && filtros.montoMin !== null) {
       this.logger.debug('💰 Aplicando filtro monto mínimo:', filtros.montoMin);
       query.andWhere('cfdi.total >= :montoMin', { montoMin: filtros.montoMin });
     }
-    if (filtros.montoMax !== undefined) {
+
+    if (filtros.montoMax !== undefined && filtros.montoMax !== null) {
       this.logger.debug('💰 Aplicando filtro monto máximo:', filtros.montoMax);
       query.andWhere('cfdi.total <= :montoMax', { montoMax: filtros.montoMax });
     }
 
-    // Filtro por tipo específico (aunque ya filtramos por 'I', esto es por si se extiende)
+    // Tipo comprobante
     if (filtros.tipoComprobante) {
       this.logger.debug('📋 Aplicando filtro de tipo:', filtros.tipoComprobante);
-      query.andWhere('cfdi.tipo_comprobante = :tipo', { tipo: filtros.tipoComprobante });
+      query.andWhere('cfdi.tipo_comprobante = :tipoComprobante', {
+        tipoComprobante: filtros.tipoComprobante
+      });
     }
 
-    // Contar total con los filtros aplicados
+    // Método de pago
+    if (filtros.metodoPago) {
+      this.logger.debug('💳 Aplicando filtro de método de pago:', filtros.metodoPago);
+      query.andWhere('cfdi.metodo_pago = :metodoPago', {
+        metodoPago: filtros.metodoPago
+      });
+    }
+
+    // Forma de pago
+    if (filtros.formaPago) {
+      this.logger.debug('🏦 Aplicando filtro de forma de pago:', filtros.formaPago);
+      query.andWhere('cfdi.forma_pago = :formaPago', {
+        formaPago: filtros.formaPago
+      });
+    }
+
     const total = await query.getCount();
-    this.logger.debug(`📊 Total después de aplicar filtros: ${total}`);
-    
-    // Obtener resultados con paginación
+    this.logger.debug(📊 Total después de aplicar filtros: ${total});
+
     const cfdis = await query
       .orderBy('cfdi.fecha', 'DESC')
       .skip(filtros.offset || 0)
       .take(filtros.limit || 50)
       .getMany();
 
-    this.logger.debug(`📋 CFDIs obtenidos: ${cfdis.length}`);
+    this.logger.debug(📋 CFDIs obtenidos: ${cfdis.length});
 
-    // Agregar etiqueta de tipo
     const cfdisConEtiqueta = cfdis.map(cfdi => ({
       ...cfdi,
       tipo_documento_label: this.getTipoDocumentoLabel(cfdi.tipo_comprobante)
@@ -1536,11 +1580,10 @@ async buscarCfdisIngresos(
 
     this.logger.debug('=== FIN buscarCfdisIngresos ===');
 
-    return { 
-      cfdis: cfdisConEtiqueta, 
-      total 
+    return {
+      cfdis: cfdisConEtiqueta,
+      total
     };
-
   } catch (error) {
     this.logger.error('❌ Error en búsqueda de ingresos:', error.message);
     this.logger.error('Stack:', error.stack);
