@@ -188,7 +188,7 @@ private loadSaleNotesByCustomerRfc(customerRfc: string) {
 }
 
 // ✅ MODIFICAR: Método para cargar CFDIs con detección de cambios
-  private loadCfdisByCustomerRfc(customerRfc: string) {
+  private loadCfdisByCustomerRfc(customerRfc: string): void {
   if (!customerRfc) {
     this.filteredCfdis = [];
     this.cfdisLoaded = true;
@@ -197,23 +197,17 @@ private loadSaleNotesByCustomerRfc(customerRfc: string) {
 
   console.log(`🔍 Cargando CFDIs para RFC: ${customerRfc}`);
   this.cfdisLoaded = false;
-  
-  this.cfdiApiService.busquedaAvanzadaIngresos({
-    rfcReceptor: customerRfc,
-    tipoComprobante: 'I'
-  }).subscribe({
+
+  this.cfdiApiService.buscarCfdisIngresos(customerRfc).subscribe({
     next: (response) => {
-      let cfdisArray: any[] = [];
-      
-      if (Array.isArray(response)) {
-        cfdisArray = response;
-      } else if (response && typeof response === 'object') {
-        cfdisArray = response.data || response.results || response.cfdis || response.items || [];
-      }
-      
-      this.filteredCfdis = cfdisArray;
+      const cfdisArray = response?.cfdis || [];
+
+      this.filteredCfdis = cfdisArray.filter(cfdi =>
+        cfdi.rfc_receptor === customerRfc
+      );
+
       this.cfdisLoaded = true;
-      
+
       console.log(`✅ CFDIs encontrados para ${customerRfc}:`, this.filteredCfdis.length);
     },
     error: (error) => {
