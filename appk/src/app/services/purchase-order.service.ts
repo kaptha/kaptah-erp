@@ -218,7 +218,7 @@ export class PurchaseOrderService {
     orderId: number,
     emailData: { recipientEmail: string; customMessage?: string }
   ): Observable<any> {
-    return this.http.post(`${this.apiUrl}/${orderId}/send-email`, emailData, { headers: this.getHeaders() }).pipe(
+    return this.http.post(`${this.apiUrl}/${orderId}/send-email`, emailData).pipe(
       catchError(this.handleError)
     );
   }
