@@ -1,12 +1,18 @@
 import { Controller, Post, Body, Logger, HttpCode } from '@nestjs/common';
+import { IsEmail, IsOptional, IsString } from 'class-validator';
 import { AuthEmailService } from './auth-email.service';
 
 class SendVerificationDto {
+  @IsEmail()
   email: string;
+
+  @IsOptional()
+  @IsString()
   displayName?: string;
 }
 
 class SendPasswordResetDto {
+  @IsEmail()
   email: string;
 }
 
