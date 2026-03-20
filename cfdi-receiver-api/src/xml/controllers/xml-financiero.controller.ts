@@ -371,7 +371,7 @@ async buscarCfdisIngresos(
   }
 
   try {
-    return await this.xmlFinancieroService.buscarCfdisIngresos(rfcUsuario, query);
+    return await this.xmlFinancieroService.buscarCfdisIngresos(rfcUsuario, { query });
   } catch (error) {
     this.logger.error('❌ Error en búsqueda rápida de ingresos:', error);
     throw error;

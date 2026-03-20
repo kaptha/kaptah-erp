@@ -1381,7 +1381,7 @@ async buscarCfdisEgresos(
 
     // Aplicar filtro de búsqueda si existe
     if (filtros.query && filtros.query.trim() !== '') {
-      const searchTerm = `%${filtros.query}%`;
+      const searchTerm = `%${filtros.query.trim()}%`;
       this.logger.debug('🔍 Aplicando filtro de búsqueda:', searchTerm);
       
       query.andWhere(
@@ -1480,7 +1480,7 @@ async buscarCfdisIngresos(
 
     // Búsqueda textual libre
     if (filtros.query && filtros.query.trim() !== '') {
-      const searchTerm = %${filtros.query.trim()}%;
+      const searchTerm = `%${filtros.query.trim()}%`;
       this.logger.debug('🔍 Aplicando filtro de búsqueda:', searchTerm);
 
       query.andWhere(
@@ -1563,7 +1563,7 @@ async buscarCfdisIngresos(
     }
 
     const total = await query.getCount();
-    this.logger.debug(📊 Total después de aplicar filtros: ${total});
+    this.logger.debug(`Total despues de aplicar filtros: ${total}`);
 
     const cfdis = await query
       .orderBy('cfdi.fecha', 'DESC')
@@ -1571,7 +1571,7 @@ async buscarCfdisIngresos(
       .take(filtros.limit || 50)
       .getMany();
 
-    this.logger.debug(📋 CFDIs obtenidos: ${cfdis.length});
+    this.logger.debug(`CFDIs obtenidos: ${cfdis.length}`);
 
     const cfdisConEtiqueta = cfdis.map(cfdi => ({
       ...cfdi,
