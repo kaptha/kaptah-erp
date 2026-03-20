@@ -14,6 +14,7 @@ import { TaxModule } from './taxes/tax.module';
 import { LogosModule } from './logos/logos.module';
 import { UploadsModule } from './uploads/uploads.module';
 import { DesignSettingsModule } from './design-settings/design-settings.module';
+import { AuthEmailModule } from './auth-email/auth-email.module';
 import { UserPostgres } from './users/entities/user.postgres.entity';
 @Module({
   imports: [
@@ -61,7 +62,8 @@ import { UserPostgres } from './users/entities/user.postgres.entity';
     TaxModule,
     LogosModule,
     UploadsModule,
-    DesignSettingsModule
+    DesignSettingsModule,
+    AuthEmailModule
   ],
   controllers: [AppController],
   providers: [AppService],
@@ -69,3 +71,4 @@ import { UserPostgres } from './users/entities/user.postgres.entity';
 export class AppModule {
  
 }
+
