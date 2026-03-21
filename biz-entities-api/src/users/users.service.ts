@@ -27,9 +27,24 @@ export class UsersService {
     return user;
   }
 
-  async create(createUserDto: CreateUserDto): Promise<User> {
+ async create(createUserDto: CreateUserDto): Promise<User> {
     console.log('Attempting to create user:', createUserDto);
     try {
+      // Validar duplicados antes de insertar
+      const existingByEmail = await this.usersRepository.findOne({ 
+        where: { email: createUserDto.email } 
+      });
+      if (existingByEmail) {
+        throw new Error('Ya existe una cuenta registrada con este correo electrónico');
+      }
+
+      const existingByRfc = await this.usersRepository.findOne({ 
+        where: { rfc: createUserDto.rfc } 
+      });
+      if (existingByRfc) {
+        throw new Error('Ya existe una cuenta registrada con este RFC');
+      }
+
       // Asegurar que tipo_persona tenga un valor por defecto si no viene
       const userData = {
         ...createUserDto,
@@ -42,7 +57,6 @@ export class UsersService {
       console.log('User saved successfully to MySQL:', savedUser);
       
       try {
-        // Filtrar solo los campos que existen en la tabla PostgreSQL
         const pgUserData = {
           firebaseUid: createUserDto.firebaseUid,
           realtimeDbKey: createUserDto.realtimeDbKey,
@@ -56,7 +70,6 @@ export class UsersService {
         console.log('User successfully saved to PostgreSQL:', savedPgUser);
       } catch (pgError) {
         console.error('Error saving to PostgreSQL:', pgError);
-        // No relanzo el error para que no afecte al flujo principal
       }
       
       return savedUser;
