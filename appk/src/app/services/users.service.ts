@@ -319,6 +319,20 @@ export class UsersService {
       return this.http.post(`${this.sendPasswordResetEmail}`, body)
 
     }
+
+  /*=============================================
+  Enviar verificacion de email con plantilla branded (via Resend)
+  =============================================*/
+  sendBrandedEmailVerification(email: string, displayName?: string) {
+    return this.http.post(`${this.mysqlApiUrl}/auth-email/send-verification`, { email, displayName });
+  }
+
+  /*=============================================
+  Enviar reset de password con plantilla branded (via Resend)
+  =============================================*/
+  sendBrandedPasswordReset(email: string) {
+    return this.http.post(`${this.mysqlApiUrl}/auth-email/send-password-reset`, { email });
+  }
     /*=============================================
     Confirmar el cambio de la contraseña
     =============================================*/
@@ -337,4 +351,5 @@ export class UsersService {
     }
     
 }
+
 

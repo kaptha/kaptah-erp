@@ -28,22 +28,18 @@ export class PasswordResetDialogComponent implements OnInit {
   onSend(): void {
     if (this.passwordResetForm.valid) {
       const email = this.passwordResetForm.get('email')?.value;
-      Sweetalert.fnc("Cargando", "Cargando...", null)
+      Sweetalert.fnc("Cargando", "Cargando...", null);
 
-      let body = {
-        requestType: "PASSWORD_RESET",
-        email: email
-      }
-
-      this.usersService.sendPasswordResetEmailFnc(body)
-      .subscribe((resp:any)=>{
-
-        if(resp["email"] == email){
-          Sweetalert.fnc("success", "Verifica tu correo para cambiar la contraseña", "login")
+      this.usersService.sendBrandedPasswordReset(email).subscribe(
+        (resp: any) => {
+          Sweetalert.fnc("success", "Verifica tu correo para cambiar la contrasena", "login");
+        },
+        error => {
+          Sweetalert.fnc("error", "Error al enviar el correo", null);
         }
+      );
 
-      })
-      this.dialogRef.close(email); // Cierra el diálogo y retorna el email
+      this.dialogRef.close(email);
     }
   }
 

@@ -187,21 +187,19 @@ export class RegisterComponent implements OnInit {
    * Envía email de verificación
    */
   private sendEmailVerification(authResp: any, formData: any): void {
-    const verificationBody = {
-      requestType: "VERIFY_EMAIL",
-      idToken: authResp["idToken"]
-    };
-  
-    this.usersService.sendEmailVerificationFnc(verificationBody).subscribe(
-      (verificationResp: any) => {                
-        if (verificationResp["email"] == formData.email) {
+    this.usersService.sendBrandedEmailVerification(formData.email, formData.nombre).subscribe(
+      (resp: any) => {
+        if (resp.success) {
           this.registerUserInDatabases(authResp, formData);
+        } else {
+          this.isLoading = false;
+          Sweetalert.fnc('error', 'Error al enviar el correo de verificacion', 'Cerrar');
         }
       },
       error => {
         this.isLoading = false;
-        console.error('Error de verificación de email:', error);
-        Sweetalert.fnc('error', 'Error al enviar el correo de verificación', 'Cerrar');
+        console.error('Error de verificacion de email:', error);
+        Sweetalert.fnc('error', 'Error al enviar el correo de verificacion', 'Cerrar');
       }
     );
   }
@@ -320,5 +318,6 @@ export class RegisterComponent implements OnInit {
     });
   }
 }
+
 
 
