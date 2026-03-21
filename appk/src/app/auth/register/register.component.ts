@@ -242,7 +242,7 @@ export class RegisterComponent implements OnInit {
     console.log('=================================');
 
     // Paso 1: Registrar en Firebase Realtime Database
-    this.usersService.registerDatabase(firebaseUserData).pipe(
+    this.usersService.registerDatabase(firebaseUserData, authResp.idToken).pipe(
       switchMap((firebaseResp: any) => {
         console.log('✅ Firebase Success! Response:', firebaseResp);
         

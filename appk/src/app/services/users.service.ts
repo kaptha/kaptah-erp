@@ -111,7 +111,7 @@ export class UsersService {
   Registro en Firebase Realtime Database
   MODIFICADO: Limpia campos que Firebase no acepta
   =============================================*/
-  registerDatabase(user: any){
+  registerDatabase(user: any, authToken?: string){
     // Crear una copia limpia del objeto
     const cleanUser = { ...user };
     
@@ -119,10 +119,10 @@ export class UsersService {
     delete cleanUser.password;
     delete cleanUser.tipo_persona;
     delete cleanUser.fiscalReg;
-    
+    const authParam = authToken ? `?auth=${authToken}` : '';
     console.log('📤 Enviando a Firebase Realtime DB:', cleanUser);
     
-    return this.http.post(`${this.api}/usuarios.json`, cleanUser);
+    return this.http.post(`${this.api}usuarios.json${authParam}`, cleanUser);
   }  
   
   /*=============================================
