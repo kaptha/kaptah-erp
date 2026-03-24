@@ -217,7 +217,8 @@ export class RegisterComponent implements OnInit {
       telefono: formData.phone,
       plan: formData.plan,
       suscripcionActiva: false,
-      cicloFacturacion: 'anual'
+      cicloFacturacion: 'anual',
+      Confirm: false
     };
 
     // Datos completos para MySQL (CON tipo_persona y fiscalReg)

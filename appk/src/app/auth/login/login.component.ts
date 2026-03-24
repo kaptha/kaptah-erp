@@ -3,7 +3,8 @@ import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { MatDialog } from '@angular/material/dialog';
 import { ActivatedRoute, Router } from '@angular/router';
 import { PasswordResetDialogComponent } from '../password-reset-dialog/password-reset-dialog.component';
-
+import { HttpClient } from '@angular/common/http';
+import { GetUserData } from '../../config';
 import { Sweetalert } from '../../functions';
 
 import { UsersModel } from '../../models/users.model';
@@ -31,7 +32,8 @@ export class LoginComponent implements OnInit {
     private activatedRoute: ActivatedRoute,
     private router: Router,
     private authService: AuthService,
-    private dialog: MatDialog
+    private dialog: MatDialog,
+    private http: HttpClient
   ) {
     this.user = new UsersModel();
     this.loginForm = this.fb.group({
@@ -166,41 +168,64 @@ private validateEmailAndLogin(): void {
  * Verifica si el usuario está confirmado
  */
 private checkUserConfirmation(token: string, authResp: any): void {
-  console.log("🔍 Verificando confirmación del usuario...");
-  console.log("🔑 Token recibido:", token);
-  console.log("📧 Email a buscar:", this.user.email);
-  console.log("📊 authResp completo:", authResp);
-  
-  // Pasamos el token como tercer parámetro
-  this.usersService.getFilterData("email", this.user.email, token).subscribe(
-    (userData: any) => {
-      console.log("✅ Datos de usuario obtenidos:", userData);
-      
-      if (!userData || Object.keys(userData).length === 0) {
-        this.isLoading = false;
-        Sweetalert.fnc("error", "Usuario no encontrado en la base de datos", null);
-        return;
-      }
-      
-      for (const key in userData) {
-        if (userData[key].Confirm) {
-          console.log("✅ Usuario confirmado, actualizando token...");
-          this.updateUserToken(key, { idToken: token }, authResp);
-        } else {
+    console.log("🔍 Verificando confirmación del usuario...");
+
+    this.usersService.getFilterData("email", this.user.email, token).subscribe(
+      (userData: any) => {
+        console.log("✅ Datos de usuario obtenidos:", userData);
+
+        if (!userData || Object.keys(userData).length === 0) {
           this.isLoading = false;
-          Sweetalert.fnc("error", "Necesita Confirmar su Correo", null);
+          Sweetalert.fnc("error", "Usuario no encontrado en la base de datos", null);
+          return;
         }
+
+        for (const key in userData) {
+          if (userData[key].Confirm) {
+            console.log("✅ Usuario confirmado, actualizando token...");
+            this.updateUserToken(key, { idToken: token }, authResp);
+          } else {
+            // Confirm es false en Realtime DB, verificar con Firebase Auth
+            console.log("⚠️ Confirm es false, verificando con Firebase Auth...");
+            this.http.post(GetUserData.url, { idToken: token }).subscribe(
+              (lookupResp: any) => {
+                const emailVerified = lookupResp?.users?.[0]?.emailVerified;
+                console.log("🔍 Firebase Auth emailVerified:", emailVerified);
+
+                if (emailVerified) {
+                  // Email ya verificado en Auth, actualizar Confirm en Realtime DB
+                  this.usersService.patchData(key, { Confirm: true }, token).subscribe(
+                    () => {
+                      console.log("✅ Confirm actualizado a true");
+                      this.updateUserToken(key, { idToken: token }, authResp);
+                    },
+                    (patchError) => {
+                      console.error("❌ Error al actualizar Confirm:", patchError);
+                      this.isLoading = false;
+                      Sweetalert.fnc("error", "Error al confirmar usuario", null);
+                    }
+                  );
+                } else {
+                  this.isLoading = false;
+                  Sweetalert.fnc("error", "Necesita Confirmar su Correo", null);
+                }
+              },
+              (lookupError) => {
+                console.error("❌ Error en lookup:", lookupError);
+                this.isLoading = false;
+                Sweetalert.fnc("error", "Necesita Confirmar su Correo", null);
+              }
+            );
+          }
+        }
+      },
+      (error) => {
+        this.isLoading = false;
+        Sweetalert.fnc("error", "Error al obtener datos del usuario", null);
+        console.error("❌ Error getFilterData:", error);
       }
-    },
-    (error) => {
-      this.isLoading = false;
-      Sweetalert.fnc("error", "Error al obtener datos del usuario", null);
-      console.error("❌ Error completo getFilterData:", error);
-      console.error("❌ Error status:", error.status);
-      console.error("❌ Error message:", error.message);
-    }
-  );
-}
+    );
+  }
 
 /**
  * Manejo de errores de autenticación
