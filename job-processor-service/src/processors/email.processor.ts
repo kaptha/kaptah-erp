@@ -163,6 +163,10 @@ export class EmailProcessor {
                   <td style="color:#8e24aa;font-size:18px;font-weight:bold;">$${context.total ? Number(context.total).toLocaleString('es-MX', { minimumFractionDigits: 2 }) : '0.00'} MXN</td>
                 </tr>
               </table>
+              ${context.customMessage ? `<p style="color:#555;font-size:15px;line-height:1.6;background:#f8f9fa;padding:15px;border-radius:6px;border-left:4px solid #8e24aa;">${context.customMessage}</p>` : ''}
+              <p style="color:#555;font-size:14px;line-height:1.6;margin-top:30px;">
+                Si tiene alguna pregunta, no dude en contactarnos.
+              </p>
             </td></tr>
             <tr><td style="background-color:#f8f9fa;padding:20px 40px;text-align:center;border-top:1px solid #e8e8e8;">
               <p style="color:#999;font-size:12px;margin:0;">Enviado por <strong>${context.emisorNombre || 'Kaptah'}</strong></p>
