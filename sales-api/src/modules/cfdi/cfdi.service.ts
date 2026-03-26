@@ -1671,5 +1671,76 @@ private async saveCfdiFile(cfdiId: string, xml: string, uuid: string): Promise<s
   this.logger.log(`✓ XML guardado en: ${filePath}`);
   return filePath;
 }
+/**
+ * Enviar CFDI por email con PDF y XML adjuntos
+ */
+async sendCfdiByEmail(
+  cfdiId: string,
+  recipientEmail: string,
+  customMessage: string,
+  userId: string,
+  firebaseToken: string,
+  pdfStyle: string = 'classic',
+): Promise<{ jobId: string; message: string }> {
+  try {
+    this.logger.log(`📧 ===== ENVIANDO CFDI POR EMAIL =====`);
+
+    // 1. Obtener el CFDI
+    const cfdi = await this.findOne(cfdiId, userId);
+    if (!cfdi) {
+      throw new Error(`CFDI ${cfdiId} no encontrado`);
+    }
+
+    if (cfdi.status !== 'timbrado') {
+      throw new Error('Solo se pueden enviar CFDIs timbrados');
+    }
+
+    // 2. Generar PDF
+    let pdfBase64: string | null = null;
+    try {
+      this.logger.log('📄 Generando PDF del CFDI...');
+      const pdfBuffer = await this.generarPdfCfdi(cfdiId, userId, pdfStyle, `Bearer ${firebaseToken}`);
+      pdfBase64 = pdfBuffer.toString('base64');
+      this.logger.log(`✅ PDF generado, tamaño base64: ${pdfBase64.length}`);
+    } catch (e) {
+      this.logger.warn(`⚠️ No se pudo generar PDF: ${e.message}`);
+    }
+
+    // 3. Extraer XML del CFDI
+    let xmlBase64: string | null = null;
+    if (cfdi.xml) {
+      xmlBase64 = Buffer.from(cfdi.xml, 'utf-8').toString('base64');
+      this.logger.log(`✅ XML extraído, tamaño base64: ${xmlBase64.length}`);
+    } else {
+      this.logger.warn('⚠️ El CFDI no tiene XML almacenado');
+    }
+
+    // 4. Encolar job con PDF + XML
+    const job = await this.queueClient.sendCFDIEmail({
+      cfdiId,
+      clienteEmail: recipientEmail,
+      serie: cfdi.serie || '',
+      folio: cfdi.folio || '',
+      uuid: cfdi.uuid || '',
+      total: cfdi.total,
+      emisorNombre: cfdi.emisor_nombre || 'Kaptah',
+      receptorNombre: cfdi.receptor_nombre || 'Cliente',
+      fecha: cfdi.createdAt?.toISOString() || new Date().toISOString(),
+      customMessage,
+      pdfBase64,
+      xmlBase64,
+    });
+
+    this.logger.log(`✅ Job de email CFDI creado: ${job.id}`);
+
+    return {
+      jobId: job.id.toString(),
+      message: 'Email en cola de envío con PDF y XML adjuntos.',
+    };
+  } catch (error) {
+    this.logger.error(`❌ Error encolando email CFDI: ${error.message}`, error.stack);
+    throw new Error(`Error encolando email: ${error.message}`);
+  }
+}
 }
 

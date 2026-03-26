@@ -76,12 +76,22 @@ export class QueueClientService {
   }) {
     return await this.emailQueue.add('enviar-cotizacion', data, { priority: 3 });
   }
-async sendCFDIEmail(cfdiId: string, clienteEmail: string) {
-    return await this.emailQueue.add('enviar-cfdi', {
-      cfdiId,
-      clienteEmail
-    }, { priority: 2 });
-  }
+async sendCFDIEmail(data: {
+  cfdiId: string;
+  clienteEmail: string;
+  serie?: string;
+  folio?: string;
+  uuid?: string;
+  total?: number;
+  emisorNombre?: string;
+  receptorNombre?: string;
+  fecha?: string;
+  customMessage?: string;
+  pdfBase64?: string;
+  xmlBase64?: string;
+}) {
+  return await this.emailQueue.add('enviar-cfdi', data, { priority: 2 });
+}
 async sendDeliveryNoteEmail(data: {
     deliveryNoteId: string;
     clienteEmail: string;

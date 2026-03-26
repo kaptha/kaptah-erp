@@ -446,6 +446,32 @@ export class CfdiController {
   ) {
     return await this.cfdiService.reenviarEmail(id, user.uid);
   }
+@Post(':id/enviar-email')
+async enviarCfdiEmail(
+  @Param('id') id: string,
+  @Body() body: { 
+    clienteEmail: string; 
+    customMessage?: string;
+    pdfStyle?: string;
+  },
+  @CurrentUser() user: User,
+  @Req() req: RequestWithUser
+) {
+  if (!body.clienteEmail) {
+    throw new HttpException('El email del destinatario es requerido', HttpStatus.BAD_REQUEST);
+  }
+
+  const firebaseToken = this.extractFirebaseToken(req);
+
+  return await this.cfdiService.sendCfdiByEmail(
+    id,
+    body.clienteEmail,
+    body.customMessage || '',
+    user.uid,
+    firebaseToken,
+    body.pdfStyle || 'classic'
+  );
+}
 
   /**
    * Regenerar PDF de CFDI
