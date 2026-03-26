@@ -22,7 +22,7 @@
   
         <mat-form-field appearance="fill">
           <mat-label>Correo electrónico</mat-label>
-          <input matInput type="email" formControlName="email" required>
+          <input matInput type="email" formControlName="email" required (blur)="verificarEmailDuplicado()">
           <mat-icon matPrefix>email</mat-icon>
           <mat-error *ngIf="registroForm.get('email')?.errors?.['required'] && registroForm.get('email')?.touched">
             Correo electrónico es requerido
@@ -30,17 +30,23 @@
           <mat-error *ngIf="registroForm.get('email')?.errors?.['email'] && registroForm.get('email')?.touched">
             Correo electrónico no es válido
           </mat-error>
+<mat-error *ngIf="registroForm.get('email')?.errors?.['duplicado']">
+            Ya existe una cuenta registrada con este correo electrónico
+          </mat-error>
         </mat-form-field>
   
         <mat-form-field appearance="fill">
           <mat-label>RFC</mat-label>
-          <input matInput type="text" formControlName="rfc" (input)="convertToUpper($event)" required>
+          <input matInput type="text" formControlName="rfc" (input)="convertToUpper($event)" (blur)="verificarRfcDuplicado()" required>
           <mat-icon matPrefix>assignment_ind</mat-icon>
           <mat-error *ngIf="registroForm.get('rfc')?.errors?.['required'] && registroForm.get('rfc')?.touched">
             RFC es requerido
           </mat-error>
           <mat-error *ngIf="registroForm.get('rfc')?.errors?.['pattern'] && registroForm.get('rfc')?.touched">
             RFC no es válido
+          </mat-error>
+<mat-error *ngIf="registroForm.get('rfc')?.errors?.['duplicado']">
+            Ya existe una cuenta registrada con este RFC
           </mat-error>
           <mat-hint>El tipo de persona se detectará automáticamente</mat-hint>
         </mat-form-field>

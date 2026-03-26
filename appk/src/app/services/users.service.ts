@@ -349,6 +349,19 @@ export class UsersService {
       return this.http.post(`${this.confirmPasswordReset}`, body)
 
     }
+/*=============================================
+  Verificar si RFC ya existe
+  =============================================*/
+  checkRfcExists(rfc: string): Observable<{ exists: boolean }> {
+    return this.http.get<{ exists: boolean }>(`${this.mysqlApiUrl}/users/check-rfc/${rfc}`);
+  }
+
+  /*=============================================
+  Verificar si Email ya existe
+  =============================================*/
+  checkEmailExists(email: string): Observable<{ exists: boolean }> {
+    return this.http.get<{ exists: boolean }>(`${this.mysqlApiUrl}/users/check-email/${email}`);
+  }
     
 }
 

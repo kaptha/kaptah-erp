@@ -26,6 +26,8 @@ export class RegisterComponent implements OnInit {
   // Tipo de persona y régimen fiscal
   tipoPersona: 'fisica' | 'moral' = 'fisica';
   regimenesFiscalesFiltrados: RegimenFiscal[] = [];
+  rfcDuplicado: boolean = false;
+  emailDuplicado: boolean = false;
 
   constructor(
     private fb: FormBuilder, 
@@ -294,6 +296,41 @@ export class RegisterComponent implements OnInit {
         Sweetalert.fnc('error', errorMessage, 'Cerrar');
       }
     );
+  }
+/**
+   * Valida si el RFC ya existe en la base de datos
+   */
+  verificarRfcDuplicado(): void {
+    const rfc = this.registroForm.get('rfc')?.value?.toUpperCase();
+    if (rfc && rfc.length >= 12 && this.registroForm.get('rfc')?.valid) {
+      this.usersService.checkRfcExists(rfc).subscribe(
+        (resp) => {
+          this.rfcDuplicado = resp.exists;
+          if (resp.exists) {
+            this.registroForm.get('rfc')?.setErrors({ duplicado: true });
+          }
+        },
+        (error) => console.error('Error al verificar RFC:', error)
+      );
+    }
+  }
+
+  /**
+   * Valida si el email ya existe en la base de datos
+   */
+  verificarEmailDuplicado(): void {
+    const email = this.registroForm.get('email')?.value;
+    if (email && this.registroForm.get('email')?.valid) {
+      this.usersService.checkEmailExists(email).subscribe(
+        (resp) => {
+          this.emailDuplicado = resp.exists;
+          if (resp.exists) {
+            this.registroForm.get('email')?.setErrors({ duplicado: true });
+          }
+        },
+        (error) => console.error('Error al verificar email:', error)
+      );
+    }
   }
 
   /**
