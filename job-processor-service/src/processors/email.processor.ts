@@ -683,47 +683,71 @@ export class EmailProcessor {
 
   // Enviar CFDI timbrado
   @Process({ name: 'enviar-cfdi', concurrency: 5 })
-  async sendCFDI(job: Job): Promise<any> {
-    const { cfdiId, clienteEmail } = job.data;
+async sendCFDI(job: Job): Promise<any> {
+  const { 
+    cfdiId, clienteEmail, serie, folio, uuid, total, 
+    emisorNombre, receptorNombre, fecha, customMessage,
+    pdfBase64, xmlBase64 
+  } = job.data;
 
-    this.logger.log(`📧 Procesando envio de CFDI ${cfdiId} a ${clienteEmail}`);
+  this.logger.log(`📧 Procesando envío de CFDI ${serie}-${folio} (${uuid}) a ${clienteEmail}`);
 
-    try {
-      const cfdi = await this.getCFDIData(cfdiId);
+  try {
+    const fechaFormateada = fecha
+      ? new Date(fecha).toLocaleDateString('es-MX')
+      : new Date().toLocaleDateString('es-MX');
 
-      const html = this.generateCFDIHtml({
-        serie: cfdi.serie,
-        folio: cfdi.folio,
-        uuid: cfdi.uuid,
-        fecha: cfdi.fecha,
-        cliente: cfdi.receptorNombre,
-        total: cfdi.total,
-        emisorNombre: cfdi.emisorNombre,
+    const html = this.generateCFDIHtml({
+      serie: serie || '',
+      folio: folio || '',
+      uuid: uuid || cfdiId,
+      fecha: fechaFormateada,
+      cliente: receptorNombre || 'Cliente',
+      total: total || 0,
+      emisorNombre: emisorNombre || 'Kaptah',
+      customMessage,
+    });
+
+    // Preparar adjuntos: PDF + XML
+    const attachments = [];
+
+    if (pdfBase64) {
+      attachments.push({
+        filename: `CFDI_${serie}${folio}_${uuid || cfdiId}.pdf`,
+        content: Buffer.from(pdfBase64, 'base64'),
+        contentType: 'application/pdf',
       });
-
-      const result = await this.resendService.send({
-        to: clienteEmail,
-        subject: `Factura Electronica ${cfdi.serie}-${cfdi.folio} - ${cfdi.emisorNombre}`,
-        html,
-      });
-
-      this.logger.log(
-        `✅ CFDI ${cfdiId} enviado exitosamente: ${result.messageId}`,
-      );
-
-      return {
-        success: true,
-        messageId: result.messageId,
-        to: clienteEmail,
-      };
-    } catch (error) {
-      this.logger.error(
-        `❌ Error enviando CFDI ${cfdiId}: ${error.message}`,
-        error.stack,
-      );
-      throw error;
+      this.logger.log('📎 PDF adjunto incluido');
     }
+
+    if (xmlBase64) {
+      attachments.push({
+        filename: `CFDI_${serie}${folio}_${uuid || cfdiId}.xml`,
+        content: Buffer.from(xmlBase64, 'base64'),
+        contentType: 'application/xml',
+      });
+      this.logger.log('📎 XML adjunto incluido');
+    }
+
+    const result = await this.resendService.send({
+      to: clienteEmail,
+      subject: `Factura Electrónica ${serie}-${folio} - ${emisorNombre || 'Kaptah'}`,
+      html,
+      attachments: attachments.length > 0 ? attachments : undefined,
+    });
+
+    this.logger.log(`✅ CFDI ${serie}-${folio} enviado exitosamente: ${result.messageId}`);
+
+    return {
+      success: true,
+      messageId: result.messageId,
+      to: clienteEmail,
+    };
+  } catch (error) {
+    this.logger.error(`❌ Error enviando CFDI ${cfdiId}: ${error.message}`, error.stack);
+    throw error;
   }
+}
 
   // Enviar resumen de batch
   @Process({ name: 'enviar-resumen-batch', concurrency: 2 })
