@@ -1083,10 +1083,19 @@ private generateComplementoPagos(data: any): string {
       throw new BadRequestException('Solo se pueden reenviar CFDIs timbrados');
     }
 
-    // Obtener email del receptor (ajustar según tu lógica)
     const clienteEmail = cfdi.user_email || 'cliente@example.com';
 
-    await this.queueClient.sendCFDIEmail(cfdiId, clienteEmail);
+    await this.queueClient.sendCFDIEmail({
+      cfdiId,
+      clienteEmail,
+      serie: cfdi.serie || '',
+      folio: cfdi.folio || '',
+      uuid: cfdi.uuid || '',
+      total: cfdi.total,
+      emisorNombre: cfdi.emisor_nombre || 'Kaptah',
+      receptorNombre: cfdi.receptor_nombre || 'Cliente',
+      fecha: cfdi.createdAt?.toISOString() || new Date().toISOString(),
+    });
 
     return {
       success: true,
