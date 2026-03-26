@@ -162,4 +162,13 @@ async updateTerminosCondiciones(
     throw error;
   }
 }
+async checkRfcExists(rfc: string): Promise<boolean> {
+    const user = await this.usersRepository.findOne({ where: { rfc } });
+    return !!user;
+  }
+
+  async checkEmailExists(email: string): Promise<boolean> {
+    const user = await this.usersRepository.findOne({ where: { email } });
+    return !!user;
+  }
 }

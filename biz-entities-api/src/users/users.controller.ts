@@ -12,6 +12,23 @@ export class UsersController {
   async register(@Body() createUserDto: CreateUserDto) {
     return this.usersService.create(createUserDto);
   }
+/**
+   * Verificar si un RFC ya existe
+   */
+  @Get('check-rfc/:rfc')
+  async checkRfc(@Param('rfc') rfc: string) {
+    const exists = await this.usersService.checkRfcExists(rfc.toUpperCase());
+    return { exists };
+  }
+
+  /**
+   * Verificar si un email ya existe
+   */
+  @Get('check-email/:email')
+  async checkEmail(@Param('email') email: string) {
+    const exists = await this.usersService.checkEmailExists(email.toLowerCase());
+    return { exists };
+  }
   /**
    * Obtener usuario por Firebase UID
    */
