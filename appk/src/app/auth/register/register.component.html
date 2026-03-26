@@ -123,6 +123,7 @@
           <button mat-icon-button matSuffix (click)="hidePassword = !hidePassword" [attr.aria-label]="'Toggle password visibility'" type="button">
             <mat-icon>{{hidePassword ? 'visibility_off' : 'visibility'}}</mat-icon>
           </button>
+<mat-hint>Debe incluir al menos una mayúscula, una minúscula, un número y un carácter especial</mat-hint>
           <mat-error *ngIf="registroForm.get('password')?.errors?.['required'] && registroForm.get('password')?.touched">
             Contraseña es requerida
           </mat-error>
