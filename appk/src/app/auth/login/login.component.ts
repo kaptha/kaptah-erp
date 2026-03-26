@@ -25,6 +25,8 @@ export class LoginComponent implements OnInit {
   rememberMe: boolean = false;
   hidePassword: boolean = true;
   isLoading: boolean = false;
+  mostrarReenviarVerificacion: boolean = false;
+  enviandoVerificacion: boolean = false;
   
   constructor(
     private fb: FormBuilder,
@@ -213,6 +215,7 @@ private checkUserConfirmation(token: string, authResp: any): void {
               (lookupError) => {
                 console.error("❌ Error en lookup:", lookupError);
                 this.isLoading = false;
+                this.mostrarReenviarVerificacion = true;
                 Sweetalert.fnc("error", "Necesita Confirmar su Correo", null);
               }
             );
@@ -355,6 +358,31 @@ private redirectToDashboard(): void {
     error => console.error("❌ Error en navegación a dashboard:", error)
   );
 }
+/**
+   * Reenvía el correo de verificación
+   */
+  reenviarVerificacion(): void {
+    const email = this.loginForm.get('email')?.value;
+    if (!email) {
+      Sweetalert.fnc("error", "Ingresa tu correo electrónico primero", null);
+      return;
+    }
+    this.enviandoVerificacion = true;
+    this.usersService.sendBrandedEmailVerification(email).subscribe(
+      (resp: any) => {
+        this.enviandoVerificacion = false;
+        if (resp.success) {
+          Sweetalert.fnc("success", "Correo de verificación reenviado. Revisa tu bandeja y spam", null);
+        } else {
+          Sweetalert.fnc("error", "Error al reenviar el correo", null);
+        }
+      },
+      (error) => {
+        this.enviandoVerificacion = false;
+        Sweetalert.fnc("error", "Error al reenviar el correo de verificación", null);
+      }
+    );
+  }
 
 }
 

@@ -49,6 +49,13 @@
             <mat-spinner *ngIf="isLoading" diameter="24"></mat-spinner>
           </button>
         </div>
+	<div class="resend-verification" *ngIf="mostrarReenviarVerificacion" style="text-align:center;margin-top:12px;">
+          <span style="color:#999;font-size:13px;">¿No recibiste el correo de verificación?</span>
+          <a mat-button color="primary" (click)="reenviarVerificacion()" [disabled]="enviandoVerificacion" style="font-size:13px;">
+            <span *ngIf="!enviandoVerificacion">Reenviar verificación</span>
+            <span *ngIf="enviandoVerificacion">Enviando...</span>
+          </a>
+        </div>
         <div class="register-link">
           <span>¿No tienes cuenta?</span>
           <a routerLink="/register">Regístrate aquí</a>
@@ -58,7 +65,7 @@
   </mat-card>
 </div>
 
-<!-- Olvido de contraseña -->
+
 
 
 
