@@ -266,7 +266,7 @@ export class RegisterComponent implements OnInit {
         console.log('✅ MySQL Success! Response:', mysqlResp);
 
           // Seed de roles para la nueva cuenta
-          this.rolesService.seedRoles(mysqlUserData.firebaseUid).subscribe(
+          this.rolesService.seedRoles(mysqlUserData.firebaseUid || '').subscribe(
             (rolesResp: any) => console.log('✅ Roles creados:', rolesResp),
             (rolesErr: any) => console.error('⚠️ Error al crear roles:', rolesErr)
           );
