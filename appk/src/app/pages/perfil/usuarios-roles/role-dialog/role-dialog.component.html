@@ -1,0 +1,75 @@
+<h2 mat-dialog-title>{{ getTitle() }}</h2>
+<mat-dialog-content>
+  <form [formGroup]="form">
+    <div class="form-row" *ngIf="mode !== 'view'">
+      <mat-form-field appearance="outline" class="full-width">
+        <mat-label>Nombre del rol</mat-label>
+        <input matInput formControlName="nombre" placeholder="Ej: Supervisor">
+      </mat-form-field>
+    </div>
+    <div class="form-row" *ngIf="mode !== 'view'">
+      <mat-form-field appearance="outline" class="full-width">
+        <mat-label>Descripci&#243;n</mat-label>
+        <input matInput formControlName="descripcion" placeholder="Breve descripcion del rol">
+      </mat-form-field>
+    </div>
+
+    <div class="role-name-display" *ngIf="mode === 'view'">
+      <h3>{{ form.value.nombre }}</h3>
+      <p *ngIf="form.value.descripcion">{{ form.value.descripcion }}</p>
+    </div>
+
+    <h3 class="permissions-title">Permisos por m&#243;dulo</h3>
+
+    <div class="permissions-table-container">
+      <table class="permissions-table">
+        <thead>
+          <tr>
+            <th class="module-col">M&#243;dulo</th>
+            <th class="perm-col" (click)="toggleAll('leer')">
+              <span class="perm-header">Leer</span>
+            </th>
+            <th class="perm-col" (click)="toggleAll('crear')">
+              <span class="perm-header">Crear</span>
+            </th>
+            <th class="perm-col" (click)="toggleAll('editar')">
+              <span class="perm-header">Editar</span>
+            </th>
+            <th class="perm-col" (click)="toggleAll('eliminar')">
+              <span class="perm-header">Eliminar</span>
+            </th>
+            <th class="toggle-col" *ngIf="mode !== 'view'">Todo</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let module of modules">
+            <td class="module-col">{{ module.label }}</td>
+            <td class="perm-col">
+              <mat-checkbox [(ngModel)]="module.leer" [ngModelOptions]="{standalone: true}" [disabled]="mode === 'view'" color="primary"></mat-checkbox>
+            </td>
+            <td class="perm-col">
+              <mat-checkbox [(ngModel)]="module.crear" [ngModelOptions]="{standalone: true}" [disabled]="mode === 'view'" color="primary"></mat-checkbox>
+            </td>
+            <td class="perm-col">
+              <mat-checkbox [(ngModel)]="module.editar" [ngModelOptions]="{standalone: true}" [disabled]="mode === 'view'" color="primary"></mat-checkbox>
+            </td>
+            <td class="perm-col">
+              <mat-checkbox [(ngModel)]="module.eliminar" [ngModelOptions]="{standalone: true}" [disabled]="mode === 'view'" color="primary"></mat-checkbox>
+            </td>
+            <td class="toggle-col" *ngIf="mode !== 'view'">
+              <button mat-icon-button (click)="toggleRow(module)" matTooltip="Alternar todo">
+                <mat-icon>{{ (module.leer && module.crear && module.editar && module.eliminar) ? 'check_box' : 'check_box_outline_blank' }}</mat-icon>
+              </button>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </form>
+</mat-dialog-content>
+<mat-dialog-actions align="end">
+  <button mat-button (click)="cancel()">{{ mode === 'view' ? 'Cerrar' : 'Cancelar' }}</button>
+  <button mat-raised-button class="btn-primary" (click)="save()" *ngIf="mode !== 'view'" [disabled]="form.invalid">
+    {{ mode === 'create' ? 'Crear Rol' : 'Guardar Cambios' }}
+  </button>
+</mat-dialog-actions>

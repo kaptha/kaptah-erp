@@ -21,6 +21,11 @@ import { SucursalModalComponent } from './sucursal-modal/sucursal-modal.componen
 import { ImpuestoModalComponent } from './impuesto-modal/impuesto-modal.component';
 import { CsdUploadModalComponent } from './csd-upload-modal/csd-upload-modal.component';
 import { FielUploadModalComponent } from './fiel-upload-modal/fiel-upload-modal.component';
+import { UsuariosRolesComponent } from './usuarios-roles/usuarios-roles.component';
+import { RoleDialogComponent } from './usuarios-roles/role-dialog/role-dialog.component';
+import { MatCheckboxModule } from '@angular/material/checkbox';
+import { MatTooltipModule } from '@angular/material/tooltip';
+import { MatMenuModule } from '@angular/material/menu';
 
 
 import { provideHttpClient, withInterceptorsFromDi } from '@angular/common/http';
@@ -29,14 +34,18 @@ import { provideHttpClient, withInterceptorsFromDi } from '@angular/common/http'
         SucursalModalComponent,
         ImpuestoModalComponent,
         CsdUploadModalComponent,
-        FielUploadModalComponent
+        FielUploadModalComponent,
+        UsuariosRolesComponent,
+        RoleDialogComponent
     ],
     exports: [
         PerfilComponent,
         SucursalModalComponent,
         ImpuestoModalComponent,
         CsdUploadModalComponent,
-        FielUploadModalComponent
+        FielUploadModalComponent,
+        UsuariosRolesComponent,
+        RoleDialogComponent
     ],
     schemas: [CUSTOM_ELEMENTS_SCHEMA, NO_ERRORS_SCHEMA], imports: [CommonModule,
         RouterModule,
@@ -52,5 +61,8 @@ import { provideHttpClient, withInterceptorsFromDi } from '@angular/common/http'
         MatTableModule,
         MatSelectModule,
         MatProgressBarModule,
-        MatSnackBarModule], providers: [provideHttpClient(withInterceptorsFromDi())] })
+        MatSnackBarModule,
+        MatCheckboxModule,
+        MatTooltipModule,
+        MatMenuModule], providers: [provideHttpClient(withInterceptorsFromDi())] })
 export class PerfilComponentsModule { }
