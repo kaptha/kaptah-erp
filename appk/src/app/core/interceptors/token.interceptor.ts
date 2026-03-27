@@ -28,7 +28,8 @@ export class TokenInterceptor implements HttpInterceptor {
     '/pdf/',  // Endpoints de PDF
     'localhost:4005', 
     'localhost:3004',
-    'selfless-analysis-production'
+    'selfless-analysis-production',
+    'kaptah-erp-production'
   ];
 
   // Verificar si la URL requiere token de Firebase
