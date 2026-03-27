@@ -91,6 +91,9 @@ export class HeaderComponent implements OnInit{
     localStorage.removeItem('access_token');   // JWT access token
     localStorage.removeItem('refresh_token');  // JWT refresh token
     localStorage.removeItem('user');           // Datos del usuario
+    localStorage.removeItem('firebaseUid');     // Firebase UID
+    localStorage.removeItem('userPermissions'); // Permisos del rol
+    localStorage.removeItem('userRole');        // Estado del rol
     
     // También llamar al método logout del AuthService por si tiene lógica adicional
     this.authService.logout();
