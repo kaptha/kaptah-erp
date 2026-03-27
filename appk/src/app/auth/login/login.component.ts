@@ -12,6 +12,7 @@ import { UsersModel } from '../../models/users.model';
 import { UsersService  } from '../../services/users.service';
 
 import { AuthService } from '../../services/auth.service';
+import { RolesService } from '../../services/roles.service';
 
 @Component({
     selector: 'app-login',
@@ -35,8 +36,9 @@ export class LoginComponent implements OnInit {
     private router: Router,
     private authService: AuthService,
     private dialog: MatDialog,
-    private http: HttpClient
-  ) {
+    private http: HttpClient,
+      private rolesService: RolesService
+    ) {
     this.user = new UsersModel();
     this.loginForm = this.fb.group({
       email: ['', [Validators.required, Validators.email]],
@@ -300,6 +302,21 @@ private handleAuthError(authError: any): void {
    * Almacena los datos del usuario en el localStorage
    */
   private storeUserData(userData: any, authData: any): void {
+      // Almacenamos el firebaseUid
+      if (authData["localId"]) {
+        localStorage.setItem("firebaseUid", authData["localId"]);
+        // Cargar permisos del usuario
+        this.rolesService.getUserPermissions(authData["localId"]).subscribe(
+          permisos => {
+            if (permisos) {
+              localStorage.setItem("userPermissions", JSON.stringify(permisos));
+              localStorage.setItem("userRole", "loaded");
+              console.log("✅ Permisos cargados:", permisos);
+            }
+          },
+          err => console.error("⚠️ Error al cargar permisos:", err)
+        );
+      }
     // Almacenamos el Token de seguridad en el localstorage
     localStorage.setItem("idToken", userData["idToken"]);
     localStorage.setItem("firebaseRefreshToken", authData["refreshToken"]);
