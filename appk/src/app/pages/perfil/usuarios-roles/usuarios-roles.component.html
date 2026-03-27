@@ -12,7 +12,7 @@
       </button>
       <mat-form-field appearance="outline" class="search-field">
         <mat-label>Buscar usuarios</mat-label>
-        <input matInput (keyup)="applyUsersFilter($event)" placeholder="Buscar por nombre o email...">
+        <input matInput (keyup)="applyUsersFilter($event)" placeholder="Buscar...">
         <mat-icon matSuffix>search</mat-icon>
       </mat-form-field>
     </div>
@@ -21,6 +21,7 @@
       <mat-spinner diameter="40"></mat-spinner>
     </div>
 
+    <!-- Tabla desktop -->
     <div class="table-container mat-elevation-z8" *ngIf="!loadingUsers">
       <table mat-table [dataSource]="usersDataSource">
         <ng-container matColumnDef="nombre">
@@ -33,19 +34,16 @@
             </div>
           </td>
         </ng-container>
-
         <ng-container matColumnDef="email">
           <th mat-header-cell *matHeaderCellDef>Email</th>
           <td mat-cell *matCellDef="let user">{{ user.email }}</td>
         </ng-container>
-
         <ng-container matColumnDef="rol">
           <th mat-header-cell *matHeaderCellDef>Rol</th>
           <td mat-cell *matCellDef="let user">
             <span class="chip chip-role">{{ user.rol }}</span>
           </td>
         </ng-container>
-
         <ng-container matColumnDef="actions">
           <th mat-header-cell *matHeaderCellDef></th>
           <td mat-cell *matCellDef="let user">
@@ -60,15 +58,41 @@
             </mat-menu>
           </td>
         </ng-container>
-
         <tr mat-header-row *matHeaderRowDef="usersColumns"></tr>
         <tr mat-row *matRowDef="let row; columns: usersColumns;"></tr>
         <tr class="mat-row" *matNoDataRow>
-          <td class="mat-cell empty-state" [attr.colspan]="usersColumns.length">
-            No hay usuarios adicionales. Agrega uno con el bot&#243;n de arriba.
-          </td>
+          <td class="mat-cell empty-state" [attr.colspan]="usersColumns.length">No hay usuarios adicionales.</td>
         </tr>
       </table>
+    </div>
+
+    <!-- Cards m&#243;vil usuarios -->
+    <div class="mobile-users-cards" *ngIf="!loadingUsers">
+      <div class="mobile-card" *ngFor="let user of usersDataSource.filteredData">
+        <div class="mobile-card-header">
+          <div class="mobile-card-title">
+            <mat-icon class="user-icon">{{ user.esAdmin ? 'admin_panel_settings' : 'person' }}</mat-icon>
+            {{ user.nombre }}
+            <span class="chip chip-admin" *ngIf="user.esAdmin">Admin</span>
+          </div>
+        </div>
+        <div class="mobile-card-content">
+          <div class="mobile-card-row">
+            <div class="mobile-card-label">Email:</div>
+            <div class="mobile-card-value">{{ user.email }}</div>
+          </div>
+          <div class="mobile-card-row">
+            <div class="mobile-card-label">Rol:</div>
+            <div class="mobile-card-value"><span class="chip chip-role">{{ user.rol }}</span></div>
+          </div>
+        </div>
+        <div class="mobile-card-actions" *ngIf="!user.esAdmin">
+          <button mat-icon-button (click)="changeUserRole(user)" matTooltip="Cambiar rol">
+            <mat-icon>swap_horiz</mat-icon>
+          </button>
+        </div>
+      </div>
+      <div *ngIf="usersDataSource.filteredData.length === 0" class="empty-state">No hay usuarios adicionales.</div>
     </div>
   </div>
 
@@ -87,7 +111,7 @@
       </button>
       <mat-form-field appearance="outline" class="search-field">
         <mat-label>Buscar roles</mat-label>
-        <input matInput (keyup)="applyRolesFilter($event)" placeholder="Buscar por nombre...">
+        <input matInput (keyup)="applyRolesFilter($event)" placeholder="Buscar...">
         <mat-icon matSuffix>search</mat-icon>
       </mat-form-field>
     </div>
@@ -96,6 +120,7 @@
       <mat-spinner diameter="40"></mat-spinner>
     </div>
 
+    <!-- Tabla desktop roles -->
     <div class="table-container mat-elevation-z8" *ngIf="!loadingRoles">
       <table mat-table [dataSource]="rolesDataSource">
         <ng-container matColumnDef="nombre">
@@ -109,12 +134,10 @@
             </div>
           </td>
         </ng-container>
-
         <ng-container matColumnDef="descripcion">
           <th mat-header-cell *matHeaderCellDef>Descripci&#243;n</th>
           <td mat-cell *matCellDef="let role">{{ role.descripcion }}</td>
         </ng-container>
-
         <ng-container matColumnDef="tipo">
           <th mat-header-cell *matHeaderCellDef>Tipo</th>
           <td mat-cell *matCellDef="let role">
@@ -123,7 +146,6 @@
             </span>
           </td>
         </ng-container>
-
         <ng-container matColumnDef="actions">
           <th mat-header-cell *matHeaderCellDef></th>
           <td mat-cell *matCellDef="let role">
@@ -146,15 +168,50 @@
             </mat-menu>
           </td>
         </ng-container>
-
         <tr mat-header-row *matHeaderRowDef="rolesColumns"></tr>
         <tr mat-row *matRowDef="let row; columns: rolesColumns;"></tr>
         <tr class="mat-row" *matNoDataRow>
-          <td class="mat-cell empty-state" [attr.colspan]="rolesColumns.length">
-            No hay roles configurados.
-          </td>
+          <td class="mat-cell empty-state" [attr.colspan]="rolesColumns.length">No hay roles configurados.</td>
         </tr>
       </table>
+    </div>
+
+    <!-- Cards m&#243;vil roles -->
+    <div class="mobile-roles-cards" *ngIf="!loadingRoles">
+      <div class="mobile-card" *ngFor="let role of rolesDataSource.filteredData">
+        <div class="mobile-card-header">
+          <div class="mobile-card-title">
+            <mat-icon class="role-icon" [class.predefined]="role.esPredefinido">
+              {{ role.esPredefinido ? 'verified' : 'tune' }}
+            </mat-icon>
+            {{ role.nombre }}
+          </div>
+          <span class="chip" [class.chip-predefined]="role.esPredefinido" [class.chip-custom]="!role.esPredefinido">
+            {{ role.esPredefinido ? 'Predefinido' : 'Custom' }}
+          </span>
+        </div>
+        <div class="mobile-card-content">
+          <div class="mobile-card-row">
+            <div class="mobile-card-label">Descripci&#243;n:</div>
+            <div class="mobile-card-value">{{ role.descripcion }}</div>
+          </div>
+          <div class="mobile-card-row">
+            <div class="mobile-card-label">Permisos activos:</div>
+            <div class="mobile-card-value">{{ getPermissionCount(role) }}</div>
+          </div>
+        </div>
+        <div class="mobile-card-actions">
+          <button mat-icon-button (click)="openViewRoleDialog(role)" matTooltip="Ver permisos">
+            <mat-icon>visibility</mat-icon>
+          </button>
+          <button mat-icon-button (click)="openEditRoleDialog(role)" *ngIf="!role.esPredefinido" matTooltip="Editar">
+            <mat-icon>edit</mat-icon>
+          </button>
+          <button mat-icon-button (click)="deleteRole(role)" *ngIf="!role.esPredefinido" matTooltip="Eliminar">
+            <mat-icon color="warn">delete</mat-icon>
+          </button>
+        </div>
+      </div>
     </div>
   </div>
 </div>
