@@ -10,6 +10,7 @@ import { UsersModel } from '../../models/users.model';
 import { UsersService } from '../../services/users.service';
 import { TermsDialogComponent } from '../terms-dialog/terms-dialog.component';
 import { RegimenFiscalService, RegimenFiscal } from '../../services/regimen-fiscal.service';
+import { RolesService } from '../../services/roles.service';
 
 @Component({
     selector: 'app-register',
@@ -35,7 +36,8 @@ export class RegisterComponent implements OnInit {
     private usersService: UsersService,
     private dialog: MatDialog,
     private router: Router,
-    private regimenFiscalService: RegimenFiscalService
+    private regimenFiscalService: RegimenFiscalService,
+      private rolesService: RolesService
   ) {
     this.user = new UsersModel();
   }
@@ -262,6 +264,12 @@ export class RegisterComponent implements OnInit {
       (mysqlResp: any) => {
         this.isLoading = false;
         console.log('✅ MySQL Success! Response:', mysqlResp);
+
+          // Seed de roles para la nueva cuenta
+          this.rolesService.seedRoles(mysqlUserData.firebaseUid).subscribe(
+            (rolesResp: any) => console.log('✅ Roles creados:', rolesResp),
+            (rolesErr: any) => console.error('⚠️ Error al crear roles:', rolesErr)
+          );
         
         Sweetalert.fnc('success', 'Cuenta creada exitosamente. Por favor confirma tu correo para acceder (revisa spam)', 'Cerrar');
         
