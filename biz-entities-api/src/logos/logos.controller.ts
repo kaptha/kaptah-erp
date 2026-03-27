@@ -41,7 +41,6 @@ export class LogosController {
     private readonly usersService: UsersService
   ) {}
 
-  @UseGuards(InternalApiKeyGuard)
   @Get('current')
   async getCurrentLogo(@Req() req: RequestWithUser, @Res() res: Response) {
     try {
@@ -306,3 +305,4 @@ export class LogosController {
     }
   }
 }
+
