@@ -23,6 +23,7 @@ import { CsdUploadModalComponent } from './csd-upload-modal/csd-upload-modal.com
 import { FielUploadModalComponent } from './fiel-upload-modal/fiel-upload-modal.component';
 import { UsuariosRolesComponent } from './usuarios-roles/usuarios-roles.component';
 import { RoleDialogComponent } from './usuarios-roles/role-dialog/role-dialog.component';
+import { SubUserDialogComponent } from './usuarios-roles/sub-user-dialog/sub-user-dialog.component';
 import { MatCheckboxModule } from '@angular/material/checkbox';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { MatMenuModule } from '@angular/material/menu';
@@ -36,7 +37,8 @@ import { provideHttpClient, withInterceptorsFromDi } from '@angular/common/http'
         CsdUploadModalComponent,
         FielUploadModalComponent,
         UsuariosRolesComponent,
-        RoleDialogComponent
+        RoleDialogComponent,
+        SubUserDialogComponent
     ],
     exports: [
         PerfilComponent,

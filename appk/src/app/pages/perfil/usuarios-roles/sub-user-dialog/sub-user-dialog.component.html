@@ -1,0 +1,38 @@
+<h2 mat-dialog-title>Agregar Usuario</h2>
+<mat-dialog-content>
+  <form [formGroup]="form">
+    <mat-form-field appearance="outline" class="full-width">
+      <mat-label>Nombre completo</mat-label>
+      <input matInput formControlName="nombre" placeholder="Nombre del usuario">
+      <mat-error *ngIf="form.get('nombre')?.hasError('required')">El nombre es requerido</mat-error>
+    </mat-form-field>
+
+    <mat-form-field appearance="outline" class="full-width">
+      <mat-label>Correo electr&#243;nico</mat-label>
+      <input matInput formControlName="email" placeholder="correo@ejemplo.com" type="email">
+      <mat-error *ngIf="form.get('email')?.hasError('required')">El correo es requerido</mat-error>
+      <mat-error *ngIf="form.get('email')?.hasError('email')">Correo no v&#225;lido</mat-error>
+    </mat-form-field>
+
+    <mat-form-field appearance="outline" class="full-width">
+      <mat-label>Rol</mat-label>
+      <mat-select formControlName="rolId">
+        <mat-option *ngFor="let role of roles" [value]="role.id">
+          {{ role.nombre }} - {{ role.descripcion }}
+        </mat-option>
+      </mat-select>
+      <mat-error *ngIf="form.get('rolId')?.hasError('required')">Selecciona un rol</mat-error>
+    </mat-form-field>
+
+    <p class="hint-text">
+      <mat-icon class="hint-icon">info</mat-icon>
+      Se enviar&#225; un correo al usuario con sus credenciales de acceso.
+    </p>
+  </form>
+</mat-dialog-content>
+<mat-dialog-actions align="end">
+  <button mat-button (click)="cancel()">Cancelar</button>
+  <button mat-raised-button class="btn-primary" (click)="save()" [disabled]="form.invalid">
+    Crear Usuario
+  </button>
+</mat-dialog-actions>

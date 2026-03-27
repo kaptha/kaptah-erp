@@ -4,11 +4,24 @@ import { CreateRoleDto } from './dto/create-role.dto';
 import { AssignRoleDto } from './dto/assign-role.dto';
 import { UpdateRoleDto } from './dto/update-role.dto';
 
+class CreateSubUserDto {
+  nombre: string;
+  email: string;
+  rolId: number;
+  adminFirebaseUid: string;
+}
+
 @Controller('roles')
 export class RolesController {
   private readonly logger = new Logger(RolesController.name);
 
   constructor(private readonly rolesService: RolesService) {}
+
+  @Get('sub-users/:firebaseUid')
+  getSubUsers(@Param('firebaseUid') firebaseUid: string) {
+    this.logger.log('GET /roles/sub-users/' + firebaseUid);
+    return this.rolesService.getSubUsers(firebaseUid);
+  }
 
   @Get('account/:firebaseUid')
   findAll(@Param('firebaseUid') firebaseUid: string) {
@@ -26,6 +39,13 @@ export class RolesController {
   getUserPermissions(@Param('firebaseUid') firebaseUid: string) {
     this.logger.log('GET /roles/permissions/' + firebaseUid);
     return this.rolesService.getUserPermissions(firebaseUid);
+  }
+
+  @Post('create-sub-user')
+  createSubUser(@Body() body: CreateSubUserDto) {
+    this.logger.log('POST /roles/create-sub-user - ' + body.email);
+    const { adminFirebaseUid, ...data } = body;
+    return this.rolesService.createSubUser(data, adminFirebaseUid);
   }
 
   @Post('seed/:firebaseUid')

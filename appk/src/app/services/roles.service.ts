@@ -65,6 +65,14 @@ export class RolesService {
     return this.http.delete(this.apiUrl + '/roles/' + id, { body: { adminFirebaseUid } });
   }
 
+  getSubUsers(firebaseUid: string): Observable<any[]> {
+    return this.http.get<any[]>(this.apiUrl + '/roles/sub-users/' + firebaseUid);
+  }
+
+  createSubUser(data: { nombre: string; email: string; rolId: number }, adminFirebaseUid: string): Observable<any> {
+    return this.http.post(this.apiUrl + '/roles/create-sub-user', { ...data, adminFirebaseUid });
+  }
+
   createCustomRole(data: any, adminFirebaseUid: string): Observable<Role> {
     return this.http.post<Role>(this.apiUrl + '/roles/custom', {
       ...data,

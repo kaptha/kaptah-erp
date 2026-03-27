@@ -1,123 +1,160 @@
 <div class="roles-container">
-  <div class="roles-header">
-    <h2>Roles del Sistema</h2>
-    <p class="roles-subtitle">Administra los roles y permisos de tu cuenta</p>
-  </div>
+  <!-- SECCION: USUARIOS -->
+  <div class="section">
+    <div class="section-header">
+      <h2>Usuarios de la Cuenta</h2>
+      <p class="section-subtitle">Gestiona los usuarios que tienen acceso a tu cuenta</p>
+    </div>
 
-  <div class="actions-container">
-    <button mat-raised-button class="btn-primary" (click)="openCreateDialog()">
-      <mat-icon>add</mat-icon> Crear rol personalizado
-    </button>
+    <div class="actions-container">
+      <button mat-raised-button class="btn-primary" (click)="openAddUserDialog()">
+        <mat-icon>person_add</mat-icon> Agregar usuario
+      </button>
+      <mat-form-field appearance="outline" class="search-field">
+        <mat-label>Buscar usuarios</mat-label>
+        <input matInput (keyup)="applyUsersFilter($event)" placeholder="Buscar por nombre o email...">
+        <mat-icon matSuffix>search</mat-icon>
+      </mat-form-field>
+    </div>
 
-    <mat-form-field appearance="outline" class="search-field">
-      <mat-label>Buscar roles</mat-label>
-      <input matInput (keyup)="applyFilter($event)" placeholder="Buscar por nombre...">
-      <mat-icon matSuffix>search</mat-icon>
-    </mat-form-field>
-  </div>
+    <div class="loading-container" *ngIf="loadingUsers">
+      <mat-spinner diameter="40"></mat-spinner>
+    </div>
 
-  <div class="loading-container" *ngIf="loading">
-    <mat-spinner></mat-spinner>
-  </div>
+    <div class="table-container mat-elevation-z8" *ngIf="!loadingUsers">
+      <table mat-table [dataSource]="usersDataSource">
+        <ng-container matColumnDef="nombre">
+          <th mat-header-cell *matHeaderCellDef>Nombre</th>
+          <td mat-cell *matCellDef="let user">
+            <div class="user-name">
+              <mat-icon class="user-icon">{{ user.esAdmin ? 'admin_panel_settings' : 'person' }}</mat-icon>
+              <span>{{ user.nombre }}</span>
+              <span class="chip chip-admin" *ngIf="user.esAdmin">Admin</span>
+            </div>
+          </td>
+        </ng-container>
 
-  <!-- Tabla de roles -->
-  <div class="table-container mat-elevation-z8" *ngIf="!loading">
-    <table mat-table [dataSource]="dataSource">
-      <ng-container matColumnDef="nombre">
-        <th mat-header-cell *matHeaderCellDef>Nombre</th>
-        <td mat-cell *matCellDef="let role">
-          <div class="role-name">
-            <mat-icon class="role-icon" [class.predefined]="role.esPredefinido">
-              {{ role.esPredefinido ? 'verified' : 'tune' }}
-            </mat-icon>
-            <span>{{ role.nombre }}</span>
-          </div>
-        </td>
-      </ng-container>
+        <ng-container matColumnDef="email">
+          <th mat-header-cell *matHeaderCellDef>Email</th>
+          <td mat-cell *matCellDef="let user">{{ user.email }}</td>
+        </ng-container>
 
-      <ng-container matColumnDef="descripcion">
-        <th mat-header-cell *matHeaderCellDef>Descripci&#243;n</th>
-        <td mat-cell *matCellDef="let role">{{ role.descripcion }}</td>
-      </ng-container>
+        <ng-container matColumnDef="rol">
+          <th mat-header-cell *matHeaderCellDef>Rol</th>
+          <td mat-cell *matCellDef="let user">
+            <span class="chip chip-role">{{ user.rol }}</span>
+          </td>
+        </ng-container>
 
-      <ng-container matColumnDef="tipo">
-        <th mat-header-cell *matHeaderCellDef>Tipo</th>
-        <td mat-cell *matCellDef="let role">
-          <span class="chip" [class.chip-predefined]="role.esPredefinido" [class.chip-custom]="!role.esPredefinido">
-            {{ role.esPredefinido ? 'Predefinido' : 'Personalizado' }}
-          </span>
-        </td>
-      </ng-container>
-
-      <ng-container matColumnDef="actions">
-        <th mat-header-cell *matHeaderCellDef></th>
-        <td mat-cell *matCellDef="let role">
-          <button mat-icon-button [matMenuTriggerFor]="menu">
-            <mat-icon>more_vert</mat-icon>
-          </button>
-          <mat-menu #menu="matMenu">
-            <button mat-menu-item (click)="openViewDialog(role)">
-              <mat-icon>visibility</mat-icon>
-              <span>Ver permisos</span>
+        <ng-container matColumnDef="actions">
+          <th mat-header-cell *matHeaderCellDef></th>
+          <td mat-cell *matCellDef="let user">
+            <button mat-icon-button [matMenuTriggerFor]="userMenu" *ngIf="!user.esAdmin">
+              <mat-icon>more_vert</mat-icon>
             </button>
-            <button mat-menu-item (click)="openEditDialog(role)" *ngIf="!role.esPredefinido">
-              <mat-icon>edit</mat-icon>
-              <span>Editar</span>
-            </button>
-            <button mat-menu-item (click)="deleteRole(role)" *ngIf="!role.esPredefinido">
-              <mat-icon color="warn">delete</mat-icon>
-              <span>Eliminar</span>
-            </button>
-          </mat-menu>
-        </td>
-      </ng-container>
+            <mat-menu #userMenu="matMenu">
+              <button mat-menu-item (click)="changeUserRole(user)">
+                <mat-icon>swap_horiz</mat-icon>
+                <span>Cambiar rol</span>
+              </button>
+            </mat-menu>
+          </td>
+        </ng-container>
 
-      <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
-      <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
-
-      <tr class="mat-row" *matNoDataRow>
-        <td class="mat-cell empty-state" [attr.colspan]="displayedColumns.length">
-          No hay roles configurados.
-        </td>
-      </tr>
-    </table>
+        <tr mat-header-row *matHeaderRowDef="usersColumns"></tr>
+        <tr mat-row *matRowDef="let row; columns: usersColumns;"></tr>
+        <tr class="mat-row" *matNoDataRow>
+          <td class="mat-cell empty-state" [attr.colspan]="usersColumns.length">
+            No hay usuarios adicionales. Agrega uno con el bot&#243;n de arriba.
+          </td>
+        </tr>
+      </table>
+    </div>
   </div>
 
-  <!-- Cards m&#243;vil -->
-  <div class="mobile-cards" *ngIf="!loading">
-    <div class="mobile-card" *ngFor="let role of dataSource.filteredData">
-      <div class="mobile-card-header">
-        <div class="mobile-card-title">
-          <mat-icon class="role-icon" [class.predefined]="role.esPredefinido">
-            {{ role.esPredefinido ? 'verified' : 'tune' }}
-          </mat-icon>
-          {{ role.nombre }}
-        </div>
-        <span class="chip" [class.chip-predefined]="role.esPredefinido" [class.chip-custom]="!role.esPredefinido">
-          {{ role.esPredefinido ? 'Predefinido' : 'Custom' }}
-        </span>
-      </div>
-      <div class="mobile-card-content">
-        <div class="mobile-card-row">
-          <div class="mobile-card-label">Descripci&#243;n:</div>
-          <div class="mobile-card-value">{{ role.descripcion }}</div>
-        </div>
-        <div class="mobile-card-row">
-          <div class="mobile-card-label">Permisos activos:</div>
-          <div class="mobile-card-value">{{ getPermissionCount(role) }}</div>
-        </div>
-      </div>
-      <div class="mobile-card-actions">
-        <button mat-icon-button (click)="openViewDialog(role)" matTooltip="Ver permisos">
-          <mat-icon>visibility</mat-icon>
-        </button>
-        <button mat-icon-button (click)="openEditDialog(role)" *ngIf="!role.esPredefinido" matTooltip="Editar">
-          <mat-icon>edit</mat-icon>
-        </button>
-        <button mat-icon-button (click)="deleteRole(role)" *ngIf="!role.esPredefinido" matTooltip="Eliminar">
-          <mat-icon color="warn">delete</mat-icon>
-        </button>
-      </div>
+  <mat-divider class="section-divider"></mat-divider>
+
+  <!-- SECCION: ROLES -->
+  <div class="section">
+    <div class="section-header">
+      <h2>Roles del Sistema</h2>
+      <p class="section-subtitle">Administra los roles y permisos disponibles</p>
+    </div>
+
+    <div class="actions-container">
+      <button mat-raised-button class="btn-primary" (click)="openCreateRoleDialog()">
+        <mat-icon>add</mat-icon> Crear rol personalizado
+      </button>
+      <mat-form-field appearance="outline" class="search-field">
+        <mat-label>Buscar roles</mat-label>
+        <input matInput (keyup)="applyRolesFilter($event)" placeholder="Buscar por nombre...">
+        <mat-icon matSuffix>search</mat-icon>
+      </mat-form-field>
+    </div>
+
+    <div class="loading-container" *ngIf="loadingRoles">
+      <mat-spinner diameter="40"></mat-spinner>
+    </div>
+
+    <div class="table-container mat-elevation-z8" *ngIf="!loadingRoles">
+      <table mat-table [dataSource]="rolesDataSource">
+        <ng-container matColumnDef="nombre">
+          <th mat-header-cell *matHeaderCellDef>Nombre</th>
+          <td mat-cell *matCellDef="let role">
+            <div class="role-name">
+              <mat-icon class="role-icon" [class.predefined]="role.esPredefinido">
+                {{ role.esPredefinido ? 'verified' : 'tune' }}
+              </mat-icon>
+              <span>{{ role.nombre }}</span>
+            </div>
+          </td>
+        </ng-container>
+
+        <ng-container matColumnDef="descripcion">
+          <th mat-header-cell *matHeaderCellDef>Descripci&#243;n</th>
+          <td mat-cell *matCellDef="let role">{{ role.descripcion }}</td>
+        </ng-container>
+
+        <ng-container matColumnDef="tipo">
+          <th mat-header-cell *matHeaderCellDef>Tipo</th>
+          <td mat-cell *matCellDef="let role">
+            <span class="chip" [class.chip-predefined]="role.esPredefinido" [class.chip-custom]="!role.esPredefinido">
+              {{ role.esPredefinido ? 'Predefinido' : 'Personalizado' }}
+            </span>
+          </td>
+        </ng-container>
+
+        <ng-container matColumnDef="actions">
+          <th mat-header-cell *matHeaderCellDef></th>
+          <td mat-cell *matCellDef="let role">
+            <button mat-icon-button [matMenuTriggerFor]="roleMenu">
+              <mat-icon>more_vert</mat-icon>
+            </button>
+            <mat-menu #roleMenu="matMenu">
+              <button mat-menu-item (click)="openViewRoleDialog(role)">
+                <mat-icon>visibility</mat-icon>
+                <span>Ver permisos</span>
+              </button>
+              <button mat-menu-item (click)="openEditRoleDialog(role)" *ngIf="!role.esPredefinido">
+                <mat-icon>edit</mat-icon>
+                <span>Editar</span>
+              </button>
+              <button mat-menu-item (click)="deleteRole(role)" *ngIf="!role.esPredefinido">
+                <mat-icon color="warn">delete</mat-icon>
+                <span>Eliminar</span>
+              </button>
+            </mat-menu>
+          </td>
+        </ng-container>
+
+        <tr mat-header-row *matHeaderRowDef="rolesColumns"></tr>
+        <tr mat-row *matRowDef="let row; columns: rolesColumns;"></tr>
+        <tr class="mat-row" *matNoDataRow>
+          <td class="mat-cell empty-state" [attr.colspan]="rolesColumns.length">
+            No hay roles configurados.
+          </td>
+        </tr>
+      </table>
     </div>
   </div>
 </div>

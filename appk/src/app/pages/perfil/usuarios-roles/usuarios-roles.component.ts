@@ -4,6 +4,7 @@ import { MatSnackBar } from '@angular/material/snack-bar';
 import { MatTableDataSource } from '@angular/material/table';
 import { RolesService, Role } from '../../../services/roles.service';
 import { RoleDialogComponent } from './role-dialog/role-dialog.component';
+import { SubUserDialogComponent } from './sub-user-dialog/sub-user-dialog.component';
 
 @Component({
   selector: 'app-usuarios-roles',
@@ -12,10 +13,18 @@ import { RoleDialogComponent } from './role-dialog/role-dialog.component';
   standalone: false
 })
 export class UsuariosRolesComponent implements OnInit {
-  displayedColumns: string[] = ['nombre', 'descripcion', 'tipo', 'actions'];
-  dataSource = new MatTableDataSource<Role>();
-  loading = true;
+  // Roles
+  rolesColumns: string[] = ['nombre', 'descripcion', 'tipo', 'actions'];
+  rolesDataSource = new MatTableDataSource<Role>();
+  loadingRoles = true;
+
+  // Usuarios
+  usersColumns: string[] = ['nombre', 'email', 'rol', 'actions'];
+  usersDataSource = new MatTableDataSource<any>();
+  loadingUsers = true;
+
   firebaseUid: string = '';
+  roles: Role[] = [];
 
   constructor(
     private rolesService: RolesService,
@@ -26,35 +35,31 @@ export class UsuariosRolesComponent implements OnInit {
   ngOnInit(): void {
     this.firebaseUid = localStorage.getItem('firebaseUid') || '';
     this.loadRoles();
+    this.loadUsers();
   }
 
+  // ===== ROLES =====
+
   loadRoles(): void {
-    this.loading = true;
+    this.loadingRoles = true;
     this.rolesService.getRolesByAccount(this.firebaseUid).subscribe({
       next: (roles) => {
-        this.dataSource.data = roles;
-        this.loading = false;
+        this.roles = roles;
+        this.rolesDataSource.data = roles;
+        this.loadingRoles = false;
       },
       error: (err) => {
         console.error('Error al cargar roles:', err);
-        this.loading = false;
-        this.snackBar.open('Error al cargar roles', 'Cerrar', { duration: 3000 });
+        this.loadingRoles = false;
       }
     });
   }
 
-  applyFilter(event: Event): void {
-    const filterValue = (event.target as HTMLInputElement).value;
-    this.dataSource.filter = filterValue.trim().toLowerCase();
-  }
-
-  openCreateDialog(): void {
+  openCreateRoleDialog(): void {
     const dialogRef = this.dialog.open(RoleDialogComponent, {
-      width: '700px',
-      maxHeight: '90vh',
+      width: '700px', maxHeight: '90vh',
       data: { mode: 'create' }
     });
-
     dialogRef.afterClosed().subscribe(result => {
       if (result) {
         this.rolesService.createCustomRole(result, this.firebaseUid).subscribe({
@@ -62,67 +67,44 @@ export class UsuariosRolesComponent implements OnInit {
             this.snackBar.open('Rol creado exitosamente', 'Cerrar', { duration: 3000 });
             this.loadRoles();
           },
-          error: (err) => {
-            console.error('Error al crear rol:', err);
-            this.snackBar.open(err.error?.message || 'Error al crear rol', 'Cerrar', { duration: 3000 });
-          }
+          error: (err) => this.snackBar.open(err.error?.message || 'Error al crear rol', 'Cerrar', { duration: 3000 })
         });
       }
     });
   }
 
-  openEditDialog(role: Role): void {
-    if (role.esPredefinido) {
-      this.openViewDialog(role);
-      return;
-    }
-
+  openEditRoleDialog(role: Role): void {
+    if (role.esPredefinido) { this.openViewRoleDialog(role); return; }
     const dialogRef = this.dialog.open(RoleDialogComponent, {
-      width: '700px',
-      maxHeight: '90vh',
+      width: '700px', maxHeight: '90vh',
       data: { mode: 'edit', role }
     });
-
     dialogRef.afterClosed().subscribe(result => {
       if (result) {
         this.rolesService.updateRole(role.id, result, this.firebaseUid).subscribe({
           next: () => {
-            this.snackBar.open('Rol actualizado exitosamente', 'Cerrar', { duration: 3000 });
+            this.snackBar.open('Rol actualizado', 'Cerrar', { duration: 3000 });
             this.loadRoles();
           },
-          error: (err) => {
-            console.error('Error al actualizar rol:', err);
-            this.snackBar.open(err.error?.message || 'Error al actualizar rol', 'Cerrar', { duration: 3000 });
-          }
+          error: (err) => this.snackBar.open(err.error?.message || 'Error al actualizar', 'Cerrar', { duration: 3000 })
         });
       }
     });
   }
 
-  openViewDialog(role: Role): void {
+  openViewRoleDialog(role: Role): void {
     this.dialog.open(RoleDialogComponent, {
-      width: '700px',
-      maxHeight: '90vh',
+      width: '700px', maxHeight: '90vh',
       data: { mode: 'view', role }
     });
   }
 
   deleteRole(role: Role): void {
-    if (role.esPredefinido) {
-      this.snackBar.open('No se pueden eliminar roles predefinidos', 'Cerrar', { duration: 3000 });
-      return;
-    }
-
+    if (role.esPredefinido) { this.snackBar.open('No se pueden eliminar roles predefinidos', 'Cerrar', { duration: 3000 }); return; }
     if (confirm('Estas seguro de eliminar el rol "' + role.nombre + '"?')) {
       this.rolesService.deleteRole(role.id, this.firebaseUid).subscribe({
-        next: () => {
-          this.snackBar.open('Rol eliminado', 'Cerrar', { duration: 3000 });
-          this.loadRoles();
-        },
-        error: (err) => {
-          console.error('Error al eliminar rol:', err);
-          this.snackBar.open(err.error?.message || 'Error al eliminar rol', 'Cerrar', { duration: 3000 });
-        }
+        next: () => { this.snackBar.open('Rol eliminado', 'Cerrar', { duration: 3000 }); this.loadRoles(); },
+        error: (err) => this.snackBar.open(err.error?.message || 'Error al eliminar', 'Cerrar', { duration: 3000 })
       });
     }
   }
@@ -137,5 +119,67 @@ export class UsuariosRolesComponent implements OnInit {
       if (perm.eliminar) count++;
     });
     return count;
+  }
+
+  // ===== USUARIOS =====
+
+  loadUsers(): void {
+    this.loadingUsers = true;
+    this.rolesService.getSubUsers(this.firebaseUid).subscribe({
+      next: (users) => {
+        this.usersDataSource.data = users;
+        this.loadingUsers = false;
+      },
+      error: (err) => {
+        console.error('Error al cargar usuarios:', err);
+        this.loadingUsers = false;
+      }
+    });
+  }
+
+  openAddUserDialog(): void {
+    const dialogRef = this.dialog.open(SubUserDialogComponent, {
+      width: '500px',
+      data: { roles: this.roles }
+    });
+    dialogRef.afterClosed().subscribe(result => {
+      if (result) {
+        this.snackBar.open('Creando usuario...', '', { duration: 0 });
+        this.rolesService.createSubUser(result, this.firebaseUid).subscribe({
+          next: (resp) => {
+            this.snackBar.open('Usuario creado. Se envio invitacion a ' + result.email, 'Cerrar', { duration: 5000 });
+            this.loadUsers();
+          },
+          error: (err) => {
+            console.error('Error al crear usuario:', err);
+            this.snackBar.open(err.error?.message || 'Error al crear usuario', 'Cerrar', { duration: 5000 });
+          }
+        });
+      }
+    });
+  }
+
+  changeUserRole(user: any): void {
+    // Reutilizar roles disponibles para seleccionar nuevo rol
+    const newRolId = prompt('ID del nuevo rol (1-' + this.roles.length + '):');
+    if (newRolId) {
+      this.rolesService.assignRole(user.firebaseUid, parseInt(newRolId), this.firebaseUid).subscribe({
+        next: () => {
+          this.snackBar.open('Rol actualizado', 'Cerrar', { duration: 3000 });
+          this.loadUsers();
+        },
+        error: (err) => this.snackBar.open(err.error?.message || 'Error al cambiar rol', 'Cerrar', { duration: 3000 })
+      });
+    }
+  }
+
+  applyUsersFilter(event: Event): void {
+    const filterValue = (event.target as HTMLInputElement).value;
+    this.usersDataSource.filter = filterValue.trim().toLowerCase();
+  }
+
+  applyRolesFilter(event: Event): void {
+    const filterValue = (event.target as HTMLInputElement).value;
+    this.rolesDataSource.filter = filterValue.trim().toLowerCase();
   }
 }

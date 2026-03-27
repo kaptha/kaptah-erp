@@ -1,9 +1,13 @@
 import { Injectable, NotFoundException, ForbiddenException, ConflictException, Logger } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
+import { DataSource } from 'typeorm';
 import { Repository } from 'typeorm';
 import { Role } from './entities/role.entity';
 import { UsuarioRole } from './entities/usuario-role.entity';
 import { CreateRoleDto } from './dto/create-role.dto';
+import admin from '../firebase/firebase-admin';
+import { Resend } from 'resend';
+import { User } from '../users/entities/user.entity';
 import { AssignRoleDto } from './dto/assign-role.dto';
 import { UpdateRoleDto } from './dto/update-role.dto';
 
@@ -16,7 +20,13 @@ export class RolesService {
     private rolesRepository: Repository<Role>,
     @InjectRepository(UsuarioRole)
     private usuarioRolesRepository: Repository<UsuarioRole>,
-  ) {}
+    @InjectRepository(User)
+    private usersRepository: Repository<User>,
+  ) {
+    this.resend = new Resend(process.env.RESEND_API_KEY);
+  }
+
+  private resend: Resend;
 
   async seedRolesForAccount(ownerFirebaseUid: string): Promise<{ message: string }> {
     this.logger.log('Seeding roles for account: ' + ownerFirebaseUid);
@@ -225,5 +235,171 @@ export class RolesService {
       ingresos: this.noAccess(), egresos: this.noAccess(),
       cfdi: this.crudNoDelete(), descarga_cfdi: this.crudNoDelete(), roles: this.noAccess(),
     };
+  }
+async getSubUsers(adminFirebaseUid: string): Promise<any[]> {
+    // Obtener todas las asignaciones de roles de esta cuenta
+    const roles = await this.rolesRepository.find({
+      where: { cuentaFirebaseUid: adminFirebaseUid },
+    });
+    const roleIds = roles.map(r => r.id);
+
+    if (roleIds.length === 0) return [];
+
+    const assignments = await this.usuarioRolesRepository.find({
+      where: roleIds.map(id => ({ rolId: id })),
+      relations: ['rol'],
+    });
+
+    // Para cada asignación, obtener datos del usuario
+    const subUsers = [];
+    for (const assignment of assignments) {
+      const user = await this.usersRepository.findOne({
+        where: { firebaseUid: assignment.usuarioFirebaseUid },
+      });
+      if (user) {
+        subUsers.push({
+          firebaseUid: user.firebaseUid,
+          nombre: user.nombre,
+          email: user.email,
+          rol: assignment.rol.nombre,
+          rolId: assignment.rolId,
+          esAdmin: assignment.usuarioFirebaseUid === adminFirebaseUid,
+          fechaCreacion: user.Fecha_Registro,
+        });
+      }
+    }
+
+    return subUsers;
+  }
+async createSubUser(data: { nombre: string; email: string; rolId: number }, adminFirebaseUid: string): Promise<any> {
+    await this.verifyAdminPermission(adminFirebaseUid);
+
+    const role = await this.rolesRepository.findOne({ where: { id: data.rolId } });
+    if (!role) throw new NotFoundException('Rol no encontrado');
+
+    const existingUser = await this.usersRepository.findOne({ where: { email: data.email } });
+    if (existingUser) throw new ConflictException('Ya existe un usuario con este email');
+
+    const adminUser = await this.usersRepository.findOne({ where: { firebaseUid: adminFirebaseUid } });
+    if (!adminUser) throw new NotFoundException('Admin no encontrado');
+
+    const tempPassword = this.generateTempPassword();
+
+    try {
+      // 1. Crear usuario en Firebase Auth
+      const firebaseUser = await admin.auth().createUser({
+        email: data.email,
+        password: tempPassword,
+        displayName: data.nombre,
+        emailVerified: true,
+      });
+      this.logger.log('Firebase user created: ' + firebaseUser.uid);
+
+      // 2. Crear en Firebase Realtime DB
+      const realtimeDb = admin.database();
+      const userRef = await realtimeDb.ref('usuarios').push({
+        nombre: data.nombre,
+        email: data.email,
+        firebaseUid: firebaseUser.uid,
+        rfc: adminUser.rfc,
+        telefono: '',
+        plan: 'basico',
+        suscripcionActiva: false,
+        cicloFacturacion: 'anual',
+        Confirm: true,
+        idToken: '',
+        cuentaPadreUid: adminFirebaseUid,
+      });
+      const realtimeDbKey = userRef.key;
+      this.logger.log('Realtime DB key: ' + realtimeDbKey);
+
+      // 3. Crear en MySQL
+      const subUserRfc = 'SUB' + firebaseUser.uid.substring(0, 10).toUpperCase();
+      const newUser = this.usersRepository.create({
+        nombre: data.nombre,
+        email: data.email,
+        firebaseUid: firebaseUser.uid,
+        realtimeDbKey: realtimeDbKey,
+        rfc: subUserRfc,
+        tipo_persona: adminUser.tipo_persona,
+        fiscalReg: adminUser.fiscalReg,
+        telefono: '',
+      });
+      await this.usersRepository.save(newUser);
+      this.logger.log('MySQL user created');
+
+      // 4. Asignar rol
+      const assignment = this.usuarioRolesRepository.create({
+        usuarioFirebaseUid: firebaseUser.uid,
+        rolId: data.rolId,
+        asignadoPor: adminFirebaseUid,
+      });
+      await this.usuarioRolesRepository.save(assignment);
+      this.logger.log('Role assigned: ' + role.nombre);
+
+      // 5. Enviar email de invitacion
+      await this.sendInvitationEmail(data.email, data.nombre, tempPassword, role.nombre, adminUser.nombre);
+
+      return {
+        message: 'Usuario creado exitosamente',
+        user: {
+          firebaseUid: firebaseUser.uid,
+          nombre: data.nombre,
+          email: data.email,
+          rol: role.nombre,
+        },
+      };
+    } catch (error) {
+      this.logger.error('Error creating sub-user: ' + error.message);
+      throw error;
+    }
+  }
+
+  private generateTempPassword(): string {
+    const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnpqrstuvwxyz23456789';
+    let password = '';
+    for (let i = 0; i < 12; i++) {
+      password += chars.charAt(Math.floor(Math.random() * chars.length));
+    }
+    return password + '!1';
+  }
+
+  private async sendInvitationEmail(email: string, nombre: string, password: string, rolName: string, adminName: string): Promise<void> {
+    try {
+      await this.resend.emails.send({
+        from: 'Kaptah <no-reply@kaptah.mx>',
+        to: [email],
+        subject: 'Invitacion a Kaptah - Tu cuenta ha sido creada',
+        html: this.getInvitationEmailHtml(nombre, email, password, rolName, adminName),
+      });
+      this.logger.log('Invitation email sent to: ' + email);
+    } catch (error) {
+      this.logger.error('Error sending invitation email: ' + error.message);
+    }
+  }
+
+  private getInvitationEmailHtml(nombre: string, email: string, password: string, rolName: string, adminName: string): string {
+    return `<!DOCTYPE html>
+<html><head><meta charset="utf-8"></head>
+<body style="font-family:Arial,sans-serif;background:#f4f4f4;padding:20px;">
+  <div style="max-width:600px;margin:0 auto;background:white;border-radius:8px;overflow:hidden;">
+    <div style="background:#8e24aa;padding:30px;text-align:center;">
+      <h1 style="color:white;margin:0;">Kaptah</h1>
+    </div>
+    <div style="padding:30px;">
+      <h2 style="color:#333;">Hola ${nombre},</h2>
+      <p style="color:#555;font-size:16px;">${adminName} te ha invitado a unirte a su cuenta en <strong>Kaptah</strong> con el rol de <strong>${rolName}</strong>.</p>
+      <div style="background:#f8f0fc;border-radius:8px;padding:20px;margin:20px 0;">
+        <p style="margin:0 0 10px;color:#333;font-weight:bold;">Tus credenciales de acceso:</p>
+        <p style="margin:5px 0;color:#555;">Email: <strong>${email}</strong></p>
+        <p style="margin:5px 0;color:#555;">Contrasena temporal: <strong>${password}</strong></p>
+      </div>
+      <p style="color:#555;font-size:14px;">Ingresa a <a href="https://app.kaptah.mx" style="color:#8e24aa;">app.kaptah.mx</a> con estas credenciales. Te recomendamos cambiar tu contrasena despues de ingresar.</p>
+    </div>
+    <div style="background:#f5f5f5;padding:15px;text-align:center;font-size:12px;color:#999;">
+      Este correo fue enviado automaticamente por Kaptah.
+    </div>
+  </div>
+</body></html>`;
   }
 }
