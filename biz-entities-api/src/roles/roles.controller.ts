@@ -3,11 +3,16 @@ import { RolesService } from './roles.service';
 import { CreateRoleDto } from './dto/create-role.dto';
 import { AssignRoleDto } from './dto/assign-role.dto';
 import { UpdateRoleDto } from './dto/update-role.dto';
+import { IsString, IsEmail, IsNumber } from 'class-validator';
 
 class CreateSubUserDto {
+  @IsString()
   nombre: string;
+  @IsEmail()
   email: string;
+  @IsNumber()
   rolId: number;
+  @IsString()
   adminFirebaseUid: string;
 }
 
