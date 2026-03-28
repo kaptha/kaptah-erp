@@ -252,6 +252,26 @@ export class CFDIService {
       catchError(this.handleError)
     );
   }
+/**
+ * Envía CFDI por email con PDF y XML adjuntos
+ */
+enviarPorEmail(cfdiId: string, clienteEmail: string, customMessage?: string): Observable<any> {
+  console.log('📧 Enviando CFDI por email:', cfdiId, 'a:', clienteEmail);
+  
+  return this.getHeaders().pipe(
+    switchMap((headers: HttpHeaders) => {
+      return this.http.post(`${this.apiUrl}/${cfdiId}/enviar-email`, {
+        clienteEmail,
+        customMessage: customMessage || '',
+      }, { headers });
+    }),
+    tap(response => console.log('✅ Email encolado:', response)),
+    catchError(error => {
+      console.error('❌ Error enviando CFDI por email:', error);
+      return throwError(() => error);
+    })
+  );
+}
 
   // ==========================================
   // MÉTODOS PARA CERTIFICADOS

@@ -157,10 +157,10 @@
               <span>Descargar XML</span>
             </button>
             <mat-divider></mat-divider>
-            <button mat-menu-item>
-              <mat-icon>email</mat-icon>
-              <span>Enviar por email</span>
-            </button>
+            <button mat-menu-item (click)="enviarCfdiPorEmail(cfdi)">
+  		<mat-icon>email</mat-icon>
+  		<span>Enviar por email</span>
+	    </button>
           </mat-menu>
         </td>
       </ng-container>
@@ -247,10 +247,10 @@
             <mat-icon>code</mat-icon>
             <span>Descargar XML</span>
           </button>
-          <button mat-menu-item>
-            <mat-icon>email</mat-icon>
-            <span>Enviar por email</span>
-          </button>
+          <button mat-menu-item (click)="enviarCfdiPorEmail(cfdi)">
+  		<mat-icon>email</mat-icon>
+  		<span>Enviar por email</span>
+	  </button>
         </mat-menu>
       </div>
     </div>

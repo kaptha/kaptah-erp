@@ -7,6 +7,7 @@ import { of } from 'rxjs';
 import * as XLSX from 'xlsx';
 import { CFDIService } from '../../services/cfdi.service';
 import { Sweetalert } from '../../functions';
+import Swal from 'sweetalert2';
 import { DesignSettingsService } from '../../services/design-settings.service';
 import { DocumentType } from '../../shared/enums/document-type.enum';
 import { CFDI } from '../../models/cfdi.model';
@@ -350,6 +351,56 @@ private createCFDI(cfdiData: Omit<CFDI, 'ID'>) {
           Sweetalert.fnc('error', 'Error al eliminar el CFDI: ' + this.getErrorMessage(error), null);
         }
       });
+  }
+}
+/**
+ * Enviar CFDI por email
+ */
+async enviarCfdiPorEmail(cfdi: CFDI) {
+  if (cfdi.estado !== 'Vigente') {
+    Sweetalert.fnc('error', 'Solo se pueden enviar CFDIs timbrados (vigentes)', null);
+    return;
+  }
+
+  const { value: formValues } = await Swal.fire({
+    title: 'Enviar CFDI por correo',
+    html:
+      `<p style="margin-bottom:15px;color:#666;font-size:14px;">Se enviará la factura <strong>${cfdi.serie}-${cfdi.folio}</strong> con PDF y XML adjuntos.</p>` +
+      `<input id="swal-email" class="swal2-input" placeholder="Email del destinatario" type="email" style="margin-bottom:10px;">` +
+      `<textarea id="swal-message" class="swal2-textarea" placeholder="Mensaje personalizado (opcional)" style="height:80px;"></textarea>`,
+    focusConfirm: false,
+    showCancelButton: true,
+    confirmButtonText: 'Enviar',
+    cancelButtonText: 'Cancelar',
+    confirmButtonColor: '#8e24aa',
+    preConfirm: () => {
+      const email = (document.getElementById('swal-email') as HTMLInputElement).value;
+      if (!email || !email.includes('@')) {
+        Swal.showValidationMessage('Ingresa un email válido');
+        return false;
+      }
+      return {
+        email,
+        message: (document.getElementById('swal-message') as HTMLTextAreaElement).value
+      };
+    }
+  });
+
+  if (formValues) {
+    Sweetalert.fnc('loading', 'Enviando CFDI por correo...', null);
+
+    this.cfdiService.enviarPorEmail(cfdi.ID, formValues.email, formValues.message).subscribe({
+      next: (response) => {
+        Sweetalert.fnc('close', '', null);
+        setTimeout(() => {
+          Sweetalert.fnc('success', 'El CFDI se enviará en unos momentos con PDF y XML adjuntos', null);
+        }, 100);
+      },
+      error: (error) => {
+        console.error('❌ Error enviando email:', error);
+        Sweetalert.fnc('error', 'Error al enviar el CFDI por correo', null);
+      }
+    });
   }
 }
 
