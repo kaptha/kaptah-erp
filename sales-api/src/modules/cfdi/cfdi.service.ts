@@ -1079,9 +1079,9 @@ private generateComplementoPagos(data: any): string {
       throw new NotFoundException('CFDI no encontrado');
     }
 
-    if (cfdi.status !== 'timbrado') {
-      throw new BadRequestException('Solo se pueden reenviar CFDIs timbrados');
-    }
+    if (cfdi.status !== 'timbrado' && cfdi.status !== 'vigente') {
+  throw new Error('Solo se pueden enviar CFDIs timbrados');
+}
 
     const clienteEmail = cfdi.user_email || 'cliente@example.com';
 
@@ -1700,9 +1700,9 @@ async sendCfdiByEmail(
       throw new Error(`CFDI ${cfdiId} no encontrado`);
     }
 
-    if (cfdi.status !== 'timbrado') {
-      throw new Error('Solo se pueden enviar CFDIs timbrados');
-    }
+    if (cfdi.status !== 'timbrado' && cfdi.status !== 'vigente') {
+  throw new Error('Solo se pueden enviar CFDIs timbrados');
+}
 
     // 2. Generar PDF
     let pdfBase64: string | null = null;
