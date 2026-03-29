@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpHeaders, HttpErrorResponse } from '@angular/common/http';
-import { Observable, throwError, tap } from 'rxjs';
+import { Observable, throwError, tap, of } from 'rxjs';
 import { catchError, switchMap } from 'rxjs/operators';
 import { UsersService } from './users.service';
 
@@ -54,9 +54,14 @@ export class ImpuestosService {
       return this.http.get<Impuesto[]>(`${this.apiUrl}/taxes/firebase/${user.firebaseUid}`, { headers });
     }),
     tap(response => console.log('Respuesta del servidor:', response)), // Agrega este log
-    catchError(this.handleError)
-  );
-}
+    catchError((error: any) => {
+        if (error?.status === 404 || error?.error?.statusCode === 404) {
+          return of([]);
+        }
+        return throwError(() => new Error(error.error?.message || 'Error desconocido'));
+      })
+    );
+  }
 
   // impuestos.service.ts
 createImpuesto(impuestoData: any): Observable<any> {
@@ -76,8 +81,13 @@ createImpuesto(impuestoData: any): Observable<any> {
     const headers = this.getHeaders();
     return this.http.delete(`${this.apiUrl}/taxes/${id}`, { headers })
       .pipe(
-        catchError(this.handleError)
-      );
+        catchError((error: any) => {
+        if (error?.status === 404 || error?.error?.statusCode === 404) {
+          return of([]);
+        }
+        return throwError(() => new Error(error.error?.message || 'Error desconocido'));
+      })
+    );
   }
 
   private handleError(error: any) {
@@ -85,3 +95,4 @@ createImpuesto(impuestoData: any): Observable<any> {
     return throwError(() => new Error(error.error?.message || 'Error desconocido'));
   }
 }
+

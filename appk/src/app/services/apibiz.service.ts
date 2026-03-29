@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpHeaders, HttpErrorResponse } from '@angular/common/http';
-import { Observable, from, throwError, tap } from 'rxjs';
+import { Observable, from, throwError, tap, of } from 'rxjs';
 import { switchMap, catchError, retry, map } from 'rxjs/operators';
 import { environment } from '../../environments/environment';
 import { Cliente } from '../models/cliente.model';
@@ -215,7 +215,12 @@ getTerminosCondiciones(): Observable<{terminos: string}> {
         { headers }
       );
     }),
-    catchError(this.handleError)
+    catchError((error: any) => {
+      if (error?.status === 404 || error?.error?.statusCode === 404) {
+        return of({ terminos: '' });
+      }
+      return throwError(() => new Error(error.error?.message || 'Error desconocido'));
+    })
   );
 }
 
@@ -242,4 +247,6 @@ updateTerminosCondiciones(terminos: string): Observable<any> {
   );
 }
 }
+
+
 

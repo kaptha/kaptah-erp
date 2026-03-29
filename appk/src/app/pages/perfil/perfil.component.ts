@@ -350,8 +350,7 @@ export class PerfilComponent implements OnInit {
           this.isLoading = false;
         },
         error: (error) => {
-          console.error('Error al cargar impuestos:', error);
-          this.showSnackBar('Error al cargar impuestos', 'Cerrar');
+          console.warn('Sin impuestos registrados aún');
           this.isLoading = false;
         }
       });
@@ -389,8 +388,7 @@ export class PerfilComponent implements OnInit {
           this.isLoading = false;
         },
         error: (error) => {
-          console.error('Error al cargar sucursales:', error);
-          this.showSnackBar('Error al cargar sucursales', 'Cerrar');
+          console.warn('Sin sucursales registradas aún');
           this.isLoading = false;
         }
       });
@@ -872,6 +870,7 @@ get terminosModificados(): boolean {
     });
   }
 }
+
 
 
 

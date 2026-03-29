@@ -1,8 +1,8 @@
-﻿import { Injectable } from '@angular/core';
+import { Injectable } from '@angular/core';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { UsersService } from './users.service';
-import { switchMap } from 'rxjs/operators';
-import { Observable } from 'rxjs';
+import { switchMap, catchError } from 'rxjs/operators';
+import { Observable, of, throwError } from 'rxjs';
 interface FielResponse {
   id: string;
   userId: string;
@@ -82,3 +82,5 @@ export class FielService {
   );
 }
 }
+
+

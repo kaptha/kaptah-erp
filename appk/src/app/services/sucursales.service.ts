@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpHeaders, HttpErrorResponse } from '@angular/common/http';
-import { Observable, throwError, tap } from 'rxjs';
+import { Observable, throwError, tap, of } from 'rxjs';
 import { catchError, switchMap } from 'rxjs/operators';
 import { UsersService } from './users.service';
 import { Sucursal } from '../models/sucursal.model';
@@ -41,7 +41,12 @@ export class SucursalesService {
         const headers = this.getHeaders();
         return this.http.get<Sucursal[]>(`${this.apiUrl}/branches/firebase/${user.firebaseUid}`, { headers });
       }),
-      catchError(this.handleError)
+      catchError((error: any) => {
+        if (error?.status === 404 || error?.error?.statusCode === 404) {
+          return of([]);
+        }
+        return throwError(() => new Error(error.error?.message || 'Error desconocido'));
+      })
     );
   }
 
@@ -101,3 +106,4 @@ export class SucursalesService {
     return throwError(() => new Error(error.error?.message || 'Error desconocido'));
   }
 }
+

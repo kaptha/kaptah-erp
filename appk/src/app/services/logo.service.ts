@@ -1,6 +1,7 @@
-﻿import { Injectable } from '@angular/core';
+import { Injectable } from '@angular/core';
 import { HttpClient, HttpEvent, HttpRequest, HttpHeaders } from '@angular/common/http';
-import { Observable } from 'rxjs';
+import { Observable, of, throwError } from 'rxjs';
+import { catchError } from 'rxjs/operators';
 import { timeout } from 'rxjs/operators';
 
 @Injectable({
@@ -66,3 +67,4 @@ export class LogoService {
     return this.http.delete(`${this.apiUrl}/current`, { headers });
   }
 }
+

@@ -1,8 +1,8 @@
-﻿import { Injectable } from '@angular/core';
+import { Injectable } from '@angular/core';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { UsersService } from './users.service';
 import { switchMap, catchError } from 'rxjs/operators';
-import { Observable, throwError } from 'rxjs';
+import { Observable, throwError, of } from 'rxjs';
 
 // Interface para la respuesta del CSD
 interface CsdResponse {
@@ -125,3 +125,5 @@ private handleError(error: any) {
     );
   }
 }
+
+
