@@ -33,6 +33,11 @@ export class RolesController {
     this.logger.log('GET /roles/account/' + firebaseUid);
     return this.rolesService.findAllByAccount(firebaseUid);
   }
+@Get('user-accounts/:firebaseUid')
+  getUserAccounts(@Param('firebaseUid') firebaseUid: string) {
+    this.logger.log('GET /roles/user-accounts/' + firebaseUid);
+    return this.rolesService.getUserAccounts(firebaseUid);
+  }
 
   @Get('user/:firebaseUid')
   findUserRole(@Param('firebaseUid') firebaseUid: string) {

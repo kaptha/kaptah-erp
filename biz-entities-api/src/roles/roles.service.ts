@@ -81,6 +81,31 @@ export class RolesService {
       order: { esPredefinido: 'DESC', nombre: 'ASC' },
     });
   }
+async getUserAccounts(usuarioFirebaseUid: string): Promise<any[]> {
+    const assignments = await this.usuarioRolesRepository.find({
+      where: { usuarioFirebaseUid },
+      relations: ['rol'],
+    });
+
+    const accounts = [];
+    for (const assignment of assignments) {
+      const owner = await this.usersRepository.findOne({
+        where: { firebaseUid: assignment.cuentaFirebaseUid },
+      });
+      if (owner) {
+        accounts.push({
+          cuentaFirebaseUid: assignment.cuentaFirebaseUid,
+          nombreCuenta: owner.nombreComercial || owner.nombre,
+          rfcCuenta: owner.rfc,
+          rol: assignment.rol.nombre,
+          rolId: assignment.rolId,
+          esPropia: assignment.usuarioFirebaseUid === assignment.cuentaFirebaseUid,
+        });
+      }
+    }
+
+    return accounts;
+  }
 
   async findUserRole(usuarioFirebaseUid: string): Promise<UsuarioRole | null> {
     return this.usuarioRolesRepository.findOne({
