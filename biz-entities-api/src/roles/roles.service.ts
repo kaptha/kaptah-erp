@@ -279,77 +279,115 @@ async createSubUser(data: { nombre: string; email: string; rolId: number }, admi
     const role = await this.rolesRepository.findOne({ where: { id: data.rolId } });
     if (!role) throw new NotFoundException('Rol no encontrado');
 
-    const existingUser = await this.usersRepository.findOne({ where: { email: data.email } });
-    if (existingUser) throw new ConflictException('Ya existe un usuario con este email');
-
     const adminUser = await this.usersRepository.findOne({ where: { firebaseUid: adminFirebaseUid } });
     if (!adminUser) throw new NotFoundException('Admin no encontrado');
 
-    const tempPassword = this.generateTempPassword();
+    // Verificar si ya tiene un rol en ESTA cuenta
+    const existingAssignment = await this.usuarioRolesRepository.findOne({
+      where: { cuentaFirebaseUid: adminFirebaseUid },
+    });
 
     try {
-      // 1. Crear usuario en Firebase Auth
-      const firebaseUser = await admin.auth().createUser({
-        email: data.email,
-        password: tempPassword,
-        displayName: data.nombre,
-        emailVerified: true,
-      });
-      this.logger.log('Firebase user created: ' + firebaseUser.uid);
+      let firebaseUid: string;
+      let isExistingUser = false;
+      let tempPassword: string | null = null;
 
-      // 2. Crear en Firebase Realtime DB
-      const realtimeDb = admin.database();
-      const userRef = await realtimeDb.ref('usuarios').push({
-        nombre: data.nombre,
-        email: data.email,
-        firebaseUid: firebaseUser.uid,
-        rfc: adminUser.rfc,
-        telefono: '',
-        plan: 'basico',
-        suscripcionActiva: false,
-        cicloFacturacion: 'anual',
-        Confirm: true,
-        idToken: '',
-        cuentaPadreUid: adminFirebaseUid,
-      });
-      const realtimeDbKey = userRef.key;
-      this.logger.log('Realtime DB key: ' + realtimeDbKey);
+      // Verificar si el email ya existe en Firebase Auth
+      try {
+        const existingFirebaseUser = await admin.auth().getUserByEmail(data.email);
+        firebaseUid = existingFirebaseUser.uid;
+        isExistingUser = true;
+        this.logger.log('User already exists in Firebase: ' + firebaseUid);
 
-      // 3. Crear en MySQL
-      const subUserRfc = 'SUB' + firebaseUser.uid.substring(0, 10).toUpperCase();
-      const newUser = this.usersRepository.create({
-        nombre: data.nombre,
-        email: data.email,
-        firebaseUid: firebaseUser.uid,
-        realtimeDbKey: realtimeDbKey,
-        rfc: subUserRfc,
-        tipo_persona: adminUser.tipo_persona,
-        fiscalReg: adminUser.fiscalReg,
-        telefono: '',
-      });
-      await this.usersRepository.save(newUser);
-      this.logger.log('MySQL user created');
+        // Verificar que no tenga ya un rol en ESTA cuenta
+        const alreadyInAccount = await this.usuarioRolesRepository.findOne({
+          where: { usuarioFirebaseUid: firebaseUid, cuentaFirebaseUid: adminFirebaseUid },
+        });
+        if (alreadyInAccount) {
+          throw new ConflictException('Este usuario ya tiene un rol en tu cuenta');
+        }
+      } catch (error) {
+        // Si el error es ConflictException, re-lanzar
+        if (error instanceof ConflictException) throw error;
 
-      // 4. Asignar rol
+        // Si el error es de Firebase (user not found), crear usuario nuevo
+        if (error.code === 'auth/user-not-found') {
+          tempPassword = this.generateTempPassword();
+
+          const firebaseUser = await admin.auth().createUser({
+            email: data.email,
+            password: tempPassword,
+            displayName: data.nombre,
+            emailVerified: true,
+          });
+          firebaseUid = firebaseUser.uid;
+          this.logger.log('New Firebase user created: ' + firebaseUid);
+
+          // Crear en Firebase Realtime DB
+          const realtimeDb = admin.database();
+          const userRef = await realtimeDb.ref('usuarios').push({
+            nombre: data.nombre,
+            email: data.email,
+            firebaseUid: firebaseUid,
+            rfc: adminUser.rfc,
+            telefono: '',
+            plan: 'basico',
+            suscripcionActiva: false,
+            cicloFacturacion: 'anual',
+            Confirm: true,
+            idToken: '',
+            cuentaPadreUid: adminFirebaseUid,
+          });
+          this.logger.log('Realtime DB key: ' + userRef.key);
+
+          // Crear en MySQL
+          const subUserRfc = 'SUB' + firebaseUid.substring(0, 10).toUpperCase();
+          const newUser = this.usersRepository.create({
+            nombre: data.nombre,
+            email: data.email,
+            firebaseUid: firebaseUid,
+            realtimeDbKey: userRef.key,
+            rfc: subUserRfc,
+            tipo_persona: adminUser.tipo_persona,
+            fiscalReg: adminUser.fiscalReg,
+            telefono: '',
+          });
+          await this.usersRepository.save(newUser);
+          this.logger.log('MySQL user created');
+        } else {
+          throw error;
+        }
+      }
+
+      // Asignar rol en esta cuenta
       const assignment = this.usuarioRolesRepository.create({
-        usuarioFirebaseUid: firebaseUser.uid,
+        usuarioFirebaseUid: firebaseUid,
         cuentaFirebaseUid: adminFirebaseUid,
         rolId: data.rolId,
         asignadoPor: adminFirebaseUid,
       });
       await this.usuarioRolesRepository.save(assignment);
-      this.logger.log('Role assigned: ' + role.nombre);
+      this.logger.log('Role assigned: ' + role.nombre + (isExistingUser ? ' (existing user)' : ' (new user)'));
 
-      // 5. Enviar email de invitacion
-      await this.sendInvitationEmail(data.email, data.nombre, tempPassword, role.nombre, adminUser.nombre);
+      // Enviar email
+      if (isExistingUser) {
+        // Usuario existente: enviar email de vinculacion (sin contrasena)
+        await this.sendLinkEmail(data.email, data.nombre, role.nombre, adminUser.nombre);
+      } else {
+        // Usuario nuevo: enviar email de invitacion con contrasena
+        await this.sendInvitationEmail(data.email, data.nombre, tempPassword, role.nombre, adminUser.nombre);
+      }
 
       return {
-        message: 'Usuario creado exitosamente',
+        message: isExistingUser
+          ? 'Usuario vinculado exitosamente a tu cuenta'
+          : 'Usuario creado exitosamente',
         user: {
-          firebaseUid: firebaseUser.uid,
+          firebaseUid: firebaseUid,
           nombre: data.nombre,
           email: data.email,
           rol: role.nombre,
+          isExistingUser: isExistingUser,
         },
       };
     } catch (error) {
@@ -365,6 +403,38 @@ async createSubUser(data: { nombre: string; email: string; rolId: number }, admi
       password += chars.charAt(Math.floor(Math.random() * chars.length));
     }
     return password + '!1';
+  }
+private async sendLinkEmail(email: string, nombre: string, rolName: string, adminName: string): Promise<void> {
+    try {
+      await this.resend.emails.send({
+        from: 'Kaptah <no-reply@kaptah.mx>',
+        to: [email],
+        subject: 'Te han agregado a una cuenta en Kaptah',
+        html: `<!DOCTYPE html>
+<html><head><meta charset="utf-8"></head>
+<body style="font-family:Arial,sans-serif;background:#f4f4f4;padding:20px;">
+  <div style="max-width:600px;margin:0 auto;background:white;border-radius:8px;overflow:hidden;">
+    <div style="background:#8e24aa;padding:30px;text-align:center;">
+      <h1 style="color:white;margin:0;">Kaptah</h1>
+    </div>
+    <div style="padding:30px;">
+      <h2 style="color:#333;">Hola ${nombre},</h2>
+      <p style="color:#555;font-size:16px;"><strong>${adminName}</strong> te ha agregado a su cuenta en <strong>Kaptah</strong> con el rol de <strong>${rolName}</strong>.</p>
+      <div style="background:#f8f0fc;border-radius:8px;padding:20px;margin:20px 0;">
+        <p style="margin:0;color:#333;">La proxima vez que inicies sesion en <a href="https://app.kaptah.mx" style="color:#8e24aa;">app.kaptah.mx</a>, podras seleccionar en que cuenta deseas trabajar.</p>
+      </div>
+      <p style="color:#555;font-size:14px;">Usa las mismas credenciales con las que ya accedes a Kaptah.</p>
+    </div>
+    <div style="background:#f5f5f5;padding:15px;text-align:center;font-size:12px;color:#999;">
+      Este correo fue enviado automaticamente por Kaptah.
+    </div>
+  </div>
+</body></html>`,
+      });
+      this.logger.log('Link email sent to: ' + email);
+    } catch (error) {
+      this.logger.error('Error sending link email: ' + error.message);
+    }
   }
 
   private async sendInvitationEmail(email: string, nombre: string, password: string, rolName: string, adminName: string): Promise<void> {
