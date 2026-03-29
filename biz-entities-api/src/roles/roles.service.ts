@@ -64,6 +64,7 @@ export class RolesService {
     if (adminRole) {
       const assignment = this.usuarioRolesRepository.create({
         usuarioFirebaseUid: ownerFirebaseUid,
+        cuentaFirebaseUid: ownerFirebaseUid,
         rolId: adminRole.id,
         asignadoPor: ownerFirebaseUid,
       });
@@ -101,7 +102,7 @@ export class RolesService {
     if (!role) throw new NotFoundException('Rol no encontrado');
 
     const existing = await this.usuarioRolesRepository.findOne({
-      where: { usuarioFirebaseUid: dto.usuarioFirebaseUid },
+      where: { usuarioFirebaseUid: dto.usuarioFirebaseUid, cuentaFirebaseUid: adminFirebaseUid },
     });
 
     if (existing) {
@@ -112,6 +113,7 @@ export class RolesService {
 
     const assignment = this.usuarioRolesRepository.create({
       ...dto,
+      cuentaFirebaseUid: adminFirebaseUid,
       asignadoPor: adminFirebaseUid,
     });
     return this.usuarioRolesRepository.save(assignment);
@@ -331,6 +333,7 @@ async createSubUser(data: { nombre: string; email: string; rolId: number }, admi
       // 4. Asignar rol
       const assignment = this.usuarioRolesRepository.create({
         usuarioFirebaseUid: firebaseUser.uid,
+        cuentaFirebaseUid: adminFirebaseUid,
         rolId: data.rolId,
         asignadoPor: adminFirebaseUid,
       });

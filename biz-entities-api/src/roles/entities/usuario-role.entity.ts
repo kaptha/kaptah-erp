@@ -9,6 +9,9 @@ export class UsuarioRole {
   @Column({ name: 'usuario_firebase_uid', type: 'varchar', length: 128 })
   usuarioFirebaseUid: string;
 
+  @Column({ name: 'cuenta_firebase_uid', type: 'varchar', length: 128 })
+  cuentaFirebaseUid: string;
+
   @Column({ name: 'rol_id' })
   rolId: number;
 
