@@ -1,0 +1,30 @@
+<div class="selector-container">
+  <div class="selector-card">
+    <div class="selector-header">
+      <img src="assets/images/logo-kaptan.png" alt="Kaptah" class="selector-logo">
+      <h2>Selecciona una cuenta</h2>
+      <p class="selector-subtitle">Hola, {{ userName }}. Elige la cuenta en la que deseas trabajar.</p>
+    </div>
+
+    <div class="loading-container" *ngIf="loading">
+      <mat-spinner diameter="40"></mat-spinner>
+      <p>Cargando tus cuentas...</p>
+    </div>
+
+    <div class="accounts-list" *ngIf="!loading && accounts.length > 1">
+      <div class="account-item" *ngFor="let account of accounts" (click)="selectAccount(account)">
+        <div class="account-icon">
+          <mat-icon>{{ account.esPropia ? 'admin_panel_settings' : 'business' }}</mat-icon>
+        </div>
+        <div class="account-info">
+          <div class="account-name">{{ account.nombreCuenta }}</div>
+          <div class="account-detail">RFC: {{ account.rfcCuenta }}</div>
+        </div>
+        <div class="account-role">
+          <span class="role-chip">{{ account.rol }}</span>
+        </div>
+        <mat-icon class="arrow-icon">chevron_right</mat-icon>
+      </div>
+    </div>
+  </div>
+</div>

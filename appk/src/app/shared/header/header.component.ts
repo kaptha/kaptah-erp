@@ -94,6 +94,9 @@ export class HeaderComponent implements OnInit{
     localStorage.removeItem('firebaseUid');     // Firebase UID
     localStorage.removeItem('userPermissions'); // Permisos del rol
     localStorage.removeItem('userRole');        // Estado del rol
+    localStorage.removeItem('activeCuentaUid');  // Cuenta activa
+    localStorage.removeItem('activeCuentaNombre'); // Nombre cuenta activa
+    localStorage.removeItem('activeRol');         // Rol en cuenta activa
     
     // También llamar al método logout del AuthService por si tiene lógica adicional
     this.authService.logout();

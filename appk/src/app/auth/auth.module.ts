@@ -17,6 +17,7 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatSnackBarModule } from '@angular/material/snack-bar';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { TermsDialogComponent } from './terms-dialog/terms-dialog.component';
+import { AccountSelectorComponent } from './account-selector/account-selector.component';
 
 @NgModule({
   declarations: [
@@ -24,7 +25,8 @@ import { TermsDialogComponent } from './terms-dialog/terms-dialog.component';
     RegisterComponent,
     PasswordResetDialogComponent,
     ResetPasswordComponent,
-    TermsDialogComponent
+    TermsDialogComponent,
+    AccountSelectorComponent
   ],
   exports: [
     LoginComponent,

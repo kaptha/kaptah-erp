@@ -370,7 +370,7 @@ private redirectToDashboard(): void {
   this.isLoading = false;
 
   // Verificar que se haga la navegación
-  this.router.navigateByUrl('dashboard').then(
+  this.router.navigateByUrl('select-account').then(
     success => console.log("✅ Navegación a dashboard exitosa:", success),
     error => console.error("❌ Error en navegación a dashboard:", error)
   );

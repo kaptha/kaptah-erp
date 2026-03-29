@@ -37,6 +37,10 @@ export class RolesService {
     return this.http.get<Role[]>(this.apiUrl + '/roles/account/' + firebaseUid);
   }
 
+  getUserAccounts(firebaseUid: string): Observable<any[]> {
+    return this.http.get<any[]>(this.apiUrl + '/roles/user-accounts/' + firebaseUid);
+  }
+
   getUserRole(firebaseUid: string): Observable<UsuarioRole> {
     return this.http.get<UsuarioRole>(this.apiUrl + '/roles/user/' + firebaseUid);
   }
