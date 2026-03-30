@@ -89,7 +89,9 @@ export class PurchaseOrderService {
     private http: HttpClient,
     private usersService: UsersService
   ) {}
-
+private getActiveCuentaUid(): string | null {
+    return localStorage.getItem('activeCuentaUid') || null;
+  }
   private getHeaders(): HttpHeaders {
     const token = localStorage.getItem('idToken');
     if (!token) {
@@ -134,7 +136,16 @@ export class PurchaseOrderService {
     if (!idToken) {
       return throwError(() => new Error('No se encontro el token de autenticacion'));
     }
-
+    const cuentaUid = this.getActiveCuentaUid();
+    if (cuentaUid) {
+      const headers = this.getHeaders();
+      return this.http.get<PurchaseOrder[]>(`${this.apiUrl}/firebase/${cuentaUid}`, { headers }).pipe(
+        catchError(error => {
+          console.error('Error al obtener ordenes:', error);
+          return throwError(() => error);
+        })
+      );
+    }
     return this.usersService.getUserByToken(idToken).pipe(
       switchMap(user => {
         if (!user) {

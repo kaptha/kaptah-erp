@@ -15,7 +15,9 @@ export class SucursalesService {
     private http: HttpClient,
     private usersService: UsersService
   ) {}
-
+private getActiveCuentaUid(): string | null {
+    return localStorage.getItem('activeCuentaUid') || null;
+  }
   private getHeaders(): HttpHeaders {
     const token = localStorage.getItem('idToken');
     if (!token) {
@@ -32,7 +34,18 @@ export class SucursalesService {
     if (!idToken) {
       return throwError(() => new Error('No se encontrÃ³ el token de autenticaciÃ³n'));
     }
-    
+    const cuentaUid = this.getActiveCuentaUid();
+    if (cuentaUid) {
+      const headers = this.getHeaders();
+      return this.http.get<Sucursal[]>(`${this.apiUrl}/branches/firebase/${cuentaUid}`, { headers }).pipe(
+        catchError((error: any) => {
+          if (error?.status === 404 || error?.error?.statusCode === 404) {
+            return of([]);
+          }
+          return throwError(() => new Error(error.error?.message || 'Error desconocido'));
+        })
+      );
+    }
     return this.usersService.getUserByToken(idToken).pipe(
       switchMap(user => {
         if (!user) {

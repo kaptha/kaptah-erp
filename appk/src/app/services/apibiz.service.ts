@@ -18,6 +18,9 @@ export class ApibizService {
     private http: HttpClient,
     private usersService: UsersService
   ) {}
+private getActiveCuentaUid(): string | null {
+    return localStorage.getItem('activeCuentaUid') || null;
+  }
 
   private getHeaders(): HttpHeaders {
     const token = localStorage.getItem('idToken');
@@ -37,7 +40,13 @@ export class ApibizService {
   if (!idToken) {
     return throwError(() => new Error('No se encontró el token de autenticación'));
   }
-    
+     const cuentaUid = this.getActiveCuentaUid();
+    if (cuentaUid) {
+      const headers = this.getHeaders();
+      return this.http.get<Cliente[]>(`${this.apiUrl}/clients/firebase/${cuentaUid}`, { headers }).pipe(
+        catchError(this.handleError)
+      );
+    }
   return this.usersService.getUserByToken(idToken).pipe(
     switchMap(user => {
       if (!user) {
@@ -93,7 +102,13 @@ export class ApibizService {
     if (!idToken) {
       return throwError(() => new Error('No se encontrÃ³ el token de autenticaciÃ³n'));
     }
-    
+    const cuentaUid = this.getActiveCuentaUid();
+    if (cuentaUid) {
+      const headers = this.getHeaders();
+      return this.http.get<Empleado[]>(`${this.apiUrl}/employees/firebase/${cuentaUid}`, { headers }).pipe(
+        catchError(this.handleError)
+      );
+    }
     return this.usersService.getUserByToken(idToken).pipe(
       switchMap(user => {
         if (!user) {
@@ -142,7 +157,13 @@ export class ApibizService {
     if (!idToken) {
       return throwError(() => new Error('No se encontrÃ³ el token de autenticaciÃ³n'));
     }
-    
+    const cuentaUid = this.getActiveCuentaUid();
+    if (cuentaUid) {
+      const headers = this.getHeaders();
+      return this.http.get<Proveedor[]>(`${this.apiUrl}/suppliers/firebase/${cuentaUid}`, { headers }).pipe(
+        catchError(this.handleError)
+      );
+    }
     return this.usersService.getUserByToken(idToken).pipe(
       switchMap(user => {
         if (!user) {
