@@ -11,6 +11,7 @@ import { RolesService } from '../../services/roles.service';
 export class AccountSelectorComponent implements OnInit {
   accounts: any[] = [];
   loading = true;
+  showSelector = false;
   userName: string = '';
 
   constructor(
@@ -32,12 +33,16 @@ export class AccountSelectorComponent implements OnInit {
         this.accounts = accounts;
         this.loading = false;
 
-        // Si solo tiene 1 cuenta, seleccionar automaticamente
-        if (accounts.length === 1) {
-          this.selectAccount(accounts[0]);
-        } else if (accounts.length === 0) {
-          // Usuario sin cuentas asignadas, usar su propio UID
-          this.selectOwnAccount(firebaseUid);
+        if (accounts.length <= 1) {
+          // 0 o 1 cuenta: redirigir directo sin mostrar selector
+          if (accounts.length === 1) {
+            this.selectAccount(accounts[0]);
+          } else {
+            this.selectOwnAccount(firebaseUid);
+          }
+        } else {
+          // Multiples cuentas: mostrar selector
+          this.showSelector = true;
         }
       },
       error: (err) => {
