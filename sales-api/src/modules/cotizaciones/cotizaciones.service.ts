@@ -87,28 +87,28 @@ async getFolioStats(year?: number): Promise<{ year: number; count: number; lastF
  */
 private async obtenerLogoUsuario(userId: string, token: string): Promise<string | null> {
   try {
-    console.log('🔍 Solicitando logo al biz-entities-api...');
-    console.log('🔑 Token a enviar:', token?.substring(0, 50) + '...');
-    
     const logoApiUrl = `${this.bizEntitiesApiUrl}/api/logos/current`;
-    console.log('🌐 URL destino:', logoApiUrl);
-    
     const response = await axios.get<LogoResponse>(logoApiUrl, {
-      headers: {
-        'Authorization': token
-      }
+      headers: { 'Authorization': token }
     });
     
     if (response.data?.url) {
-      console.log('✅ Logo obtenido:', response.data.url);
-      return response.data.url;
+      // ← Agregar esto:
+      try {
+        const logoResponse = await axios.get<ArrayBuffer>(response.data.url, {
+          responseType: 'arraybuffer'
+        });
+        const base64Logo = Buffer.from(logoResponse.data).toString('base64');
+        const mimeType = logoResponse.headers['content-type'] || 'image/png';
+        return `data:${mimeType};base64,${base64Logo}`;
+      } catch (downloadError: any) {
+        console.error('Error descargando logo:', downloadError.message);
+        return null; // Caer al fallback local en vez de URL externa
+      }
     }
-    
-    console.log('⚠️ No se encontró URL de logo en la respuesta');
     return null;
   } catch (error) {
-    console.error('❌ Error obteniendo logo:', error.message);
-    console.error('❌ Código de error:', error.code);
+    console.error('Error obteniendo logo:', error.message);
     return null;
   }
 }
