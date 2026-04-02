@@ -29,7 +29,8 @@ export class TokenInterceptor implements HttpInterceptor {
     'localhost:4005', 
     'localhost:3004',
     'selfless-analysis-production',
-    'kaptah-erp-production'
+    'kaptah-erp-production',
+    'reliable-harmony-production'
   ];
 
   // Verificar si la URL requiere token de Firebase
