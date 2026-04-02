@@ -115,7 +115,7 @@ export class CfdiService {
         const logoUrl = await this.obtenerLogoUsuario(finalUserId, token);
         if (logoUrl) {
           // Descargar y convertir a base64 (como en SaleNotesService)
-          const logoResponse = await axios.get(logoUrl, { responseType: 'arraybuffer' });
+          const logoResponse = await axios.get<ArrayBuffer>(logoUrl, { responseType: 'arraybuffer' });
           const base64Logo = Buffer.from(logoResponse.data).toString('base64');
           const mimeType = logoResponse.headers['content-type'] || 'image/png';
           logoDataUri = `data:${mimeType};base64,${base64Logo}`;
