@@ -1,10 +1,9 @@
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
-import { UsersService } from './users.service';
-import { switchMap, catchError } from 'rxjs/operators';
-import { Observable, throwError, of } from 'rxjs';
+import { Observable, throwError } from 'rxjs';
+import { switchMap } from 'rxjs/operators';
+import { RefreshToken } from '../config';
 
-// Interface para la respuesta del CSD
 interface CsdResponse {
   id: string;
   userId: string;
@@ -14,7 +13,6 @@ interface CsdResponse {
   validUntil: string;
   issuerName: string;
   issuerSerial: string;
-  // Campos especÃ­ficos de CSD
   cerPem: string;
   keyPem: string;
   cerBase64: string;
@@ -27,25 +25,34 @@ interface CsdResponse {
 export class CsdService {
   private apiUrl = 'https://reliable-harmony-production-ca69.up.railway.app/api';
 
-  constructor(
-    private http: HttpClient,
-    private usersService: UsersService
-  ) {}
+  constructor(private http: HttpClient) {}
 
-  private getHeaders(): HttpHeaders {
-    const token = localStorage.getItem('idToken');
-    if (!token) {
-      console.error('No se encontrÃ³ token de autenticaciÃ³n');
-      throw new Error('No se encontrÃ³ token de autenticaciÃ³n');
+  private getFreshToken(): Observable<string> {
+    const refreshToken = localStorage.getItem('firebaseRefreshToken');
+    if (!refreshToken) {
+      return throwError(() => new Error('No hay refresh token disponible'));
     }
-    return new HttpHeaders({
-      'Authorization': `Bearer ${token}`
-    });
+    return this.http.post<any>(RefreshToken.url, {
+      grant_type: 'refresh_token',
+      refresh_token: refreshToken
+    }).pipe(
+      switchMap(response => {
+        const freshToken = response.id_token;
+        localStorage.setItem('idToken', freshToken);
+        return [freshToken];
+      })
+    );
   }
 
   getActiveCsd(): Observable<CsdResponse> {
-    const headers = this.getHeaders();
-    return this.http.get<CsdResponse>(`${this.apiUrl}/certificates/csd/active`, { headers });
+    return this.getFreshToken().pipe(
+      switchMap(token => {
+        const headers = new HttpHeaders({
+          'Authorization': `Bearer ${token}`
+        });
+        return this.http.get<CsdResponse>(`${this.apiUrl}/certificates/csd/active`, { headers });
+      })
+    );
   }
 
   uploadCsd(
@@ -58,72 +65,41 @@ export class CsdService {
     validUntil: string,
     issuerName: string,
     issuerSerial: string
-  ) {
-    return this.usersService.getUserByToken(localStorage.getItem('idToken') || '').pipe(
-      switchMap(user => {
+  ): Observable<CsdResponse> {
+    return this.getFreshToken().pipe(
+      switchMap(token => {
         const formData = new FormData();
-        
-        // Convertir las fechas a strings simples
-        const validFromString = validFrom.replace('T', ' ').split('.')[0];
-        const validUntilString = validUntil.replace('T', ' ').split('.')[0];
-
         formData.append('cer', cerFile);
         formData.append('key', keyFile);
         formData.append('password', password);
-        formData.append('userId', user.id);
         formData.append('certificateNumber', certificateNumber);
         formData.append('serialNumber', serialNumber);
-        formData.append('validFrom', validFromString);
-        formData.append('validUntil', validUntilString);
+        formData.append('validFrom', validFrom.replace('T', ' ').split('.')[0]);
+        formData.append('validUntil', validUntil.replace('T', ' ').split('.')[0]);
         formData.append('issuerName', issuerName);
         formData.append('issuerSerial', issuerSerial);
 
-        console.log('Datos enviados para CSD:', {
-          validFrom: validFromString,
-          validUntil: validUntilString,
-          certificateNumber,
-          serialNumber
+        const headers = new HttpHeaders({
+          'Authorization': `Bearer ${token}`
         });
 
-        const headers = this.getHeaders();
         return this.http.post<CsdResponse>(
-          `${this.apiUrl}/certificates/csd`, 
-          formData, 
+          `${this.apiUrl}/certificates/csd`,
+          formData,
           { headers }
         );
       })
     );
   }
- 
-private handleError(error: any) {
-  console.error('Error en CsdService:', error);
-  
-  let errorMessage = 'OcurriÃ³ un error en el servidor';
-  
-  if (error.error instanceof ErrorEvent) {
-    // Error del cliente
-    errorMessage = `Error: ${error.error.message}`;
-  } else if (error.status) {
-    // Error del servidor con cÃ³digo de estado
-    errorMessage = `Error ${error.status}: ${error.message}`;
-    
-    // Si hay un mensaje especÃ­fico del API
-    if (error.error && error.error.message) {
-      errorMessage = error.error.message;
-    }
-  }
-  
-  return throwError(() => new Error(errorMessage));
-}
 
-  // MÃ©todo opcional para verificar el estado de un CSD
   verifyCsdStatus(csdId: string): Observable<any> {
-    const headers = this.getHeaders();
-    return this.http.get(
-      `${this.apiUrl}/certificates/csd/${csdId}/status`, 
-      { headers }
+    return this.getFreshToken().pipe(
+      switchMap(token => {
+        const headers = new HttpHeaders({
+          'Authorization': `Bearer ${token}`
+        });
+        return this.http.get(`${this.apiUrl}/certificates/csd/${csdId}/status`, { headers });
+      })
     );
   }
 }
-
-

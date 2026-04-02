@@ -1,8 +1,9 @@
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
-import { UsersService } from './users.service';
-import { switchMap, catchError } from 'rxjs/operators';
-import { Observable, of, throwError } from 'rxjs';
+import { Observable, throwError } from 'rxjs';
+import { switchMap } from 'rxjs/operators';
+import { RefreshToken } from '../config';
+
 interface FielResponse {
   id: string;
   userId: string;
@@ -13,74 +14,73 @@ interface FielResponse {
   issuerName: string;
   issuerSerial: string;
 }
+
 @Injectable({
   providedIn: 'root'
 })
 export class FielService {
-  private apiUrl = 'https://kaptah-erp-production.up.railway.app/api';
+  private apiUrl = 'https://reliable-harmony-production-ca69.up.railway.app/api';
 
-  constructor(
-    private http: HttpClient,
-    private usersService: UsersService
-  ) {}
+  constructor(private http: HttpClient) {}
 
-  private getHeaders(): HttpHeaders {
-    const token = localStorage.getItem('idToken');
-    if (!token) {
-      console.error('No se encontrÃ³ token de autenticaciÃ³n');
-      throw new Error('No se encontrÃ³ token de autenticaciÃ³n');
+  private getFreshToken(): Observable<string> {
+    const refreshToken = localStorage.getItem('firebaseRefreshToken');
+    if (!refreshToken) {
+      return throwError(() => new Error('No hay refresh token disponible'));
     }
-    // Quitar el Content-Type para FormData
-    return new HttpHeaders({
-      'Authorization': `Bearer ${token}`
-    });
+    return this.http.post<any>(RefreshToken.url, {
+      grant_type: 'refresh_token',
+      refresh_token: refreshToken
+    }).pipe(
+      switchMap(response => {
+        const freshToken = response.id_token;
+        localStorage.setItem('idToken', freshToken);
+        return [freshToken];
+      })
+    );
   }
 
-  getActiveFiel(): Observable<any> {
-  const headers = this.getHeaders();
-  return this.http.get(`${this.apiUrl}/certificates/fiel/active`, { headers });
-}
+  getActiveFiel(): Observable<FielResponse> {
+    return this.getFreshToken().pipe(
+      switchMap(token => {
+        const headers = new HttpHeaders({
+          'Authorization': `Bearer ${token}`
+        });
+        return this.http.get<FielResponse>(`${this.apiUrl}/certificates/fiel/active`, { headers });
+      })
+    );
+  }
 
   uploadFiel(
-  cerFile: File,
-  keyFile: File,
-  password: string,
-  certificateNumber: string,
-  serialNumber: string,
-  validFrom: string,
-  validUntil: string,
-  issuerName: string,
-  issuerSerial: string
-) {
-  return this.usersService.getUserByToken(localStorage.getItem('idToken') || '').pipe(
-    switchMap(user => {
-      const formData = new FormData();
-      
-      // Convertir las fechas a strings simples
-      const validFromString = validFrom.replace('T', ' ').split('.')[0];
-      const validUntilString = validUntil.replace('T', ' ').split('.')[0];
+    cerFile: File,
+    keyFile: File,
+    password: string,
+    certificateNumber: string,
+    serialNumber: string,
+    validFrom: string,
+    validUntil: string,
+    issuerName: string,
+    issuerSerial: string
+  ): Observable<any> {
+    return this.getFreshToken().pipe(
+      switchMap(token => {
+        const formData = new FormData();
+        formData.append('cer', cerFile);
+        formData.append('key', keyFile);
+        formData.append('password', password);
+        formData.append('certificateNumber', certificateNumber);
+        formData.append('serialNumber', serialNumber);
+        formData.append('validFrom', validFrom.replace('T', ' ').split('.')[0]);
+        formData.append('validUntil', validUntil.replace('T', ' ').split('.')[0]);
+        formData.append('issuerName', issuerName);
+        formData.append('issuerSerial', issuerSerial);
 
-      formData.append('cer', cerFile);
-      formData.append('key', keyFile);
-      formData.append('password', password);
-      formData.append('userId', user.id);
-      formData.append('certificateNumber', certificateNumber);
-      formData.append('serialNumber', serialNumber);
-      formData.append('validFrom', validFromString);
-      formData.append('validUntil', validUntilString);
-      formData.append('issuerName', issuerName);
-      formData.append('issuerSerial', issuerSerial);
+        const headers = new HttpHeaders({
+          'Authorization': `Bearer ${token}`
+        });
 
-      console.log('Fechas enviadas en FormData:', {
-        validFrom: validFromString,
-        validUntil: validUntilString
-      });
-
-      const headers = this.getHeaders();
-      return this.http.post(`${this.apiUrl}/certificates/fiel`, formData, { headers });
-    })
-  );
+        return this.http.post(`${this.apiUrl}/certificates/fiel`, formData, { headers });
+      })
+    );
+  }
 }
-}
-
-
