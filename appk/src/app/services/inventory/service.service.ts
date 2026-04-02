@@ -14,6 +14,9 @@ export class ServiceService {
     private http: HttpClient,
     private usersService: UsersService
   ) {}
+private getActiveCuentaUid(): string | null {
+    return localStorage.getItem('activeCuentaUid') || null;
+  }
 
   private getHeaders(): HttpHeaders {
     const token = localStorage.getItem('idToken');
@@ -28,7 +31,17 @@ export class ServiceService {
     if (!idToken) {
       return throwError(() => new Error('No se encontró el token de autenticación'));
     }
-    
+    const cuentaUid = this.getActiveCuentaUid();
+    if (cuentaUid) {
+      const headers = this.getHeaders();
+      return this.http.get<any[]>(`${this.apiUrl}/services/firebase/${cuentaUid}`, { headers }).pipe(
+        tap(response => console.log('Servicios recibidos:', response)),
+        catchError(error => {
+          console.error('Error al obtener servicios:', error);
+          return throwError(() => error);
+        })
+      );
+    }
     return this.usersService.getUserByToken(idToken).pipe(
       switchMap(user => {
         if (!user) {
