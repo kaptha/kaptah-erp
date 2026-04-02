@@ -40,9 +40,11 @@ export class SalesOrdersService {
   }
 
   getAll(): Observable<SalesOrder[]> {
+    const cuentaUid = localStorage.getItem('activeCuentaUid') || '';
+    const url = cuentaUid ? `${this.apiUrl}?cuentaUid=${cuentaUid}` : this.apiUrl;
     return this.getHeaders().pipe(
       switchMap((headers: HttpHeaders) => {
-        return this.http.get<SalesOrder[]>(this.apiUrl, { headers });
+        return this.http.get<SalesOrder[]>(url, { headers });
       })
     );
   }
