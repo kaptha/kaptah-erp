@@ -109,6 +109,21 @@ export class CfdiService {
     try {
       // Obtener CFDI
       const cfdi = await this.findOne(id, finalUserId);
+      let logoDataUri = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg==';
+ if (token) {
+      try {
+        const logoUrl = await this.obtenerLogoUsuario(finalUserId, token);
+        if (logoUrl) {
+          // Descargar y convertir a base64 (como en SaleNotesService)
+          const logoResponse = await axios.get(logoUrl, { responseType: 'arraybuffer' });
+          const base64Logo = Buffer.from(logoResponse.data).toString('base64');
+          const mimeType = logoResponse.headers['content-type'] || 'image/png';
+          logoDataUri = `data:${mimeType};base64,${base64Logo}`;
+        }
+      } catch (e) {
+        console.error('Error obteniendo logo para CFDI:', e.message);
+      }
+    }
       console.log('✅ CFDI encontrado:', cfdi.id);
 
       // Generar QR dinámicamente
@@ -129,7 +144,8 @@ export class CfdiService {
     const html = this.cfdiTemplateService.generateCfdiHTML(
       cfdi, 
       qrData.image,
-      estilo // ⭐ DEBE PASAR ESTE PARÁMETRO
+      estilo,
+      logoDataUri
     );
 
     console.log('✅ HTML generado con estilo:', estilo); // ⭐ LOG
