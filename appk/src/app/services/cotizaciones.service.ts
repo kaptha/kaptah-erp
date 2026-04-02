@@ -105,9 +105,11 @@ export class CotizacionesService {
   }
 
   getCotizaciones(): Observable<Cotizacion[]> {
+    const cuentaUid = localStorage.getItem('activeCuentaUid') || '';
     return this.getHeaders().pipe(
       switchMap((headers: HttpHeaders) => {
-        return this.http.get<Cotizacion[]>(this.apiUrl, { headers });
+        const url = cuentaUid ? `${this.apiUrl}?cuentaUid=${cuentaUid}` : this.apiUrl;
+        return this.http.get<Cotizacion[]>(url, { headers });
       }),
       tap(response => console.log('Cotizaciones recibidas:', response)),
       catchError(error => {

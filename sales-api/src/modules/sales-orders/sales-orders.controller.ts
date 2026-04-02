@@ -64,8 +64,8 @@ export class SalesOrdersController {
   @ApiOperation({ summary: 'Obtener todas las órdenes de venta' })
   @ApiResponse({ status: HttpStatus.OK, description: 'Lista de órdenes de venta', type: [SalesOrder] })
   @ApiResponse({ status: HttpStatus.UNAUTHORIZED, description: 'No autorizado' })
-  findAll(@CurrentUser() user: any) {
-    return this.salesOrdersService.findAll(user.uid);
+  findAll(@CurrentUser() user: any, @Query('cuentaUid') cuentaUid?: string) {
+    return this.salesOrdersService.findAll(cuentaUid || user.uid);
   }
 
   // ✨ NUEVO: Buscar por folio

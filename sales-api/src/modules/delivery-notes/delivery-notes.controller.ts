@@ -70,8 +70,8 @@ export class DeliveryNotesController {
   @ApiOperation({ summary: 'Obtener todas las notas de remisión' })
   @ApiResponse({ status: HttpStatus.OK, description: 'Lista de notas de remisión', type: [DeliveryNote] })
   @ApiResponse({ status: HttpStatus.UNAUTHORIZED, description: 'No autorizado' })
-  findAll(@CurrentUser() user: any) {
-    return this.deliveryNotesService.findAll(user.uid);
+  findAll(@CurrentUser() user: any, @Query('cuentaUid') cuentaUid?: string) {
+    return this.deliveryNotesService.findAll(cuentaUid || user.uid);
   }
 
   // ✨ NUEVO: Buscar por folio

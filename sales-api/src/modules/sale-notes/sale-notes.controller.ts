@@ -60,8 +60,8 @@ create(@Body() createSaleNoteDto: CreateSaleNoteDto, @CurrentUser() user: any) {
 
   @Get()
   @ApiOperation({ summary: 'Obtener todas las notas de venta' })
-  findAll(@CurrentUser() user: any) {
-    return this.saleNotesService.findAll(user.uid);
+  findAll(@CurrentUser() user: any, @Query('cuentaUid') cuentaUid?: string) {
+    return this.saleNotesService.findAll(cuentaUid || user.uid);
   }
 
   // ✨ NUEVO: Buscar por folio

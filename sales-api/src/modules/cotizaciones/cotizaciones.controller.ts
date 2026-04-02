@@ -91,7 +91,8 @@ export class CotizacionesController {
   @ApiQuery({ name: 'sucursal_id', required: false, description: 'Filtrar por ID de sucursal' })
   async findAll(
     @CurrentUser() user: any,
-    @Query('sucursal_id') sucursal_id?: string
+    @Query('sucursal_id') sucursal_id?: string,
+    @Query('cuentaUid') cuentaUid?: string
   ) {
     this.logger.log(`📬 GET /cotizaciones${sucursal_id ? `?sucursal_id=${sucursal_id}` : ''} - Usuario: ${user.email || user.uid || "unknown"}`);
     
@@ -118,7 +119,7 @@ export class CotizacionesController {
     // Obtener ID numerico del usuario por su Firebase UID
     let usuarioId: number | undefined;
     try {
-      const usuario = await this.usuariosService.findByFirebaseUid(user.uid);
+      const usuario = await this.usuariosService.findByFirebaseUid(cuentaUid || user.uid);
       usuarioId = usuario.ID;
     } catch (e) {
       this.logger.warn('No se encontro usuario por UID, mostrando todas las cotizaciones');
