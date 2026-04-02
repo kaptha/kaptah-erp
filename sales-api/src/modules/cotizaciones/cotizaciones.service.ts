@@ -523,7 +523,14 @@ private async obtenerLogoUsuario(userId: string, token: string): Promise<string 
     };
   }
 
-  async findAll(): Promise<Cotizacion[]> {
+  async findAll(usuarioId?: number): Promise<Cotizacion[]> {
+    if (usuarioId) {
+      return this.cotizacionRepository.find({
+        where: { usuarioId },
+        relations: ['items'],
+        order: { fechaCreacion: 'DESC' },
+      });
+    }
     return this.cotizacionRepository.find({
       relations: ['items'],
       order: { fechaCreacion: 'DESC' },

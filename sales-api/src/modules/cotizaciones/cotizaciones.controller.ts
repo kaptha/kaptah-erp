@@ -23,6 +23,7 @@ import { Public } from '../../auth/decorators/public.decorator';
 import { CotizacionesService } from './cotizaciones.service';
 import { CreateCotizacionDto } from './dto/create-cotizacion.dto';
 import { UpdateCotizacionDto } from './dto/update-cotizacion.dto';
+import { UsuariosService } from '../usuarios/usuarios.service';
 
 @ApiTags('Cotizaciones')
 @ApiBearerAuth()
@@ -31,7 +32,7 @@ import { UpdateCotizacionDto } from './dto/update-cotizacion.dto';
 export class CotizacionesController {
   private readonly logger = new Logger(CotizacionesController.name);
 
-  constructor(private readonly cotizacionesService: CotizacionesService) {}
+  constructor(private readonly cotizacionesService: CotizacionesService, private readonly usuariosService: UsuariosService,) {}
 
   @Post()
   @HttpCode(HttpStatus.CREATED)
@@ -114,7 +115,16 @@ export class CotizacionesController {
       };
     }
     
-    const cotizaciones = await this.cotizacionesService.findAll();
+    // Obtener ID numerico del usuario por su Firebase UID
+    let usuarioId: number | undefined;
+    try {
+      const usuario = await this.usuariosService.findByFirebaseUid(user.uid);
+      usuarioId = usuario.ID;
+    } catch (e) {
+      this.logger.warn('No se encontro usuario por UID, mostrando todas las cotizaciones');
+    }
+
+    const cotizaciones = await this.cotizacionesService.findAll(usuarioId);
     return {
       success: true,
       data: cotizaciones,
