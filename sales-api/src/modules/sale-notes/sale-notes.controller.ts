@@ -125,7 +125,7 @@ create(@Body() createSaleNoteDto: CreateSaleNoteDto, @CurrentUser() user: any) {
       emailData.customMessage,
       user.uid,
       firebaseToken,
-      emailData.pdfStyle || 'classic',
+      emailData.pdfStyle || 'classic-delivery',
     );
   }
 }

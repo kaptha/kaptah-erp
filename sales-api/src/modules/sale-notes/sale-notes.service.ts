@@ -204,6 +204,8 @@ private async obtenerLogoUsuario(userId: string, token: string): Promise<string 
     const saleNote = await this.findOne(id, finalUserId);
     console.log('✅ Nota de venta encontrada:', saleNote.id);
 
+    // Limpiar sufijo -delivery del estilo (frontend manda 'classic-delivery', template es 'remision-classic.html')
+    estilo = estilo.replace('-delivery', '');
     const templatesPath = path.join(process.cwd(), 'src', 'templates');
     const htmlPath = path.join(templatesPath, `remision-${estilo}.html`);
 
@@ -680,7 +682,7 @@ private async obtenerLogoUsuario(userId: string, token: string): Promise<string 
       let pdfBase64: string | null = null;
       try {
         this.logger.log('📄 Generando PDF para adjuntar al email...');
-        const pdfBuffer = await this.generarPdfEstiloRemision(id, userId, 'classic', idToken);
+        const pdfBuffer = await this.generarPdfEstiloRemision(id, userId, pdfStyle, idToken);
         pdfBase64 = pdfBuffer.toString('base64');
         this.logger.log('✅ PDF generado, tamaño base64: ' + pdfBase64.length);
       } catch (e) {
@@ -724,3 +726,4 @@ private getPaymentMethodText(method: 'CASH' | 'CARD' | 'TRANSFER'): string {
   return methods[method] || method;
 }
 }
+
