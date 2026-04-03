@@ -264,7 +264,7 @@ export class CotizacionesController {
       emailData.recipientEmail,
       emailData.customMessage,
       user.uid,
-      emailData.pdfStyle || 'classic',
+      emailData.pdfStyle || 'classic-quote',
     );
   }
   /**
@@ -359,3 +359,4 @@ export class CotizacionesController {
     } as any);
   }
 }
+

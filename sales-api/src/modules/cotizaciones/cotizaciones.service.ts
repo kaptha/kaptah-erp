@@ -157,6 +157,8 @@ private async obtenerLogoUsuario(userId: string, token: string): Promise<string 
     const cotizacion = await this.findOne(id);
     console.log('✅ Cotización encontrada:', cotizacion.id);
 
+    // Limpiar sufijo -quote del estilo (frontend manda 'classic-quote', template es 'classic-quote.html')
+    estilo = estilo.replace('-quote', '');
     const templatesPath = path.join(process.cwd(), 'src', 'templates');
     const htmlPath = path.join(templatesPath, `${estilo}-quote.html`);
 
