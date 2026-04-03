@@ -30,11 +30,16 @@ import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
         <mat-form-field appearance="outline" style="width: 100%;">
           <mat-label>Estilo del PDF</mat-label>
           <mat-select formControlName="pdfStyle">
-            <mat-option value="classic">Clásico</mat-option>
-            <mat-option value="modern">Moderno</mat-option>
-            <mat-option value="minimal">Minimalista</mat-option>
-            <mat-option value="professional">Profesional</mat-option>
-            <mat-option value="creative">Creativo</mat-option>
+            <mat-option value="classic-delivery">Clásico</mat-option>
+            <mat-option value="modern-delivery">Moderno</mat-option>
+            <mat-option value="creative-delivery">Creativo</mat-option>
+            <mat-option value="minimal-delivery">Minimalista</mat-option>
+            <mat-option value="profesional-delivery">Profesional</mat-option>
+            <mat-option value="simple-delivery">Simple</mat-option>
+            <mat-option value="elegant-delivery">Elegante</mat-option>
+            <mat-option value="wave-delivery">Wave</mat-option>
+            <mat-option value="orange-delivery">Orange</mat-option>
+            <mat-option value="friendly-delivery">Friendly</mat-option>
           </mat-select>
         </mat-form-field>
 
@@ -88,7 +93,7 @@ export class SendEmailDialogComponent {
     this.emailForm = this.fb.group({
       recipientEmail: [data.defaultEmail || '', [Validators.required, Validators.email]],
       customMessage: ['Le enviamos su nota de venta. Gracias por su preferencia.'],
-      pdfStyle: ['modern']
+      pdfStyle: ['classic-delivery']
     });
   }
 
@@ -103,3 +108,5 @@ export class SendEmailDialogComponent {
     }
   }
 }
+
+
