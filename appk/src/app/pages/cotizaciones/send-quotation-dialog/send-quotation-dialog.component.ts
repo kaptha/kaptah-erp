@@ -30,11 +30,16 @@ import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
         <mat-form-field appearance="outline" style="width: 100%;">
           <mat-label>Estilo del PDF</mat-label>
           <mat-select formControlName="pdfStyle">
-            <mat-option value="classic">Clásico</mat-option>
-            <mat-option value="modern">Moderno</mat-option>
-            <mat-option value="minimal">Minimalista</mat-option>
-            <mat-option value="professional">Profesional</mat-option>
-            <mat-option value="creative">Creativo</mat-option>
+            <mat-option value="classic-quote">Clásico</mat-option>
+            <mat-option value="modern-quote">Moderno</mat-option>
+            <mat-option value="creative-quote">Creativo</mat-option>
+            <mat-option value="minimal-quote">Minimalista</mat-option>
+            <mat-option value="professional-quote">Profesional</mat-option>
+            <mat-option value="formal-quote">Formal</mat-option>
+            <mat-option value="blue-quote">Blue</mat-option>
+            <mat-option value="clean-quote">Clean</mat-option>
+            <mat-option value="mint-quote">Mint</mat-option>
+            <mat-option value="purpple-quote">Purpple</mat-option>
           </mat-select>
         </mat-form-field>
 
@@ -88,7 +93,7 @@ export class SendQuotationDialogComponent {
     this.emailForm = this.fb.group({
       recipientEmail: [data.defaultEmail || '', [Validators.required, Validators.email]],
       customMessage: ['Le enviamos nuestra cotización. Válida por 15 días.'],
-      pdfStyle: ['modern']
+      pdfStyle: ['classic-quote']
     });
   }
 
@@ -103,3 +108,4 @@ export class SendQuotationDialogComponent {
     }
   }
 }
+
