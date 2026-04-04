@@ -263,8 +263,18 @@ export class CotizacionesService {
       pdfStyle: emailData.pdfStyle || 'modern'
     });
     
-    return this.getHeaders().pipe(
-      switchMap((headers: HttpHeaders) => {
+    const idToken = localStorage.getItem('idToken');
+    if (!idToken) {
+      return throwError(() => new Error('No se encontró token de autenticación'));
+    }
+
+    return from(this.authService.convertToJWT(idToken)).pipe(
+      switchMap((response: AuthResponse) => {
+        const headers = new HttpHeaders({
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${response.access_token}`,
+          'X-Firebase-Token': idToken
+        });
         return this.http.post(url, emailData, { headers });
       }),
       tap(response => {
