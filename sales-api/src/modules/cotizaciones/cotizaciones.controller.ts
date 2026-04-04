@@ -13,7 +13,8 @@ import {
   Logger,
   UseGuards,
   Res,
-  Req
+  Req,
+  Headers
 } from '@nestjs/common';
 import type { Response, Request } from 'express';
 import { ApiTags, ApiBearerAuth, ApiOperation, ApiParam, ApiQuery, ApiResponse } from '@nestjs/swagger';
@@ -256,15 +257,16 @@ export class CotizacionesController {
       pdfStyle?: string;
     },
     @CurrentUser() user: any,
+    @Headers('x-firebase-token') firebaseToken: string,
   ) {
     this.logger.log(`📬 POST /cotizaciones/${id}/send-email - Usuario: ${user.email || user.uid || "unknown"}`);
-    
     return this.cotizacionesService.sendQuotationByEmail(
       id,
       emailData.recipientEmail,
       emailData.customMessage,
       user.uid,
       emailData.pdfStyle || 'classic-quote',
+      firebaseToken,
     );
   }
   /**
