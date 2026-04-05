@@ -461,7 +461,7 @@ async enviarCfdiEmail(
     throw new HttpException('El email del destinatario es requerido', HttpStatus.BAD_REQUEST);
   }
 
-  const firebaseToken = this.extractFirebaseToken(req);
+ const firebaseToken = req.headers['x-firebase-token'] as string || this.extractFirebaseToken(req);
 
   return await this.cfdiService.sendCfdiByEmail(
     id,
