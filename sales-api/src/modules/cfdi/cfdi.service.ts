@@ -115,13 +115,15 @@ export class CfdiService {
         const logoUrl = await this.obtenerLogoUsuario(finalUserId, token);
         if (logoUrl) {
           // Descargar y convertir a base64 (como en SaleNotesService)
+          console.log('📥 Descargando logo desde:', logoUrl);
           const logoResponse = await axios.get<ArrayBuffer>(logoUrl, { responseType: 'arraybuffer' });
           const base64Logo = Buffer.from(logoResponse.data).toString('base64');
           const mimeType = logoResponse.headers['content-type'] || 'image/png';
           logoDataUri = `data:${mimeType};base64,${base64Logo}`;
+          console.log('✅ Logo convertido a base64, tamaño:', base64Logo.length);
         }
       } catch (e) {
-        console.error('Error obteniendo logo para CFDI:', e.message);
+        console.error('❌ Error obteniendo logo para CFDI:', e.message);
       }
     }
       console.log('✅ CFDI encontrado:', cfdi.id);
