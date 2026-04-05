@@ -255,14 +255,14 @@ export class CFDIService {
 /**
  * Envía CFDI por email con PDF y XML adjuntos
  */
-enviarPorEmail(cfdiId: string, clienteEmail: string, customMessage?: string): Observable<any> {
-  console.log('📧 Enviando CFDI por email:', cfdiId, 'a:', clienteEmail);
-  
+enviarPorEmail(cfdiId: string, clienteEmail: string, customMessage?: string, pdfStyle?: string): Observable<any> {
+  console.log('📧 Enviando CFDI por email:', cfdiId, 'a:', clienteEmail, 'estilo:', pdfStyle);
   return this.getHeaders().pipe(
     switchMap((headers: HttpHeaders) => {
       return this.http.post(`${this.apiUrl}/${cfdiId}/enviar-email`, {
         clienteEmail,
         customMessage: customMessage || '',
+        pdfStyle: pdfStyle || 'classic',
       }, { headers });
     }),
     tap(response => console.log('✅ Email encolado:', response)),

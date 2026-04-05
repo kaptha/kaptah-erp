@@ -365,9 +365,20 @@ async enviarCfdiPorEmail(cfdi: CFDI) {
   const { value: formValues } = await Swal.fire({
     title: 'Enviar CFDI por correo',
     html:
-      `<p style="margin-bottom:15px;color:#666;font-size:14px;">Se enviará la factura <strong>${cfdi.serie}-${cfdi.folio}</strong> con PDF y XML adjuntos.</p>` +
       `<input id="swal-email" class="swal2-input" placeholder="Email del destinatario" type="email" style="margin-bottom:10px;">` +
-      `<textarea id="swal-message" class="swal2-textarea" placeholder="Mensaje personalizado (opcional)" style="height:80px;"></textarea>`,
+      `<textarea id="swal-message" class="swal2-textarea" placeholder="Mensaje personalizado (opcional)" style="height:80px;"></textarea>` +
+      `<select id="swal-pdfStyle" class="swal2-select" style="margin-top:10px;width:100%;padding:8px;border:1px solid #ccc;border-radius:4px;">` +
+        `<option value="classic">Clásico</option>` +
+        `<option value="modern">Moderno</option>` +
+        `<option value="minimal">Minimalista</option>` +
+        `<option value="professional">Profesional</option>` +
+        `<option value="wave">Wave</option>` +
+        `<option value="elegant">Elegante</option>` +
+        `<option value="aqua">Aqua</option>` +
+        `<option value="simple">Simple</option>` +
+        `<option value="corporate">Corporate</option>` +
+        `<option value="creative">Creativo</option>` +
+      `</select>`,
     focusConfirm: false,
     showCancelButton: true,
     confirmButtonText: 'Enviar',
@@ -381,7 +392,8 @@ async enviarCfdiPorEmail(cfdi: CFDI) {
       }
       return {
         email,
-        message: (document.getElementById('swal-message') as HTMLTextAreaElement).value
+        message: (document.getElementById('swal-message') as HTMLTextAreaElement).value,
+        pdfStyle: (document.getElementById('swal-pdfStyle') as HTMLSelectElement).value
       };
     }
   });
@@ -389,7 +401,7 @@ async enviarCfdiPorEmail(cfdi: CFDI) {
   if (formValues) {
     Sweetalert.fnc('loading', 'Enviando CFDI por correo...', null);
 
-    this.cfdiService.enviarPorEmail(cfdi.ID, formValues.email, formValues.message).subscribe({
+   this.cfdiService.enviarPorEmail(cfdi.ID, formValues.email, formValues.message, formValues.pdfStyle).subscribe({
       next: (response) => {
         Sweetalert.fnc('close', '', null);
         setTimeout(() => {
