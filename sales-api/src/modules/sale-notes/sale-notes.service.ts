@@ -345,10 +345,13 @@ private async obtenerLogoUsuario(userId: string, token: string): Promise<string 
       
       const qrData = await this.qrGeneratorService.generateNoteQR({
         folio: saleNote.folio,
-        fecha: fechaString, // 👈 Convertida a string
-        rfcEmisor: empresaRfc, // 👈 Ya está declarada
-        total: total, // 👈 Ya está declarada
-        clienteNombre: saleNote.customerName
+        fecha: format(fecha, 'dd/MM/yyyy'),
+        rfcEmisor: empresaRfc,
+        total: total,
+        clienteNombre: saleNote.customerName,
+        empresaNombre: empresaNombre,
+        subtotal: subtotalTotal,
+        impuestos: impuestosTotal,
       });
 
       qrCodeImage = qrData.image; // Base64 del QR

@@ -101,35 +101,54 @@ export class QrGeneratorService {
    * @param noteData Datos de la nota de venta
    * @returns URL de verificación de tu sistema
    */
-  generateNoteQRUrl(noteData: {
+  async generateNoteQR(noteData: {
     folio: string;
     fecha: string;
     rfcEmisor: string;
     total: number;
     clienteNombre?: string;
-  }): string {
+    empresaNombre?: string;
+    subtotal?: number;
+    impuestos?: number;
+  }): Promise<{ url: string; image: string }> {
     try {
-      // Generar hash único para verificación
-      const verificationData = `${noteData.folio}|${noteData.fecha}|${noteData.rfcEmisor}|${noteData.total}`;
-      const hash = Buffer.from(verificationData).toString('base64url');
+      const totalFormatted = parseFloat(noteData.total.toString()).toFixed(2);
+      const subtotalFormatted = noteData.subtotal
+        ? parseFloat(noteData.subtotal.toString()).toFixed(2)
+        : null;
+      const impuestosFormatted = noteData.impuestos
+        ? parseFloat(noteData.impuestos.toString()).toFixed(2)
+        : null;
 
-      // URL de tu sistema (ajusta según tu dominio)
-      const qrUrl = `https://tu-dominio.com/verificar/nota/${hash}`;
+      let qrText = `NOTA DE VENTA\n`;
+      qrText += `========================\n`;
+      qrText += `Folio: ${noteData.folio}\n`;
+      qrText += `Fecha: ${noteData.fecha}\n`;
+      qrText += `------------------------\n`;
+      if (noteData.empresaNombre) {
+        qrText += `Empresa: ${noteData.empresaNombre}\n`;
+      }
+      qrText += `RFC Emisor: ${noteData.rfcEmisor}\n`;
+      qrText += `Cliente: ${noteData.clienteNombre || 'PUBLICO GENERAL'}\n`;
+      qrText += `------------------------\n`;
+      if (subtotalFormatted) {
+        qrText += `Subtotal: $${subtotalFormatted}\n`;
+      }
+      if (impuestosFormatted) {
+        qrText += `Impuestos: $${impuestosFormatted}\n`;
+      }
+      qrText += `TOTAL: $${totalFormatted}\n`;
+      qrText += `========================\n`;
+      qrText += `Generado por Kaptah`;
 
-      // O si prefieres parámetros visibles:
-      // const qrUrl = 
-      //   `https://tu-dominio.com/verificar/nota?` +
-      //   `folio=${noteData.folio}` +
-      //   `&fecha=${noteData.fecha}` +
-      //   `&rfc=${noteData.rfcEmisor}` +
-      //   `&total=${noteData.total.toFixed(2)}`;
+      const image = await this.generateQRImage(qrText);
 
-      this.logger.log(`📱 URL QR Nota generada: ${qrUrl}`);
+      this.logger.log('QR de nota de venta generado con resumen legible');
 
-      return qrUrl;
+      return { url: qrText, image };
     } catch (error) {
-      this.logger.error('❌ Error generando URL del QR para nota:', error);
-      throw new Error(`Error generando URL del QR: ${error.message}`);
+      this.logger.error('Error en generateNoteQR:', error);
+      throw error;
     }
   }
 
