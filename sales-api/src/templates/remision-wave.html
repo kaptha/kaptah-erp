@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Nota de Remisión - Wave</title>
+  <title>Nota de Remision - Wave</title>
   <style>
     * {
       margin: 0;
@@ -63,7 +63,7 @@
       border-radius: 6px;
     }
 
-    /* LÍNEA SEPARADORA */
+    /* LINEA SEPARADORA */
     .separator {
       width: 100%;
       height: 3px;
@@ -71,7 +71,7 @@
       margin-bottom: 18px;
     }
 
-    /* SECCIÓN INFO CLIENTE Y EMPRESA */
+    /* SECCION INFO CLIENTE Y EMPRESA */
     .info-grid {
       display: grid;
       grid-template-columns: 1fr 1fr;
@@ -93,6 +93,74 @@
       text-transform: uppercase;
       letter-spacing: 0.8px;
       margin-bottom: 8px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    /* Icono cliente - persona */
+    .icon-cliente {
+      width: 10px;
+      height: 10px;
+      border: 1.5px solid #2d1b4e;
+      border-radius: 50%;
+      position: relative;
+      display: inline-block;
+      flex-shrink: 0;
+    }
+    .icon-cliente::after {
+      content: '';
+      position: absolute;
+      bottom: -5px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 12px;
+      height: 5px;
+      border: 1.5px solid #2d1b4e;
+      border-bottom: none;
+      border-radius: 6px 6px 0 0;
+    }
+
+    /* Icono empresa - edificio */
+    .icon-empresa {
+      width: 10px;
+      height: 12px;
+      border: 1.5px solid #2d1b4e;
+      border-radius: 1px;
+      position: relative;
+      display: inline-block;
+      flex-shrink: 0;
+    }
+    .icon-empresa::before {
+      content: '';
+      position: absolute;
+      top: 2px;
+      left: 2px;
+      width: 2px;
+      height: 2px;
+      background: #2d1b4e;
+      box-shadow: 4px 0 0 #2d1b4e, 0 4px 0 #2d1b4e, 4px 4px 0 #2d1b4e;
+    }
+
+    /* Icono nota */
+    .icon-nota {
+      width: 9px;
+      height: 11px;
+      border: 1.5px solid #2d1b4e;
+      border-radius: 1px;
+      position: relative;
+      display: inline-block;
+      flex-shrink: 0;
+    }
+    .icon-nota::after {
+      content: '';
+      position: absolute;
+      top: 2px;
+      left: 1px;
+      right: 1px;
+      height: 1px;
+      background: #2d1b4e;
+      box-shadow: 0 3px 0 #2d1b4e;
     }
 
     .info-item {
@@ -186,7 +254,7 @@
       border-bottom: none;
     }
 
-    /* SECCIÓN TOTALES */
+    /* SECCION TOTALES */
     .totales-section {
       display: flex;
       justify-content: flex-end;
@@ -244,7 +312,7 @@
       color: #2d1b4e;
     }
 
-    /* SECCIÓN OBSERVACIONES Y QR */
+    /* SECCION OBSERVACIONES Y QR */
     .bottom-grid {
       display: grid;
       grid-template-columns: 1.5fr 1fr;
@@ -266,6 +334,9 @@
       text-transform: uppercase;
       letter-spacing: 0.8px;
       margin-bottom: 10px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
     }
 
     .observaciones-content {
@@ -276,7 +347,7 @@
       min-height: 70px;
     }
 
-    /* SECCIÓN QR */
+    /* SECCION QR */
     .qr-box {
       background-color: #ffffff;
       padding: 15px;
@@ -356,7 +427,7 @@
       margin-right: 4px;
     }
 
-    /* MEDIA QUERIES PARA IMPRESIÓN */
+    /* MEDIA QUERIES */
     @media print {
       body {
         background-color: #ffffff;
@@ -391,29 +462,33 @@
       </div>
     </header>
 
-    <!-- LÍNEA SEPARADORA -->
+    <!-- LINEA SEPARADORA -->
     <div class="separator"></div>
 
-    <!-- SECCIÓN INFO CLIENTE Y EMPRESA -->
+    <!-- SECCION INFO CLIENTE Y EMPRESA -->
     <section class="info-grid">
-      <!-- Datos del Cliente -->
       <div class="info-box">
-        <div class="info-box-header">📋 Datos del Cliente</div>
+        <div class="info-box-header">
+          <span class="icon-cliente"></span>
+          Datos del Cliente
+        </div>
         <div class="info-value-large">{{cliente}}</div>
         <div class="info-item"><strong>Folio:</strong> {{folio}}</div>
         <div class="info-item"><strong>Fecha:</strong> {{fecha}}</div>
-        <div class="info-item"><strong>Teléfono:</strong> {{telefono}}</div>
+        <div class="info-item"><strong>Telefono:</strong> {{telefono}}</div>
         <div class="info-item"><strong>Domicilio:</strong> {{direccion}}</div>
       </div>
 
-      <!-- Datos de la Empresa -->
       <div class="info-box">
-        <div class="info-box-header">🏢 Datos de la Empresa</div>
+        <div class="info-box-header">
+          <span class="icon-empresa"></span>
+          Datos de la Empresa
+        </div>
         <div class="info-value-large">{{sucursal_nombre}}</div>
         <div class="info-item"><strong>RFC:</strong> {{empresa_rfc}}</div>
-        <div class="info-item"><strong>Teléfono:</strong> {{sucursal_telefono}}</div>
+        <div class="info-item"><strong>Telefono:</strong> {{sucursal_telefono}}</div>
         <div class="info-item"><strong>Email:</strong> {{sucursal_email}}</div>
-        <div class="info-item"><strong>Dirección:</strong> {{sucursal_calle}}, {{sucursal_ciudad}}</div>
+        <div class="info-item"><strong>Direccion:</strong> {{sucursal_calle}}, {{sucursal_ciudad}}</div>
         <div class="info-item"><strong>C.P.:</strong> {{sucursal_codigoPostal}}</div>
       </div>
     </section>
@@ -423,7 +498,7 @@
       <thead>
         <tr>
           <th>Cant.</th>
-          <th>Descripción</th>
+          <th>Descripcion</th>
           <th>Precio Unit.</th>
           <th>Subtotal</th>
         </tr>
@@ -451,24 +526,25 @@
       </div>
     </div>
 
-    <!-- SECCIÓN OBSERVACIONES Y QR -->
+    <!-- SECCION OBSERVACIONES Y QR -->
     <section class="bottom-grid">
-      <!-- Observaciones -->
       <div class="observaciones-box">
-        <div class="observaciones-title">📝 Observaciones</div>
+        <div class="observaciones-title">
+          <span class="icon-nota"></span>
+          Observaciones
+        </div>
         <div class="observaciones-content">{{observaciones}}</div>
       </div>
 
-      <!-- Código QR -->
       <div class="qr-box">
         <p class="qr-title">Escanea para verificar</p>
         <img 
           src="{{qr_code}}" 
-          alt="Código QR de verificación"
+          alt="Codigo QR de verificacion"
           class="qr-code-img"
         />
         <p class="qr-info">Folio: {{qr_folio}} | Fecha: {{qr_fecha}}</p>
-        <p class="qr-footer-text">Verificación en línea disponible</p>
+        <p class="qr-footer-text">Verificacion en linea disponible</p>
       </div>
     </section>
 
@@ -477,13 +553,13 @@
       <div class="footer-title">Datos de Contacto</div>
       <div class="footer-content">
         <div class="footer-item">
-          <strong>📧 Email:</strong> {{sucursal_email}}
+          <strong>Email:</strong> {{sucursal_email}}
         </div>
         <div class="footer-item">
-          <strong>📞 Teléfono:</strong> {{sucursal_telefono}}
+          <strong>Telefono:</strong> {{sucursal_telefono}}
         </div>
         <div class="footer-item">
-          <strong>📍 Dirección:</strong> {{sucursal_calle}}, {{sucursal_ciudad}}, C.P. {{sucursal_codigoPostal}}
+          <strong>Direccion:</strong> {{sucursal_calle}}, {{sucursal_ciudad}}, C.P. {{sucursal_codigoPostal}}
         </div>
       </div>
     </footer>

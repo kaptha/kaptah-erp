@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Nota de Remisión - Minimal</title>
+  <title>Nota de Remision - Minimal</title>
   <style>
     * {
       margin: 0;
@@ -82,7 +82,7 @@
       color: #ffffff;
     }
 
-    /* SECCIÓN DE INFORMACIÓN */
+    /* SECCION DE INFORMACION */
     .info-section {
       padding: 20px 35px 15px;
       background-color: #f5f5f5;
@@ -198,7 +198,7 @@
       text-align: right;
     }
 
-    /* SECCIÓN OBSERVACIONES Y QR */
+    /* SECCION OBSERVACIONES Y QR */
     .bottom-section {
       display: flex;
       gap: 20px;
@@ -220,6 +220,29 @@
       margin-bottom: 10px;
       color: #0a0a2e;
       letter-spacing: 0.5px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .icon-nota {
+      width: 9px;
+      height: 11px;
+      border: 1.5px solid #0a0a2e;
+      border-radius: 1px;
+      position: relative;
+      display: inline-block;
+      flex-shrink: 0;
+    }
+    .icon-nota::after {
+      content: '';
+      position: absolute;
+      top: 2px;
+      left: 1px;
+      right: 1px;
+      height: 1px;
+      background: #0a0a2e;
+      box-shadow: 0 3px 0 #0a0a2e;
     }
 
     .observaciones-content {
@@ -304,7 +327,7 @@
       line-height: 1.4;
     }
 
-    /* MEDIA QUERIES PARA IMPRESIÓN */
+    /* MEDIA QUERIES */
     @media print {
       .main-wrapper {
         width: 100%;
@@ -349,12 +372,11 @@
       <h1>{{tipo_documento}}</h1>
     </header>
 
-    <!-- SECCIÓN DE INFORMACIÓN -->
+    <!-- SECCION DE INFORMACION -->
     <section class="info-section">
-      <!-- Primera fila: Número, Datos Fiscales, Fecha -->
       <div class="info-row">
         <div class="info-cell">
-          <strong>NÚMERO:</strong> <span>{{folio}}</span>
+          <strong>NUMERO:</strong> <span>{{folio}}</span>
         </div>
         <div class="info-cell wide">
           <strong>DATOS FISCALES:</strong> <span>{{rfc}}</span>
@@ -364,7 +386,6 @@
         </div>
       </div>
 
-      <!-- Segunda fila: Cliente (vacío para fecha) -->
       <div class="info-row">
         <div class="info-cell" style="flex: 2.8;">
           <strong>CLIENTE:</strong> <span>{{cliente}}</span>
@@ -374,14 +395,12 @@
         </div>
       </div>
 
-      <!-- Tercera fila: Domicilio -->
       <div class="info-row">
         <div class="info-cell" style="flex: 1;">
           <strong>DOMICILIO:</strong> <span>{{direccion}}</span>
         </div>
       </div>
 
-      <!-- Cuarta fila: Ciudad/Estado y Teléfono -->
       <div class="info-row">
         <div class="info-cell" style="flex: 2;">
           <strong>CIUDAD O ESTADO:</strong> <span>{{ciudad}}</span>
@@ -397,7 +416,7 @@
       <thead>
         <tr>
           <th>CANTIDAD</th>
-          <th>DESCRIPCIÓN</th>
+          <th>DESCRIPCION</th>
           <th>VALOR UNITARIO</th>
           <th>IMPORTE</th>
         </tr>
@@ -421,37 +440,38 @@
       </tfoot>
     </table>
 
-    <!-- SECCIÓN OBSERVACIONES Y QR -->
+    <!-- SECCION OBSERVACIONES Y QR -->
     <section class="bottom-section">
-      <!-- Observaciones -->
       <div class="observaciones-box">
-        <div class="observaciones-title">📝 Observaciones</div>
+        <div class="observaciones-title">
+          <span class="icon-nota"></span>
+          Observaciones
+        </div>
         <div class="observaciones-content">{{observaciones}}</div>
       </div>
 
-      <!-- Código QR -->
       <div class="qr-box">
         <p class="qr-title">Escanea para verificar</p>
         <img 
           src="{{qr_code}}" 
-          alt="Código QR de verificación"
+          alt="Codigo QR de verificacion"
           class="qr-code-img"
         />
         <p class="qr-info">Folio: {{qr_folio}}</p>
         <p class="qr-info">Fecha: {{qr_fecha}}</p>
-        <p class="qr-footer-text">Verificación en línea disponible</p>
+        <p class="qr-footer-text">Verificacion en linea disponible</p>
       </div>
     </section>
 
     <!-- FOOTER -->
     <footer>
       <div class="footer-section">
-        <strong>DIRECCIÓN</strong>
+        <strong>DIRECCION</strong>
         <p>{{sucursal_calle}},</p>
         <p>{{sucursal_ciudad}}, C.P. {{sucursal_codigoPostal}}</p>
       </div>
       <div class="footer-section">
-        <strong>TELÉFONO</strong>
+        <strong>TELEFONO</strong>
         <p>{{sucursal_telefono}}</p>
       </div>
       <div class="footer-section">

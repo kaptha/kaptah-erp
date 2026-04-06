@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Nota de Remisión - Creative</title>
+  <title>Nota de Remision - Creative</title>
   <style>
     * {
       margin: 0;
@@ -266,6 +266,9 @@
       color: #2c3e50;
       font-size: 14px;
       text-transform: uppercase;
+      display: flex;
+      align-items: center;
+      gap: 6px;
     }
 
     .observaciones-content {
@@ -347,6 +350,112 @@
       margin-top: 4px;
     }
 
+    /* ICONOS CSS */
+    .icon-nota {
+      width: 10px;
+      height: 12px;
+      border: 1.5px solid #2c3e50;
+      border-radius: 1px;
+      position: relative;
+      display: inline-block;
+      flex-shrink: 0;
+    }
+    .icon-nota::after {
+      content: '';
+      position: absolute;
+      top: 2px;
+      left: 1.5px;
+      right: 1.5px;
+      height: 1px;
+      background: #2c3e50;
+      box-shadow: 0 3px 0 #2c3e50;
+    }
+
+    .footer-icon {
+      display: inline-block;
+      width: 12px;
+      height: 12px;
+      vertical-align: middle;
+      margin-right: 4px;
+      position: relative;
+      flex-shrink: 0;
+    }
+
+    .icon-email-footer {
+      width: 12px;
+      height: 8px;
+      border: 1.5px solid #34495e;
+      border-radius: 1px;
+      position: relative;
+      display: inline-block;
+      vertical-align: middle;
+      margin-right: 4px;
+      margin-top: 2px;
+    }
+    .icon-email-footer::after {
+      content: '';
+      position: absolute;
+      top: -1px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 0;
+      height: 0;
+      border-left: 4px solid transparent;
+      border-right: 4px solid transparent;
+      border-top: 4px solid #34495e;
+    }
+
+    .icon-phone-footer {
+      width: 10px;
+      height: 10px;
+      border: 1.5px solid #34495e;
+      border-radius: 2px;
+      display: inline-block;
+      vertical-align: middle;
+      margin-right: 4px;
+      position: relative;
+    }
+    .icon-phone-footer::before {
+      content: '';
+      display: block;
+      width: 4px;
+      height: 1.5px;
+      background: #34495e;
+      margin: 1.5px auto 0;
+    }
+    .icon-phone-footer::after {
+      content: '';
+      display: block;
+      width: 3px;
+      height: 3px;
+      background: #34495e;
+      border-radius: 50%;
+      margin: 0.5px auto 0;
+    }
+
+    .icon-location-footer {
+      width: 10px;
+      height: 10px;
+      background: #34495e;
+      border-radius: 50%;
+      display: inline-block;
+      vertical-align: middle;
+      margin-right: 4px;
+      position: relative;
+    }
+    .icon-location-footer::after {
+      content: '';
+      position: absolute;
+      bottom: -4px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 0;
+      height: 0;
+      border-left: 4px solid transparent;
+      border-right: 4px solid transparent;
+      border-top: 5px solid #34495e;
+    }
+
     /* FOOTER */
     .footer {
       background-color: #f8f9fa;
@@ -361,6 +470,8 @@
       margin: 5px 0;
       font-size: 12px;
       color: #34495e;
+      display: flex;
+      align-items: center;
     }
 
     .footer p:first-child {
@@ -399,7 +510,7 @@
   </style>
 </head>
 <body>
-  <!-- DECORACIÓN SUPERIOR -->
+  <!-- DECORACION SUPERIOR -->
   <div class="decorative-top">
     <div class="decorative-square square-1"></div>
     <div class="decorative-square square-2"></div>
@@ -408,7 +519,7 @@
     <div class="decorative-square square-5"></div>
   </div>
 
-  <!-- DECORACIÓN INFERIOR -->
+  <!-- DECORACION INFERIOR -->
   <div class="decorative-bottom">
     <div class="decorative-square square-bottom-1"></div>
     <div class="decorative-square square-bottom-2"></div>
@@ -431,11 +542,11 @@
       </div>
     </header>
 
-    <!-- SECCIÓN CLIENTE -->
+    <!-- SECCION CLIENTE -->
     <section class="cliente">
       <p><strong>Cliente:</strong> {{cliente}}</p>
-      <p><strong>Teléfono:</strong> {{telefono}}</p>
-      <p><strong>Dirección:</strong> {{direccion}}</p>
+      <p><strong>Telefono:</strong> {{telefono}}</p>
+      <p><strong>Direccion:</strong> {{direccion}}</p>
     </section>
 
     <!-- TABLA DE PRODUCTOS -->
@@ -456,7 +567,10 @@
     <!-- OBSERVACIONES Y TOTALES -->
     <section class="info-section">
       <div class="observaciones">
-        <p class="observaciones-title">📝 Observaciones</p>
+        <p class="observaciones-title">
+          <span class="icon-nota"></span>
+          Observaciones
+        </p>
         <div class="observaciones-content">{{observaciones}}</div>
       </div>
       <div class="totales">
@@ -466,24 +580,24 @@
       </div>
     </section>
 
-    <!-- SECCIÓN QR -->
+    <!-- SECCION QR -->
     <section class="qr-section">
       <p class="qr-title">Escanea para verificar este documento</p>
       <img 
         src="{{qr_code}}" 
-        alt="Código QR de verificación"
+        alt="Codigo QR de verificacion"
         class="qr-code-img"
       />
       <p class="qr-info">Folio: {{qr_folio}} | Fecha: {{qr_fecha}}</p>
-      <p class="qr-footer-text">Verificación en línea disponible</p>
+      <p class="qr-footer-text">Verificacion en linea disponible</p>
     </section>
 
     <!-- FOOTER -->
     <footer class="footer">
       <p><strong>DATOS DE CONTACTO</strong></p>
-      <p>📧 {{sucursal_email}}</p>
-      <p>📞 {{sucursal_telefono}}</p>
-      <p>📍 {{sucursal_calle}}, {{sucursal_ciudad}}, C.P.: {{sucursal_codigoPostal}}</p>
+      <p><span class="icon-email-footer"></span> {{sucursal_email}}</p>
+      <p><span class="icon-phone-footer"></span> {{sucursal_telefono}}</p>
+      <p><span class="icon-location-footer"></span> {{sucursal_calle}}, {{sucursal_ciudad}}, C.P.: {{sucursal_codigoPostal}}</p>
     </footer>
   </div>
 </body>

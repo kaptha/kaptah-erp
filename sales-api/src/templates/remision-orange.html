@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Nota de Remisión - Orange</title>
+  <title>Nota de Remision - Orange</title>
   <style>
     * {
       margin: 0;
@@ -99,7 +99,7 @@
       font-weight: 400;
     }
 
-    /* SECCIÓN CLIENTE */
+    /* SECCION CLIENTE */
     .cliente-section {
       margin-bottom: 25px;
     }
@@ -214,7 +214,7 @@
       border-bottom: none;
     }
 
-    /* SECCIÓN OBSERVACIONES Y TOTALES */
+    /* SECCION OBSERVACIONES Y TOTALES */
     .bottom-section {
       display: flex;
       gap: 20px;
@@ -222,7 +222,6 @@
       margin-bottom: 20px;
     }
 
-    /* OBSERVACIONES */
     .observaciones-container {
       flex: 1;
     }
@@ -241,6 +240,29 @@
       text-transform: uppercase;
       letter-spacing: 0.5px;
       margin-bottom: 12px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .icon-nota {
+      width: 10px;
+      height: 12px;
+      border: 1.5px solid #2c2c2c;
+      border-radius: 1px;
+      position: relative;
+      display: inline-block;
+      flex-shrink: 0;
+    }
+    .icon-nota::after {
+      content: '';
+      position: absolute;
+      top: 2px;
+      left: 1.5px;
+      right: 1.5px;
+      height: 1px;
+      background: #2c2c2c;
+      box-shadow: 0 3px 0 #2c2c2c;
     }
 
     .observaciones-content {
@@ -250,7 +272,6 @@
       white-space: pre-wrap;
     }
 
-    /* TOTALES */
     .totales-container {
       min-width: 360px;
     }
@@ -294,7 +315,7 @@
       font-weight: 700;
     }
 
-    /* SECCIÓN QR */
+    /* SECCION QR */
     .qr-section {
       text-align: center;
       padding: 20px 0;
@@ -368,7 +389,7 @@
       margin-right: 4px;
     }
 
-    /* MEDIA QUERIES PARA IMPRESIÓN */
+    /* MEDIA QUERIES */
     @media print {
       .container {
         width: 100%;
@@ -409,7 +430,7 @@
       </div>
     </header>
 
-    <!-- SECCIÓN CLIENTE -->
+    <!-- SECCION CLIENTE -->
     <section class="cliente-section">
       <div class="cliente-field">
         <div class="cliente-label">Nombre</div>
@@ -418,8 +439,8 @@
       <div class="cliente-field datos-field">
         <div class="cliente-label">Datos</div>
         <div class="cliente-value datos-value">
-          Teléfono: {{telefono}}<br>
-          Dirección: {{direccion}}<br>
+          Telefono: {{telefono}}<br>
+          Direccion: {{direccion}}<br>
           RFC: {{rfc}}
         </div>
       </div>
@@ -430,7 +451,7 @@
       <thead>
         <tr>
           <th>Cant.</th>
-          <th>Descripción</th>
+          <th>Descripcion</th>
           <th>P. Unitario</th>
           <th>Subtotal</th>
         </tr>
@@ -440,17 +461,18 @@
       </tbody>
     </table>
 
-    <!-- SECCIÓN OBSERVACIONES Y TOTALES -->
+    <!-- SECCION OBSERVACIONES Y TOTALES -->
     <div class="bottom-section">
-      <!-- OBSERVACIONES -->
       <div class="observaciones-container">
         <div class="observaciones-box">
-          <div class="observaciones-title">📝 Observaciones</div>
+          <div class="observaciones-title">
+            <span class="icon-nota"></span>
+            Observaciones
+          </div>
           <div class="observaciones-content">{{observaciones}}</div>
         </div>
       </div>
 
-      <!-- TOTALES -->
       <div class="totales-container">
         <div class="totales-row">
           <div class="totales-label">Subtotal</div>
@@ -467,16 +489,16 @@
       </div>
     </div>
 
-    <!-- SECCIÓN QR -->
+    <!-- SECCION QR -->
     <section class="qr-section">
       <p class="qr-title">Escanea para verificar este documento</p>
       <img 
         src="{{qr_code}}" 
-        alt="Código QR de verificación"
+        alt="Codigo QR de verificacion"
         class="qr-code-img"
       />
       <p class="qr-info">Folio: {{qr_folio}} | Fecha: {{qr_fecha}}</p>
-      <p class="qr-footer-text">Verificación en línea disponible</p>
+      <p class="qr-footer-text">Verificacion en linea disponible</p>
     </section>
 
     <!-- FOOTER -->
@@ -484,13 +506,13 @@
       <div class="footer-title">Datos de Contacto</div>
       <div class="footer-content">
         <div class="footer-item">
-          <strong>📧 Email:</strong> {{sucursal_email}}
+          <strong>Email:</strong> {{sucursal_email}}
         </div>
         <div class="footer-item">
-          <strong>📞 Teléfono:</strong> {{sucursal_telefono}}
+          <strong>Telefono:</strong> {{sucursal_telefono}}
         </div>
         <div class="footer-item">
-          <strong>📍 Dirección:</strong> {{sucursal_calle}}, {{sucursal_ciudad}}, C.P. {{sucursal_codigoPostal}}
+          <strong>Direccion:</strong> {{sucursal_calle}}, {{sucursal_ciudad}}, C.P. {{sucursal_codigoPostal}}
         </div>
       </div>
     </footer>

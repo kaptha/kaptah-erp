@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Nota de Remisión - Professional</title>
+  <title>Nota de Remision - Professional</title>
   <style>
     * {
       margin: 0;
@@ -29,7 +29,7 @@
       flex-direction: column;
     }
 
-    /* TÍTULO */
+    /* TITULO */
     .titulo {
       background-color: #e8d5c4;
       color: #6b5347;
@@ -42,7 +42,7 @@
       border: 2px solid #8b6f5c;
     }
 
-    /* SECCIÓN DE DATOS DEL ENCABEZADO */
+    /* SECCION DE DATOS DEL ENCABEZADO */
     .datos-encabezado {
       margin-bottom: 20px;
     }
@@ -148,7 +148,7 @@
       background-color: #ffffff;
     }
 
-    /* SECCIÓN DE BRANDING Y TOTALES */
+    /* SECCION DE BRANDING Y TOTALES */
     .bottom-section {
       display: flex;
       border-top: 2px solid #8b6f5c;
@@ -235,7 +235,7 @@
       font-size: 12px;
     }
 
-    /* SECCIÓN OBSERVACIONES Y QR */
+    /* SECCION OBSERVACIONES Y QR */
     .obs-qr-section {
       display: flex;
       gap: 18px;
@@ -256,6 +256,29 @@
       margin-bottom: 10px;
       color: #6b5347;
       letter-spacing: 0.5px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .icon-nota {
+      width: 9px;
+      height: 11px;
+      border: 1.5px solid #6b5347;
+      border-radius: 1px;
+      position: relative;
+      display: inline-block;
+      flex-shrink: 0;
+    }
+    .icon-nota::after {
+      content: '';
+      position: absolute;
+      top: 2px;
+      left: 1px;
+      right: 1px;
+      height: 1px;
+      background: #6b5347;
+      box-shadow: 0 3px 0 #6b5347;
     }
 
     .observaciones-content {
@@ -340,7 +363,7 @@
       color: #5a4a42;
     }
 
-    /* MEDIA QUERIES PARA IMPRESIÓN */
+    /* MEDIA QUERIES */
     @media print {
       .main-wrapper {
         width: 100%;
@@ -368,22 +391,20 @@
 </head>
 <body>
   <div class="main-wrapper">
-    <!-- TÍTULO -->
+    <!-- TITULO -->
     <h1 class="titulo">{{tipo_documento}}</h1>
 
-    <!-- SECCIÓN DE DATOS DEL ENCABEZADO -->
+    <!-- SECCION DE DATOS DEL ENCABEZADO -->
     <section class="datos-encabezado">
-      <!-- Primera fila: Número y Fecha (DÍA, MES, AÑO) -->
       <div class="fila">
         <div class="celda large">
-          <strong>NÚMERO:</strong> <span>{{folio}}</span>
+          <strong>NUMERO:</strong> <span>{{folio}}</span>
         </div>
-        <div class="celda header-cell small">DÍA</div>
+        <div class="celda header-cell small">DIA</div>
         <div class="celda header-cell small">MES</div>
-        <div class="celda header-cell small">AÑO</div>
+        <div class="celda header-cell small">ANO</div>
       </div>
 
-      <!-- Segunda fila: Cliente con fecha -->
       <div class="fila">
         <div class="celda large">
           <strong>CLIENTE:</strong> <span>{{cliente}}</span>
@@ -393,14 +414,12 @@
         <div class="celda small" style="justify-content: center;">{{anio}}</div>
       </div>
 
-      <!-- Tercera fila: Domicilio -->
       <div class="fila">
         <div class="celda" style="flex: 1;">
           <strong>DOMICILIO:</strong> <span>{{direccion}}</span>
         </div>
       </div>
 
-      <!-- Cuarta fila: Ciudad/Estado y Teléfono -->
       <div class="fila">
         <div class="celda" style="flex: 2;">
           <strong>CIUDAD O ESTADO:</strong> <span>{{ciudad}}</span>
@@ -427,7 +446,6 @@
         </tbody>
       </table>
 
-      <!-- SECCIÓN INFERIOR: BRANDING + TOTALES -->
       <div class="bottom-section">
         <div class="branding-area">
           <img src="{{logo}}" alt="Logo" class="logo" />
@@ -453,37 +471,38 @@
       </div>
     </div>
 
-    <!-- SECCIÓN OBSERVACIONES Y QR -->
+    <!-- SECCION OBSERVACIONES Y QR -->
     <section class="obs-qr-section">
-      <!-- Observaciones -->
       <div class="observaciones-box">
-        <div class="observaciones-title">📝 Observaciones</div>
+        <div class="observaciones-title">
+          <span class="icon-nota"></span>
+          Observaciones
+        </div>
         <div class="observaciones-content">{{observaciones}}</div>
       </div>
 
-      <!-- Código QR -->
       <div class="qr-box">
         <p class="qr-title">Escanea para verificar</p>
         <img 
           src="{{qr_code}}" 
-          alt="Código QR de verificación"
+          alt="Codigo QR de verificacion"
           class="qr-code-img"
         />
         <p class="qr-info">Folio: {{qr_folio}}</p>
         <p class="qr-info">Fecha: {{qr_fecha}}</p>
-        <p class="qr-footer-text">Verificación en línea disponible</p>
+        <p class="qr-footer-text">Verificacion en linea disponible</p>
       </div>
     </section>
 
     <!-- FOOTER -->
     <footer class="footer">
       <div class="footer-section">
-        <strong>DIRECCIÓN</strong>
+        <strong>DIRECCION</strong>
         <p>{{sucursal_calle}}</p>
         <p>C.P. {{sucursal_codigoPostal}}</p>
       </div>
       <div class="footer-section">
-        <strong>TELÉFONO</strong>
+        <strong>TELEFONO</strong>
         <p>{{sucursal_telefono}}</p>
       </div>
       <div class="footer-section">

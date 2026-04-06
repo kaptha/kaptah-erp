@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Nota de Remisión - Elegant</title>
+  <title>Nota de Remision - Elegant</title>
   <style>
     * {
       margin: 0;
@@ -110,15 +110,33 @@
       margin-bottom: -1px;
     }
 
+    /* Icono estrella CSS puro */
     .star-icon {
       width: 30px;
       display: flex;
       align-items: center;
       justify-content: center;
-      font-size: 16px;
       color: #2c2c2c;
       background-color: #ffffff;
       border-right: 1px solid #2c2c2c;
+    }
+
+    .icon-star-css {
+      width: 10px;
+      height: 10px;
+      background: #2c2c2c;
+      clip-path: polygon(
+        50% 0%,
+        61% 35%,
+        98% 35%,
+        68% 57%,
+        79% 91%,
+        50% 70%,
+        21% 91%,
+        32% 57%,
+        2% 35%,
+        39% 35%
+      );
     }
 
     .info-label {
@@ -285,6 +303,29 @@
       letter-spacing: 1.5px;
       text-transform: uppercase;
       margin-bottom: 12px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .icon-nota {
+      width: 9px;
+      height: 11px;
+      border: 1.5px solid #2c2c2c;
+      border-radius: 1px;
+      position: relative;
+      display: inline-block;
+      flex-shrink: 0;
+    }
+    .icon-nota::after {
+      content: '';
+      position: absolute;
+      top: 2px;
+      left: 1px;
+      right: 1px;
+      height: 1px;
+      background: #2c2c2c;
+      box-shadow: 0 3px 0 #2c2c2c;
     }
 
     .observaciones-content {
@@ -432,7 +473,7 @@
       pointer-events: none;
     }
 
-    /* MEDIA QUERIES PARA IMPRESIÓN */
+    /* MEDIA QUERIES */
     @media print {
       .container {
         width: 100%;
@@ -452,7 +493,7 @@
 </head>
 <body>
   <div class="container">
-    <!-- DECORACIÓN SUPERIOR IZQUIERDA -->
+    <!-- DECORACION SUPERIOR IZQUIERDA -->
     <svg class="decorative-corner decorative-top-left decorative-svg" viewBox="0 0 180 120">
       <path d="M 10 80 Q 50 20, 120 10" class="curve-line"/>
       <path d="M 30 100 Q 80 50, 150 40" class="curve-line"/>
@@ -464,7 +505,7 @@
       </g>
     </svg>
 
-    <!-- DECORACIÓN SUPERIOR DERECHA -->
+    <!-- DECORACION SUPERIOR DERECHA -->
     <svg class="decorative-corner decorative-top-right decorative-svg" viewBox="0 0 180 120">
       <path d="M 170 80 Q 130 20, 60 10" class="curve-line"/>
       <path d="M 150 100 Q 100 50, 30 40" class="curve-line"/>
@@ -487,10 +528,10 @@
       <div class="document-title">{{tipo_documento}}</div>
     </header>
 
-    <!-- SECCIÓN INFO -->
+    <!-- SECCION INFO -->
     <section class="info-section">
       <div class="info-row">
-        <div class="star-icon">✦</div>
+        <div class="star-icon"><span class="icon-star-css"></span></div>
         <div class="info-label">Factura No.:</div>
         <div class="info-value">{{folio}}</div>
         <div class="fecha-header">Fecha</div>
@@ -500,13 +541,13 @@
       </div>
 
       <div class="info-row">
-        <div class="star-icon">✦</div>
+        <div class="star-icon"><span class="icon-star-css"></span></div>
         <div class="info-label">Cliente:</div>
         <div class="info-value">{{cliente}}</div>
       </div>
 
       <div class="info-row">
-        <div class="star-icon">✦</div>
+        <div class="star-icon"><span class="icon-star-css"></span></div>
         <div class="info-label">Domicilio:</div>
         <div class="info-value">{{direccion}}</div>
       </div>
@@ -526,7 +567,7 @@
       <thead>
         <tr>
           <th>Cantidad</th>
-          <th>Descripción</th>
+          <th>Descripcion</th>
           <th>Valor Unitario</th>
           <th>Importe</th>
         </tr>
@@ -536,10 +577,13 @@
       </tbody>
     </table>
 
-    <!-- SECCIÓN INFERIOR CON OBSERVACIONES Y TOTALES -->
+    <!-- SECCION INFERIOR CON OBSERVACIONES Y TOTALES -->
     <div class="bottom-section">
       <div class="observaciones-info">
-        <div class="observaciones-title">📝 Observaciones</div>
+        <div class="observaciones-title">
+          <span class="icon-nota"></span>
+          Observaciones
+        </div>
         <div class="observaciones-content">{{observaciones}}</div>
       </div>
       <div class="totales-section">
@@ -556,19 +600,19 @@
       </div>
     </div>
 
-    <!-- SECCIÓN CÓDIGO QR -->
+    <!-- SECCION CODIGO QR -->
     <section class="qr-section">
       <p class="qr-title">Escanea para verificar este documento</p>
       <img 
         src="{{qr_code}}" 
-        alt="Código QR de verificación"
+        alt="Codigo QR de verificacion"
         class="qr-code-img"
       />
       <p class="qr-info">Folio: {{qr_folio}} | Fecha: {{qr_fecha}}</p>
-      <p class="qr-footer-text">Verificación en línea disponible</p>
+      <p class="qr-footer-text">Verificacion en linea disponible</p>
     </section>
 
-    <!-- INFORMACIÓN DE EMPRESA -->
+    <!-- INFORMACION DE EMPRESA -->
     <div class="empresa-info-footer">
       <strong>{{sucursal_nombre}}</strong> | RFC: <strong>{{empresa_rfc}}</strong>
     </div>
@@ -576,11 +620,11 @@
     <!-- FOOTER -->
     <footer class="footer">
       <div class="footer-item">
-        <div class="footer-title">Dirección</div>
+        <div class="footer-title">Direccion</div>
         <div class="footer-content">{{sucursal_calle}},<br>{{sucursal_ciudad}}, C.P. {{sucursal_codigoPostal}}</div>
       </div>
       <div class="footer-item">
-        <div class="footer-title">Teléfono</div>
+        <div class="footer-title">Telefono</div>
         <div class="footer-content">{{sucursal_telefono}}</div>
       </div>
       <div class="footer-item">

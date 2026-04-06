@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Nota de Remisión - Modern</title>
+  <title>Nota de Remision - Modern</title>
   <style>
     * {
       margin: 0;
@@ -80,7 +80,7 @@
       z-index: 1;
     }
 
-    /* SECCIÓN INFORMACIÓN (CLIENTE + EMPRESA) */
+    /* SECCION INFORMACION */
     .info-section {
       display: grid;
       grid-template-columns: 1fr 1fr;
@@ -206,7 +206,7 @@
       font-weight: 700;
     }
 
-    /* SECCIÓN INFERIOR: OBSERVACIONES + QR */
+    /* SECCION INFERIOR */
     .bottom-section {
       display: grid;
       grid-template-columns: 1.8fr 1fr;
@@ -310,7 +310,7 @@
       letter-spacing: 0.5px;
     }
 
-    /* RESPONSIVE */
+    /* MEDIA QUERIES */
     @media print {
       .main-wrapper {
         width: 100%;
@@ -363,9 +363,8 @@
       </svg>
     </header>
 
-    <!-- SECCIÓN DE INFORMACIÓN: CLIENTE + EMPRESA -->
+    <!-- SECCION DE INFORMACION -->
     <section class="info-section">
-      <!-- Cliente -->
       <div class="info-box">
         <h3>Vendido a:</h3>
         <p><strong>{{cliente}}</strong></p>
@@ -373,9 +372,8 @@
         <p><strong>RFC:</strong> {{rfc}}</p>
       </div>
 
-      <!-- Empresa -->
       <div class="info-box">
-        <h3>Información de la Empresa</h3>
+        <h3>Informacion de la Empresa</h3>
         <div class="empresa-grid">
           <div class="empresa-item">
             <div class="empresa-icon"></div>
@@ -425,30 +423,27 @@
       <p><strong>TOTAL:</strong> ${{total}}</p>
     </section>
 
-    <!-- SECCIÓN INFERIOR: OBSERVACIONES + QR -->
+    <!-- SECCION INFERIOR -->
     <section class="bottom-section">
-      <!-- Observaciones -->
       <div class="observaciones-box">
         <h3>Observaciones</h3>
         <div class="observaciones-content">{{observaciones}}</div>
       </div>
 
-      <!-- Código QR -->
       <div class="qr-box">
         <p>Escanea para verificar</p>
         <img 
           src="{{qr_code}}" 
-          alt="Código QR de verificación"
+          alt="Codigo QR de verificacion"
         />
         <p class="qr-info">Folio: {{qr_folio}}</p>
         <p class="qr-info">Fecha: {{qr_fecha}}</p>
-        <p class="qr-footer">Verificación en línea</p>
+        <p class="qr-footer">Verificacion en linea</p>
       </div>
     </section>
 
     <!-- FOOTER -->
     <footer>
-      <!-- Onda inferior -->
       <svg class="wave-bottom" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1440 320" preserveAspectRatio="none">
         <path fill="#ffffff" d="M0,96L48,112C96,128,192,160,288,160C384,160,480,128,576,122.7C672,117,768,139,864,154.7C960,171,1056,181,1152,165.3C1248,149,1344,107,1392,85.3L1440,64L1440,320L1392,320C1344,320,1248,320,1152,320C1056,320,960,320,864,320C768,320,672,320,576,320C480,320,384,320,288,320C192,320,96,320,48,320L0,320Z"></path>
       </svg>
