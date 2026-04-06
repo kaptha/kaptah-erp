@@ -366,11 +366,11 @@
       </div>
 
       <div class="block doc-meta">
-        <div class="row"><span class="label">Date:</span> {{fecha}}</div>
-        <div class="row"><span class="label">Valid Until:</span> {{fecha_validez}}</div>
-        <div class="row"><span class="label">{{tipo_documento}}:</span> {{folio}}</div>
-        <div class="status">{{estado}}</div>
-      </div>
+  <div class="row"><span class="label">Fecha:</span> {{fecha}}</div>
+  <div class="row"><span class="label">Válido hasta:</span> {{fecha_validez}}</div>
+  <div class="row"><span class="label">{{tipo_documento}}:</span> {{folio}}</div>
+  <div class="status">{{estado}}</div>
+</div>
     </div>
 
     <!-- ITEMS TABLE -->
@@ -378,10 +378,10 @@
       <table>
         <thead>
           <tr>
-            <th class="c-desc">Cantidad</th>
-            <th class="c-qty">Descripcion</th>
-            <th class="c-price">Precio</th>
-            <th class="c-total">Total</th>
+            <th class="c-qty">Cantidad</th>
+<th class="c-desc">Descripción</th>
+<th class="c-price">Precio</th>
+<th class="c-total">Total</th>
           </tr>
         </thead>
         <tbody>
@@ -395,26 +395,26 @@
     <!-- TERMS + TOTALS -->
     <div class="bottom-grid">
       <div class="terms">
-        <div class="title">Terms &amp; Condiciones:</div>
-        <div class="content">{{terminos_condiciones}}</div>
-      </div>
+  <div class="title">Términos y Condiciones:</div>
+  <div class="content">{{terminos_condiciones}}</div>
+</div>
 
       <div class="totals">
-        <table>
-          <tr>
-            <td class="t-label">Subtotal:</td>
-            <td class="t-value">$ {{subtotal}}</td>
-          </tr>
-          <tr>
-            <td class="t-label">Tax:</td>
-            <td class="t-value">$ {{impuestos}}</td>
-          </tr>
-          <tr>
-            <td class="t-label t-total-label">Total:</td>
-            <td class="t-value t-total-value">$ {{total}}</td>
-          </tr>
-        </table>
-      </div>
+  <table>
+    <tr>
+      <td class="t-label">Subtotal:</td>
+      <td class="t-value">$ {{subtotal}}</td>
+    </tr>
+    <tr>
+      <td class="t-label">Impuestos:</td>
+      <td class="t-value">$ {{impuestos}}</td>
+    </tr>
+    <tr>
+      <td class="t-label t-total-label">Total:</td>
+      <td class="t-value t-total-value">$ {{total}}</td>
+    </tr>
+  </table>
+</div>
     </div>
 
     <!-- OBSERVACIONES -->
