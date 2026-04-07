@@ -2,6 +2,9 @@
 .clientes-container {
   padding: 16px;
   width: 100%;
+  max-width: 100%;
+  overflow-x: hidden;
+  box-sizing: border-box;
 }
 
 .page-title {
@@ -64,7 +67,7 @@
 /* Estilos de la tabla */
 table.mat-table {
   width: 100%;
-  min-width: 750px; /* Ancho mínimo para garantizar legibilidad */
+  min-width: 750px;
 }
 
 .mat-column-razonSocial {
@@ -217,12 +220,12 @@ table.mat-table {
   .page-title {
     font-size: 22px;
   }
-  
+
   .actions-container {
     flex-wrap: wrap;
     gap: 8px;
   }
-  
+
   .search-field {
     flex: 0 0 100%;
     max-width: 100%;
@@ -233,61 +236,106 @@ table.mat-table {
   .page-title {
     font-size: 20px;
   }
-  
+
   .actions-container {
     flex-direction: column;
     align-items: stretch;
   }
-  
+
   .actions-right {
     width: 100%;
     justify-content: space-between;
   }
-  
+
   .mobile-filter-section {
     display: block;
   }
+
+  /* Botones apilados en movil para evitar corte con sidebar */
+  .actions-container .btn-primary,
+  .actions-container .btn-white {
+    width: 100%;
+    box-sizing: border-box;
+    min-width: 0;
+  }
+
+  .actions-right {
+    flex-wrap: wrap;
+  }
 }
 
-/* Vista alternativa para móviles */
+/* Vista alternativa para moviles */
 @media screen and (max-width: 600px) {
-  .table-container, 
+  .table-container,
   .mat-table {
     display: none;
   }
-  
+
   .mobile-cards {
     display: block;
   }
-  
+
   .clientes-container {
-    padding: 10px;
+    padding: 8px;
+    overflow-x: hidden;
   }
-  
+
   .page-title {
     font-size: 18px;
     margin-top: 10px;
     margin-bottom: 10px;
   }
-  
+
   .breadcrumb {
     font-size: 12px;
     margin-bottom: 10px;
   }
-  
+
   .actions-container {
     margin-bottom: 10px;
+    padding: 0;
+    gap: 8px;
   }
-  
+
+  /* Botones no se desbordan */
+  .actions-container button {
+    min-width: 0;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 100%;
+    box-sizing: border-box;
+  }
+
+  .actions-right {
+    flex-direction: column;
+    gap: 8px;
+    width: 100%;
+  }
+
   .mobile-card-header {
     padding: 10px 12px;
+    flex-wrap: wrap;
+    gap: 4px;
   }
-  
+
   .mobile-card-content {
     padding: 12px;
   }
-  
+
   .mobile-card-actions {
     padding: 6px 12px;
+  }
+
+  .mobile-card-title {
+    font-size: 14px;
+    word-break: break-word;
+    flex: 1;
+    min-width: 0;
+  }
+
+  .mobile-card-subtitle {
+    font-size: 12px;
+    flex-shrink: 0;
   }
 }

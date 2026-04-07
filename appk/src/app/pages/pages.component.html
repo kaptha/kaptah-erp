@@ -1,6 +1,6 @@
 <div class="main-container">  
     <mat-sidenav-container>  
-      <mat-sidenav #sidenav mode="side" [opened]="isOpen">  
+      <mat-sidenav #sidenav [mode]="isMobile ? 'over' : 'side'" [opened]="isOpen"> 
         <app-sidebar></app-sidebar>
       </mat-sidenav>
 <mat-sidenav-content>       

@@ -11,4 +11,8 @@ export class SidebarService {
   toggleSidebar() {
     this.sidebarStateSubject.next(!this.sidebarStateSubject.value);
   }
+
+  setSidebar(open: boolean) {
+    this.sidebarStateSubject.next(open);
+  }
 }
