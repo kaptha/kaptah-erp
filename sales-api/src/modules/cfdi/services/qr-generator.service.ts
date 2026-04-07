@@ -152,34 +152,7 @@ export class QrGeneratorService {
     }
   }
 
-  /**
-   * Genera QR completo para Nota de Venta
-   * @param noteData Datos de la nota de venta
-   * @returns Objeto con URL y imagen base64
-   */
-  async generateNoteQR(noteData: {
-    folio: string;
-    fecha: string;
-    rfcEmisor: string;
-    total: number;
-    clienteNombre?: string;
-  }): Promise<{ url: string; image: string }> {
-    try {
-      // 1. Generar URL
-      const url = this.generateNoteQRUrl(noteData);
-
-      // 2. Generar imagen (reutilizando el método existente)
-      const image = await this.generateQRImage(url);
-
-      this.logger.log('✅ QR de nota de venta generado correctamente');
-
-      return { url, image };
-    } catch (error) {
-      this.logger.error('❌ Error en generateNoteQR:', error);
-      throw error;
-    }
-  }
-
+ 
   /**
    * Genera QR con datos JSON embebidos (alternativa más detallada)
    * Útil si quieres que el QR contenga toda la información sin conexión

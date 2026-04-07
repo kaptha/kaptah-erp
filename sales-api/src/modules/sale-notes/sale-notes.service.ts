@@ -345,7 +345,7 @@ private async obtenerLogoUsuario(userId: string, token: string): Promise<string 
       
       const qrData = await this.qrGeneratorService.generateNoteQR({
         folio: saleNote.folio,
-        fecha: format(fecha, 'dd/MM/yyyy'),
+        fecha: fechaString,
         rfcEmisor: empresaRfc,
         total: total,
         clienteNombre: saleNote.customerName,
