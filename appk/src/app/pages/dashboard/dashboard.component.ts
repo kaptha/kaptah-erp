@@ -1,300 +1,360 @@
 import { Component, OnInit } from '@angular/core';
+import { Router } from '@angular/router';
 import { CfdiApiService } from '../../services/cfdi-api.service';
 import { firstValueFrom } from 'rxjs';
 
 interface KpiCard {
   title: string;
   value: string;
-  change: string;
-  isPositive: boolean;
+  subtitle: string;
+  icon: string;
+  color: 'primary' | 'success' | 'danger' | 'info';
 }
 
-interface ChartData {
-  name: string;
-  value: number;
+interface MesData {
+  mes: string;
+  ingresos: number;
+  egresos: number;
 }
+
+interface Alerta {
+  tipo: 'warning' | 'danger' | 'info';
+  icono: string;
+  titulo: string;
+  detalle: string;
+  ruta?: string;
+}
+
+const CACHE_KEY = 'kaptah_dashboard_cache';
+const CACHE_TTL = 30 * 60 * 1000; // 30 minutos
 
 @Component({
-    selector: 'app-dashboard',
-    templateUrl: './dashboard.component.html',
-    styleUrls: ['./dashboard.component.css'],
-    standalone: false
+  selector: 'app-dashboard',
+  templateUrl: './dashboard.component.html',
+  styleUrls: ['./dashboard.component.css'],
+  standalone: false
 })
 export class DashboardComponent implements OnInit {
-  
-  // Loading states
+
   isLoading = true;
-  isProcessing = false;
-  
-  // User RFC
-  userRfc = '';
-  
-  // KPI Cards data
-  kpiCards: KpiCard[] = [
-    { title: 'XMLs Procesados', value: '0', change: 'Total importados', isPositive: true },
-    { title: 'Ingresos Totales', value: '$0', change: 'Este año', isPositive: true },
-    { title: 'Egresos Totales', value: '$0', change: 'Este año', isPositive: false },
-    { title: 'IVA Neto', value: '$0', change: 'A favor/por pagar', isPositive: true }
-  ];
+  hasDatos = false;
 
-  // Chart data para tipos de comprobante
-  pieChartData: ChartData[] = [
-    { name: "Ingresos", value: 0 },
-    { name: "Egresos", value: 0 }
-  ];
+  // KPIs
+  kpiCards: KpiCard[] = [];
 
-  // Top proveedores para tabla
-  topProveedores: any[] = [];
+  // Grafica mensual
+  chartData: any[] = [];
+  colorScheme: any = { domain: ['#10b981', '#ef4444'] };
 
-  // Filtros de fecha - año actual por defecto
+  // Alertas
+  alertas: Alerta[] = [];
+
+  // Periodo
   fechaInicio = '';
   fechaFin = '';
 
-  constructor(private cfdiApiService: CfdiApiService) {
-    // Configurar fechas por defecto (año actual)
+  // Datos crudos para cache
+  private datosIngresos: any = null;
+  private datosEgresos: any = null;
+
+  constructor(
+    private cfdiApiService: CfdiApiService,
+    private router: Router
+  ) {
     const now = new Date();
     const startOfYear = new Date(now.getFullYear(), 0, 1);
     this.fechaInicio = startOfYear.toISOString().split('T')[0];
     this.fechaFin = now.toISOString().split('T')[0];
-    
-    // Obtener RFC del usuario
-    this.userRfc = this.getUserRfc();
   }
 
   async ngOnInit() {
-    console.log('🔹 Iniciando dashboard...');
-    console.log('🔹 RFC Usuario:', this.userRfc);
-    console.log('🔹 Período:', this.fechaInicio, 'a', this.fechaFin);
-    
-    this.loadDashboardData();
+    await this.loadDashboard();
   }
 
   /**
-   * Obtiene el RFC del usuario desde localStorage
+   * Carga datos: primero intenta cache, si no, fetch
    */
-  private getUserRfc(): string {
-    try {
-      const userStr = localStorage.getItem('user');
-      if (userStr) {
-        const user = JSON.parse(userStr);
-        return user.rfc || 'DIVM801101RJ9';
+  async loadDashboard(forceRefresh = false) {
+    this.isLoading = true;
+
+    if (!forceRefresh) {
+      const cached = this.getFromCache();
+      if (cached) {
+        this.datosIngresos = cached.ingresos;
+        this.datosEgresos = cached.egresos;
+        this.buildDashboard();
+        this.isLoading = false;
+        return;
       }
+    }
+
+    await this.fetchFromApi();
+    this.isLoading = false;
+  }
+
+  /**
+   * Fetch paralelo: solo 2 llamadas
+   */
+  private async fetchFromApi() {
+    try {
+      const [ingresosRes, egresosRes] = await Promise.all([
+        firstValueFrom(this.cfdiApiService.getAnalisisCompletoIngresos(this.fechaInicio, this.fechaFin)),
+        firstValueFrom(this.cfdiApiService.getAnalisisCompletoEgresos(this.fechaInicio, this.fechaFin))
+      ]);
+
+      this.datosIngresos = ingresosRes?.success ? ingresosRes.analisis : null;
+      this.datosEgresos = egresosRes?.success ? egresosRes.analisis : null;
+
+      // Guardar en cache
+      this.saveToCache({
+        ingresos: this.datosIngresos,
+        egresos: this.datosEgresos
+      });
+
+      this.buildDashboard();
     } catch (error) {
-      console.error('Error obteniendo RFC:', error);
-    }
-    return 'DIVM801101RJ9';
-  }
-
-  /**
-   * Carga todos los datos del dashboard
-   */
-  async loadDashboardData() {
-    try {
-      this.isLoading = true;
-      console.log('📊 Cargando datos del dashboard...');
-      
-      // Cargar análisis de ingresos y egresos usando los endpoints correctos
-      await this.loadAnalisisIngresos();
-      await this.loadAnalisisEgresos();
-      
-      // Cargar top proveedores
-      await this.loadTopProveedores();
-      
-      console.log('✅ Datos del dashboard cargados');
-    } catch (error: any) {
-      console.error('❌ Error cargando datos del dashboard:', error);
-    } finally {
-      this.isLoading = false;
+      console.error('Error cargando dashboard:', error);
+      this.hasDatos = false;
     }
   }
 
   /**
-   * Carga análisis de INGRESOS
+   * Construye KPIs, grafica y alertas a partir de datos crudos
    */
-  async loadAnalisisIngresos() {
-    try {
-      console.log('💰 Cargando análisis de ingresos...');
-      const response = await firstValueFrom(
-        this.cfdiApiService.getAnalisisCompletoIngresos(this.fechaInicio, this.fechaFin)
-      );
-      
-      console.log('💰 Respuesta ingresos:', response);
-      
-      if (response && response.success && response.analisis) {
-        const resumen = response.analisis.resumenGeneral;
-        
-        // Actualizar KPI de ingresos
-        this.kpiCards[1].value = this.formatCurrency(resumen.total || 0);
-        this.kpiCards[1].change = `${resumen.totalCfdis || 0} CFDIs`;
-        
-        // Actualizar pie chart - INGRESOS
-        this.pieChartData[0].value = resumen.totalCfdis || 0;
-        
-        console.log('✅ Análisis de ingresos cargado');
-        console.log('   - Total ingresos:', resumen.total);
-        console.log('   - CFDIs ingresos:', resumen.totalCfdis);
+  private buildDashboard() {
+    if (!this.datosIngresos && !this.datosEgresos) {
+      this.hasDatos = false;
+      return;
+    }
+
+    this.hasDatos = true;
+
+    const resIngresos = this.datosIngresos?.resumenGeneral || {};
+    const resEgresos = this.datosEgresos?.resumenGeneral || {};
+    const infoFiscal = this.datosEgresos?.informacionFiscal || {};
+
+    const totalIngresos = resIngresos.total || 0;
+    const totalEgresos = resEgresos.total || 0;
+    const utilidadBruta = totalIngresos - totalEgresos;
+
+    // IVA Neto correcto: trasladado (cobrado) - acreditable (pagado)
+    const ivaTrasladado = resIngresos.ivaTotal || 0;
+    const ivaAcreditable = infoFiscal.ivaAcreditable || 0;
+    const ivaNeto = ivaTrasladado - ivaAcreditable;
+
+    // KPIs
+    this.kpiCards = [
+      {
+        title: 'Ingresos',
+        value: this.formatCurrency(totalIngresos),
+        subtitle: `${this.formatNumber(resIngresos.totalCfdis || 0)} CFDIs emitidos`,
+        icon: 'trending_up',
+        color: 'success'
+      },
+      {
+        title: 'Egresos',
+        value: this.formatCurrency(totalEgresos),
+        subtitle: `${this.formatNumber(resEgresos.totalCfdis || 0)} CFDIs recibidos`,
+        icon: 'trending_down',
+        color: 'danger'
+      },
+      {
+        title: 'Utilidad Bruta',
+        value: this.formatCurrency(utilidadBruta),
+        subtitle: utilidadBruta >= 0 ? 'Ingresos > Egresos' : 'Egresos > Ingresos',
+        icon: utilidadBruta >= 0 ? 'account_balance' : 'warning',
+        color: utilidadBruta >= 0 ? 'primary' : 'danger'
+      },
+      {
+        title: 'IVA Neto',
+        value: this.formatCurrency(Math.abs(ivaNeto)),
+        subtitle: ivaNeto > 0 ? 'Por pagar al SAT' : ivaNeto < 0 ? 'A favor' : 'Saldo cero',
+        icon: ivaNeto > 0 ? 'payments' : 'savings',
+        color: ivaNeto > 0 ? 'danger' : 'info'
       }
-    } catch (error) {
-      console.error('❌ Error cargando análisis de ingresos:', error);
-    }
+    ];
+
+    // Grafica mensual comparativa
+    this.buildChartData();
+
+    // Alertas accionables
+    this.buildAlertas(resIngresos, resEgresos);
   }
 
   /**
-   * Carga análisis de EGRESOS
+   * Construye datos para grafica de barras agrupadas Ingresos vs Egresos por mes
    */
-  async loadAnalisisEgresos() {
+  private buildChartData() {
+    const temporalIngresos = this.datosIngresos?.analisisTemporal || [];
+    const temporalEgresos = this.datosEgresos?.analisisTemporal || [];
+
+    // Obtener todos los periodos unicos
+    const periodosSet = new Set<string>();
+    temporalIngresos.forEach((t: any) => periodosSet.add(t.periodo));
+    temporalEgresos.forEach((t: any) => periodosSet.add(t.periodo));
+
+    const periodos = Array.from(periodosSet).sort();
+
+    // Construir series para ngx-charts bar-vertical-2d
+    this.chartData = periodos.map(periodo => {
+      const ing = temporalIngresos.find((t: any) => t.periodo === periodo);
+      const egr = temporalEgresos.find((t: any) => t.periodo === periodo);
+
+      return {
+        name: this.formatPeriodo(periodo),
+        series: [
+          { name: 'Ingresos', value: ing?.total || 0 },
+          { name: 'Egresos', value: egr?.total || 0 }
+        ]
+      };
+    });
+  }
+
+  /**
+   * Genera alertas accionables
+   */
+  private buildAlertas(resIngresos: any, resEgresos: any) {
+    this.alertas = [];
+
+    // CFDIs cancelados
+    const canceladosIng = resIngresos.cfdisCancelados || 0;
+    const canceladosEgr = resEgresos.cfdisCancelados || 0;
+    const totalCancelados = canceladosIng + canceladosEgr;
+
+    if (totalCancelados > 0) {
+      this.alertas.push({
+        tipo: 'warning',
+        icono: 'cancel',
+        titulo: `${totalCancelados} CFDI${totalCancelados > 1 ? 's' : ''} cancelado${totalCancelados > 1 ? 's' : ''}`,
+        detalle: `${canceladosIng} de ingresos, ${canceladosEgr} de egresos`,
+        ruta: undefined
+      });
+    }
+
+    // Monto cancelado significativo
+    const montoCancelado = resIngresos.montoCancelados || 0;
+    if (montoCancelado > 0) {
+      this.alertas.push({
+        tipo: 'danger',
+        icono: 'money_off',
+        titulo: `${this.formatCurrency(montoCancelado)} en ingresos cancelados`,
+        detalle: 'Revisa los detalles en el modulo de Ingresos',
+        ruta: '/ingresos'
+      });
+    }
+
+    // Proveedores nuevos
+    const provNuevos = this.datosEgresos?.proveedoresNuevos || [];
+    if (provNuevos.length > 0) {
+      this.alertas.push({
+        tipo: 'info',
+        icono: 'person_add',
+        titulo: `${provNuevos.length} proveedor${provNuevos.length > 1 ? 'es' : ''} nuevo${provNuevos.length > 1 ? 's' : ''}`,
+        detalle: 'Detectados en el periodo actual',
+        ruta: '/egresos'
+      });
+    }
+
+    // Porcentaje de vigentes bajo
+    const pctVigentes = resIngresos.porcentajeVigentes || 100;
+    if (pctVigentes < 90 && resIngresos.totalCfdis > 0) {
+      this.alertas.push({
+        tipo: 'warning',
+        icono: 'error_outline',
+        titulo: `Solo ${this.formatPercentage(pctVigentes)} de CFDIs vigentes`,
+        detalle: 'El porcentaje de cancelacion es alto',
+        ruta: '/ingresos'
+      });
+    }
+  }
+
+  // ==========================================
+  // CACHE
+  // ==========================================
+
+  private getFromCache(): any | null {
     try {
-      console.log('💸 Cargando análisis de egresos...');
-      const response = await firstValueFrom(
-        this.cfdiApiService.getAnalisisCompletoEgresos(this.fechaInicio, this.fechaFin)
-      );
-      
-      console.log('💸 Respuesta egresos:', response);
-      
-      if (response && response.success && response.analisis) {
-        const resumen = response.analisis.resumenGeneral;
-        const infoFiscal = response.analisis.informacionFiscal;
-        
-        // Actualizar KPI de egresos
-        this.kpiCards[2].value = this.formatCurrency(resumen.total || 0);
-        this.kpiCards[2].change = `${resumen.totalCfdis || 0} CFDIs`;
-        
-        // Actualizar pie chart - EGRESOS
-        this.pieChartData[1].value = resumen.totalCfdis || 0;
-        
-        // Calcular IVA Neto
-        // IVA Acreditable (de egresos) - IVA Trasladado (de ingresos)
-        const ivaAcreditable = infoFiscal?.ivaAcreditable || 0;
-        const ivaTrasladadoIngresos = parseFloat(this.kpiCards[1].value.replace(/[^0-9.-]+/g, '')) * 0.16 || 0;
-        
-        const ivaNeto = ivaAcreditable - ivaTrasladadoIngresos;
-        this.kpiCards[3].value = this.formatCurrency(Math.abs(ivaNeto));
-        this.kpiCards[3].isPositive = ivaNeto < 0; // Negativo es a favor
-        this.kpiCards[3].change = ivaNeto < 0 ? 'A favor' : 'Por pagar';
-        
-        // Actualizar KPI de XMLs procesados (total de ambos)
-        const totalCfdis = (this.pieChartData[0].value || 0) + (this.pieChartData[1].value || 0);
-        this.kpiCards[0].value = totalCfdis.toString();
-        
-        console.log('✅ Análisis de egresos cargado');
-        console.log('   - Total egresos:', resumen.total);
-        console.log('   - CFDIs egresos:', resumen.totalCfdis);
-        console.log('   - IVA Acreditable:', ivaAcreditable);
-        console.log('   - IVA Neto:', ivaNeto);
+      const raw = localStorage.getItem(CACHE_KEY);
+      if (!raw) return null;
+
+      const { data, timestamp, periodo } = JSON.parse(raw);
+
+      // Validar TTL
+      if (Date.now() - timestamp > CACHE_TTL) return null;
+
+      // Validar que el periodo no cambio
+      if (periodo?.fechaInicio !== this.fechaInicio || periodo?.fechaFin !== this.fechaFin) {
+        return null;
       }
-    } catch (error) {
-      console.error('❌ Error cargando análisis de egresos:', error);
+
+      return data;
+    } catch {
+      return null;
     }
   }
 
-  /**
-   * Carga top proveedores desde el análisis de egresos
-   */
-  async loadTopProveedores() {
+  private saveToCache(data: any) {
     try {
-      console.log('🏆 Cargando top proveedores...');
-      const response = await firstValueFrom(
-        this.cfdiApiService.getAnalisisCompletoEgresos(this.fechaInicio, this.fechaFin)
-      );
-      
-      if (response && response.success && response.analisis) {
-        const topProveedoresPorMonto = response.analisis.topProveedoresPorMonto || [];
-        
-        // Transformar datos para la tabla
-        this.topProveedores = topProveedoresPorMonto.map((proveedor: any) => ({
-          rfc: proveedor.rfc,
-          nombre: proveedor.nombre,
-          cantidad_facturas: proveedor.cantidad,
-          total_gastado: proveedor.totalMonto
-        }));
-        
-        console.log('✅ Top proveedores cargados:', this.topProveedores.length);
-      }
-    } catch (error) {
-      console.error('❌ Error cargando top proveedores:', error);
+      localStorage.setItem(CACHE_KEY, JSON.stringify({
+        data,
+        timestamp: Date.now(),
+        periodo: { fechaInicio: this.fechaInicio, fechaFin: this.fechaFin }
+      }));
+    } catch (e) {
+      console.warn('No se pudo guardar cache del dashboard:', e);
     }
   }
 
-  /**
-   * Procesa todos los XMLs importados
-   */
-  async procesarXmls() {
-    try {
-      this.isProcessing = true;
-      console.log('⚙️ Procesando XMLs...');
-      
-      const response = await firstValueFrom(this.cfdiApiService.procesarTodosLosXmls());
-      
-      console.log('⚙️ Respuesta procesamiento:', response);
-      
-      if (response && response.success) {
-        console.log('✅ XMLs procesados exitosamente:', response.resultado);
-        alert(`XMLs procesados exitosamente!\n\nTotal: ${response.resultado.totalProcesados}\nExitosos: ${response.resultado.exitosos}\nErrores: ${response.resultado.errores}`);
-        
-        // Recargar datos después del procesamiento
-        await this.loadDashboardData();
-      }
-    } catch (error) {
-      console.error('❌ Error procesando XMLs:', error);
-      alert('Error al procesar XMLs. Revisa la consola para más detalles.');
-    } finally {
-      this.isProcessing = false;
-    }
+  // ==========================================
+  // ACCIONES
+  // ==========================================
+
+  async onRefresh() {
+    await this.loadDashboard(true);
   }
 
-  /**
-   * Importa nuevos XMLs
-   */
-  async importarXmls() {
-    // Aquí abrir dialog para seleccionar carpeta
-    // Por ahora usar ruta fija
-    const rutaBase = "C:\\Users\\Mario\\OneDrive\\Documentos\\LizBetXML\\DIVM801101RJ9";
-    
-    try {
-      console.log('📥 Importando XMLs desde:', rutaBase);
-      
-      const response = await firstValueFrom(
-        this.cfdiApiService.importarEstructuraCompleta(rutaBase)
-      );
-      
-      console.log('📥 Respuesta importación:', response);
-      
-      if (response && response.success) {
-        console.log('✅ XMLs importados exitosamente:', response.resultado);
-        alert(`XMLs importados exitosamente!\n\nTotal: ${response.resultado.totalProcesados}\nExitosos: ${response.resultado.exitosos}\nErrores: ${response.resultado.errores}`);
-        
-        await this.loadDashboardData();
-      }
-    } catch (error) {
-      console.error('❌ Error importando XMLs:', error);
-      alert('Error al importar XMLs. Revisa la consola para más detalles.');
-    }
-  }
-
-  /**
-   * Actualiza el período de análisis
-   */
   async onFechaChange() {
-    console.log('📅 Cambiando fechas:', this.fechaInicio, 'a', this.fechaFin);
-    await this.loadDashboardData();
+    await this.loadDashboard(true);
   }
 
-  /**
-   * Formatea números como moneda
-   */
-  public formatCurrency(amount: number): string {
+  navigateTo(ruta: string | undefined) {
+    if (ruta) {
+      this.router.navigate([ruta]);
+    }
+  }
+
+  // ==========================================
+  // FORMATEO
+  // ==========================================
+
+  formatCurrency(amount: number): string {
     return new Intl.NumberFormat('es-MX', {
       style: 'currency',
       currency: 'MXN',
-      minimumFractionDigits: 2,
-      maximumFractionDigits: 2
+      minimumFractionDigits: 0,
+      maximumFractionDigits: 0
     }).format(amount);
   }
 
-  /**
-   * Formatea números
-   */
-  public formatNumber(num: number): string {
+  formatNumber(num: number): string {
     return new Intl.NumberFormat('es-MX').format(num);
+  }
+
+  formatPercentage(value: number): string {
+    return `${value.toFixed(1)}%`;
+  }
+
+  formatPeriodo(periodo: string): string {
+    if (!periodo) return '';
+    const meses: Record<string, string> = {
+      '01': 'Ene', '02': 'Feb', '03': 'Mar', '04': 'Abr',
+      '05': 'May', '06': 'Jun', '07': 'Jul', '08': 'Ago',
+      '09': 'Sep', '10': 'Oct', '11': 'Nov', '12': 'Dic'
+    };
+    const parts = periodo.split('-');
+    if (parts.length === 2) {
+      return `${meses[parts[1]] || parts[1]} ${parts[0]}`;
+    }
+    return periodo;
   }
 }
