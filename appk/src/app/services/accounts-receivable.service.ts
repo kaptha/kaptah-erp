@@ -1,4 +1,4 @@
-﻿import { Injectable } from '@angular/core';
+import { Injectable } from '@angular/core';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Observable, throwError, from } from 'rxjs';
 import { tap, catchError, switchMap, map } from 'rxjs/operators';
@@ -109,7 +109,7 @@ export class AccountsReceivableService {
     // Validar campos requeridos con verificaciones correctas
     const missingFields: string[] = [];
     
-    if (!data.customerId || data.customerId === 0) {
+    if (data.customerId === undefined || data.customerId === null) {
       missingFields.push('customerId');
     }
     if (!data.customerName || data.customerName.trim() === '') {
@@ -134,7 +134,7 @@ export class AccountsReceivableService {
     if (missingFields.length > 0) {
       console.error('Campos requeridos faltantes:', missingFields);
       console.error('Datos recibidos:', data);
-      return throwError(`Campos requeridos faltantes: ${missingFields.join(', ')}`);
+      return throwError(() => new Error(`Campos requeridos faltantes: ${missingFields.join(', ')}`);
     }
 
     return this.getHeaders().pipe(

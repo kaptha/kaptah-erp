@@ -504,15 +504,19 @@ onSubmit() {
             
             // ✅ MEJOR MANEJO DE ERRORES
             let errorMessage = 'Error desconocido';
-            if (error.error && error.error.message) {
-              if (Array.isArray(error.error.message)) {
-                errorMessage = error.error.message.join(', ');
-              } else {
-                errorMessage = error.error.message;
-              }
-            } else if (error.message) {
-              errorMessage = error.message;
-            }
+if (typeof error === 'string') {
+  errorMessage = error;
+} else if (error instanceof Error) {
+  errorMessage = error.message;
+} else if (error.error && error.error.message) {
+  if (Array.isArray(error.error.message)) {
+    errorMessage = error.error.message.join(', ');
+  } else {
+    errorMessage = error.error.message;
+  }
+} else if (error.message) {
+  errorMessage = error.message;
+}
             
             Sweetalert.fnc('error', 'Error al crear: ' + errorMessage, null);
           }
