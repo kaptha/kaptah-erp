@@ -4,12 +4,13 @@ import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
 
 @Component({
     selector: 'app-send-delivery-dialog',
-    template: `
-    <h2 mat-dialog-title>Enviar Guía de Remisión por Email</h2>
+  template: `
+    <h2 mat-dialog-title class="dialog-title">Enviar Guía de Remisión</h2>
     
-    <mat-dialog-content>
-      <form [formGroup]="emailForm">
-        <mat-form-field appearance="outline" style="width: 100%; margin-bottom: 16px;">
+    <mat-dialog-content class="responsive-container">
+      <form [formGroup]="emailForm" class="form-layout">
+        
+        <mat-form-field appearance="outline" class="full-width">
           <mat-label>Email del cliente</mat-label>
           <input matInput formControlName="recipientEmail" placeholder="cliente@ejemplo.com" type="email">
           <mat-icon matSuffix>email</mat-icon>
@@ -21,43 +22,146 @@ import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
           </mat-error>
         </mat-form-field>
 
-        <mat-form-field appearance="outline" style="width: 100%; margin-bottom: 16px;">
+        <mat-form-field appearance="outline" class="full-width">
           <mat-label>Mensaje personalizado (opcional)</mat-label>
           <textarea matInput formControlName="customMessage" rows="3" 
-            placeholder="Mensaje adicional para el cliente"></textarea>
+            placeholder="Instrucciones de entrega..."></textarea>
         </mat-form-field>
 
-        <div class="email-preview" style="margin-top: 16px; padding: 12px; background: #f5f5f5; border-radius: 4px;">
-          <p style="margin: 0 0 8px 0; font-weight: 500;">Vista previa:</p>
-          <p style="margin: 0; font-size: 14px; color: #666;">
-            <strong>Para:</strong> {{emailForm.get('recipientEmail')?.value || 'No especificado'}}<br>
-            <strong>Guía:</strong> #{{data.deliveryNoteId.substring(0, 8)}}<br>
-            <strong>Orden:</strong> #{{data.salesOrderId.substring(0, 8)}}<br>
-            <strong>Fecha:</strong> {{data.deliveryDate | date:'dd/MM/yyyy'}}
-          </p>
+        <div class="preview-box">
+          <div class="preview-header">
+            <mat-icon>visibility</mat-icon>
+            <span>Vista previa del envío</span>
+          </div>
+          
+          <div class="preview-grid">
+            <div class="grid-item">
+              <span class="label">Destinatario:</span>
+              <span class="value">{{emailForm.get('recipientEmail')?.value || '---'}}</span>
+            </div>
+            <div class="grid-item">
+              <span class="label">Guía:</span>
+              <span class="value">#{{data.deliveryNoteId.substring(0, 8)}}</span>
+            </div>
+            <div class="grid-item">
+              <span class="label">Orden:</span>
+              <span class="value">#{{data.salesOrderId.substring(0, 8)}}</span>
+            </div>
+            <div class="grid-item">
+              <span class="label">Fecha Entrega:</span>
+              <span class="value">{{data.deliveryDate | date:'dd/MM/yyyy'}}</span>
+            </div>
+          </div>
         </div>
       </form>
     </mat-dialog-content>
 
-    <mat-dialog-actions align="end">
-      <button mat-button (click)="onCancel()">Cancelar</button>
+    <mat-dialog-actions align="end" class="actions-group">
+      <button mat-button (click)="onCancel()" [disabled]="sending">Cancelar</button>
       <button mat-raised-button color="primary" 
         (click)="onSend()" 
-        [disabled]="!emailForm.valid || sending">
-        <mat-icon *ngIf="!sending">send</mat-icon>
-        <mat-spinner *ngIf="sending" diameter="20" style="display: inline-block; margin-right: 8px;"></mat-spinner>
-        {{sending ? 'Enviando...' : 'Enviar Guía'}}
+        [disabled]="!emailForm.valid || sending"
+        class="send-btn">
+        <mat-icon *ngIf="!sending">local_shipping</mat-icon>
+        <mat-spinner *ngIf="sending" diameter="20"></mat-spinner>
+        <span>{{sending ? 'Enviando...' : 'Enviar Guía'}}</span>
       </button>
     </mat-dialog-actions>
   `,
-    styles: [`
-    mat-dialog-content {
-      min-width: 400px;
+  styles: [`
+    .responsive-container {
+      min-width: 280px;
       max-width: 500px;
     }
 
-    .email-preview {
+    .form-layout {
+      display: flex;
+      flex-direction: column;
+      padding-top: 12px;
+    }
+
+    .full-width {
+      width: 100%;
+      margin-bottom: 4px;
+    }
+
+    /* Caja de Vista Previa mejorada */
+    .preview-box {
+      background: #fafafa;
+      border: 1px dashed #ccc;
+      border-radius: 8px;
+      padding: 16px;
+      margin-top: 8px;
+    }
+
+    .preview-header {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 12px;
+      color: #555;
+      font-weight: 500;
+      font-size: 0.9rem;
+    }
+
+    .preview-header mat-icon {
+      font-size: 18px;
+      width: 18px;
+      height: 18px;
+    }
+
+    .preview-grid {
+      display: grid;
+      grid-template-columns: 1fr; /* Una columna en móvil */
+      gap: 10px;
+    }
+
+    .grid-item {
+      display: flex;
+      flex-direction: column;
+    }
+
+    .label {
+      font-size: 11px;
+      color: #888;
+      text-transform: uppercase;
+      font-weight: 600;
+    }
+
+    .value {
       font-size: 13px;
+      color: #333;
+      word-break: break-all;
+    }
+
+    mat-spinner {
+      display: inline-block;
+      margin-right: 8px;
+    }
+
+    /* Media Queries */
+    @media (min-width: 480px) {
+      .preview-grid {
+        grid-template-columns: 1fr 1fr; /* Dos columnas en tablets/PC */
+      }
+      .responsive-container {
+        width: 480px;
+      }
+    }
+
+    @media (max-width: 400px) {
+      .actions-group {
+        flex-direction: column-reverse;
+        padding: 16px !important;
+        gap: 8px;
+      }
+      .actions-group button {
+        width: 100%;
+        margin: 0 !important;
+      }
+      .dialog-title {
+        font-size: 1.1rem;
+      }
     }
   `],
     standalone: false
