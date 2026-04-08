@@ -41,7 +41,8 @@ export class CotizacionesController {
   @ApiResponse({ status: HttpStatus.CREATED, description: 'Cotización creada exitosamente con folio generado' })
   async create(
     @Body() createCotizacionDto: CreateCotizacionDto,
-    @CurrentUser() user?: any
+    @CurrentUser() user?: any,
+    @Query('cuentaUid') cuentaUid?: string
   ) {
     this.logger.log(`📬 POST /cotizaciones - Crear nueva cotización`);
     

@@ -52,11 +52,13 @@ export class SaleNotesController {
 @Post()
 @ApiOperation({ summary: 'Crear una nota de venta' })
 @ApiResponse({ status: 201, description: 'Nota creada exitosamente con folio generado' })
-create(@Body() createSaleNoteDto: CreateSaleNoteDto, @CurrentUser() user: any) {
-  console.log('📥 BODY RECIBIDO:', JSON.stringify(createSaleNoteDto, null, 2));
-  console.log('📥 ITEMS:', createSaleNoteDto.items);
-  return this.saleNotesService.create(createSaleNoteDto, user.uid);
-}
+create(@Body() createSaleNoteDto: CreateSaleNoteDto, @CurrentUser() user: any, @Query('cuentaUid') cuentaUid?: string) {
+    const uid = cuentaUid || user.uid;
+    console.log('📥 BODY RECIBIDO:', JSON.stringify(createSaleNoteDto, null, 2));
+    console.log('📥 ITEMS:', createSaleNoteDto.items);
+    console.log('📥 CuentaUid:', uid);
+    return this.saleNotesService.create(createSaleNoteDto, uid);
+  }
 
   @Get()
   @ApiOperation({ summary: 'Obtener todas las notas de venta' })

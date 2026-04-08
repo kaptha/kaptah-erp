@@ -56,8 +56,8 @@ export class SalesOrdersController {
   @ApiResponse({ status: HttpStatus.CREATED, description: 'Orden creada exitosamente con folio generado', type: SalesOrder })
   @ApiResponse({ status: HttpStatus.BAD_REQUEST, description: 'Datos inválidos' })
   @ApiResponse({ status: HttpStatus.UNAUTHORIZED, description: 'No autorizado' })
-  create(@Body() createSalesOrderDto: CreateSalesOrderDto, @CurrentUser() user: any) {
-    return this.salesOrdersService.create(createSalesOrderDto, user.uid);
+  create(@Body() createSalesOrderDto: CreateSalesOrderDto, @CurrentUser() user: any, @Query('cuentaUid') cuentaUid?: string) {
+    return this.salesOrdersService.create(createSalesOrderDto, cuentaUid || user.uid);
   }
 
   @Get()

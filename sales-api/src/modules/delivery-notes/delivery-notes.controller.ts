@@ -61,9 +61,10 @@ export class DeliveryNotesController {
   @ApiResponse({ status: HttpStatus.UNAUTHORIZED, description: 'No autorizado' })
   create(
     @Body() createDeliveryNoteDto: CreateDeliveryNoteDto,
-    @CurrentUser() user: any
+    @CurrentUser() user: any,
+    @Query('cuentaUid') cuentaUid?: string
   ) {
-    return this.deliveryNotesService.create(createDeliveryNoteDto, user.uid);
+    return this.deliveryNotesService.create(createDeliveryNoteDto, cuentaUid || user.uid);
   }
 
   @Get()
