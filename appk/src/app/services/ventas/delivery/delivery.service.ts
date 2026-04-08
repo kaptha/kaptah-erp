@@ -47,11 +47,13 @@ export class DeliveryService {
   }
 
   create(delivery: Partial<DeliveryNote>): Observable<DeliveryNote> {
+    const cuentaUid = localStorage.getItem('activeCuentaUid') || '';
+    const url = cuentaUid ? `${this.apiUrl}?cuentaUid=${cuentaUid}` : this.apiUrl;
     return this.getHeaders().pipe(
       switchMap((headers: HttpHeaders) => {
-        console.log('ðŸš€ Enviando POST a:', this.apiUrl);
-        console.log('ðŸ“¦ Payload:', delivery);
-        return this.http.post<DeliveryNote>(this.apiUrl, delivery, { headers });
+        console.log('🚀 Enviando POST a:', url);
+        console.log('📦 Payload:', delivery);
+        return this.http.post<DeliveryNote>(url, delivery, { headers });
       })
     );
   }

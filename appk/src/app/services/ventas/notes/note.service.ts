@@ -46,9 +46,11 @@ export class NoteService {
   }
 
   create(note: Partial<SaleNote>): Observable<SaleNote> {
+    const cuentaUid = localStorage.getItem('activeCuentaUid') || '';
+    const url = cuentaUid ? `${this.apiUrl}?cuentaUid=${cuentaUid}` : this.apiUrl;
     return this.getHeaders().pipe(
       switchMap((headers: HttpHeaders) => {
-        return this.http.post<SaleNote>(this.apiUrl, note, { headers });
+        return this.http.post<SaleNote>(url, note, { headers });
       })
     );
   }

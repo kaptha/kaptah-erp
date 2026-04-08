@@ -50,9 +50,11 @@ export class SalesOrdersService {
   }
 
   create(order: Partial<SalesOrder>): Observable<SalesOrder> {
+    const cuentaUid = localStorage.getItem('activeCuentaUid') || '';
+    const url = cuentaUid ? `${this.apiUrl}?cuentaUid=${cuentaUid}` : this.apiUrl;
     return this.getHeaders().pipe(
       switchMap((headers: HttpHeaders) => {
-        return this.http.post<SalesOrder>(this.apiUrl, order, { headers });
+        return this.http.post<SalesOrder>(url, order, { headers });
       })
     );
   }
