@@ -89,7 +89,7 @@ export class AccountsReceivableService {
       map((response: AuthResponse) => {
         return new HttpHeaders({
           'Content-Type': 'application/json',
-          'Authorization': Bearer ${response.access_token}
+          'Authorization': `Bearer ${response.access_token}`
         });
       })
     );
@@ -97,9 +97,9 @@ export class AccountsReceivableService {
 
   create(data: CreateAccountReceivableDto): Observable<AccountReceivable> {
     console.log('Enviando datos al backend:', data);
-    
+
     const missingFields: string[] = [];
-    
+
     if (data.customerId === undefined || data.customerId === null) {
       missingFields.push('customerId');
     }
@@ -121,11 +121,11 @@ export class AccountsReceivableService {
     if (!data.concept || data.concept.trim() === '') {
       missingFields.push('concept');
     }
-    
+
     if (missingFields.length > 0) {
       console.error('Campos requeridos faltantes:', missingFields);
       console.error('Datos recibidos:', data);
-      return throwError(() => new Error(Campos requeridos faltantes: ${missingFields.join(', ')}));
+      return throwError(() => new Error('Campos requeridos faltantes: ' + missingFields.join(', ')));
     }
 
     return this.getHeaders().pipe(
@@ -151,7 +151,7 @@ export class AccountsReceivableService {
   getById(id: string): Observable<AccountReceivable> {
     return this.getHeaders().pipe(
       switchMap((headers: HttpHeaders) => {
-        return this.http.get<AccountReceivable>(${this.apiUrl}/${id}, { headers });
+        return this.http.get<AccountReceivable>(`${this.apiUrl}/${id}`, { headers });
       })
     );
   }
@@ -159,7 +159,7 @@ export class AccountsReceivableService {
   update(id: string, data: UpdateAccountReceivableDto): Observable<AccountReceivable> {
     return this.getHeaders().pipe(
       switchMap((headers: HttpHeaders) => {
-        return this.http.put<AccountReceivable>(${this.apiUrl}/${id}, data, { headers });
+        return this.http.put<AccountReceivable>(`${this.apiUrl}/${id}`, data, { headers });
       })
     );
   }
@@ -167,7 +167,7 @@ export class AccountsReceivableService {
   delete(id: string): Observable<void> {
     return this.getHeaders().pipe(
       switchMap((headers: HttpHeaders) => {
-        return this.http.delete<void>(${this.apiUrl}/${id}, { headers });
+        return this.http.delete<void>(`${this.apiUrl}/${id}`, { headers });
       })
     );
   }
@@ -175,7 +175,7 @@ export class AccountsReceivableService {
   registerPayment(id: string, paymentData: PaymentData): Observable<AccountReceivable> {
     return this.getHeaders().pipe(
       switchMap((headers: HttpHeaders) => {
-        return this.http.post<AccountReceivable>(${this.apiUrl}/${id}/payments, paymentData, { headers });
+        return this.http.post<AccountReceivable>(`${this.apiUrl}/${id}/payments`, paymentData, { headers });
       })
     );
   }
@@ -183,7 +183,7 @@ export class AccountsReceivableService {
   getPaymentHistory(id: string): Observable<any[]> {
     return this.getHeaders().pipe(
       switchMap((headers: HttpHeaders) => {
-        return this.http.get<any[]>(${this.apiUrl}/${id}/payments, { headers });
+        return this.http.get<any[]>(`${this.apiUrl}/${id}/payments`, { headers });
       })
     );
   }
@@ -191,7 +191,7 @@ export class AccountsReceivableService {
   getByStatus(status: 'pending' | 'partial' | 'paid' | 'cancelled'): Observable<AccountReceivable[]> {
     return this.getHeaders().pipe(
       switchMap((headers: HttpHeaders) => {
-        return this.http.get<AccountReceivable[]>(${this.apiUrl}?status=${status}, { headers });
+        return this.http.get<AccountReceivable[]>(`${this.apiUrl}?status=${status}`, { headers });
       })
     );
   }
@@ -199,7 +199,7 @@ export class AccountsReceivableService {
   getOverdue(): Observable<AccountReceivable[]> {
     return this.getHeaders().pipe(
       switchMap((headers: HttpHeaders) => {
-        return this.http.get<AccountReceivable[]>(${this.apiUrl}/overdue, { headers });
+        return this.http.get<AccountReceivable[]>(`${this.apiUrl}/overdue`, { headers });
       })
     );
   }
@@ -207,7 +207,7 @@ export class AccountsReceivableService {
   getSummary(): Observable<any> {
     return this.getHeaders().pipe(
       switchMap((headers: HttpHeaders) => {
-        return this.http.get<any>(${this.apiUrl}/summary, { headers });
+        return this.http.get<any>(`${this.apiUrl}/summary`, { headers });
       })
     );
   }
@@ -219,7 +219,7 @@ export class AccountsReceivableService {
     return this.getHeaders().pipe(
       switchMap((headers: HttpHeaders) => {
         return this.http.post<{ jobId: string; logId: string; message: string }>(
-          ${this.apiUrl}/${accountId}/send-reminder,
+          `${this.apiUrl}/${accountId}/send-reminder`,
           emailData,
           { headers }
         );
@@ -236,7 +236,7 @@ export class AccountsReceivableService {
     return this.getHeaders().pipe(
       switchMap((headers: HttpHeaders) => {
         return this.http.post<{ sent: number; failed: number; results: any[] }>(
-          ${this.apiUrl}/send-overdue-reminders,
+          `${this.apiUrl}/send-overdue-reminders`,
           {},
           { headers }
         );
