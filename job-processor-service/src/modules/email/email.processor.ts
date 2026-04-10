@@ -10,7 +10,7 @@ import { ResendService } from '../providers/resend.service';
 import { TemplatesService } from '../templates/templates.service';
 import { SendDocumentDto } from './dto/send-document.dto';
 
-@Processor('email')
+@Processor('email-queue')
 export class EmailProcessor {
   private readonly logger = new Logger(EmailProcessor.name);
 
