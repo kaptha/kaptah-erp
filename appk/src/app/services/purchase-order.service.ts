@@ -171,10 +171,15 @@ private getActiveCuentaUid(): string | null {
   }
 
   create(order: CreatePurchaseOrderDto): Observable<PurchaseOrder> {
-    return this.http.post<PurchaseOrder>(this.apiUrl, order, { headers: this.getHeaders() }).pipe(
-      catchError(this.handleError)
-    );
-  }
+  const cuentaUid = this.getActiveCuentaUid() || localStorage.getItem('firebaseUid');
+  return this.http.post<PurchaseOrder>(
+    `${this.apiUrl}/firebase/${cuentaUid}`,
+    order,
+    { headers: this.getHeaders() }
+  ).pipe(
+    catchError(this.handleError)
+  );
+}
 
   update(id: number, order: Partial<CreatePurchaseOrderDto>): Observable<PurchaseOrder> {
     return this.http.patch<PurchaseOrder>(`${this.apiUrl}/${id}`, order, { headers: this.getHeaders() }).pipe(
