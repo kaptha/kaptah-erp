@@ -35,18 +35,17 @@ export class PdfGeneratorService {
 
       // ⭐ CONFIGURACIÓN MEJORADA DEL PDF
       const pdfBuffer = await page.pdf({
-        format: 'A4',
+        format: 'Letter',         // Cambiado de A4 a Letter (8.5" x 11")
         printBackground: true,
-        preferCSSPageSize: false, // ⭐ Usar el tamaño A4 forzado
+        preferCSSPageSize: true,  // Permitimos que el CSS controle el layout
         displayHeaderFooter: false,
         margin: {
-          top: '5mm',    // ⭐ Reducir márgenes
-          right: '5mm',
-          bottom: '5mm',
-          left: '5mm'
+          top: '0px',             // Quitamos márgenes de Puppeteer porque 
+          right: '0px',           // el template ya tiene sus propios paddings
+          bottom: '0px',
+          left: '0px'
         },
-        // ⭐ CRÍTICO: Intentar que todo quepa en una página
-        scale: 0.70 // ⭐ Escalar ligeramente para que quepa mejor
+        scale: 1                  // Aumentado de 0.70 a 1 para tamaño real
       });
 
       this.logger.log('✅ PDF generado correctamente');
