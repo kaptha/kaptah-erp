@@ -158,10 +158,6 @@ export class CobrosComponent implements OnInit {
       // ✅ Aplicar filtros
       this.applyAllFilters();
       
-      // Mostrar mensaje de éxito solo si hay datos
-      if (cobrosDisplay.length > 0) {
-        Sweetalert.fnc('success', `${cobrosDisplay.length} cuentas por cobrar cargadas correctamente`, null);
-      }
     });
   }
 

@@ -168,9 +168,6 @@ export class PagosComponent implements OnInit {
       // ✅ Aplicar filtros
       this.applyAllFilters();
       
-      if (pagosDisplay.length > 0) {
-        Sweetalert.fnc('success', `${pagosDisplay.length} cuentas por pagar cargadas correctamente`, null);
-      }
     });
   }
 
