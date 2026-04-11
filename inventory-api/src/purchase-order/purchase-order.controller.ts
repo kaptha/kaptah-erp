@@ -300,6 +300,20 @@ async findByFirebaseUid(@Param('firebaseUid') firebaseUid: string) {
       req.user.firebaseUid,
     );
   }
+@Post('firebase/:firebaseUid/:id/send-email')
+@ApiOperation({ summary: 'Enviar orden de compra por email (via Firebase UID)' })
+async sendByEmailFirebase(
+  @Param('id', ParseIntPipe) id: number,
+  @Param('firebaseUid') firebaseUid: string,
+  @Body() emailData: SendPurchaseOrderEmailDto,
+) {
+  return this.purchaseOrderService.sendPurchaseOrderByEmail(
+    id,
+    emailData.recipientEmail,
+    emailData.customMessage,
+    firebaseUid,
+  );
+}
 
   @Post(':id/send-email')
   @ApiOperation({ summary: 'Enviar orden de compra por email al proveedor' })
