@@ -886,6 +886,10 @@ export class PurchaseOrderService {
     }
 
     try {
+const userDebug = await this.usersService.findByFirebaseUid(finalUserId);
+console.log('🔍 DEBUG - firebaseUid:', finalUserId);
+console.log('🔍 DEBUG - user.ID resuelto:', userDebug?.ID);
+console.log('🔍 DEBUG - buscando orden con id:', id, 'y userId:', userDebug?.ID);
       // Obtener la orden de compra con sus items
       const purchaseOrder = await this.findOne(id, finalUserId);
       console.log('✅ Orden de compra encontrada:', purchaseOrder.id);
