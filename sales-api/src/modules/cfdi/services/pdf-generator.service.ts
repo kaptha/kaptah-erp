@@ -32,18 +32,18 @@ export class PdfGeneratorService {
       });
 
       const pdfBuffer = await page.pdf({
-        format: 'Letter',
-        printBackground: true,
-        preferCSSPageSize: false,
-        displayHeaderFooter: false,
-        margin: {
-          top: '10px',
-          right: '10px',
-          bottom: '10px',
-          left: '10px',
-        },
-        scale: 1,
-      });
+  format: 'Letter',
+  printBackground: true,
+  preferCSSPageSize: false,
+  displayHeaderFooter: false,
+  margin: {
+    top: '5px',
+    right: '5px',
+    bottom: '5px',
+    left: '5px',
+  },
+  scale: 0.95,
+});
 
       this.logger.log('PDF generado correctamente');
       return Buffer.from(pdfBuffer);
