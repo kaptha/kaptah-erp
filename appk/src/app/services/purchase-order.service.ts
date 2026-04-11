@@ -226,13 +226,18 @@ private getActiveCuentaUid(): string | null {
   }
 
   sendPurchaseOrderByEmail(
-    orderId: number,
-    emailData: { recipientEmail: string; customMessage?: string }
-  ): Observable<any> {
-    return this.http.post(`${this.apiUrl}/${orderId}/send-email`, emailData, { headers: this.getHeaders() }).pipe(
-      catchError(this.handleError)
-    );
-  }
+  orderId: number,
+  emailData: { recipientEmail: string; customMessage?: string }
+): Observable<any> {
+  const cuentaUid = this.getActiveCuentaUid() || localStorage.getItem('firebaseUid');
+  return this.http.post(
+    `${this.apiUrl}/firebase/${cuentaUid}/${orderId}/send-email`,
+    emailData,
+    { headers: this.getHeaders() }
+  ).pipe(
+    catchError(this.handleError)
+  );
+}
 
   private handleError(error: any): Observable<never> {
     let errorMessage = 'Ha ocurrido un error';
