@@ -65,6 +65,15 @@ export class LoginComponent implements OnInit {
       });
       this.rememberMe = true;
     }
+   // Redirigir a reset-password si viene con mode=resetPassword
+    if (this.activatedRoute.snapshot.queryParams["mode"] === "resetPassword" &&
+        this.activatedRoute.snapshot.queryParams["oobCode"]) {
+      const oobCode = this.activatedRoute.snapshot.queryParams["oobCode"];
+      this.router.navigate(['/reset-password'], { 
+        queryParams: { mode: 'resetPassword', oobCode: oobCode } 
+      });
+      return;
+    }
     
     /*=============================================
     Verificar cuenta de correo electrónico
