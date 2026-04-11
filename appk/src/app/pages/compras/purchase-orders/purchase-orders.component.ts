@@ -128,12 +128,14 @@ export class PurchaseOrdersComponent implements OnInit {
         
         // Extraer solo el nombre del estilo (quitar sufijos)
         const estilo = designId.replace('-purchase-order', '').replace('-quote', '');
+const estilosDisponibles = ['classic', 'creativ', 'minimal', 'modern', 'professional'];
+const estiloFinal = estilosDisponibles.includes(estilo) ? estilo : 'minimal';
         
         console.log('🎨 Diseño completo:', designId);
         console.log('🎨 Estilo para template:', estilo);
         
         // Llamar al backend para obtener el PDF generado con Puppeteer
-        this.purchaseOrderService.descargarPDF(order.id!, estilo).subscribe({
+        this.purchaseOrderService.descargarPDF(order.id!, estiloFinal).subscribe({
           next: (pdfBlob: Blob) => {
             Sweetalert.fnc('close', '', null);
 
@@ -184,8 +186,10 @@ export class PurchaseOrdersComponent implements OnInit {
         
         // Extraer solo el nombre del estilo
         const estilo = designId.replace('-purchase-order', '').replace('-quote', '');
+const estilosDisponibles = ['classic', 'creativ', 'minimal', 'modern', 'professional'];
+const estiloFinal = estilosDisponibles.includes(estilo) ? estilo : 'minimal';
         
-        this.purchaseOrderService.descargarPDF(order.id!, estilo).subscribe({
+        this.purchaseOrderService.descargarPDF(order.id!, estiloFinal).subscribe({
           next: (blob) => {
             const url = window.URL.createObjectURL(blob);
             const a = document.createElement('a');
