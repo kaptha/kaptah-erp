@@ -6,12 +6,12 @@
   <title>CFDI - Comprobante Fiscal Digital</title>
   <style>
     * { margin: 0; padding: 0; box-sizing: border-box; }
-    body { font-family: 'Arial', 'Helvetica', sans-serif; background-color: #f5f0f8; color: #2c2c2c; line-height: 1.4; font-size: 12px; }
+    body { font-family: 'Arial', 'Helvetica', sans-serif; background-color: #f5f0f8; color: #2c2c2c; line-height: 1.4; font-size: 13px; }
 
     .container {
       width: 100%;
       max-width: 210mm;
-      min-height: 279mm;
+      min-height: auto;
       margin: 0 auto;
       background: #ffffff;
       position: relative;
@@ -33,7 +33,7 @@
     .content {
       position: relative;
       z-index: 1;
-      padding: 90px 40px 90px 40px;
+      padding: 70px 40px 40px 40px;
       flex: 1;
       display: flex;
       flex-direction: column;
@@ -65,15 +65,15 @@
     .company-details { text-align: right; min-width: 220px; }
 
     .company-logo {
-      width: 80px;
-      height: 80px;
+      width: 120px;
+      height: 120px;
       margin: 0 0 8px auto;
       display: flex;
       align-items: center;
       justify-content: center;
       background: #faf8fb;
       border-radius: 10px;
-      padding: 6px;
+      padding: 8px;
       border: 1px solid #e8d5f0;
     }
 
@@ -118,7 +118,7 @@
     .fiscal-item .value { color: #2c2c2c; font-weight: 500; }
 
     /* TABLE */
-    .table-section { margin: 16px 0; border-radius: 6px; overflow: hidden; flex: 1; }
+    .table-section { margin: 16px 0; border-radius: 6px; overflow: hidden; flex: 1; page-break-inside: avoid;}
 
     .tabla { width: 100%; border-collapse: collapse; }
     .tabla thead { background: #9b59b6; color: white; }
@@ -169,6 +169,7 @@
       padding: 16px;
       background: #faf8fb;
       border-radius: 6px;
+page-break-inside: avoid;
     }
 
     .qr-container { display: flex; flex-direction: column; align-items: center; min-width: 120px; }
@@ -182,16 +183,16 @@
     .cert-item .value { color: #2c2c2c; font-family: 'Courier New', monospace; }
 
     /* SELLOS */
-    .sellos-section { margin: 14px 0; }
+    .sellos-section { margin: 14px 0; page-break-inside: avoid;}
     .sello-box { background: #f3e8f8; border-left: 3px solid #9b59b6; padding: 8px 12px; margin-bottom: 8px; border-radius: 4px; }
     .sello-title { font-size: 9px; font-weight: 700; color: #7b3f9e; margin-bottom: 4px; text-transform: uppercase; }
-    .sello-content { font-size: 8px; color: #2c2c2c; font-family: 'Courier New', monospace; word-break: break-all; line-height: 1.4; max-height: 40px; overflow: hidden; }
+    .sello-content { font-size: 9px; color: #2c2c2c; font-family: 'Courier New', monospace; word-break: break-all; line-height: 1.4; max-height: none; overflow: hidden; }
 
     /* CADENA ORIGINAL */
     .cadena-section { margin: 14px 0; }
     .cadena-box { background: #f3e8f8; border-left: 3px solid #9b59b6; padding: 8px 12px; border-radius: 4px; }
     .cadena-title { font-size: 9px; font-weight: 700; color: #7b3f9e; margin-bottom: 4px; text-transform: uppercase; }
-    .cadena-content { font-size: 8px; color: #2c2c2c; font-family: 'Courier New', monospace; word-break: break-all; line-height: 1.4; max-height: 40px; overflow: hidden; }
+    .cadena-content { font-size: 9px; color: #2c2c2c; font-family: 'Courier New', monospace; word-break: break-all; line-height: 1.4; max-height: none; overflow: hidden; }
 
     /* THANK YOU MESSAGE */
     .thank-you { text-align: center; font-size: 22px; color: #7b3f9e; font-style: italic; margin: 20px 0 10px 0; }
