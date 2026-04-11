@@ -6,8 +6,7 @@ export class PdfGeneratorService {
   private readonly logger = new Logger(PdfGeneratorService.name);
 
   async generatePDF(html: string): Promise<Buffer> {
-    this.logger.log('🎨 Iniciando generación de PDF con Puppeteer...');
-
+    this.logger.log('Iniciando generacion de PDF con Puppeteer...');
     let browser;
     try {
       browser = await puppeteer.launch({
@@ -16,43 +15,82 @@ export class PdfGeneratorService {
           '--no-sandbox',
           '--disable-setuid-sandbox',
           '--disable-dev-shm-usage',
-          '--disable-gpu'
-        ]
+          '--disable-gpu',
+        ],
       });
 
       const page = await browser.newPage();
 
-      // ⭐ Configurar el tamaño de la página antes de cargar contenido
       await page.setViewport({
-        width: 1280,
-        height: 1024,
-        deviceScaleFactor: 2
+        width: 816,    // 8.5 pulgadas * 96 DPI = 816px (Letter width exacto)
+        height: 1056,  // 11 pulgadas * 96 DPI = 1056px (Letter height exacto)
+        deviceScaleFactor: 2,
       });
 
-      await page.setContent(html, {
-        waitUntil: 'networkidle0'
+      // Inyectar CSS base ANTES del contenido del template
+      const cssReset = `
+        <style>
+          @page {
+            size: Letter;
+            margin: 0;
+          }
+          html, body {
+            width: 816px;
+            margin: 0;
+            padding: 0;
+            -webkit-print-color-adjust: exact;
+            print-color-adjust: exact;
+          }
+          /* Forzar que .container (usado en todos los templates) quepa en 1 pagina */
+          .container {
+            width: 100% !important;
+            max-width: 780px !important;
+            margin: 0 auto !important;
+            padding: 15px 18px !important;
+            box-sizing: border-box !important;
+            overflow: hidden !important;
+          }
+          /* Evitar que tablas se desborden */
+          table {
+            width: 100% !important;
+            table-layout: fixed !important;
+            word-wrap: break-word !important;
+          }
+          /* Logos no deben ser gigantes */
+          img {
+            max-height: 80px !important;
+            object-fit: contain !important;
+          }
+        </style>
+      `;
+
+      // Insertar el CSS reset justo después del <head> o al inicio
+      const modifiedHtml = html.includes('<head>')
+        ? html.replace('<head>', `<head>${cssReset}`)
+        : `${cssReset}${html}`;
+
+      await page.setContent(modifiedHtml, {
+        waitUntil: 'networkidle0',
       });
 
-      // ⭐ CONFIGURACIÓN MEJORADA DEL PDF
       const pdfBuffer = await page.pdf({
-        format: 'Letter',         // Cambiado de A4 a Letter (8.5" x 11")
+        format: 'Letter',
         printBackground: true,
-        preferCSSPageSize: true,  // Permitimos que el CSS controle el layout
+        preferCSSPageSize: false,   // Puppeteer controla el tamaño, no el CSS del template
         displayHeaderFooter: false,
         margin: {
-          top: '0px',             // Quitamos márgenes de Puppeteer porque 
-          right: '0px',           // el template ya tiene sus propios paddings
-          bottom: '0px',
-          left: '0px'
+          top: '10px',
+          right: '10px',
+          bottom: '10px',
+          left: '10px',
         },
-        scale: 1                  // Aumentado de 0.70 a 1 para tamaño real
+        scale: 1,
       });
 
-      this.logger.log('✅ PDF generado correctamente');
-
+      this.logger.log('PDF generado correctamente');
       return Buffer.from(pdfBuffer);
     } catch (error) {
-      this.logger.error('❌ Error generando PDF:', error);
+      this.logger.error('Error generando PDF:', error);
       throw new Error(`Error generando PDF: ${error.message}`);
     } finally {
       if (browser) {
