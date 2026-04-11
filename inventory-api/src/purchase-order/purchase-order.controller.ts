@@ -42,7 +42,6 @@ interface RequestWithUser extends Request {
 @ApiTags('Purchase Orders')
 @ApiBearerAuth()
 @Controller('purchase-orders')
-@UseGuards(FirebaseAuthGuard)
 export class PurchaseOrderController {
   constructor(private readonly purchaseOrderService: PurchaseOrderService) {}
 
@@ -303,6 +302,7 @@ async findByFirebaseUid(@Param('firebaseUid') firebaseUid: string) {
   }
 
   @Post(':id/send-email')
+  @UseGuards(FirebaseAuthGuard)
   @ApiOperation({ summary: 'Enviar orden de compra por email al proveedor' })
   @ApiParam({ name: 'id', type: Number })
   @ApiResponse({
