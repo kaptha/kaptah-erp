@@ -6,19 +6,12 @@
   <title>CFDI - Comprobante Fiscal Digital</title>
   <style>
     * { margin: 0; padding: 0; box-sizing: border-box; }
-
-    body {
-      font-family: 'Arial', 'Helvetica', sans-serif;
-      background-color: #ffffff;
-      color: #1e293b;
-      line-height: 1.4;
-      font-size: 12px;
-    }
+    body { font-family: 'Arial', 'Helvetica', sans-serif; background-color: #ffffff; color: #1e293b; line-height: 1.3; font-size: 10px; }
 
     .container {
       width: 100%;
       max-width: 210mm;
-      min-height: 279mm;
+      height: 279mm;
       margin: 0 auto;
       background: #ffffff;
       position: relative;
@@ -28,295 +21,103 @@
     }
 
     /* DECORACION DIAGONAL SUPERIOR */
-    .diagonal-top {
-      position: absolute;
-      top: 0;
-      right: 0;
-      width: 400px;
-      height: 300px;
-      overflow: hidden;
-      z-index: 0;
-    }
-
-    .diagonal-top::before {
-      content: '';
-      position: absolute;
-      top: -50px;
-      right: -100px;
-      width: 500px;
-      height: 400px;
-      background: linear-gradient(135deg, #3b82f6 0%, #60a5fa 50%, #93c5fd 100%);
-      transform: rotate(15deg);
-      opacity: 0.15;
-    }
-
-    .diagonal-top::after {
-      content: '';
-      position: absolute;
-      top: 0;
-      right: -80px;
-      width: 450px;
-      height: 350px;
-      background: linear-gradient(135deg, #2563eb 0%, #3b82f6 100%);
-      transform: rotate(15deg);
-      opacity: 0.1;
-    }
+    .diagonal-top { position: absolute; top: 0; right: 0; width: 300px; height: 200px; overflow: hidden; z-index: 0; }
+    .diagonal-top::before { content: ''; position: absolute; top: -50px; right: -100px; width: 400px; height: 300px; background: linear-gradient(135deg, #3b82f6 0%, #60a5fa 50%, #93c5fd 100%); transform: rotate(15deg); opacity: 0.15; }
+    .diagonal-top::after { content: ''; position: absolute; top: 0; right: -80px; width: 350px; height: 250px; background: linear-gradient(135deg, #2563eb 0%, #3b82f6 100%); transform: rotate(15deg); opacity: 0.1; }
 
     /* DECORACION DIAGONAL INFERIOR */
-    .diagonal-bottom {
-      position: absolute;
-      bottom: 0;
-      right: 0;
-      width: 450px;
-      height: 350px;
-      overflow: hidden;
-      z-index: 0;
-    }
-
-    .diagonal-bottom::before {
-      content: '';
-      position: absolute;
-      bottom: -80px;
-      right: -120px;
-      width: 550px;
-      height: 450px;
-      background: linear-gradient(135deg, #1e40af 0%, #2563eb 50%, #3b82f6 100%);
-      transform: rotate(15deg);
-      opacity: 0.12;
-    }
-
-    .diagonal-bottom::after {
-      content: '';
-      position: absolute;
-      bottom: -100px;
-      right: -100px;
-      width: 500px;
-      height: 400px;
-      background: linear-gradient(135deg, #60a5fa 0%, #93c5fd 100%);
-      transform: rotate(15deg);
-      opacity: 0.08;
-    }
+    .diagonal-bottom { position: absolute; bottom: 0; right: 0; width: 350px; height: 250px; overflow: hidden; z-index: 0; }
+    .diagonal-bottom::before { content: ''; position: absolute; bottom: -80px; right: -120px; width: 450px; height: 350px; background: linear-gradient(135deg, #1e40af 0%, #2563eb 50%, #3b82f6 100%); transform: rotate(15deg); opacity: 0.12; }
+    .diagonal-bottom::after { content: ''; position: absolute; bottom: -100px; right: -100px; width: 400px; height: 300px; background: linear-gradient(135deg, #60a5fa 0%, #93c5fd 100%); transform: rotate(15deg); opacity: 0.08; }
 
     /* HEADER */
-    .header {
-      position: relative;
-      z-index: 1;
-      padding: 22px 35px;
-      display: flex;
-      align-items: center;
-      gap: 14px;
-    }
-
-    .logo-container {
-      width: 65px;
-      height: 65px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      flex-shrink: 0;
-    }
-
+    .header { position: relative; z-index: 1; padding: 15px 30px; display: flex; align-items: center; gap: 12px; }
+    .logo-container { width: 55px; height: 55px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
     .logo-container img { max-width: 100%; max-height: 100%; object-fit: contain; }
-    .company-name { font-size: 22px; font-weight: 700; color: #1e293b; letter-spacing: -0.5px; }
+    .company-name { font-size: 18px; font-weight: 700; color: #1e293b; letter-spacing: -0.5px; }
 
     /* CONTENIDO */
-    .content {
-      position: relative;
-      z-index: 1;
-      padding: 0 35px 25px 35px;
-      flex: 1;
-      display: flex;
-      flex-direction: column;
-    }
+    .content { position: relative; z-index: 1; padding: 0 30px 15px 30px; flex: 1; display: flex; flex-direction: column; }
 
     /* UUID */
-    .uuid-section {
-      background: #f8fafc;
-      border-left: 4px solid #3b82f6;
-      padding: 10px 16px;
-      margin-bottom: 18px;
-      border-radius: 4px;
-    }
-
-    .uuid-label { font-size: 10px; color: #64748b; text-transform: uppercase; font-weight: 600; margin-bottom: 3px; letter-spacing: 0.5px; }
-    .uuid-value { font-size: 12px; font-weight: 700; color: #1e293b; font-family: 'Courier New', monospace; word-break: break-all; }
+    .uuid-section { background: #f8fafc; border-left: 4px solid #3b82f6; padding: 7px 14px; margin-bottom: 10px; border-radius: 3px; }
+    .uuid-label { font-size: 8px; color: #64748b; text-transform: uppercase; font-weight: 600; margin-bottom: 2px; letter-spacing: 0.5px; }
+    .uuid-value { font-size: 10px; font-weight: 700; color: #1e293b; font-family: 'Courier New', monospace; word-break: break-all; }
 
     /* DATOS PRINCIPALES */
-    .main-info { display: flex; gap: 30px; margin-bottom: 20px; }
+    .main-info { display: flex; gap: 20px; margin-bottom: 10px; }
     .info-column { flex: 1; }
-    .info-column h2 { font-size: 13px; font-weight: 700; color: #1e293b; margin-bottom: 10px; letter-spacing: -0.3px; }
-    .info-item { margin-bottom: 5px; font-size: 11px; color: #475569; line-height: 1.6; }
+    .info-column h2 { font-size: 11px; font-weight: 700; color: #1e293b; margin-bottom: 5px; letter-spacing: -0.3px; }
+    .info-item { margin-bottom: 3px; font-size: 10px; color: #475569; line-height: 1.4; }
     .info-item strong { color: #1e293b; font-weight: 600; }
 
     /* DATOS FISCALES */
-    .fiscal-data { display: flex; gap: 30px; margin-bottom: 20px; }
+    .fiscal-data { display: flex; gap: 20px; margin-bottom: 10px; }
     .fiscal-box { flex: 1; }
-    .fiscal-box h3 { font-size: 12px; font-weight: 700; color: #1e293b; margin-bottom: 10px; padding-bottom: 4px; border-bottom: 2px solid #e2e8f0; }
-    .fiscal-row { display: flex; margin-bottom: 5px; font-size: 11px; }
-    .fiscal-row .label { font-weight: 600; color: #64748b; min-width: 130px; }
+    .fiscal-box h3 { font-size: 10px; font-weight: 700; color: #1e293b; margin-bottom: 5px; padding-bottom: 3px; border-bottom: 2px solid #e2e8f0; }
+    .fiscal-row { display: flex; margin-bottom: 3px; font-size: 9px; }
+    .fiscal-row .label { font-weight: 600; color: #64748b; min-width: 115px; }
     .fiscal-row .value { color: #1e293b; flex: 1; }
 
     /* TABLA */
-    .conceptos-section { margin: 18px 0; flex: 1; }
-
+    .conceptos-section { margin: 8px 0; }
     .tabla { width: 100%; border-collapse: collapse; }
     .tabla thead { background: #1e293b; color: white; }
-
-    .tabla thead th {
-      padding: 10px 10px;
-      text-align: left;
-      font-weight: 600;
-      font-size: 11px;
-      text-transform: uppercase;
-      letter-spacing: 0.3px;
-    }
-
+    .tabla thead th { padding: 6px 8px; text-align: left; font-weight: 600; font-size: 9px; text-transform: uppercase; letter-spacing: 0.3px; }
     .tabla thead th.col-cant { width: 8%; text-align: center; }
     .tabla thead th.col-unidad { width: 10%; text-align: center; }
     .tabla thead th.col-desc { width: 36%; }
     .tabla thead th.col-precio { width: 16%; text-align: right; }
     .tabla thead th.col-impuesto { width: 14%; text-align: right; }
     .tabla thead th.col-total { width: 16%; text-align: right; }
-
-    .tabla tbody td {
-      padding: 10px 10px;
-      border-bottom: 1px solid #e2e8f0;
-      font-size: 11px;
-      color: #475569;
-    }
-
+    .tabla tbody td { padding: 6px 8px; border-bottom: 1px solid #e2e8f0; font-size: 9px; color: #475569; }
     .tabla tbody tr:last-child td { border-bottom: 2px solid #cbd5e1; }
     .tabla tbody td.td-cant { text-align: center; font-weight: 600; color: #1e293b; }
     .tabla tbody td.td-unidad { text-align: center; }
     .tabla tbody td.td-desc { color: #1e293b; font-weight: 500; }
-    .tabla tbody td.td-precio,
-    .tabla tbody td.td-impuesto,
-    .tabla tbody td.td-total { text-align: right; font-family: 'Courier New', monospace; }
+    .tabla tbody td.td-precio, .tabla tbody td.td-impuesto, .tabla tbody td.td-total { text-align: right; font-family: 'Courier New', monospace; }
     .tabla tbody td.td-total { font-weight: 700; color: #1e293b; }
 
     /* TOTALES */
-    .totales-section { display: flex; justify-content: flex-end; margin: 16px 0; }
-    .totales-container { min-width: 280px; }
-
-    .total-row {
-      display: flex;
-      justify-content: space-between;
-      padding: 8px 0;
-      font-size: 13px;
-      border-bottom: 1px solid #e2e8f0;
-    }
-
-    .total-row.final {
-      border-bottom: none;
-      border-top: 2px solid #1e293b;
-      padding-top: 12px;
-      margin-top: 4px;
-      font-size: 16px;
-    }
-
+    .totales-section { display: flex; justify-content: flex-end; margin: 8px 0; }
+    .totales-container { min-width: 240px; }
+    .total-row { display: flex; justify-content: space-between; padding: 4px 0; font-size: 11px; border-bottom: 1px solid #e2e8f0; }
+    .total-row.final { border-bottom: none; border-top: 2px solid #1e293b; padding-top: 8px; margin-top: 3px; font-size: 13px; }
     .total-row .label { font-weight: 600; color: #64748b; }
     .total-row .value { font-weight: 700; color: #1e293b; text-align: right; font-family: 'Courier New', monospace; }
     .total-row.final .label, .total-row.final .value { color: #1e293b; font-weight: 700; }
 
     /* QR Y CERTIFICACION */
-    .qr-cert-section {
-      display: flex;
-      gap: 20px;
-      margin: 18px 0;
-      padding: 16px;
-      background: #f8fafc;
-      border-radius: 6px;
-    }
-
-    .qr-box {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      padding: 10px;
-      background: white;
-      border-radius: 6px;
-      border: 1px solid #e2e8f0;
-    }
-
-    .qr-box img { width: 105px; height: 105px; margin-bottom: 6px; }
-    .qr-title { font-size: 9px; font-weight: 600; color: #1e293b; text-align: center; margin-bottom: 2px; }
-    .qr-text { font-size: 9px; color: #64748b; text-align: center; line-height: 1.3; }
-
+    .qr-cert-section { display: flex; gap: 15px; margin: 8px 0; padding: 10px; background: #f8fafc; border-radius: 4px; }
+    .qr-box { display: flex; flex-direction: column; align-items: center; padding: 6px; background: white; border-radius: 4px; border: 1px solid #e2e8f0; }
+    .qr-box img { width: 80px; height: 80px; margin-bottom: 3px; }
+    .qr-title { font-size: 7px; font-weight: 600; color: #1e293b; text-align: center; margin-bottom: 1px; }
+    .qr-text { font-size: 7px; color: #64748b; text-align: center; line-height: 1.3; }
     .cert-box { flex: 1; }
-    .cert-box h3 { font-size: 12px; font-weight: 700; color: #1e293b; margin-bottom: 10px; }
-    .cert-item { margin-bottom: 5px; font-size: 11px; }
-    .cert-item .label { font-weight: 600; color: #64748b; display: inline-block; min-width: 150px; }
+    .cert-box h3 { font-size: 10px; font-weight: 700; color: #1e293b; margin-bottom: 5px; }
+    .cert-item { margin-bottom: 3px; font-size: 9px; }
+    .cert-item .label { font-weight: 600; color: #64748b; display: inline-block; min-width: 130px; }
     .cert-item .value { color: #1e293b; font-family: 'Courier New', monospace; }
 
     /* SELLOS */
-    .sellos-section { margin: 16px 0; }
-
-    .sello-item {
-      background: #fffbeb;
-      border-left: 3px solid #f59e0b;
-      padding: 8px 12px;
-      margin-bottom: 8px;
-      border-radius: 4px;
-    }
-
-    .sello-label { font-size: 9px; font-weight: 700; color: #92400e; margin-bottom: 4px; text-transform: uppercase; }
-
-    .sello-text {
-      font-size: 8px;
-      color: #78350f;
-      font-family: 'Courier New', monospace;
-      word-break: break-all;
-      line-height: 1.4;
-      background: rgba(255, 255, 255, 0.6);
-      padding: 5px;
-      border-radius: 3px;
-      max-height: 40px;
-      overflow: hidden;
-    }
+    .sellos-section { margin: 6px 0; }
+    .sello-item { background: #fffbeb; border-left: 3px solid #f59e0b; padding: 4px 10px; margin-bottom: 4px; border-radius: 3px; }
+    .sello-label { font-size: 7px; font-weight: 700; color: #92400e; margin-bottom: 2px; text-transform: uppercase; }
+    .sello-text { font-size: 6px; color: #78350f; font-family: 'Courier New', monospace; word-break: break-all; line-height: 1.3; background: rgba(255, 255, 255, 0.6); padding: 3px; border-radius: 2px; max-height: 20px; overflow: hidden; }
 
     /* CADENA ORIGINAL */
-    .cadena-section {
-      background: #f0fdf4;
-      border-left: 3px solid #10b981;
-      padding: 8px 12px;
-      margin: 16px 0;
-      border-radius: 4px;
-    }
-
-    .cadena-label { font-size: 9px; font-weight: 700; color: #065f46; margin-bottom: 4px; text-transform: uppercase; }
-
-    .cadena-text {
-      font-size: 8px;
-      color: #064e3b;
-      font-family: 'Courier New', monospace;
-      word-break: break-all;
-      line-height: 1.4;
-      background: rgba(255, 255, 255, 0.6);
-      padding: 5px;
-      border-radius: 3px;
-      max-height: 38px;
-      overflow: hidden;
-    }
+    .cadena-section { background: #f0fdf4; border-left: 3px solid #10b981; padding: 4px 10px; margin: 6px 0; border-radius: 3px; }
+    .cadena-label { font-size: 7px; font-weight: 700; color: #065f46; margin-bottom: 2px; text-transform: uppercase; }
+    .cadena-text { font-size: 6px; color: #064e3b; font-family: 'Courier New', monospace; word-break: break-all; line-height: 1.3; background: rgba(255, 255, 255, 0.6); padding: 3px; border-radius: 2px; max-height: 20px; overflow: hidden; }
 
     /* FOOTER */
-    .footer {
-      position: relative;
-      z-index: 1;
-      margin-top: auto;
-      padding: 12px 35px;
-      text-align: center;
-      font-size: 10px;
-      color: #64748b;
-      border-top: 1px solid #e2e8f0;
-    }
-
-    .footer p { margin: 3px 0; }
+    .footer { position: relative; z-index: 1; margin-top: auto; padding: 8px 30px; text-align: center; font-size: 8px; color: #64748b; border-top: 1px solid #e2e8f0; }
+    .footer p { margin: 1px 0; }
     .footer strong { color: #1e293b; font-weight: 600; }
 
-    /* PRINT STYLES */
     @media print {
       body { background: white; }
-      .container { width: 100%; max-width: none; min-height: 100vh; }
+      .container { width: 100%; max-width: none; }
       .diagonal-top, .diagonal-bottom { print-color-adjust: exact; -webkit-print-color-adjust: exact; }
     }
   </style>

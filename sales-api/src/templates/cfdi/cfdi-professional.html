@@ -6,19 +6,12 @@
   <title>CFDI - Professional</title>
   <style>
     * { margin: 0; padding: 0; box-sizing: border-box; }
-
-    body {
-      font-family: 'Arial', 'Helvetica', sans-serif;
-      background-color: #f5f5f5;
-      color: #333;
-      line-height: 1.4;
-      font-size: 12px;
-    }
+    body { font-family: 'Arial', 'Helvetica', sans-serif; background-color: #f5f5f5; color: #333; line-height: 1.3; font-size: 10px; }
 
     .container {
       width: 100%;
       max-width: 210mm;
-      min-height: 279mm;
+      height: 279mm;
       margin: 0 auto;
       background: #ffffff;
       position: relative;
@@ -28,310 +21,116 @@
     }
 
     /* FORMAS GEOMETRICAS DE FONDO */
-    .background-shapes {
-      position: absolute;
-      top: 0;
-      right: 0;
-      width: 100%;
-      height: 100%;
-      overflow: hidden;
-      z-index: 0;
-      pointer-events: none;
-    }
-
+    .background-shapes { position: absolute; top: 0; right: 0; width: 100%; height: 100%; overflow: hidden; z-index: 0; pointer-events: none; }
     .shape-decoration { position: absolute; opacity: 0.08; }
-    .shape-1 { width: 300px; height: 300px; background: #3a3a3a; border-radius: 50%; top: 100px; right: -150px; }
-    .shape-2 { width: 150px; height: 150px; background: #3a3a3a; transform: rotate(45deg); top: 400px; right: 50px; }
-    .shape-3 { width: 200px; height: 200px; background: #3a3a3a; border-radius: 50%; bottom: 150px; right: -80px; }
+    .shape-1 { width: 250px; height: 250px; background: #3a3a3a; border-radius: 50%; top: 80px; right: -120px; }
+    .shape-2 { width: 120px; height: 120px; background: #3a3a3a; transform: rotate(45deg); top: 350px; right: 40px; }
+    .shape-3 { width: 160px; height: 160px; background: #3a3a3a; border-radius: 50%; bottom: 100px; right: -60px; }
 
     /* HEADER OSCURO */
     .header {
       position: relative;
       z-index: 2;
       background: linear-gradient(135deg, #2d2d2d 0%, #3a3a3a 100%);
-      padding: 22px 30px;
+      padding: 14px 25px;
       color: white;
       display: flex;
       justify-content: space-between;
       align-items: center;
     }
 
-    .logo-section {
-      display: flex;
-      align-items: center;
-      gap: 14px;
-    }
-
-    .logo-container {
-      width: 65px;
-      height: 65px;
-      background: white;
-      border-radius: 8px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      padding: 6px;
-    }
-
+    .logo-section { display: flex; align-items: center; gap: 10px; }
+    .logo-container { width: 50px; height: 50px; background: white; border-radius: 6px; display: flex; align-items: center; justify-content: center; padding: 4px; }
     .logo-container img { max-width: 100%; max-height: 100%; object-fit: contain; }
-
-    .company-name {
-      font-size: 20px;
-      font-weight: 700;
-      text-transform: uppercase;
-      letter-spacing: 1px;
-    }
-
+    .company-name { font-size: 16px; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; }
     .invoice-info { text-align: right; }
-    .invoice-number { font-size: 15px; font-weight: 700; margin-bottom: 3px; }
-    .invoice-date { font-size: 12px; opacity: 0.9; }
+    .invoice-number { font-size: 12px; font-weight: 700; margin-bottom: 2px; }
+    .invoice-date { font-size: 10px; opacity: 0.9; }
 
     /* CONTENIDO */
-    .content {
-      position: relative;
-      z-index: 2;
-      padding: 24px 30px;
-      flex: 1;
-      display: flex;
-      flex-direction: column;
-    }
+    .content { position: relative; z-index: 2; padding: 14px 25px; flex: 1; display: flex; flex-direction: column; }
 
-    /* UUID DESTACADO */
-    .uuid-banner {
-      background: #f8f9fa;
-      border-left: 4px solid #2d2d2d;
-      padding: 10px 16px;
-      margin-bottom: 18px;
-      border-radius: 3px;
-    }
-
-    .uuid-label { font-size: 10px; color: #666; text-transform: uppercase; font-weight: 600; margin-bottom: 3px; }
-    .uuid-value { font-size: 12px; font-weight: 700; color: #2d2d2d; font-family: 'Courier New', monospace; }
+    /* UUID */
+    .uuid-banner { background: #f8f9fa; border-left: 4px solid #2d2d2d; padding: 6px 12px; margin-bottom: 10px; border-radius: 3px; }
+    .uuid-label { font-size: 8px; color: #666; text-transform: uppercase; font-weight: 600; margin-bottom: 2px; }
+    .uuid-value { font-size: 10px; font-weight: 700; color: #2d2d2d; font-family: 'Courier New', monospace; }
 
     /* INFORMACION EN DOS COLUMNAS */
-    .billing-section {
-      display: flex;
-      gap: 25px;
-      margin-bottom: 20px;
-    }
-
+    .billing-section { display: flex; gap: 20px; margin-bottom: 10px; }
     .billing-column { flex: 1; }
-
-    .column-title {
-      font-size: 12px;
-      font-weight: 700;
-      color: #2d2d2d;
-      text-transform: uppercase;
-      margin-bottom: 10px;
-      letter-spacing: 0.5px;
-    }
-
-    .billing-info p { font-size: 11px; color: #555; margin: 4px 0; line-height: 1.6; }
+    .column-title { font-size: 10px; font-weight: 700; color: #2d2d2d; text-transform: uppercase; margin-bottom: 5px; letter-spacing: 0.5px; }
+    .billing-info p { font-size: 9px; color: #555; margin: 2px 0; line-height: 1.5; }
     .billing-info strong { color: #333; font-weight: 600; }
+    .company-box { text-align: right; padding: 8px 10px; background: #f8f9fa; border-radius: 4px; }
+    .company-box-title { font-size: 11px; font-weight: 700; color: #2d2d2d; margin-bottom: 3px; }
+    .company-box-code { font-size: 9px; color: #666; margin: 2px 0; }
 
-    .company-box {
-      text-align: right;
-      padding: 14px;
-      background: #f8f9fa;
-      border-radius: 4px;
-    }
-
-    .company-box-title { font-size: 13px; font-weight: 700; color: #2d2d2d; margin-bottom: 6px; }
-    .company-box-code { font-size: 11px; color: #666; margin: 3px 0; }
-
-    /* TABLA PROFESIONAL */
-    .table-section {
-      margin: 18px 0;
-      flex: 1;
-    }
-
+    /* TABLA */
+    .table-section { margin: 8px 0; }
     .table { width: 100%; border-collapse: collapse; }
     .table thead { background: #3a3a3a; color: white; }
-
-    .table thead th {
-      padding: 10px 10px;
-      text-align: left;
-      font-weight: 600;
-      font-size: 11px;
-      text-transform: uppercase;
-      letter-spacing: 0.5px;
-    }
-
+    .table thead th { padding: 6px 8px; text-align: left; font-weight: 600; font-size: 9px; text-transform: uppercase; letter-spacing: 0.5px; }
     .table thead th.col-cant { width: 8%; text-align: center; }
     .table thead th.col-unidad { width: 10%; text-align: center; }
     .table thead th.col-desc { width: 36%; }
     .table thead th.col-precio { width: 16%; text-align: right; }
     .table thead th.col-impuesto { width: 14%; text-align: right; }
     .table thead th.col-total { width: 16%; text-align: right; }
-
     .table tbody tr { background: #fafafa; }
     .table tbody tr:nth-child(even) { background: #ffffff; }
-
-    .table tbody td {
-      padding: 10px 10px;
-      border-bottom: 1px solid #e5e7eb;
-      font-size: 11px;
-      color: #555;
-    }
-
+    .table tbody td { padding: 6px 8px; border-bottom: 1px solid #e5e7eb; font-size: 9px; color: #555; }
     .table tbody td.td-cant { text-align: center; font-weight: 600; color: #2d2d2d; }
     .table tbody td.td-unidad { text-align: center; }
     .table tbody td.td-desc { font-weight: 500; }
-    .table tbody td.td-precio,
-    .table tbody td.td-impuesto,
-    .table tbody td.td-total { text-align: right; font-family: 'Courier New', monospace; }
+    .table tbody td.td-precio, .table tbody td.td-impuesto, .table tbody td.td-total { text-align: right; font-family: 'Courier New', monospace; }
     .table tbody td.td-total { font-weight: 700; color: #333; }
 
     /* SECCION INFERIOR */
-    .bottom-section {
-      display: flex;
-      gap: 25px;
-      margin: 20px 0;
-    }
-
+    .bottom-section { display: flex; gap: 20px; margin: 8px 0; }
     .payment-info { flex: 1; }
-    .payment-title { font-size: 12px; font-weight: 700; color: #2d2d2d; text-transform: uppercase; margin-bottom: 10px; }
-    .payment-details { font-size: 11px; color: #555; line-height: 1.7; }
-    .payment-details p { margin: 3px 0; }
+    .payment-title { font-size: 10px; font-weight: 700; color: #2d2d2d; text-transform: uppercase; margin-bottom: 4px; }
+    .payment-details { font-size: 9px; color: #555; line-height: 1.5; }
+    .payment-details p { margin: 2px 0; }
     .payment-details strong { color: #333; }
-
-    .totals-box { min-width: 280px; }
-
-    .total-row {
-      display: flex;
-      justify-content: space-between;
-      padding: 8px 14px;
-      font-size: 13px;
-      background: #f8f9fa;
-      margin-bottom: 2px;
-    }
-
+    .totals-box { min-width: 240px; }
+    .total-row { display: flex; justify-content: space-between; padding: 5px 10px; font-size: 11px; background: #f8f9fa; margin-bottom: 2px; }
     .total-row .label { font-weight: 600; color: #666; }
     .total-row .value { font-weight: 700; color: #333; font-family: 'Courier New', monospace; }
-
-    .total-row.final {
-      background: #3a3a3a;
-      color: white;
-      padding: 12px 14px;
-      font-size: 16px;
-      margin-top: 4px;
-    }
-
-    .total-row.final .label,
-    .total-row.final .value { color: white; }
+    .total-row.final { background: #3a3a3a; color: white; padding: 8px 10px; font-size: 13px; margin-top: 3px; }
+    .total-row.final .label, .total-row.final .value { color: white; }
 
     /* QR Y CERTIFICACION */
-    .qr-section {
-      display: flex;
-      gap: 20px;
-      margin: 20px 0;
-      background: #f8f9fa;
-      padding: 16px;
-      border-radius: 4px;
-    }
-
+    .qr-section { display: flex; gap: 15px; margin: 8px 0; background: #f8f9fa; padding: 10px; border-radius: 4px; }
     .qr-container { flex-shrink: 0; text-align: center; }
-
-    .qr-container img {
-      width: 105px;
-      height: 105px;
-      border: 3px solid #2d2d2d;
-      border-radius: 4px;
-      padding: 6px;
-      background: white;
-    }
-
-    .qr-title { font-size: 9px; font-weight: 700; color: #2d2d2d; margin-top: 6px; text-transform: uppercase; }
-    .qr-text { font-size: 9px; color: #666; margin-top: 2px; }
-
+    .qr-container img { width: 80px; height: 80px; border: 2px solid #2d2d2d; border-radius: 3px; padding: 4px; background: white; }
+    .qr-title { font-size: 7px; font-weight: 700; color: #2d2d2d; margin-top: 3px; text-transform: uppercase; }
+    .qr-text { font-size: 7px; color: #666; margin-top: 1px; }
     .cert-details { flex: 1; }
-    .cert-details h3 { font-size: 12px; font-weight: 700; color: #2d2d2d; margin-bottom: 10px; text-transform: uppercase; }
-
-    .cert-line { margin-bottom: 5px; font-size: 11px; }
-    .cert-line .cert-label { font-weight: 600; color: #666; display: inline-block; min-width: 150px; }
+    .cert-details h3 { font-size: 10px; font-weight: 700; color: #2d2d2d; margin-bottom: 5px; text-transform: uppercase; }
+    .cert-line { margin-bottom: 3px; font-size: 9px; }
+    .cert-line .cert-label { font-weight: 600; color: #666; display: inline-block; min-width: 130px; }
     .cert-line .cert-value { color: #333; font-family: 'Courier New', monospace; }
 
-    /* SELLOS - COMPACTOS */
-    .seals { margin: 16px 0; }
-
-    .seal {
-      background: #fffbf0;
-      border-left: 3px solid #f59e0b;
-      padding: 8px 12px;
-      margin-bottom: 8px;
-      border-radius: 3px;
-    }
-
-    .seal-header { font-size: 9px; font-weight: 700; color: #92400e; margin-bottom: 4px; text-transform: uppercase; }
-
-    .seal-content {
-      font-size: 8px;
-      color: #78350f;
-      font-family: 'Courier New', monospace;
-      word-break: break-all;
-      line-height: 1.4;
-      background: rgba(255, 255, 255, 0.6);
-      padding: 5px;
-      border-radius: 2px;
-      max-height: 40px;
-      overflow: hidden;
-    }
+    /* SELLOS */
+    .seals { margin: 6px 0; }
+    .seal { background: #fffbf0; border-left: 3px solid #f59e0b; padding: 4px 10px; margin-bottom: 4px; border-radius: 3px; }
+    .seal-header { font-size: 7px; font-weight: 700; color: #92400e; margin-bottom: 2px; text-transform: uppercase; }
+    .seal-content { font-size: 6px; color: #78350f; font-family: 'Courier New', monospace; word-break: break-all; line-height: 1.3; background: rgba(255, 255, 255, 0.6); padding: 3px; border-radius: 2px; max-height: 20px; overflow: hidden; }
 
     /* CADENA ORIGINAL */
-    .chain {
-      background: #f0fdf4;
-      border-left: 3px solid #10b981;
-      padding: 8px 12px;
-      margin: 16px 0;
-      border-radius: 3px;
-    }
-
-    .chain-header { font-size: 9px; font-weight: 700; color: #065f46; margin-bottom: 4px; text-transform: uppercase; }
-
-    .chain-content {
-      font-size: 8px;
-      color: #064e3b;
-      font-family: 'Courier New', monospace;
-      word-break: break-all;
-      line-height: 1.4;
-      background: rgba(255, 255, 255, 0.6);
-      padding: 5px;
-      border-radius: 2px;
-      max-height: 38px;
-      overflow: hidden;
-    }
+    .chain { background: #f0fdf4; border-left: 3px solid #10b981; padding: 4px 10px; margin: 6px 0; border-radius: 3px; }
+    .chain-header { font-size: 7px; font-weight: 700; color: #065f46; margin-bottom: 2px; text-transform: uppercase; }
+    .chain-content { font-size: 6px; color: #064e3b; font-family: 'Courier New', monospace; word-break: break-all; line-height: 1.3; background: rgba(255, 255, 255, 0.6); padding: 3px; border-radius: 2px; max-height: 20px; overflow: hidden; }
 
     /* FOOTER */
-    .footer {
-      margin-top: auto;
-      background: #e8e8e8;
-      padding: 12px 30px;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      font-size: 11px;
-      color: #555;
-      position: relative;
-      z-index: 2;
-    }
+    .footer { margin-top: auto; background: #e8e8e8; padding: 6px 25px; display: flex; justify-content: space-between; align-items: center; font-size: 9px; color: #555; position: relative; z-index: 2; }
+    .footer-item { display: flex; align-items: center; gap: 4px; }
+    .footer-icon { font-weight: 700; color: #2d2d2d; font-size: 9px; }
+    .footer-legal { text-align: center; padding: 5px; font-size: 8px; color: #666; background: #f5f5f5; position: relative; z-index: 2; }
 
-    .footer-item { display: flex; align-items: center; gap: 6px; }
-    .footer-icon { font-weight: 700; color: #2d2d2d; font-size: 11px; }
-
-    .footer-legal {
-      text-align: center;
-      padding: 10px;
-      font-size: 10px;
-      color: #666;
-      background: #f5f5f5;
-      position: relative;
-      z-index: 2;
-    }
-
-    /* PRINT STYLES */
     @media print {
       body { background: white; }
-      .container { width: 100%; max-width: none; min-height: 100vh; }
+      .container { width: 100%; max-width: none; }
     }
   </style>
 </head>
