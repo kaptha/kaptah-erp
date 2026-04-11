@@ -160,6 +160,14 @@ async findByFirebaseUid(@Param('firebaseUid') firebaseUid: string) {
   console.log('📋 GET /purchase-orders/firebase/:firebaseUid - firebaseUid:', firebaseUid);
   return this.purchaseOrderService.findAllByUser(firebaseUid);
 }
+@Post('firebase/:firebaseUid')
+@ApiOperation({ summary: 'Crear orden de compra (via Firebase UID)' })
+async createByFirebaseUid(
+  @Param('firebaseUid') firebaseUid: string,
+  @Body() createPurchaseOrderDto: CreatePurchaseOrderDto,
+) {
+  return this.purchaseOrderService.create(createPurchaseOrderDto, firebaseUid);
+}
 
   @Get()
   @ApiOperation({ summary: 'Listar todas las órdenes de compra' })
