@@ -42,6 +42,7 @@ interface RequestWithUser extends Request {
 @ApiTags('Purchase Orders')
 @ApiBearerAuth()
 @Controller('purchase-orders')
+@UseGuards(FirebaseAuthGuard)
 export class PurchaseOrderController {
   constructor(private readonly purchaseOrderService: PurchaseOrderService) {}
 
