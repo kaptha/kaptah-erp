@@ -20,6 +20,16 @@ export class CreatePurchaseOrderItemDto {
   @IsNotEmpty()
   @IsNumber()
   productId: number;
+  
+  @ApiPropertyOptional({ example: 'Producto XYZ' })
+@IsOptional()
+@IsString()
+productName?: string;
+
+@ApiPropertyOptional({ example: 'Descripción del producto' })
+@IsOptional()
+@IsString()
+description?: string;
 
   @ApiProperty({ example: 10 })
   @IsNotEmpty()
@@ -50,6 +60,11 @@ export class CreatePurchaseOrderDto {
   @IsNotEmpty()
   @IsNumber()
   supplierId: number;
+
+  @ApiPropertyOptional({ example: 'Proveedor ABC' })
+@IsOptional()
+@IsString()
+supplierName?: string;
 
   @ApiPropertyOptional({ example: '2025-11-27' })
   @IsOptional()
