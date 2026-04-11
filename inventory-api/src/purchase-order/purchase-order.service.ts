@@ -896,14 +896,18 @@ console.log('🔍 DEBUG - buscando orden con id:', id, 'y userId:', userDebug?.I
 
       // Validar que el template existe
       const templatesPath = path.join(process.cwd(), 'src', 'templates');
-      const htmlPath = path.join(templatesPath, `orden-compra-${estilo}.html`);
+      let htmlPath = path.join(templatesPath, `orden-compra-${estilo}.html`);
 
       console.log('📄 HTML path:', htmlPath);
       console.log('📄 HTML exists?', fs.existsSync(htmlPath));
 
       if (!fs.existsSync(htmlPath)) {
-        throw new NotFoundException(`Template HTML no encontrado en: ${htmlPath}`);
-      }
+  console.log(`⚠️ Template ${estilo} no encontrado, intentando con minimal...`);
+  htmlPath = path.join(templatesPath, 'orden-compra-minimal.html');
+  if (!fs.existsSync(htmlPath)) {
+    throw new NotFoundException('Ningún template de orden de compra encontrado');
+  }
+}
 
       console.log('✅ Template HTML existe');
 
