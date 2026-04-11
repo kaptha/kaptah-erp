@@ -229,7 +229,7 @@ private getActiveCuentaUid(): string | null {
     orderId: number,
     emailData: { recipientEmail: string; customMessage?: string }
   ): Observable<any> {
-    return this.http.post(`${this.apiUrl}/${orderId}/send-email`, emailData).pipe(
+    return this.http.post(`${this.apiUrl}/${orderId}/send-email`, emailData, { headers: this.getHeaders() }).pipe(
       catchError(this.handleError)
     );
   }
