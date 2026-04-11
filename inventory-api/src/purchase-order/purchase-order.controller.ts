@@ -44,6 +44,38 @@ interface RequestWithUser extends Request {
 @Controller('purchase-orders')
 export class PurchaseOrderController {
   constructor(private readonly purchaseOrderService: PurchaseOrderService) {}
+@Get('firebase/:firebaseUid/:id/pdf/:style')
+@ApiOperation({ summary: 'Generar PDF de orden de compra (via Firebase UID)' })
+async generarPdfDeOrdenFirebase(
+  @Param('id', ParseIntPipe) id: number,
+  @Param('firebaseUid') firebaseUid: string,
+  @Param('style') estilo: string,
+  @Req() req: RequestWithUser,
+  @Res() res: Response,
+) {
+  console.log('📄 Request para generar PDF de orden de compra (Firebase)');
+  console.log('📋 Purchase Order ID:', id);
+  console.log('🎨 Estilo:', estilo);
+  console.log('🔑 Firebase UID:', firebaseUid);
+
+  const authHeader = req.headers.authorization;
+  const token = authHeader?.startsWith('Bearer ') ? authHeader : null;
+
+  const pdf = await this.purchaseOrderService.generarPdfOrdenCompra(
+    id,
+    firebaseUid,
+    estilo,
+    token,
+  );
+
+  res.set({
+    'Content-Type': 'application/pdf',
+    'Content-Disposition': `attachment; filename=orden_compra_${id}.pdf`,
+    'Content-Length': pdf.length.toString(),
+  });
+
+  res.end(pdf);
+}
 
   // 🆕 NUEVO ENDPOINT: Generar PDF de orden de compra
   @Get(':id/pdf/:style')
