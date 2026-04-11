@@ -16,7 +16,7 @@ export class AuthEmailService {
       this.logger.log(`📧 Generando link de verificacion para: ${email}`);
 
       const actionLink = await admin.auth().generateEmailVerificationLink(email, {
-        url: 'https://app.kaptah.mx/reset-password',
+        url: 'https://app.kaptah.mx/login',
       });
 
       this.logger.log(`✅ Link de verificacion generado correctamente`);
@@ -46,7 +46,7 @@ export class AuthEmailService {
       this.logger.log(`🔑 Generando link de reset para: ${email}`);
 
       const actionLink = await admin.auth().generatePasswordResetLink(email, {
-        url: 'https://app.kaptah.mx/login',
+        url: 'https://app.kaptah.mx/reset-password',
       });
 
       this.logger.log(`✅ Link de reset generado correctamente`);
