@@ -104,32 +104,33 @@ private getActiveCuentaUid(): string | null {
   }
 
   descargarPDF(orderId: number, estilo: string = 'minimal'): Observable<Blob> {
-    const url = `${this.apiUrl}/${orderId}/pdf/${estilo}`;
-    const headers = this.getHeaders();
+  const cuentaUid = this.getActiveCuentaUid() || localStorage.getItem('firebaseUid');
+  const url = `${this.apiUrl}/firebase/${cuentaUid}/${orderId}/pdf/${estilo}`;
+  const headers = this.getHeaders();
 
-    return this.http.get(url, {
-      responseType: 'blob',
-      observe: 'response',
-      headers
-    }).pipe(
-      map(response => {
-        if (response.body) {
-          return response.body;
-        }
-        throw new Error('No se recibio el PDF del servidor');
-      }),
-      catchError(error => {
-        console.error('Error al descargar PDF:', error);
-        let errorMessage = 'Error al generar el PDF de la orden de compra';
-        if (error.status === 404) {
-          errorMessage = 'Orden de compra no encontrada';
-        } else if (error.status === 500) {
-          errorMessage = 'Error del servidor al generar el PDF';
-        }
-        return throwError(() => new Error(errorMessage));
-      })
-    );
-  }
+  return this.http.get(url, {
+    responseType: 'blob',
+    observe: 'response',
+    headers
+  }).pipe(
+    map(response => {
+      if (response.body) {
+        return response.body;
+      }
+      throw new Error('No se recibio el PDF del servidor');
+    }),
+    catchError(error => {
+      console.error('Error al descargar PDF:', error);
+      let errorMessage = 'Error al generar el PDF de la orden de compra';
+      if (error.status === 404) {
+        errorMessage = 'Orden de compra no encontrada';
+      } else if (error.status === 500) {
+        errorMessage = 'Error del servidor al generar el PDF';
+      }
+      return throwError(() => new Error(errorMessage));
+    })
+  );
+}
 
   getAll(): Observable<PurchaseOrder[]> {
     const idToken = localStorage.getItem('idToken');
