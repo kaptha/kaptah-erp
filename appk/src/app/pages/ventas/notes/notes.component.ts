@@ -219,73 +219,23 @@ onPeriodChange(period: string) {
     this.mobilePaginator.pageIndex = 0;
   }
 
-  /**
-   * ✨ NUEVO: Descontar inventario para productos vendidos
-   */
-  private updateInventory(items: any[]): Promise<void> {
-    return new Promise((resolve, reject) => {
-      // Filtrar solo los items que son productos (type === 'product')
-      const productItems = items.filter(item => item.productId);
-      
-      if (productItems.length === 0) {
-        console.log('No hay productos para descontar del inventario');
-        resolve();
-        return;
-      }
-
-      console.log('🔄 Actualizando inventario para', productItems.length, 'productos');
-
-      // Crear array de observables para actualizar stock
-      const updateObservables = productItems.map(item => 
-        this.productService.updateStock(item.productId, -item.quantity)
-      );
-
-      // Ejecutar todas las actualizaciones en paralelo
-      forkJoin(updateObservables).subscribe({
-        next: (results) => {
-          console.log('✅ Inventario actualizado exitosamente:', results);
-          resolve();
-        },
-        error: (error) => {
-          console.error('❌ Error al actualizar inventario:', error);
-          reject(error);
-        }
-      });
-    });
-  }
-
+ 
   /**
    * Abre el diálogo para crear una nueva nota
    * ✨ MODIFICADO: Ahora descuenta el inventario después de crear la nota
    */
   agregarNota() {
-  const dialogRef = this.dialog.open(NoteFormModalComponent, {
-    width: this.isMobile ? '95%' : '600px',
-    data: null,
-    disableClose: false
-  });
-
-  dialogRef.afterClosed().subscribe(result => {
-    if (result && result.saved) {
-      this.loading = true;
-      
-      // La nota ya fue creada en el modal, solo descontar inventario
-      this.updateInventory(result.note.items).then(() => {
-        Sweetalert.fnc('success', 'Nota creada e inventario actualizado correctamente', null);
+    const dialogRef = this.dialog.open(NoteFormModalComponent, {
+      width: this.isMobile ? '95%' : '600px',
+      data: null,
+      disableClose: false
+    });
+    dialogRef.afterClosed().subscribe(result => {
+      if (result && result.saved) {
         this.loadNotes();
-        this.loading = false;
-      }).catch((error) => {
-        console.error('Error al actualizar inventario:', error);
-        Sweetalert.fnc('warning', 
-          'Nota creada correctamente, pero hubo un problema al actualizar el inventario. Por favor, verifica el stock manualmente.', 
-          null
-        );
-        this.loadNotes();
-        this.loading = false;
-      });
-    }
-  });
-}
+      }
+    });
+  }
 
     /**
    * Editar una nota de venta existente
