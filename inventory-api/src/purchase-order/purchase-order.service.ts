@@ -88,7 +88,7 @@ export class PurchaseOrderService {
       const orderNumber = await this.generateOrderNumber();
 
       // Obtener información del proveedor (placeholder)
-      const supplierName = `Proveedor-${createPurchaseOrderDto.supplierId}`;
+      const supplierName = createPurchaseOrderDto.supplierName || `Proveedor-${createPurchaseOrderDto.supplierId}`;
 
       // Calcular totales
       let subtotal = 0;
