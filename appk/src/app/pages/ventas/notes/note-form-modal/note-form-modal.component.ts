@@ -954,7 +954,9 @@ console.log('🔍 FORM observaciones control:', this.noteForm.get('observaciones
         .reduce((ts: number, t: any) => ts + (sub * Number(t.tasa || 0)), 0);
       return s + sub + taxes;
     }, 0),
-    observaciones: formData.observaciones || ''
+    observaciones: formData.observaciones || '',
+    afectaInventario: true,                                    
+  almacenId: formData.sucursalId?.toString() || 'default'
   };
 
   console.log('📤 DTO FINAL:', noteDto);
