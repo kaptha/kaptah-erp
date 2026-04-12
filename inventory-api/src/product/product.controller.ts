@@ -14,6 +14,7 @@ import {
   Patch
 } from '@nestjs/common';
 import { FirebaseAuthGuard } from '../guards/firebase-auth.guard';
+import { InternalApiKeyGuard } from '../guards/internal-api-key.guard';
 import { ProductService } from './product.service';
 import { CreateProductDto } from './dto/create-product.dto';
 import { UpdateProductDto } from './dto/update-product.dto';
@@ -40,6 +41,24 @@ export class ProductController {
     }
     return this.productService.create(createProductDto, req.user.firebaseUid);
   }
+  @Patch('internal/deduct-stock')
+  @UseGuards(InternalApiKeyGuard)
+  async internalDeductStock(
+    @Body() body: {
+      productId: number;
+      quantity: number;
+      firebaseUid: string;
+      motivo?: string;
+    },
+  ) {
+    this.logger.log(`📦 Deduccion interna: producto ${body.productId}, cantidad: -${body.quantity}`);
+    return this.productService.updateStock(
+      body.productId,
+      -body.quantity,
+      body.firebaseUid
+    );
+  }
+
   @Get('firebase/:firebaseUid')
 async findByFirebaseUid(@Param('firebaseUid') firebaseUid: string) {
   console.log('📋 GET /products/firebase/:firebaseUid - firebaseUid:', firebaseUid);
@@ -93,3 +112,5 @@ async findByFirebaseUid(@Param('firebaseUid') firebaseUid: string) {
     return this.productService.updateStock(id, quantity, req.user.firebaseUid);
   }
 }
+
+
