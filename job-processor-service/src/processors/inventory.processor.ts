@@ -144,24 +144,55 @@ export class InventoryProcessor {
     }
   }
 
-  @Process({ 
-    name: 'deducir-stock-venta', 
-    concurrency: 10 
+  @Process({
+    name: 'deducir-stock-venta',
+    concurrency: 10
   })
   async deductStockForSale(job: Job): Promise<any> {
     const { notaVentaId, items, almacenId, empresaId, userId } = job.data;
 
-    return await this.updateInventory({
-      data: {
-        type: 'deduct',
-        empresaId,
-        almacenId,
-        items,
-        referenceType: 'nota-venta',
-        referenceId: notaVentaId,
-        userId
+    this.logger.log(`📦 Descontando stock para nota ${notaVentaId} - ${items.length} items`);
+
+    const results = [];
+
+    for (const item of items) {
+      if (!item.productoId) {
+        this.logger.warn('⚠️ Item sin productoId, saltando...');
+        results.push({ productoId: null, success: false, error: 'Sin productoId' });
+        continue;
       }
-    } as Job<InventoryUpdateJob>);
+
+      try {
+        const response: AxiosResponse = await firstValueFrom(
+          this.httpService.patch(
+            `${this.INVENTORY_API_URL}/api/products/internal/deduct-stock`,
+            {
+              productId: Number(item.productoId),
+              quantity: item.cantidad,
+              firebaseUid: empresaId,
+              motivo: `Nota de venta ${notaVentaId}`
+            },
+            {
+              headers: {
+                'x-internal-api-key': process.env.INTERNAL_API_KEY,
+                'Content-Type': 'application/json'
+              }
+            }
+          )
+        );
+
+        this.logger.log(`✅ Stock descontado: producto ${item.productoId}, cantidad: ${item.cantidad}`);
+        results.push({ productoId: item.productoId, success: true, newStock: response.data.currentStock });
+      } catch (error) {
+        this.logger.error(`❌ Error producto ${item.productoId}: ${error.message}`);
+        results.push({ productoId: item.productoId, success: false, error: error.message });
+      }
+    }
+
+    const exitosos = results.filter(r => r.success).length;
+    this.logger.log(`📦 Resultado: ${exitosos}/${items.length} productos descontados para nota ${notaVentaId}`);
+
+    return { success: true, total: items.length, exitosos, detalles: results };
   }
 
   @Process({ 
