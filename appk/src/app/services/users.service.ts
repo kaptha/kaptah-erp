@@ -203,43 +203,28 @@ export class UsersService {
     NUEVO: Actualizar datos de usuario en MySQL
   =============================================*/
   updateUserData(userData: any): Observable<any> {
-    const idToken = localStorage.getItem('idToken');
+    const firebaseUid = localStorage.getItem('activeCuentaUid');
     
-    if (!idToken) {
-      throw new Error('No se encontró el token de autenticación');
+    if (!firebaseUid) {
+      throw new Error('No se encontró el UID de la cuenta activa');
     }
 
-    // Primero obtenemos el usuario por token para obtener su firebaseUid
-    return this.getUserByToken(idToken).pipe(
-      switchMap(user => {
-        if (!user || !user.firebaseUid) {
-          throw new Error('No se encontró el usuario');
-        }
+    const mysqlData = {
+      nombre: userData.nombre,
+      nombreComercial: userData.nombreComercial || '',
+      phone: userData.phone,
+      rfc: userData.rfc.toUpperCase(),
+      tipoPersona: userData.tipoPersona || 'fisica',
+      fiscalReg: userData.fiscalReg,
+      email: userData.email,
+      firebaseUid: firebaseUid
+    };
 
-        const firebaseUid = user.firebaseUid;
-        
-        console.log('Actualizando usuario:', { firebaseUid, userData });
+    console.log('📤 Datos a enviar a MySQL:', mysqlData);
 
-        // Preparar datos para MySQL
-        const mysqlData = {
-          nombre: userData.nombre,
-          nombreComercial: userData.nombreComercial || '',
-          phone: userData.phone,
-          rfc: userData.rfc.toUpperCase(),
-          tipoPersona: userData.tipoPersona || 'fisica',
-          fiscalReg: userData.fiscalReg,
-          email: userData.email,
-          firebaseUid: firebaseUid
-        };
-
-        console.log('Datos a enviar a MySQL:', mysqlData);
-
-        // Actualizar solo en MySQL
-        return this.http.put(
-          `${this.mysqlApiUrl}/users/update`,
-          mysqlData
-        );
-      })
+    return this.http.put(
+      `${this.mysqlApiUrl}/users/update`,
+      mysqlData
     );
   }
 
