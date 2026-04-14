@@ -342,6 +342,16 @@ export class UsersService {
   /*=============================================
   Enviar verificacion de email con plantilla branded (via Resend)
   =============================================*/
+  getUserFromMySQL(firebaseUid: string): Observable<any> {
+    return this.http.get(`${this.mysqlApiUrl}/users/firebase/${firebaseUid}`);
+  }
+
+  getUserFromRTDB(realtimeDbKey: string): Observable<any> {
+    const idToken = localStorage.getItem('idToken');
+    const authParam = idToken ? `?auth=${idToken}` : '';
+    return this.http.get(`${this.api}usuarios/${realtimeDbKey}.json${authParam}`);
+  }
+
   sendBrandedEmailVerification(email: string, displayName?: string) {
     return this.http.post(`${this.mysqlApiUrl}/auth-email/send-verification`, { email, displayName });
   }
@@ -383,5 +393,6 @@ export class UsersService {
   }
     
 }
+
 
 

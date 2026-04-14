@@ -3,6 +3,8 @@ import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
 import { MatDialog } from '@angular/material/dialog';
 import { MatSnackBar } from '@angular/material/snack-bar';
+import { of } from 'rxjs';
+import { switchMap } from 'rxjs/operators';
 import { UsersService } from 'src/app/services/users.service';
 import { ApibizService } from '../../services/apibiz.service';
 import { SucursalModalComponent } from './sucursal-modal/sucursal-modal.component';
@@ -164,23 +166,27 @@ export class PerfilComponent implements OnInit {
    */
   loadUserData() {
     this.isLoading = true;
-    const idToken = localStorage.getItem('idToken');
+    const firebaseUid = localStorage.getItem('activeCuentaUid');
     
-    if (idToken) {
-      this.usersService.getUserByToken(idToken).subscribe(
-        user => {
-          console.log('Datos del usuario recibidos:', user);
+    if (firebaseUid) {
+      this.usersService.getUserFromMySQL(firebaseUid).pipe(
+        switchMap((mysqlUser: any) => {
+          if (mysqlUser?.realtimeDbKey) {
+            return this.usersService.getUserFromRTDB(mysqlUser.realtimeDbKey);
+          }
+          return of(null);
+        })
+      ).subscribe(
+        (user: any) => {
+          console.log('Datos del usuario:', user);
           if (user) {
-            // Determinar tipo de persona basado en el régimen fiscal o RFC
             const tipoPersonaDeterminado = user.tipo_persona || this.determinarTipoPersona(user.rfc, user.fiscalReg);
-            
-            // Actualizar propiedad de la clase
             this.tipoPersona = tipoPersonaDeterminado;
             
             this.perfilForm.patchValue({
               nombre: user.nombre || '',
               nombreComercial: user.nombreComercial || '',
-              phone: user.phone || '',
+              phone: user.phone || user.telefono || '',
               rfc: user.rfc || '',
               codigoPostal: user.codigoPostal || '',
               colonia: user.colonia || '',
@@ -189,25 +195,26 @@ export class PerfilComponent implements OnInit {
             });
             this.email = user.email || '';
 
-            // Cargar datos del plan desde Firebase
             this.planActual = user.plan || 'starter';
             this.suscripcionActiva = user.suscripcionActiva || false;
             this.cicloFacturacion = user.cicloFacturacion || 'anual';
-            this.actualizarInfoPlan();
             
-            // Actualizar regímenes fiscales filtrados
+            if (user.fechaInicioTrial) {
+              this.calcularEstadoTrial(user.fechaInicioTrial, this.suscripcionActiva);
+            }
+            
+            this.actualizarInfoPlan();
             this.regimenesFiscalesFiltrados = this.regimenFiscalService.getRegimenesPorTipo(tipoPersonaDeterminado);
           }
           this.isLoading = false;
         },
         error => {
-          console.error('Error al cargar datos del usuario:', error);
+          console.error('Error al cargar datos:', error);
           this.showSnackBar('Error al cargar datos del usuario', 'Cerrar');
           this.isLoading = false;
         }
       );
     } else {
-      console.log('No se encontró idToken en localStorage');
       this.isLoading = false;
     }
   }
@@ -870,6 +877,8 @@ get terminosModificados(): boolean {
     });
   }
 }
+
+
 
 
 
