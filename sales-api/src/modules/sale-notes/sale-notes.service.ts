@@ -538,8 +538,10 @@ private async obtenerLogoUsuario(userId: string, token: string): Promise<string 
   const savedNote = await this.saleNoteRepository.save(saleNote);
 
   try {
+    this.logger.log(`📦 afectaInventario: ${createSaleNoteDto.afectaInventario}, items: ${items.length}`);
     if (createSaleNoteDto.afectaInventario && items.length > 0) {
-      await this.queueClient.deductStockForSale({
+      this.logger.log(`📦 Encolando deduccion de stock para nota ${savedNote.id}...`);
+      const stockJob = await this.queueClient.deductStockForSale({
         notaVentaId: savedNote.id,
         items: items.map(item => ({
           productoId: item.productId,
@@ -549,6 +551,7 @@ private async obtenerLogoUsuario(userId: string, token: string): Promise<string 
         empresaId: userId,
         userId
       });
+this.logger.log(`📦 Job de stock encolado exitosamente: ${stockJob.id}`);
     }
 
     await this.queueClient.generateSaleNotePDF(savedNote.id);
@@ -567,7 +570,8 @@ private async obtenerLogoUsuario(userId: string, token: string): Promise<string 
     await this.saleNoteRepository.update(savedNote.id, { status: 'COMPLETED' });
 
   } catch (error) {
-    this.logger.error(`Error en jobs asíncronos: ${error.message}`);
+    this.logger.error(`❌ ERROR en jobs asincronos: ${error.message}`);
+    this.logger.error(`❌ Stack: ${error.stack}`);
   }
 
   return savedNote;
