@@ -210,7 +210,6 @@ export class UsersService {
       throw new Error('No se encontró el UID de la cuenta activa');
     }
 
-    // Datos para MySQL
     const mysqlData = {
       nombre: userData.nombre,
       nombreComercial: userData.nombreComercial || '',
@@ -222,57 +221,42 @@ export class UsersService {
       firebaseUid: firebaseUid
     };
 
-    // Datos para Firebase RTDB
     const firebaseData = {
       nombre: userData.nombre,
       nombreComercial: userData.nombreComercial || '',
       phone: userData.phone,
       rfc: userData.rfc.toUpperCase(),
-      fiscalReg: userData.fiscalReg
+      fiscalReg: userData.fiscalReg,
+      firebaseUid: firebaseUid  // También guardarlo para que no falte
     };
 
     console.log('📤 Actualizando MySQL y Firebase RTDB...');
 
-    // Primero buscar el nodo del usuario en RTDB, luego actualizar ambos
-    const authParam = idToken ? `&auth=${idToken}` : '';
-    
-    return this.http.get(
-      `${this.api}usuarios.json?orderBy="firebaseUid"&equalTo="${firebaseUid}"${authParam}`
-    ).pipe(
-      switchMap((response: any) => {
-        console.log('🔍 Respuesta RTDB buscando por firebaseUid:', response);
+    // Obtener realtimeDbKey desde MySQL
+    return this.http.get(`${this.mysqlApiUrl}/users/firebase/${firebaseUid}`).pipe(
+      switchMap((mysqlUser: any) => {
+        console.log('🔑 realtimeDbKey desde MySQL:', mysqlUser?.realtimeDbKey);
         
         const mysqlUpdate$ = this.http.put(`${this.mysqlApiUrl}/users/update`, mysqlData);
         
-        if (response) {
-          const keys = Object.keys(response);
-          console.log('🔑 Keys encontradas:', keys);
-          const realtimeDbKey = keys[0];
+        if (mysqlUser?.realtimeDbKey) {
+          const authParam = idToken ? `?auth=${idToken}` : '';
+          const firebaseUpdate$ = this.http.patch(
+            `${this.api}usuarios/${mysqlUser.realtimeDbKey}.json${authParam}`,
+            firebaseData
+          );
           
-          if (realtimeDbKey) {
-            console.log('✅ realtimeDbKey:', realtimeDbKey);
-            const firebaseUpdate$ = this.http.patch(
-              `${this.api}usuarios/${realtimeDbKey}.json?auth=${idToken}`,
-              firebaseData
-            );
-            
-            return mysqlUpdate$.pipe(
-              switchMap(mysqlRes => firebaseUpdate$.pipe(
-                map(fbRes => {
-                  console.log('✅ Firebase RTDB actualizado:', fbRes);
-                  return {
-                    success: true,
-                    message: 'Usuario actualizado correctamente',
-                    mysql: mysqlRes,
-                    firebase: fbRes
-                  };
-                })
-              ))
-            );
-          }
+          return mysqlUpdate$.pipe(
+            switchMap(mysqlRes => firebaseUpdate$.pipe(
+              map(fbRes => {
+                console.log('✅ Firebase RTDB actualizado:', fbRes);
+                return { success: true, mysql: mysqlRes, firebase: fbRes };
+              })
+            ))
+          );
         }
         
-        console.warn('⚠️ No se encontró nodo en RTDB, solo se actualiza MySQL');
+        console.warn('⚠️ Sin realtimeDbKey, solo MySQL');
         return mysqlUpdate$;
       })
     );
