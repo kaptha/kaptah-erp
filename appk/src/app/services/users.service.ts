@@ -204,11 +204,13 @@ export class UsersService {
   =============================================*/
   updateUserData(userData: any): Observable<any> {
     const firebaseUid = localStorage.getItem('activeCuentaUid');
+    const idToken = localStorage.getItem('idToken');
     
     if (!firebaseUid) {
       throw new Error('No se encontró el UID de la cuenta activa');
     }
 
+    // Datos para MySQL
     const mysqlData = {
       nombre: userData.nombre,
       nombreComercial: userData.nombreComercial || '',
@@ -220,11 +222,53 @@ export class UsersService {
       firebaseUid: firebaseUid
     };
 
-    console.log('📤 Datos a enviar a MySQL:', mysqlData);
+    // Datos para Firebase RTDB
+    const firebaseData = {
+      nombre: userData.nombre,
+      nombreComercial: userData.nombreComercial || '',
+      phone: userData.phone,
+      rfc: userData.rfc.toUpperCase(),
+      fiscalReg: userData.fiscalReg
+    };
 
-    return this.http.put(
-      `${this.mysqlApiUrl}/users/update`,
-      mysqlData
+    console.log('📤 Actualizando MySQL y Firebase RTDB...');
+
+    // Primero buscar el nodo del usuario en RTDB, luego actualizar ambos
+    const authParam = idToken ? `&auth=${idToken}` : '';
+    
+    return this.http.get(
+      `${this.api}usuarios.json?orderBy="firebaseUid"&equalTo="${firebaseUid}"${authParam}`
+    ).pipe(
+      switchMap((response: any) => {
+        // Actualizar MySQL
+        const mysqlUpdate$ = this.http.put(`${this.mysqlApiUrl}/users/update`, mysqlData);
+        
+        // Actualizar Firebase RTDB si encontramos el nodo
+        if (response) {
+          const realtimeDbKey = Object.keys(response)[0];
+          if (realtimeDbKey) {
+            const firebaseUpdate$ = this.http.patch(
+              `${this.api}usuarios/${realtimeDbKey}.json?auth=${idToken}`,
+              firebaseData
+            );
+            
+            // Ejecutar ambos en paralelo
+            return mysqlUpdate$.pipe(
+              switchMap(mysqlRes => firebaseUpdate$.pipe(
+                map(fbRes => ({
+                  success: true,
+                  message: 'Usuario actualizado correctamente',
+                  mysql: mysqlRes,
+                  firebase: fbRes
+                }))
+              ))
+            );
+          }
+        }
+        
+        // Si no hay nodo en RTDB, solo actualizar MySQL
+        return mysqlUpdate$;
+      })
     );
   }
 
