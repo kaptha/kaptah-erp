@@ -240,33 +240,39 @@ export class UsersService {
       `${this.api}usuarios.json?orderBy="firebaseUid"&equalTo="${firebaseUid}"${authParam}`
     ).pipe(
       switchMap((response: any) => {
-        // Actualizar MySQL
+        console.log('🔍 Respuesta RTDB buscando por firebaseUid:', response);
+        
         const mysqlUpdate$ = this.http.put(`${this.mysqlApiUrl}/users/update`, mysqlData);
         
-        // Actualizar Firebase RTDB si encontramos el nodo
         if (response) {
-          const realtimeDbKey = Object.keys(response)[0];
+          const keys = Object.keys(response);
+          console.log('🔑 Keys encontradas:', keys);
+          const realtimeDbKey = keys[0];
+          
           if (realtimeDbKey) {
+            console.log('✅ realtimeDbKey:', realtimeDbKey);
             const firebaseUpdate$ = this.http.patch(
               `${this.api}usuarios/${realtimeDbKey}.json?auth=${idToken}`,
               firebaseData
             );
             
-            // Ejecutar ambos en paralelo
             return mysqlUpdate$.pipe(
               switchMap(mysqlRes => firebaseUpdate$.pipe(
-                map(fbRes => ({
-                  success: true,
-                  message: 'Usuario actualizado correctamente',
-                  mysql: mysqlRes,
-                  firebase: fbRes
-                }))
+                map(fbRes => {
+                  console.log('✅ Firebase RTDB actualizado:', fbRes);
+                  return {
+                    success: true,
+                    message: 'Usuario actualizado correctamente',
+                    mysql: mysqlRes,
+                    firebase: fbRes
+                  };
+                })
               ))
             );
           }
         }
         
-        // Si no hay nodo en RTDB, solo actualizar MySQL
+        console.warn('⚠️ No se encontró nodo en RTDB, solo se actualiza MySQL');
         return mysqlUpdate$;
       })
     );
