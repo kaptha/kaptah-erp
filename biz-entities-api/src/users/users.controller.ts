@@ -45,8 +45,12 @@ export class UsersController {
         firebaseUid: user.firebaseUid,
         email: user.email,
         nombre: user.nombre,
+        nombreComercial: user.nombreComercial,
+        phone: user.telefono,
         rfc: user.rfc,
-        tipo_persona: user.tipo_persona
+        tipo_persona: user.tipo_persona,
+        fiscalReg: user.fiscalReg,
+        realtimeDbKey: user.realtimeDbKey
       };
     } catch (error) {
       this.logger.error('❌ Error:', error.message);
