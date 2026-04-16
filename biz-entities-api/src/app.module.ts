@@ -16,6 +16,7 @@ import { UploadsModule } from './uploads/uploads.module';
 import { DesignSettingsModule } from './design-settings/design-settings.module';
 import { AuthEmailModule } from './auth-email/auth-email.module';
 import { RolesModule } from './roles/roles.module';
+import { PaymentsModule } from './payments/payments.module';
 import { UserPostgres } from './users/entities/user.postgres.entity';
 @Module({
   imports: [
@@ -65,7 +66,8 @@ import { UserPostgres } from './users/entities/user.postgres.entity';
     UploadsModule,
     DesignSettingsModule,
     AuthEmailModule,
-    RolesModule
+    RolesModule,
+    PaymentsModule
   ],
   controllers: [AppController],
   providers: [AppService],
