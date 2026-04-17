@@ -1,9 +1,11 @@
-import { Controller, Post, Body, Req, Headers, Logger } from '@nestjs/common';
+import { Controller, Post, Body, Req, Headers, Logger, UseGuards } from '@nestjs/common';
 import { PaymentsService } from './payments.service';
 import { CreateCheckoutDto } from './dto/create-checkout.dto';
 import { Public } from '../decorators/public.decorator';
+import { FirebaseAuthGuard } from '../guards/firebase-auth.guard';
 
 @Controller('payments')
+@UseGuards(FirebaseAuthGuard)
 export class PaymentsController {
   private readonly logger = new Logger(PaymentsController.name);
 
