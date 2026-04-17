@@ -742,6 +742,9 @@ button {
   height: 600px !important;
   border: none !important;
   display: block !important;
+  pointer-events: auto !important;
+  z-index: 9999 !important;
+  position: relative !important;
 }
 
 .checkout-section {
