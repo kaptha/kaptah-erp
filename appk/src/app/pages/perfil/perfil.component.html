@@ -164,7 +164,7 @@
             <p class="checkout-loading-text">Preparando formulario de pago...</p>
           </div>
 
-          <div id="conekta-checkout-container" *ngIf="mostrarCheckout" style="min-height: 600px; margin-top: 20px; border: 1px solid #e0e0e0; border-radius: 8px; padding: 16px;">
+          <div id="conekta-checkout-container" [hidden]="!mostrarCheckout" style="min-height: 600px; margin-top: 20px; border: 1px solid #e0e0e0; border-radius: 8px; padding: 16px;">
           </div>
         </div>
       </div>
