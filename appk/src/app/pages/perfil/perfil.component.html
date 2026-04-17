@@ -147,8 +147,8 @@
 
           <!-- Botón de pago -->
           <div class="plan-actions">
-            <button mat-raised-button class="btn-activar" 
-              (click)="iniciarPago()" 
+            <button mat-raised-button class="btn-activar"
+              (click)="iniciarPago()"
               [disabled]="suscripcionActiva">
               <mat-icon>{{ suscripcionActiva ? 'check_circle' : 'payment' }}</mat-icon>
               {{ suscripcionActiva ? 'Plan activo' : 'Activar plan' }}
@@ -157,8 +157,17 @@
               <mat-icon>swap_horiz</mat-icon> Cambiar plan
             </button>
           </div>
+
+          <!-- Conekta Checkout -->
+          <div class="checkout-section" *ngIf="checkoutLoading">
+            <mat-progress-bar mode="indeterminate" color="accent"></mat-progress-bar>
+            <p class="checkout-loading-text">Preparando formulario de pago...</p>
+          </div>
+
+          <div id="conekta-checkout-container" *ngIf="mostrarCheckout" style="min-height: 600px; margin-top: 20px; border: 1px solid #e0e0e0; border-radius: 8px; padding: 16px;">
+          </div>
         </div>
-      </div>    
+      </div>
     </mat-tab>
 
     <mat-tab label="Sucursales">

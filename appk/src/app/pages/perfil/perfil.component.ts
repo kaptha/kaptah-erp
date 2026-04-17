@@ -20,6 +20,7 @@ import { RegimenFiscalService, RegimenFiscal } from '../../services/regimen-fisc
 import { Sucursal } from '../../models/sucursal.model';
 import { HttpEventType } from '@angular/common/http';
 import Swal from 'sweetalert2';
+import { PaymentsService } from 'src/app/services/payments.service';
 
 interface PlanInfo {
   nombre: string;
@@ -98,6 +99,9 @@ export class PerfilComponent implements OnInit {
   precioMostrado: number = 599;
   ahorroAnual: number = 0;
 
+  mostrarCheckout: boolean = false;
+  checkoutLoading: boolean = false;
+
   planes: { [key: string]: PlanInfo } = {
     starter: { nombre: 'Kaptah Básico', mensual: 0, anual: 599, ahorro: 0, soloAnual: true },
     pro: { nombre: 'Kaptah Fiscal', mensual: 299, anual: 2990, ahorro: 598 },
@@ -118,6 +122,7 @@ export class PerfilComponent implements OnInit {
     private snackBar: MatSnackBar,
     private cdr: ChangeDetectorRef,
     private router: Router,
+    private paymentsService: PaymentsService,
   ) {}
   
   ngOnInit(): void {
@@ -857,11 +862,83 @@ get terminosModificados(): boolean {
    * Inicia el proceso de pago con Conekta
    */
   iniciarPago(): void {
-    Swal.fire({
-      icon: 'info',
-      title: 'Próximamente',
-      text: 'La integración de pagos con Conekta estará disponible pronto.',
-      confirmButtonColor: '#8e24aa'
+    if (this.suscripcionActiva) return;
+
+    const firebaseUid = localStorage.getItem('activeCuentaUid');
+    if (!firebaseUid) {
+      Swal.fire({ icon: 'error', title: 'Error', text: 'No se encontro la cuenta activa', confirmButtonColor: '#8e24aa' });
+      return;
+    }
+
+    // Mapear plan interno a key del backend
+    const planMap: { [key: string]: string } = {
+      starter: 'basico',
+      pro: 'fiscal',
+      business: 'erp',
+      enterprise: 'ilimitado'
+    };
+
+    const planKey = planMap[this.planActual];
+    if (!planKey) {
+      Swal.fire({ icon: 'error', title: 'Error', text: 'Plan no valido', confirmButtonColor: '#8e24aa' });
+      return;
+    }
+
+    this.checkoutLoading = true;
+    this.mostrarCheckout = false;
+
+    const checkoutData = {
+      plan: planKey,
+      cicloFacturacion: this.cicloFacturacion,
+      firebaseUid: firebaseUid,
+      customerName: this.perfilForm.get('nombre')?.value || '',
+      customerEmail: this.email,
+      customerPhone: this.perfilForm.get('phone')?.value || ''
+    };
+
+    this.paymentsService.createCheckout(checkoutData).subscribe({
+      next: (response) => {
+        this.checkoutLoading = false;
+        this.mostrarCheckout = true;
+        this.cdr.detectChanges();
+
+        setTimeout(() => {
+          this.paymentsService.initConektaCheckout(
+            response.checkoutRequestId,
+            '#conekta-checkout-container',
+            (order) => {
+              this.mostrarCheckout = false;
+              this.suscripcionActiva = true;
+              this.enPeriodoPrueba = false;
+              this.cdr.detectChanges();
+              Swal.fire({
+                icon: 'success',
+                title: 'Pago exitoso',
+                text: 'Tu plan ha sido activado correctamente.',
+                confirmButtonColor: '#8e24aa'
+              });
+            },
+            (error) => {
+              Swal.fire({
+                icon: 'error',
+                title: 'Error en el pago',
+                text: 'Hubo un problema al procesar tu pago. Intenta de nuevo.',
+                confirmButtonColor: '#8e24aa'
+              });
+            }
+          );
+        }, 500);
+      },
+      error: (error) => {
+        this.checkoutLoading = false;
+        console.error('Error al crear checkout:', error);
+        Swal.fire({
+          icon: 'error',
+          title: 'Error',
+          text: error.error?.message || 'No se pudo iniciar el proceso de pago',
+          confirmButtonColor: '#8e24aa'
+        });
+      }
     });
   }
 
