@@ -45,10 +45,13 @@ export class RolesController {
     return this.rolesService.findUserRole(firebaseUid);
   }
 
-  @Get('permissions/:firebaseUid')
-  getUserPermissions(@Param('firebaseUid') firebaseUid: string) {
-    this.logger.log('GET /roles/permissions/' + firebaseUid);
-    return this.rolesService.getUserPermissions(firebaseUid);
+ @Get('permissions/:firebaseUid')
+  getUserPermissions(
+    @Param('firebaseUid') firebaseUid: string,
+    @Query('cuentaUid') cuentaUid?: string,
+  ) {
+    this.logger.log('GET /roles/permissions/' + firebaseUid + ' cuentaUid=' + (cuentaUid || 'none'));
+    return this.rolesService.getUserPermissions(firebaseUid, cuentaUid);
   }
 
   @Post('create-sub-user')

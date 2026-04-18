@@ -107,15 +107,19 @@ async getUserAccounts(usuarioFirebaseUid: string): Promise<any[]> {
     return accounts;
   }
 
-  async findUserRole(usuarioFirebaseUid: string): Promise<UsuarioRole | null> {
+  async findUserRole(usuarioFirebaseUid: string, cuentaFirebaseUid?: string): Promise<UsuarioRole | null> {
+    const where: any = { usuarioFirebaseUid };
+    if (cuentaFirebaseUid) {
+      where.cuentaFirebaseUid = cuentaFirebaseUid;
+    }
     return this.usuarioRolesRepository.findOne({
-      where: { usuarioFirebaseUid },
+      where,
       relations: ['rol'],
     });
   }
 
-  async getUserPermissions(usuarioFirebaseUid: string): Promise<Record<string, any> | null> {
-    const userRole = await this.findUserRole(usuarioFirebaseUid);
+  async getUserPermissions(usuarioFirebaseUid: string, cuentaFirebaseUid?: string): Promise<Record<string, any> | null> {
+    const userRole = await this.findUserRole(usuarioFirebaseUid, cuentaFirebaseUid);
     if (!userRole) return null;
     return userRole.rol.permisos;
   }
