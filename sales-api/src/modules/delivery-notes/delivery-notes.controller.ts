@@ -1,3 +1,5 @@
+import { PermissionsGuard } from '../../auth/guards/permissions.guard';
+import { RequirePermission } from '../../auth/decorators/require-permission.decorator';
 import { Controller, Get, Post, Body, Put, Param, Delete, UseGuards, HttpStatus, Query, Res, Req } from '@nestjs/common';
 import type { Response, Request } from 'express';
 import { ApiTags, ApiOperation, ApiResponse, ApiParam, ApiQuery, ApiBearerAuth } from '@nestjs/swagger';
@@ -13,7 +15,7 @@ import { Public } from '../../auth/decorators/public.decorator';
 @ApiTags('DeliveryNotes')
 @ApiBearerAuth()
 @Controller('delivery-notes')
-@UseGuards(JwtAuthGuard)
+@UseGuards(JwtAuthGuard, PermissionsGuard)
 export class DeliveryNotesController {
   constructor(private readonly deliveryNotesService: DeliveryNotesService) {}
 
@@ -59,6 +61,7 @@ export class DeliveryNotesController {
   @ApiResponse({ status: HttpStatus.CREATED, description: 'Nota creada exitosamente con folio generado', type: DeliveryNote })
   @ApiResponse({ status: HttpStatus.BAD_REQUEST, description: 'Datos inválidos' })
   @ApiResponse({ status: HttpStatus.UNAUTHORIZED, description: 'No autorizado' })
+  @RequirePermission('guias_remision.crear')
   create(
     @Body() createDeliveryNoteDto: CreateDeliveryNoteDto,
     @CurrentUser() user: any,
@@ -111,6 +114,7 @@ export class DeliveryNotesController {
   @ApiResponse({ status: HttpStatus.BAD_REQUEST, description: 'Datos inválidos' })
   @ApiResponse({ status: HttpStatus.NOT_FOUND, description: 'Nota no encontrada' })
   @ApiResponse({ status: HttpStatus.UNAUTHORIZED, description: 'No autorizado' })
+  @RequirePermission('guias_remision.editar')
   update(
     @Param('id') id: string,
     @Body() updateDeliveryNoteDto: UpdateDeliveryNoteDto,
@@ -126,6 +130,7 @@ export class DeliveryNotesController {
   @ApiResponse({ status: HttpStatus.NOT_FOUND, description: 'Nota no encontrada' })
   @ApiResponse({ status: HttpStatus.BAD_REQUEST, description: 'No se puede eliminar una nota entregada' })
   @ApiResponse({ status: HttpStatus.UNAUTHORIZED, description: 'No autorizado' })
+  @RequirePermission('guias_remision.eliminar')
   remove(@Param('id') id: string, @CurrentUser() user: any) {
     return this.deliveryNotesService.remove(id, user.uid);
   }

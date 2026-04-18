@@ -1,3 +1,5 @@
+import { PermissionsGuard } from '../../auth/guards/permissions.guard';
+import { RequirePermission } from '../../auth/decorators/require-permission.decorator';
 import { Controller, Get, Post, Body, Put, Param, Delete, UseGuards, Res, Req, HttpStatus, Headers, Query } from '@nestjs/common';
 import type { Response, Request } from 'express';
 import { ApiTags, ApiOperation, ApiResponse, ApiParam, ApiQuery, ApiBearerAuth } from '@nestjs/swagger';
@@ -12,7 +14,7 @@ import { Public } from '../../auth/decorators/public.decorator';
 @ApiTags('SaleNotes')
 @ApiBearerAuth()
 @Controller('sale-notes')
-@UseGuards(JwtAuthGuard)
+@UseGuards(JwtAuthGuard, PermissionsGuard)
 export class SaleNotesController {
   constructor(private readonly saleNotesService: SaleNotesService) {}
 
@@ -52,6 +54,7 @@ export class SaleNotesController {
 @Post()
 @ApiOperation({ summary: 'Crear una nota de venta' })
 @ApiResponse({ status: 201, description: 'Nota creada exitosamente con folio generado' })
+@RequirePermission('notas_venta.crear')
 create(@Body() createSaleNoteDto: CreateSaleNoteDto, @CurrentUser() user: any, @Query('cuentaUid') cuentaUid?: string) {
     const uid = cuentaUid || user.uid;
     console.log('📥 BODY RECIBIDO:', JSON.stringify(createSaleNoteDto, null, 2));
@@ -93,6 +96,7 @@ create(@Body() createSaleNoteDto: CreateSaleNoteDto, @CurrentUser() user: any, @
 
   @Put(':id')
   @ApiOperation({ summary: 'Actualizar una nota de venta' })
+  @RequirePermission('notas_venta.editar')
   update(
     @Param('id') id: string,
     @Body() updateSaleNoteDto: UpdateSaleNoteDto,
@@ -103,6 +107,7 @@ create(@Body() createSaleNoteDto: CreateSaleNoteDto, @CurrentUser() user: any, @
 
   @Delete(':id')
   @ApiOperation({ summary: 'Eliminar una nota de venta' })
+  @RequirePermission('notas_venta.eliminar')
   remove(@Param('id') id: string, @CurrentUser() user: any) {
     return this.saleNotesService.remove(id, user.uid);
   }

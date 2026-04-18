@@ -16,6 +16,8 @@ import {
   Req,
   Headers
 } from '@nestjs/common';
+import { PermissionsGuard } from '../../auth/guards/permissions.guard';
+import { RequirePermission } from '../../auth/decorators/require-permission.decorator';
 import type { Response, Request } from 'express';
 import { ApiTags, ApiBearerAuth, ApiOperation, ApiParam, ApiQuery, ApiResponse } from '@nestjs/swagger';
 import { JwtAuthGuard } from '../../auth/jwt-auth.guard';
@@ -28,7 +30,7 @@ import { UsuariosService } from '../usuarios/usuarios.service';
 
 @ApiTags('Cotizaciones')
 @ApiBearerAuth()
-@UseGuards(JwtAuthGuard)
+@UseGuards(JwtAuthGuard, PermissionsGuard)
 @Controller('cotizaciones')
 export class CotizacionesController {
   private readonly logger = new Logger(CotizacionesController.name);
@@ -39,6 +41,7 @@ export class CotizacionesController {
   @HttpCode(HttpStatus.CREATED)
   @ApiOperation({ summary: 'Crear nueva cotización' })
   @ApiResponse({ status: HttpStatus.CREATED, description: 'Cotización creada exitosamente con folio generado' })
+  @RequirePermission('cotizaciones.crear')
   async create(
     @Body() createCotizacionDto: CreateCotizacionDto,
     @CurrentUser() user?: any,
@@ -182,6 +185,7 @@ export class CotizacionesController {
 
   @Put(':id')
   @ApiOperation({ summary: 'Actualizar una cotización' })
+@RequirePermission('cotizaciones.editar')
   async update(
     @Param('id', ParseIntPipe) id: number,
     @Body() updateCotizacionDto: UpdateCotizacionDto,
@@ -202,6 +206,7 @@ export class CotizacionesController {
   @Delete(':id')
   @HttpCode(HttpStatus.NO_CONTENT)
   @ApiOperation({ summary: 'Eliminar una cotización' })
+@RequirePermission('cotizaciones.eliminar')
   async remove(
     @Param('id', ParseIntPipe) id: number,
     @CurrentUser() user?: any

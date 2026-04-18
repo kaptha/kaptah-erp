@@ -1,3 +1,5 @@
+import { PermissionsGuard } from '../../auth/guards/permissions.guard';
+import { RequirePermission } from '../../auth/decorators/require-permission.decorator';
 import { Controller, Get, Post, Put, Delete, Body, Param, UseGuards, HttpStatus, Res, Req, Query } from '@nestjs/common';
 import type { Response, Request } from 'express';
 import { ApiTags, ApiOperation, ApiResponse, ApiParam, ApiQuery, ApiBearerAuth } from '@nestjs/swagger';
@@ -13,7 +15,7 @@ import { Public } from '../../auth/decorators/public.decorator';
 @ApiTags('SalesOrders')
 @ApiBearerAuth()
 @Controller('sales-orders')
-@UseGuards(JwtAuthGuard)
+@UseGuards(JwtAuthGuard, PermissionsGuard)
 export class SalesOrdersController {
   constructor(private readonly salesOrdersService: SalesOrdersService) {}
 
@@ -56,6 +58,7 @@ export class SalesOrdersController {
   @ApiResponse({ status: HttpStatus.CREATED, description: 'Orden creada exitosamente con folio generado', type: SalesOrder })
   @ApiResponse({ status: HttpStatus.BAD_REQUEST, description: 'Datos inválidos' })
   @ApiResponse({ status: HttpStatus.UNAUTHORIZED, description: 'No autorizado' })
+  @RequirePermission('ordenes_venta.crear')
   create(@Body() createSalesOrderDto: CreateSalesOrderDto, @CurrentUser() user: any, @Query('cuentaUid') cuentaUid?: string) {
     return this.salesOrdersService.create(createSalesOrderDto, cuentaUid || user.uid);
   }
@@ -104,6 +107,7 @@ export class SalesOrdersController {
   @ApiResponse({ status: HttpStatus.BAD_REQUEST, description: 'Datos inválidos' })
   @ApiResponse({ status: HttpStatus.NOT_FOUND, description: 'Orden no encontrada' })
   @ApiResponse({ status: HttpStatus.UNAUTHORIZED, description: 'No autorizado' })
+  @RequirePermission('ordenes_venta.editar')
   update(
     @Param('id') id: string,
     @Body() updateSalesOrderDto: UpdateSalesOrderDto,
@@ -118,6 +122,7 @@ export class SalesOrdersController {
   @ApiResponse({ status: HttpStatus.OK, description: 'Orden eliminada exitosamente' })
   @ApiResponse({ status: HttpStatus.NOT_FOUND, description: 'Orden no encontrada' })
   @ApiResponse({ status: HttpStatus.UNAUTHORIZED, description: 'No autorizado' })
+  @RequirePermission('ordenes_venta.eliminar')
   remove(@Param('id') id: string, @CurrentUser() user: any) {
     return this.salesOrdersService.remove(id, user.uid);
   }
