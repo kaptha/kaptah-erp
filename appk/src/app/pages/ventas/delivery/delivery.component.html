@@ -16,7 +16,7 @@
 
   <!-- Acciones principales y búsqueda -->
   <div class="actions-container">
-    <button mat-raised-button class="btn-primary" (click)="agregarGuia()">
+    <button mat-raised-button class="btn-primary" (click)="agregarGuia()" *appHasPermission="'guias_remision.crear'">
       <mat-icon>add</mat-icon> Nueva Guía
     </button>
     
@@ -102,11 +102,11 @@
               <mat-icon color="primary">email</mat-icon>
               <span>Enviar por Email</span>
             </button>
-            <button mat-menu-item (click)="editarGuia(delivery)">
+            <button mat-menu-item (click)="editarGuia(delivery)" *appHasPermission="'guias_remision.editar'">
               <mat-icon>edit</mat-icon>
               <span>Editar</span>
             </button>
-            <button mat-menu-item (click)="eliminarGuia(delivery.id)">
+            <button mat-menu-item (click)="eliminarGuia(delivery.id)" *appHasPermission="'guias_remision.eliminar'">
               <mat-icon color="warn">delete</mat-icon>
               <span>Eliminar</span>
             </button>
@@ -168,11 +168,11 @@
             <mat-icon color="primary">email</mat-icon>
             <span>Enviar por Email</span>
           </button>
-          <button mat-menu-item (click)="editarGuia(delivery)">
+          <button mat-menu-item (click)="editarGuia(delivery)" *appHasPermission="'guias_remision.editar'">
             <mat-icon>edit</mat-icon>
             <span>Editar</span>
           </button>
-          <button mat-menu-item (click)="eliminarGuia(delivery.id)">
+          <button mat-menu-item (click)="eliminarGuia(delivery.id)" *appHasPermission="'guias_remision.eliminar'">
             <mat-icon color="warn">delete</mat-icon>
             <span>Eliminar</span>
           </button>

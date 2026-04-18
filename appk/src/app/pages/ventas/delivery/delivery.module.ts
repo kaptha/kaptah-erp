@@ -1,3 +1,4 @@
+import { SharedModule } from '../../../shared/shared.module';
 import { NgModule } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
@@ -28,6 +29,7 @@ const routes = [
     CommonModule,
     RouterModule.forChild(routes),
     FormsModule,
+    SharedModule,
     ReactiveFormsModule,
     MaterialModule,
     MatMenuModule

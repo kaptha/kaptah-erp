@@ -1,3 +1,4 @@
+import { SharedModule } from '../../../shared/shared.module';
 import { NgModule } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
@@ -8,7 +9,7 @@ import { MatMenuModule } from '@angular/material/menu';
 // Componentes
 import { OrdersComponent } from './orders.component';
 import { OrderFormModalComponent } from './order-form-modal/order-form-modal.component';
-import { SendOrderDialogComponent } from './send-order-dialog/send-order-dialog.component'; // <-- CORREGIR NOMBRE
+import { SendOrderDialogComponent } from './send-order-dialog/send-order-dialog.component';
 import { OrderDetailComponent } from './order-detail/order-detail.component';
 const routes = [
   {
@@ -28,6 +29,7 @@ const routes = [
     CommonModule,
     RouterModule.forChild(routes),
     FormsModule,
+    SharedModule,
     ReactiveFormsModule,
     MaterialModule,
     MatMenuModule

@@ -16,7 +16,7 @@
 
   <!-- Acciones principales y búsqueda -->
   <div class="actions-container">
-    <button mat-raised-button class="btn-primary" (click)="agregarCotizacion()">
+    <button mat-raised-button class="btn-primary" (click)="agregarCotizacion()" *appHasPermission="'cotizaciones.crear'">
       <mat-icon>add</mat-icon> Nueva Cotización
     </button>
     
@@ -122,7 +122,7 @@
               <mat-icon>visibility</mat-icon>
               <span>Ver detalle</span>
             </button>
-            <button mat-menu-item (click)="editarCotizacion(cot)">
+            <button mat-menu-item (click)="editarCotizacion(cot)" *appHasPermission="'cotizaciones.editar'">
               <mat-icon>edit</mat-icon>
               <span>Editar</span>
             </button>
@@ -134,7 +134,7 @@
               <mat-icon>picture_as_pdf</mat-icon>
               <span>Descargar PDF</span>
             </button>
-            <button mat-menu-item (click)="eliminarCotizacion(cot.id)">
+            <button mat-menu-item (click)="eliminarCotizacion(cot.id)" *appHasPermission="'cotizaciones.eliminar'">
               <mat-icon color="warn">delete</mat-icon>
               <span>Eliminar</span>
             </button>
@@ -212,10 +212,10 @@
             <mat-icon>visibility</mat-icon>
             <span>Ver detalle</span>
           </button>
-          <button mat-menu-item (click)="editarCotizacion(cot)">
-            <mat-icon>edit</mat-icon>
-            <span>Editar</span>
-          </button>
+          <button mat-menu-item (click)="editarCotizacion(cot)" *appHasPermission="'cotizaciones.editar'">
+              <mat-icon>edit</mat-icon>
+              <span>Editar</span>
+            </button>
           <button mat-menu-item (click)="enviarPorEmail(cot)">
             <mat-icon color="primary">email</mat-icon>
             <span>Enviar por Email</span>
@@ -224,7 +224,7 @@
             <mat-icon>picture_as_pdf</mat-icon>
             <span>Descargar PDF</span>
           </button>
-          <button mat-menu-item (click)="eliminarCotizacion(cot.id || 0)">
+          <button mat-menu-item (click)="eliminarCotizacion(cot.id || 0)" *appHasPermission="'cotizaciones.eliminar'">
             <mat-icon color="warn">delete</mat-icon>
             <span>Eliminar</span>
           </button>

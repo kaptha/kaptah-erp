@@ -1,3 +1,4 @@
+import { SharedModule } from '../../shared/shared.module';
 import { NgModule } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
@@ -41,6 +42,7 @@ import { CotizacionesService } from '../../services/cotizaciones.service';
     exports: [CotizacionesComponent], imports: [CommonModule,
         RouterModule,
         FormsModule,
+        SharedModule,
         ReactiveFormsModule,
         NgxMatSelectSearchModule,
         MatTableModule,

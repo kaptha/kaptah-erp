@@ -6,17 +6,20 @@ import { MaterialModule } from './material.module';
 
 // Importa componentes compartidos
 import { SidebarComponent } from './sidebar/sidebar.component';
+import { HasPermissionDirective } from '../directives/has-permission.directive';
 import { HeaderComponent } from './header/header.component';
 
 @NgModule({
   declarations: [
     SidebarComponent,
-    HeaderComponent
+    HeaderComponent,
+HasPermissionDirective
   ],
   exports: [
     // Exporta componentes
     SidebarComponent,
     HeaderComponent,
+HasPermissionDirective,
     // Exporta módulos para que estén disponibles en módulos que importan SharedModule
     CommonModule,
     RouterModule,
