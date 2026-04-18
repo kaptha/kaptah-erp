@@ -55,7 +55,9 @@ export class LogoService {
    */
   getLogo(): Observable<any> {
     const headers = this.getHeaders();
-    return this.http.get(`${this.apiUrl}/current`, { headers });
+    const cuentaUid = localStorage.getItem('activeCuentaUid') || '';
+    const params = cuentaUid ? `?cuentaUid=${cuentaUid}` : '';
+    return this.http.get(`${this.apiUrl}/current${params}`, { headers });
   }
 
   /**
