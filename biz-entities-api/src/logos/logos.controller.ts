@@ -11,7 +11,8 @@ import {
   NotFoundException,
   UseGuards,
   Logger,
-  Param
+  Param,
+  Query
 } from '@nestjs/common';
 import { existsSync, accessSync, constants } from 'fs';
 import { FileInterceptor } from '@nestjs/platform-express';
@@ -41,16 +42,16 @@ export class LogosController {
     private readonly usersService: UsersService
   ) {}
 
-  @Get('current')
-  async getCurrentLogo(@Req() req: RequestWithUser, @Res() res: Response) {
+ @Get('current')
+  async getCurrentLogo(@Req() req: RequestWithUser, @Res() res: Response, @Query('cuentaUid') cuentaUid?: string) {
     try {
       if (!req.user || !req.user.firebaseUid) {
         return res.status(HttpStatus.UNAUTHORIZED).json({
           message: 'No se pudo obtener el UID de Firebase del usuario',
         });
       }
-      
-      const user = await this.usersService.findUserByFirebaseUid(req.user.firebaseUid);
+      const uidToUse = cuentaUid || req.user.firebaseUid;
+      const user = await this.usersService.findUserByFirebaseUid(uidToUse);
       if (!user) {
         return res.status(HttpStatus.NOT_FOUND).json({
           message: 'Usuario no encontrado en la base de datos',
