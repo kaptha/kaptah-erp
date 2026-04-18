@@ -16,7 +16,7 @@
 
   <!-- Acciones principales y búsqueda -->
   <div class="actions-container">
-    <button mat-raised-button class="btn-primary" (click)="openClientDialog()">
+    <button mat-raised-button class="btn-primary" (click)="openClientDialog()" *appHasPermission="'clientes.crear'">
       <mat-icon>add</mat-icon> Agregar cliente
     </button>
     
@@ -88,11 +88,11 @@
             <mat-icon>more_vert</mat-icon>
           </button>
           <mat-menu #menu="matMenu">
-            <button mat-menu-item (click)="editClient(client)">
+            <button mat-menu-item (click)="editClient(client)" *appHasPermission="'clientes.editar'">
               <mat-icon>edit</mat-icon>
               <span>Editar</span>
             </button>
-            <button mat-menu-item (click)="deleteClient($event, client.ID)">
+            <button mat-menu-item (click)="deleteClient($event, client.ID)" *appHasPermission="'clientes.eliminar'">
               <mat-icon color="warn">delete</mat-icon>
               <span>Eliminar</span>
             </button>
@@ -141,11 +141,11 @@
           <mat-icon>more_vert</mat-icon>
         </button>
         <mat-menu #mobileMenu="matMenu">
-          <button mat-menu-item (click)="editClient(client)">
+          <button mat-menu-item (click)="editClient(client)" *appHasPermission="'clientes.editar'">
             <mat-icon>edit</mat-icon>
             <span>Editar</span>
           </button>
-          <button mat-menu-item (click)="deleteClient($event, client.ID)">
+          <button mat-menu-item (click)="deleteClient($event, client.ID)" *appHasPermission="'clientes.eliminar'">
             <mat-icon color="warn">delete</mat-icon>
             <span>Eliminar</span>
           </button>

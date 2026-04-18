@@ -1,3 +1,4 @@
+import { SharedModule } from '../../shared/shared.module';
 import { NgModule, CUSTOM_ELEMENTS_SCHEMA, NO_ERRORS_SCHEMA } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
@@ -37,6 +38,7 @@ const routes = [
   imports: [
     CommonModule,
     RouterModule.forChild(routes), // Para lazy loading
+    SharedModule,
     FormsModule,
     ReactiveFormsModule,
     MaterialModule,
