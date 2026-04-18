@@ -1,3 +1,7 @@
+import { HttpModule } from '@nestjs/axios';
+import { InventoryProcessor } from './processors/inventory.processor';
+import { QueueName } from './config/queue.config';
+
 import { Module } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
@@ -67,6 +71,10 @@ import { AppService } from './app.service';
 
     // Módulo de Schedule para cron jobs
     ScheduleModule.forRoot(),
+    // Cola de inventario
+    BullModule.registerQueue({ name: QueueName.INVENTORY_UPDATE }),
+    BullModule.registerQueue({ name: QueueName.NOTIFICATION }),
+    HttpModule,
 
     // Módulos de la aplicación
     EmailModule,
@@ -76,6 +84,6 @@ import { AppService } from './app.service';
     SchedulerModule,
   ],
   controllers: [AppController],
-  providers: [AppService],
+  providers: [AppService, InventoryProcessor],
 })
 export class AppModule {}
