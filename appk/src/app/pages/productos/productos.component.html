@@ -16,7 +16,7 @@
 
   <!-- Acciones principales -->
   <div class="actions">
-    <button mat-raised-button class="btn-primary" (click)="agregarProducto()">
+    <button mat-raised-button class="btn-primary" (click)="agregarProducto()" *appHasPermission="'productos.crear'">
       <mat-icon>add</mat-icon> Agregar producto
     </button>
     
@@ -103,11 +103,11 @@
             <mat-icon>more_vert</mat-icon>
           </button>
           <mat-menu #menu="matMenu">
-            <button mat-menu-item (click)="editarProducto(element)">
+            <button mat-menu-item (click)="editarProducto(element)" *appHasPermission="'productos.editar'">
               <mat-icon>edit</mat-icon>
               <span>Editar</span>
             </button>
-            <button mat-menu-item (click)="eliminarProducto(element)">
+            <button mat-menu-item (click)="eliminarProducto(element)" *appHasPermission="'productos.eliminar'">
               <mat-icon color="warn">delete</mat-icon>
               <span>Eliminar</span>
             </button>
@@ -172,10 +172,10 @@
       </div>
       
       <div class="mobile-card-actions">
-        <button mat-icon-button color="primary" matTooltip="Editar" (click)="editarProducto(product)">
+        <button mat-icon-button color="primary" matTooltip="Editar" (click)="editarProducto(product)" *appHasPermission="'productos.editar'">
           <mat-icon>edit</mat-icon>
         </button>
-        <button mat-icon-button color="warn" matTooltip="Eliminar" (click)="eliminarProducto(product)">
+        <button mat-icon-button color="warn" matTooltip="Eliminar" (click)="eliminarProducto(product)" *appHasPermission="'productos.eliminar'">
           <mat-icon>delete</mat-icon>
         </button>
       </div>
