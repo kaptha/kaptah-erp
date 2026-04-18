@@ -1,7 +1,8 @@
 import { Directive, Input, TemplateRef, ViewContainerRef, OnInit } from '@angular/core';
 
 @Directive({
-  selector: '[appHasPermission]'
+  selector: '[appHasPermission]',
+  standalone: false
 })
 export class HasPermissionDirective implements OnInit {
   @Input('appHasPermission') permission: string = '';
