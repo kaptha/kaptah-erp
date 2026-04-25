@@ -186,12 +186,13 @@ private async obtenerLogoUsuario(userId: string, token: string, cuentaUid?: stri
   }
   
   console.log('👤 User ID final a usar:', finalUserId);
-
+  // Si hay cuentaUid, usar ese para buscar datos (sub-usuarios)
+  const ownerUid = cuentaUid || finalUserId;
   // Obtener datos del usuario desde MySQL
   if (finalUserId) {
     try {
       console.log('👤 Obteniendo datos del usuario desde MySQL...');
-      datosUsuario = await this.usuariosService.getDatosParaTemplate(finalUserId);
+      datosUsuario = await this.usuariosService.getDatosParaTemplate(ownerUid);
       console.log('✅ Datos del usuario obtenidos:', {
         nombre: datosUsuario.sucursal_nombre,
         rfc: datosUsuario.empresa_rfc,
@@ -203,7 +204,7 @@ private async obtenerLogoUsuario(userId: string, token: string, cuentaUid?: stri
   }
 
   try {
-    const saleNote = await this.findOne(id, finalUserId);
+    const saleNote = await this.findOne(id, ownerUid);
     console.log('✅ Nota de venta encontrada:', saleNote.id);
 
     // Limpiar sufijo -delivery del estilo (frontend manda 'classic-delivery', template es 'remision-classic.html')
