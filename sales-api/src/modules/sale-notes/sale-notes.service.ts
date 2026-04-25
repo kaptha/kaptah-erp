@@ -57,12 +57,13 @@ export class SaleNotesService {
  /**
  * Obtiene el logo del usuario como base64
  */
-private async obtenerLogoUsuario(userId: string, token: string): Promise<string | null> {
+private async obtenerLogoUsuario(userId: string, token: string, cuentaUid?: string): Promise<string | null> {
   try {
     console.log('🔍 Solicitando logo al biz-entities-api...');
     console.log('🔑 Token a enviar:', token?.substring(0, 50) + '...');
     
-    const logoApiUrl = `${this.bizEntitiesApiUrl}/api/logos/current`;
+    const cuentaParam = cuentaUid ? `?cuentaUid=${cuentaUid}` : '';
+    const logoApiUrl = `${this.bizEntitiesApiUrl}/api/logos/current${cuentaParam}`;
     console.log('🌐 URL destino:', logoApiUrl);
     
     const response = await axios.get<LogoResponse>(logoApiUrl, {
@@ -151,10 +152,11 @@ private async obtenerLogoUsuario(userId: string, token: string): Promise<string 
 
   // MÉTODO: Generar PDF con estilo
   async generarPdfEstiloRemision(
-  id: string, 
-  userId: string, 
+ id: string,
+  userId: string,
   estilo: string,
-  token: string | null
+  token: string | null,
+  cuentaUid?: string
 ): Promise<Buffer> {
   console.log('📄 Iniciando generación de PDF');
   console.log('📋 Sale Note ID:', id);
@@ -224,7 +226,7 @@ private async obtenerLogoUsuario(userId: string, token: string): Promise<string 
     let logoDataUri: string;
 
     if (token) {
-      const logoUrl = await this.obtenerLogoUsuario(finalUserId, token);
+      const logoUrl = await this.obtenerLogoUsuario(finalUserId, token, cuentaUid);
       
       if (logoUrl) {
         logoDataUri = logoUrl;

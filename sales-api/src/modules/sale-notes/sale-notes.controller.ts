@@ -25,21 +25,20 @@ export class SaleNotesController {
     @Param('id') id: string,
     @Param('style') estilo: string,
     @CurrentUser('uid') userId: string,
+    @Query('cuentaUid') cuentaUid: string,
     @Req() req: Request,
     @Res() res: Response,
   ) {
     console.log('🔥 Request para generar PDF de nota de venta');
-    
     const authHeader = req.headers.authorization;
     const token = authHeader?.startsWith('Bearer ') ? authHeader : null;
-    
     console.log('🔐 Token recibido:', token ? 'Sí' : 'No');
-    
     const pdf = await this.saleNotesService.generarPdfEstiloRemision(
-      id, 
+      id,
       null,
       estilo,
-      token
+      token,
+      cuentaUid
     );
 
     res.set({
