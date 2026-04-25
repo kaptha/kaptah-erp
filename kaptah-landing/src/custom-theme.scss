@@ -20,7 +20,7 @@ $kaptah-landing-warn: mat.define-palette(mat.$red-palette);
 
 // Create the theme object. A theme consists of configurations for individual
 // theming systems such as "color" or "typography".
-$kaptah-landing-theme: mat.define-light-theme((
+$kaptah-landing-theme: mat.define-dark-theme((
   color: (
     primary: $kaptah-landing-primary,
     accent: $kaptah-landing-accent,

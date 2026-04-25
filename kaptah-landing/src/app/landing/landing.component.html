@@ -101,10 +101,10 @@
   <!-- ============================= -->
   <!--      FREELANCER PLANS        -->
   <!-- ============================= -->
-  <div class="pricing-cards fade-animation reveal" *ngIf="activeTab === 'freelancer'">
+  <div class="pricing-cards fade-animation" *ngIf="activeTab === 'freelancer'">
 
     <!-- BASIC -->
-    <div class="pricing-card reveal">
+    <div class="pricing-card">
       <span class="tag basic">Básico</span>
       <mat-icon class="plan-icon">star_border</mat-icon>
       <h3 class="price">$99 MXN</h3>
@@ -142,7 +142,7 @@
   <!-- ============================= -->
   <!--          EMPRESA PLANS       -->
   <!-- ============================= -->
-  <div class="pricing-cards fade-animation reveal" *ngIf="activeTab === 'empresa'">
+  <div class="pricing-cards fade-animation" *ngIf="activeTab === 'empresa'">
 
     <!-- NEGOCIO -->
     <div class="pricing-card">
@@ -301,41 +301,80 @@
   <div class="testimonials-grid">
 
     <!-- TESTIMONIO 1 -->
-    <div class="testimonial-card reveal">
+    <div class="testimonial-card">
       <div class="avatar-box">
         <img src="https://i.pravatar.cc/100?img=12" alt="Usuario" class="avatar"/>
       </div>
-      <h3 class="name">María López</h3>
+      <h3 class="name">Maria Lopez</h3>
       <p class="role">Contadora Independiente</p>
       <div class="stars">★★★★★</div>
       <p class="comment">
-        “Kaptah me ahorra horas cada semana. La descarga masiva del SAT es increíblemente rápida.”
+        Kaptah me ahorra horas cada semana. La descarga masiva del SAT es increiblemente rapida.
       </p>
     </div>
 
     <!-- TESTIMONIO 2 -->
-    <div class="testimonial-card reveal">
+    <div class="testimonial-card">
       <div class="avatar-box">
         <img src="https://i.pravatar.cc/100?img=32" alt="Usuario" class="avatar"/>
       </div>
-      <h3 class="name">Carlos Méndez</h3>
-      <p class="role">Dueño de PyME</p>
+      <h3 class="name">Carlos Mendez</h3>
+      <p class="role">Dueno de PyME</p>
       <div class="stars">★★★★★</div>
       <p class="comment">
-        “Los reportes y el control de pagos me permiten ver claramente mis ingresos cada mes.”
+        Los reportes y el control de pagos me permiten ver claramente mis ingresos cada mes.
       </p>
     </div>
 
     <!-- TESTIMONIO 3 -->
-    <div class="testimonial-card reveal">
+    <div class="testimonial-card">
       <div class="avatar-box">
         <img src="https://i.pravatar.cc/100?img=47" alt="Usuario" class="avatar"/>
       </div>
-      <h3 class="name">Ana Rodríguez</h3>
+      <h3 class="name">Ana Rodriguez</h3>
       <p class="role">Administradora</p>
       <div class="stars">★★★★★</div>
       <p class="comment">
-        “La plataforma es muy intuitiva. Emitir facturas y timbrarlas es rapidísimo.”
+        La plataforma es muy intuitiva. Emitir facturas y timbrarlas es rapidisimo.
+      </p>
+    </div>
+
+    <!-- TESTIMONIO 4 -->
+    <div class="testimonial-card">
+      <div class="avatar-box">
+        <img src="https://i.pravatar.cc/100?img=15" alt="Usuario" class="avatar"/>
+      </div>
+      <h3 class="name">Roberto Hernandez</h3>
+      <p class="role">Director Financiero</p>
+      <div class="stars">★★★★★</div>
+      <p class="comment">
+        Desde que usamos Kaptah, el cierre mensual se redujo de 5 dias a solo 2.
+      </p>
+    </div>
+
+    <!-- TESTIMONIO 5 -->
+    <div class="testimonial-card">
+      <div class="avatar-box">
+        <img src="https://i.pravatar.cc/100?img=25" alt="Usuario" class="avatar"/>
+      </div>
+      <h3 class="name">Laura Gutierrez</h3>
+      <p class="role">Freelancer / Disenadora</p>
+      <div class="stars">★★★★★</div>
+      <p class="comment">
+        Por fin una plataforma de facturacion que no parece de los 90s. Moderna y facil de usar.
+      </p>
+    </div>
+
+    <!-- TESTIMONIO 6 -->
+    <div class="testimonial-card">
+      <div class="avatar-box">
+        <img src="https://i.pravatar.cc/100?img=60" alt="Usuario" class="avatar"/>
+      </div>
+      <h3 class="name">Fernando Torres</h3>
+      <p class="role">CEO de Logistica MX</p>
+      <div class="stars">★★★★★</div>
+      <p class="comment">
+        La integracion con la descarga SAT nos ahorro contratar un servicio externo. Todo en uno.
       </p>
     </div>
 
@@ -384,7 +423,7 @@
           <div class="form-row">
             <mat-form-field appearance="fill" class="full">
               <mat-label>Nombre</mat-label>
-              <input matInput formControlName="name" placeholder="Tu nombre">
+              <input matInput formControlName="name">
               <mat-error *ngIf="contactForm.get('name')?.invalid && contactForm.get('name')?.touched">
                 Escribe tu nombre.
               </mat-error>
@@ -392,7 +431,7 @@
 
             <mat-form-field appearance="fill" class="full">
               <mat-label>Email</mat-label>
-              <input matInput formControlName="email" placeholder="tu@email.com">
+              <input matInput formControlName="email">
               <mat-error *ngIf="contactForm.get('email')?.invalid && contactForm.get('email')?.touched">
                 Escribe un email válido.
               </mat-error>
@@ -400,12 +439,12 @@
 
             <mat-form-field appearance="fill" class="full">
               <mat-label>Teléfono (opcional)</mat-label>
-              <input matInput formControlName="phone" placeholder="+52 ...">
+              <input matInput formControlName="phone">
             </mat-form-field>
 
             <mat-form-field appearance="fill" class="full">
               <mat-label>Asunto</mat-label>
-              <input matInput formControlName="subject" placeholder="Ej: Quiero una demo">
+              <input matInput formControlName="subject">
               <mat-error *ngIf="contactForm.get('subject')?.invalid && contactForm.get('subject')?.touched">
                 Escribe un asunto.
               </mat-error>
@@ -413,7 +452,7 @@
 
             <mat-form-field appearance="fill" class="full">
               <mat-label>Mensaje</mat-label>
-              <textarea matInput rows="5" formControlName="message" placeholder="Cuéntanos tu necesidad..."></textarea>
+              <textarea matInput rows="5" formControlName="message"></textarea>
               <mat-error *ngIf="contactForm.get('message')?.invalid && contactForm.get('message')?.touched">
                 Escribe tu mensaje.
               </mat-error>
@@ -485,5 +524,9 @@
     © 2025 Kaptah — Todos los derechos reservados.
   </div>
 </footer>
+<!-- SCROLL TO TOP -->
+<button class="scroll-to-top" [class.visible]="showScrollTop" (click)="scrollToTop()">
+  <mat-icon>keyboard_arrow_up</mat-icon>
+</button>
 
 

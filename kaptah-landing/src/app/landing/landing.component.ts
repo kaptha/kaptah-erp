@@ -11,13 +11,14 @@ export class LandingComponent {
   fade = false;
   ngOnInit() {
   window.addEventListener('scroll', this.revealOnScroll);
+  window.addEventListener('scroll', this.checkScrollTop);
 }
 contactEmail = 'contacto@kaptah.com';
 contactPhone = '+52 000 000 0000';
 
 sending = false;
 sentOk = false;
-
+showScrollTop = false;
 contactForm = this.fb.group({
   name: ['', [Validators.required, Validators.minLength(2)]],
   email: ['', [Validators.required, Validators.email]],
@@ -64,5 +65,12 @@ revealOnScroll = () => {
     }
   });
 };
+checkScrollTop = () => {
+  this.showScrollTop = window.scrollY > 400;
+};
+
+scrollToTop() {
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
 
 }

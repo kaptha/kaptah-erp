@@ -297,7 +297,7 @@ p {
   background: rgba(15,14,23,0.8);
   border: 1px solid rgba(164,107,255,0.5);
   margin-bottom: 20px;
-  font-size: 0.9rem;
+  font-size: 1rem;
   color: #EFE8FF;
   backdrop-filter: blur(10px);
 }
@@ -311,14 +311,14 @@ p {
 }
 
 .hero h1 {
-  font-size: 3rem;
+  font-size: 3.6rem;
   font-weight: 700;
   margin-bottom: 16px;
   text-shadow: 0 2px 16px rgba(0,0,0,0.5);
 }
 
 .hero p {
-  font-size: 1.1rem;
+  font-size: 1.25rem;
   color: #D3D3E0;
   margin-bottom: 32px;
   line-height: 1.7rem;
@@ -477,37 +477,62 @@ button[mat-stroked-button] {
 
 /* === BENEFICIOS === */
 .benefits {
-  background: #fff;
+  background: #0F0E17;
+  padding: 100px 10%;
 }
+
 .benefits h2 {
-  margin-bottom: 40px;
-  font-size: 2rem;
+  margin-bottom: 16px;
+  font-size: 2.5rem;
+  color: #fff;
+  font-weight: 700;
 }
+
 .benefits-grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(270px, 1fr));
-  gap: 25px;
+  gap: 30px;
+  margin-top: 50px;
 }
+
 .benefit {
-  background: #1A1926;
-  border-radius: 18px;
-  padding: 30px;
-  box-shadow: 0 0 20px rgba(127,63,240,0.1);
+  background: rgba(26, 25, 38, 0.6);
+  border-radius: 22px;
+  padding: 40px 30px;
+  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.3);
   color: #fff;
-  transition: all 0.25s;
+  transition: all 0.35s ease;
+  border: 1px solid rgba(127, 63, 240, 0.15);
+  backdrop-filter: blur(12px);
+  text-align: center;
 }
 
 .benefit:hover {
-  transform: translateY(-6px);
-  box-shadow: 0 8px 25px rgba(127,63,240,0.25);
+  transform: translateY(-8px);
+  box-shadow: 0 12px 35px rgba(164, 107, 255, 0.3);
+  border-color: rgba(164, 107, 255, 0.4);
+}
+
+.benefit mat-icon {
+  font-size: 48px;
+  width: 48px;
+  height: 48px;
+  color: #A46BFF;
+  margin-bottom: 20px;
+  text-shadow: 0 0 15px rgba(164, 107, 255, 0.5);
 }
 
 .benefit h3 {
   color: #fff;
+  font-size: 1.3rem;
+  margin-bottom: 12px;
+  font-weight: 600;
 }
 
 .benefit p {
-  color: #BDBDC7;
+  color: #C8C8D5;
+  font-size: 1rem;
+  line-height: 1.6;
 }
 /* ================================
    PRICING SECTION
@@ -622,7 +647,6 @@ button[mat-stroked-button] {
 
 .mat-expansion-panel-body {
   color: #C8C8D5 !important;
-  padding: 0 24px 20px !important;
   font-size: 1rem;
   line-height: 1.5rem;
 }
@@ -894,11 +918,13 @@ button[mat-stroked-button] {
 
 /* === POR QUÉ ELEGIRNOS === */
 .why {
-  background: var(--bg-light);
-  padding: 80px 10%;
+  background: #0F0E17;
+  padding: 100px 10%;
 }
 .why h2 {
   margin-bottom: 30px;
+  color: #fff;
+  font-size: 2.5rem;
 }
 .why ul {
   list-style: none;
@@ -913,6 +939,7 @@ button[mat-stroked-button] {
   gap: 10px;
   margin: 12px 0;
   font-size: 1.05rem;
+  color: #C8C8D5;
 }
 .why mat-icon {
   color: #4caf50;
@@ -1677,4 +1704,44 @@ button[mat-stroked-button] {
 
 #contact .mat-mdc-form-field.mat-focused {
   outline: none;
+}
+/* === SCROLL TO TOP === */
+.scroll-to-top {
+  position: fixed;
+  bottom: 30px;
+  right: 30px;
+  width: 50px;
+  height: 50px;
+  border-radius: 50%;
+  background: #7F3FF0;
+  border: none;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0;
+  visibility: hidden;
+  transform: translateY(20px);
+  transition: all 0.35s ease;
+  box-shadow: 0 4px 18px rgba(127, 63, 240, 0.5);
+  z-index: 3000;
+}
+
+.scroll-to-top.visible {
+  opacity: 1;
+  visibility: visible;
+  transform: translateY(0);
+}
+
+.scroll-to-top:hover {
+  background: #A46BFF;
+  transform: translateY(-3px);
+  box-shadow: 0 6px 24px rgba(164, 107, 255, 0.6);
+}
+
+.scroll-to-top mat-icon {
+  color: #fff;
+  font-size: 28px;
+  width: 28px;
+  height: 28px;
 }
