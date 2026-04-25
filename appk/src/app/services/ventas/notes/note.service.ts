@@ -73,12 +73,14 @@ export class NoteService {
 
   // NUEVO MÃ‰TODO: Descargar PDF con estilo desde el backend
   descargarPDF(noteId: string, estilo: string): Observable<Blob> {
-    const url = `${this.apiUrl}/${noteId}/pdf/${estilo}`;
+    const cuentaUid = localStorage.getItem('activeCuentaUid') || '';
+    const cuentaParam = cuentaUid ? `?cuentaUid=${cuentaUid}` : '';
+    const url = `${this.apiUrl}/${noteId}/pdf/${estilo}${cuentaParam}`;
     return this.getHeaders().pipe(
       switchMap((headers: HttpHeaders) => {
-        return this.http.get(url, { 
+        return this.http.get(url, {
           headers: headers,
-          responseType: 'blob' 
+          responseType: 'blob'
         });
       })
     );
