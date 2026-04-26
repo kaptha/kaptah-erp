@@ -137,7 +137,11 @@ async getUserAccounts(usuarioFirebaseUid: string): Promise<any[]> {
     if (existing) {
       existing.rolId = dto.rolId;
       existing.asignadoPor = adminFirebaseUid;
-      return this.usuarioRolesRepository.save(existing);
+      await this.usuarioRolesRepository.save(existing);
+      return this.usuarioRolesRepository.findOne({
+        where: { id: existing.id },
+        relations: ['rol'],
+      });
     }
 
     const assignment = this.usuarioRolesRepository.create({
@@ -145,7 +149,11 @@ async getUserAccounts(usuarioFirebaseUid: string): Promise<any[]> {
       cuentaFirebaseUid: adminFirebaseUid,
       asignadoPor: adminFirebaseUid,
     });
-    return this.usuarioRolesRepository.save(assignment);
+    await this.usuarioRolesRepository.save(assignment);
+    return this.usuarioRolesRepository.findOne({
+      where: { id: assignment.id },
+      relations: ['rol'],
+    });
   }
 
   async createCustomRole(dto: CreateRoleDto, adminFirebaseUid: string): Promise<Role> {
