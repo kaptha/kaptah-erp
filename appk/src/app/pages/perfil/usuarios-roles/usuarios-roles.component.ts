@@ -5,6 +5,7 @@ import { MatTableDataSource } from '@angular/material/table';
 import { RolesService, Role } from '../../../services/roles.service';
 import { RoleDialogComponent } from './role-dialog/role-dialog.component';
 import { SubUserDialogComponent } from './sub-user-dialog/sub-user-dialog.component';
+import Swal from 'sweetalert2';
 
 @Component({
   selector: 'app-usuarios-roles',
@@ -100,13 +101,35 @@ export class UsuariosRolesComponent implements OnInit {
   }
 
   deleteRole(role: Role): void {
-    if (role.esPredefinido) { this.snackBar.open('No se pueden eliminar roles predefinidos', 'Cerrar', { duration: 3000 }); return; }
-    if (confirm('Estas seguro de eliminar el rol "' + role.nombre + '"?')) {
-      this.rolesService.deleteRole(role.id, this.firebaseUid).subscribe({
-        next: () => { this.snackBar.open('Rol eliminado', 'Cerrar', { duration: 3000 }); this.loadRoles(); },
-        error: (err) => this.snackBar.open(err.error?.message || 'Error al eliminar', 'Cerrar', { duration: 3000 })
+    if (role.esPredefinido) {
+      Swal.fire({
+        icon: 'warning',
+        title: 'Accion no permitida',
+        text: 'No se pueden eliminar roles predefinidos',
+        confirmButtonColor: '#8e24aa'
       });
+      return;
     }
+    Swal.fire({
+      title: 'Eliminar rol',
+      text: 'Estas seguro de eliminar el rol "' + role.nombre + '"? Esta accion no se puede deshacer.',
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonText: 'Eliminar',
+      cancelButtonText: 'Cancelar',
+      confirmButtonColor: '#d32f2f',
+      cancelButtonColor: '#8e24aa'
+    }).then((result) => {
+      if (result.isConfirmed) {
+        this.rolesService.deleteRole(role.id, this.firebaseUid).subscribe({
+          next: () => {
+            Swal.fire({ icon: 'success', title: 'Eliminado', text: 'El rol ha sido eliminado', confirmButtonColor: '#8e24aa' });
+            this.loadRoles();
+          },
+          error: (err) => Swal.fire({ icon: 'error', title: 'Error', text: err.error?.message || 'Error al eliminar el rol', confirmButtonColor: '#8e24aa' })
+        });
+      }
+    });
   }
 
   getPermissionCount(role: Role): number {
@@ -160,17 +183,39 @@ export class UsuariosRolesComponent implements OnInit {
   }
 
   changeUserRole(user: any): void {
-    // Reutilizar roles disponibles para seleccionar nuevo rol
-    const newRolId = prompt('ID del nuevo rol (1-' + this.roles.length + '):');
-    if (newRolId) {
-      this.rolesService.assignRole(user.firebaseUid, parseInt(newRolId), this.firebaseUid).subscribe({
-        next: () => {
-          this.snackBar.open('Rol actualizado', 'Cerrar', { duration: 3000 });
-          this.loadUsers();
-        },
-        error: (err) => this.snackBar.open(err.error?.message || 'Error al cambiar rol', 'Cerrar', { duration: 3000 })
-      });
-    }
+    const inputOptions: { [key: string]: string } = {};
+    this.roles.forEach(role => {
+      inputOptions[role.id.toString()] = role.nombre;
+    });
+
+    Swal.fire({
+      title: 'Cambiar rol',
+      text: 'Selecciona el nuevo rol para ' + (user.nombre || user.email),
+      input: 'select',
+      inputOptions: inputOptions,
+      inputValue: user.rolId?.toString() || '',
+      inputPlaceholder: 'Selecciona un rol',
+      showCancelButton: true,
+      confirmButtonText: 'Guardar',
+      cancelButtonText: 'Cancelar',
+      confirmButtonColor: '#8e24aa',
+      inputValidator: (value) => {
+        if (!value) {
+          return 'Debes seleccionar un rol';
+        }
+        return null;
+      }
+    }).then((result) => {
+      if (result.isConfirmed && result.value) {
+        this.rolesService.assignRole(user.firebaseUid, parseInt(result.value), this.firebaseUid).subscribe({
+          next: () => {
+            this.snackBar.open('Rol actualizado', 'Cerrar', { duration: 3000 });
+            this.loadUsers();
+          },
+          error: (err) => this.snackBar.open(err.error?.message || 'Error al cambiar rol', 'Cerrar', { duration: 3000 })
+        });
+      }
+    });
   }
 
   applyUsersFilter(event: Event): void {
