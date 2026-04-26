@@ -136,6 +136,7 @@ async getUserAccounts(usuarioFirebaseUid: string): Promise<any[]> {
 
     if (existing) {
       existing.rolId = dto.rolId;
+      existing.rol = null;
       existing.asignadoPor = adminFirebaseUid;
       await this.usuarioRolesRepository.save(existing);
       return this.usuarioRolesRepository.findOne({
