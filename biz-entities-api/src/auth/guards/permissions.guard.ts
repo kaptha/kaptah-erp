@@ -25,25 +25,26 @@ export class PermissionsGuard implements CanActivate {
 
     const request = context.switchToHttp().getRequest();
     const user = request.user;
-    const cuentaUid = request.query?.cuentaUid || user?.uid;
+    const userUid = user?.uid || user?.firebaseUid;
+    const cuentaUid = request.query?.cuentaUid || userUid;
 
-    if (!user?.uid || !cuentaUid) {
-this.logger.log('Verificando permiso: ' + requiredPermission + ' para user: ' + user.uid + ' cuenta: ' + cuentaUid);
+    if (!userUid || !cuentaUid) {
+this.logger.log('Verificando permiso: ' + requiredPermission + ' para user: ' + userUid + ' cuenta: ' + cuentaUid);
       this.logger.warn('No se pudo determinar usuario o cuenta');
       throw new ForbiddenException('No se pudo verificar permisos');
     }
 
     try {
-      const permissions = await this.rolesService.getUserPermissions(user.uid, cuentaUid);
-      this.logger.log('Permisos obtenidos para ' + user.uid + ' en cuenta ' + cuentaUid + ': ' + JSON.stringify(permissions));
+      const permissions = await this.rolesService.getUserPermissions(userUid, cuentaUid);
+      this.logger.log('Permisos obtenidos para ' + userUid + ' en cuenta ' + cuentaUid + ': ' + JSON.stringify(permissions));
       const permisos = permissions;
 
       if (!permisos[modulo] || permisos[modulo][accion] !== true) {
-        this.logger.warn('Permiso denegado: ' + requiredPermission + ' para usuario ' + user.uid);
+        this.logger.warn('Permiso denegado: ' + requiredPermission + ' para usuario ' + userUid);
         throw new ForbiddenException('No tienes permiso para realizar esta accion: ' + requiredPermission);
       }
 
-      this.logger.log('Permiso concedido: ' + requiredPermission + ' para usuario ' + user.uid);
+      this.logger.log('Permiso concedido: ' + requiredPermission + ' para usuario ' + userUid);
       return true;
     } catch (error) {
       if (error instanceof ForbiddenException) throw error;
