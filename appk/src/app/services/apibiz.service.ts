@@ -180,7 +180,8 @@ private getActiveCuentaUid(): string | null {
   createProveedor(proveedorData: any): Observable<Proveedor> {
     const headers = this.getHeaders();
     console.log('Datos enviados al crear proveedor:', JSON.stringify(proveedorData));
-    return this.http.post<Proveedor>(`${this.apiUrl}/suppliers`, proveedorData, { headers })
+    const cuentaUid = localStorage.getItem('activeCuentaUid') || '';
+    return this.http.post<Proveedor>(`${this.apiUrl}/suppliers?cuentaUid=${cuentaUid}`, proveedorData, { headers })
       .pipe(
         catchError(this.handleError)
       );
@@ -203,7 +204,8 @@ private getActiveCuentaUid(): string | null {
     
     console.log('Datos enviados al actualizar proveedor:', JSON.stringify(cleanData));
     
-    return this.http.put<Proveedor>(`${this.apiUrl}/suppliers/${id}`, cleanData, { headers })
+    const cuentaUid = localStorage.getItem('activeCuentaUid') || '';
+    return this.http.put<Proveedor>(`${this.apiUrl}/suppliers/${id}?cuentaUid=${cuentaUid}`, cleanData, { headers })
       .pipe(
         catchError(this.handleError)
       );
@@ -214,7 +216,8 @@ private getActiveCuentaUid(): string | null {
     const token = localStorage.getItem('idToken');
     const headers = new HttpHeaders().set('Authorization', `Bearer ${token}`);
 
-    return this.http.delete(`${this.apiUrl}/suppliers/${ID}`, { headers }).pipe(
+    const cuentaUid = localStorage.getItem('activeCuentaUid') || '';
+    return this.http.delete(`${this.apiUrl}/suppliers/${ID}?cuentaUid=${cuentaUid}`, { headers }).pipe(
       catchError(this.handleError)
     );
   }
