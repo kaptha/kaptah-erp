@@ -28,12 +28,14 @@ export class PermissionsGuard implements CanActivate {
     const cuentaUid = request.query?.cuentaUid || user?.uid;
 
     if (!user?.uid || !cuentaUid) {
+this.logger.log('Verificando permiso: ' + requiredPermission + ' para user: ' + user.uid + ' cuenta: ' + cuentaUid);
       this.logger.warn('No se pudo determinar usuario o cuenta');
       throw new ForbiddenException('No se pudo verificar permisos');
     }
 
     try {
       const permissions = await this.rolesService.getUserPermissions(user.uid, cuentaUid);
+      this.logger.log('Permisos obtenidos para ' + user.uid + ' en cuenta ' + cuentaUid + ': ' + JSON.stringify(permissions));
       const permisos = permissions;
 
       if (!permisos[modulo] || permisos[modulo][accion] !== true) {
