@@ -229,7 +229,9 @@ export class CotizacionesService {
       'Authorization': `Bearer ${token}`
     });
 
-    const url = `${this.apiUrl}/${cotizacionId}/pdf/${estilo}`;
+    const cuentaUid = localStorage.getItem('activeCuentaUid') || '';
+    const cuentaParam = cuentaUid ? `?cuentaUid=${cuentaUid}` : '';
+    const url = `${this.apiUrl}/${cotizacionId}/pdf/${estilo}${cuentaParam}`;
     
     console.log('📄 Solicitando PDF de cotización:', { cotizacionId, estilo, url });
 
