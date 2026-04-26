@@ -18,6 +18,8 @@ import {
   ConflictException,
   ValidationPipe
 } from '@nestjs/common';
+import { PermissionsGuard } from '../auth/guards/permissions.guard';
+import { RequirePermission } from '../auth/decorators/require-permission.decorator';
 import { FirebaseAuthGuard } from '../guards/firebase-auth.guard';
 import { UpdateSupplierDto } from './dto/update-supplier.dto';
 import { Request } from 'express';
@@ -30,7 +32,7 @@ interface RequestWithUser extends Request {
 }
 
 @Controller('suppliers')
-@UseGuards(FirebaseAuthGuard)
+@UseGuards(FirebaseAuthGuard, PermissionsGuard)
 export class SuppliersController {
   private readonly logger = new Logger(SuppliersController.name);
 
@@ -38,7 +40,7 @@ export class SuppliersController {
     private readonly suppliersService: SuppliersService,
     private readonly usersService: UsersService
   ) {}
-
+  @RequirePermission('proveedores.crear')
   @Post()
   async create(@Body() createSupplierDto: CreateSupplierDto, @Req() req: RequestWithUser) {
     console.log('Datos recibidos en el backend:', createSupplierDto);
@@ -56,7 +58,7 @@ async findByFirebaseUid(@Param('firebaseUid') firebaseUid: string) {
   async findAll(@Param('realtimeDbKey') realtimeDbKey: string) {
     return this.suppliersService.findAllByRealtimeDbKey(realtimeDbKey);
   }
-  
+  @RequirePermission('proveedores.editar')
   @Put(':id')
   async update(
     @Param('id', ParseIntPipe) id: number,
@@ -73,6 +75,7 @@ async findByFirebaseUid(@Param('firebaseUid') firebaseUid: string) {
     }
   }
 
+  @RequirePermission('proveedores.eliminar')
   @Delete(':ID')
   async remove(@Param('ID', ParseIntPipe) ID: number) {
     console.log(`Recibida solicitud para eliminar proveedor con ID: ${ID}`);

@@ -5,12 +5,14 @@ import { SuppliersController } from './suppliers.controller';
 import { Supplier } from './entities/supplier.entity';
 import { UserEntityRelationsModule } from '../user-entity-relations/user-entity-relations.module';
 import { UsersModule } from '../users/users.module';
+import { RolesModule } from '../roles/roles.module';
 
 @Module({
   imports: [
     TypeOrmModule.forFeature([Supplier]),
     UserEntityRelationsModule,
     UsersModule,
+    RolesModule,
   ],
   controllers: [SuppliersController],
   providers: [SuppliersService],
