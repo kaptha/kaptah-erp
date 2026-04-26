@@ -61,6 +61,7 @@ export class PerfilComponent implements OnInit {
   perfilForm!: FormGroup;
   email: string = '';
   isLoading: boolean = false;
+  isOwner: boolean = true;
   
   // Tipo de persona y régimen fiscal
   tipoPersona: 'fisica' | 'moral' = 'fisica';
@@ -126,6 +127,14 @@ export class PerfilComponent implements OnInit {
   ) {}
   
   ngOnInit(): void {
+    const uid = localStorage.getItem('firebaseUid');
+    const cuentaUid = localStorage.getItem('activeCuentaUid');
+    this.isOwner = !cuentaUid || uid === cuentaUid;
+
+    if (!this.isOwner) {
+      this.displayedColumnsSucursales = ['alias', 'telefono', 'direccion', 'codigoPostal', 'colonia'];
+      this.displayedColumnsImpuestos = ['alias', 'uso', 'tipo_impuesto', 'impuesto', 'tasa', 'valor_cuota'];
+    }
     this.initForm();
     this.loadUserData();
     this.cargarImpuestos();
@@ -164,6 +173,10 @@ export class PerfilComponent implements OnInit {
     this.perfilForm.get('tipoPersona')?.valueChanges.subscribe(tipo => {
       this.onTipoPersonaChange(tipo);
     });
+
+    if (!this.isOwner) {
+      this.perfilForm.disable();
+    }
   }
 
   /**

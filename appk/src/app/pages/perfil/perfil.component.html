@@ -82,7 +82,7 @@
         
         </div>
         
-        <div class="button-container">
+        <div class="button-container" *ngIf="isOwner">
           <button mat-raised-button color="primary" class="btn-primary" type="submit" [disabled]="perfilForm.invalid">
             <mat-icon>save</mat-icon> Guardar
           </button>
@@ -90,7 +90,7 @@
       </form>
 
       <!-- Sección Mi Plan -->
-      <div class="mi-plan-section">
+      <div class="mi-plan-section" *ngIf="isOwner">
         <h2>Mi Plan</h2>
         
         <div class="plan-card" [ngClass]="'plan-' + planActual">
@@ -173,7 +173,7 @@
     <mat-tab label="Sucursales">
       <div class="sucursales-container">
         <h2>Configurar sucursales</h2>
-        <div class="actions-row">
+        <div class="actions-row" *ngIf="isOwner">
           <button mat-raised-button color="primary" class="btn-primary" (click)="openSucursalModal()">
             <mat-icon>add</mat-icon> Agregar
           </button>
@@ -237,7 +237,7 @@
             <h3>Logo para comprobantes</h3>
             <div class="logo-container">
               <img [src]="logoUrl || '/assets/img/no-logo.png'" alt="Logo en factura" class="preview-logo" (error)="onImageError($event)">
-              <div class="logo-upload">
+              <div class="logo-upload" *ngIf="isOwner">
                 <input type="file" id="logo-upload" hidden accept="image/png,image/jpeg,image/svg+xml" (change)="onLogoSelected($event)">
                 <label for="logo-upload" class="file-upload-btn">
                   <mat-icon>upload_file</mat-icon> Seleccionar archivo
@@ -249,10 +249,10 @@
                 </div>
               </div>
             </div>
-            <mat-progress-bar *ngIf="uploading" mode="indeterminate"></mat-progress-bar>
+            <mat-progress-bar *ngIf="uploading && isOwner" mode="indeterminate"></mat-progress-bar>
             <div class="button-container">
               <button mat-raised-button color="primary" class="btn-primary section-button" 
-                [disabled]="!logoFile || uploading" (click)="saveLogo()">
+                [disabled]="!logoFile || uploading" (click)="saveLogo()" *ngIf="isOwner">
                 <mat-icon>save</mat-icon> Guardar logo
               </button>
             </div>
@@ -267,7 +267,7 @@
                 <mat-icon class="large-icon">style</mat-icon>
               </div>
               <button mat-raised-button color="primary" class="btn-primary section-button" 
-                (click)="navigateToInvoiceDesign()">
+                (click)="navigateToInvoiceDesign()" *ngIf="isOwner">
                 <mat-icon>palette</mat-icon> Plantillas para facturas
               </button>
             </div>
@@ -280,7 +280,7 @@
             <mat-label>Términos y condiciones</mat-label>
             <textarea 
               matInput 
-              [(ngModel)]="terminosCondiciones"
+              [(ngModel)]="terminosCondiciones" [disabled]="!isOwner"
               rows="10"
               placeholder="Ingrese los términos y condiciones que aparecerán en sus cotizaciones...">
             </textarea>
@@ -292,7 +292,7 @@
               mat-raised-button 
               color="primary" 
               class="btn-primary section-button"
-              [disabled]="!terminosModificados"
+              [disabled]="!terminosModificados" *ngIf="isOwner"
               (click)="guardarTerminosCondiciones()">
               <mat-icon>save</mat-icon> Guardar términos
             </button>
@@ -366,7 +366,7 @@
           <div class="archivos-container">
             <div class="csd-section">
               <h4>CSD para facturación</h4>
-              <button mat-raised-button color="primary" class="btn-primary" (click)="openCsdUploadModal()">
+              <button mat-raised-button color="primary" class="btn-primary" (click)="openCsdUploadModal()" *ngIf="isOwner">
                 <mat-icon>upload_file</mat-icon> Cargar CSD
               </button>
               <p *ngIf="csdExpiryDate">
@@ -379,7 +379,7 @@
             
             <div class="fiel-section">
               <h4>FIEL para descarga masiva</h4>
-              <button mat-raised-button color="primary" class="btn-primary" (click)="openFielUploadModal()">
+              <button mat-raised-button color="primary" class="btn-primary" (click)="openFielUploadModal()" *ngIf="isOwner">
                 <mat-icon>upload_file</mat-icon> Cargar FIEL
               </button>
               <p *ngIf="fielExpiryDate">
@@ -393,7 +393,7 @@
         </section>
       </div>
     </mat-tab>
-      <mat-tab label="Usuarios y Roles">
+      <mat-tab label="Usuarios y Roles" *ngIf="isOwner">
       <app-usuarios-roles></app-usuarios-roles>
     </mat-tab>
   </mat-tab-group>
