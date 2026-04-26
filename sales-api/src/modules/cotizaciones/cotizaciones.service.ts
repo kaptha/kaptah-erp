@@ -85,9 +85,10 @@ async getFolioStats(year?: number): Promise<{ year: number; count: number; lastF
 /**
  * ⭐ Obtiene el logo del usuario desde biz-entities-api
  */
-private async obtenerLogoUsuario(userId: string, token: string): Promise<string | null> {
+private async obtenerLogoUsuario(userId: string, token: string, cuentaUid?: string): Promise<string | null> {
   try {
-    const logoApiUrl = `${this.bizEntitiesApiUrl}/api/logos/current`;
+    const cuentaParam = cuentaUid ? `?cuentaUid=${cuentaUid}` : '';
+    const logoApiUrl = `${this.bizEntitiesApiUrl}/api/logos/current${cuentaParam}`;
     const response = await axios.get<LogoResponse>(logoApiUrl, {
       headers: { 'Authorization': token }
     });
@@ -114,9 +115,10 @@ private async obtenerLogoUsuario(userId: string, token: string): Promise<string 
 }
   // ✨ MÉTODO ACTUALIZADO: Generar PDF con estilo (IGUAL QUE SALE NOTES)
   async generarPdfEstiloCotizacion(
-  id: number, 
+  id: number,
   estilo: string,
-  token: string | null
+  token: string | null,
+  cuentaUid?: string
 ): Promise<Buffer> {
   console.log('📄 Iniciando generación de PDF');
   console.log('📋 Cotizacion ID:', id);
@@ -134,11 +136,11 @@ private async obtenerLogoUsuario(userId: string, token: string): Promise<string 
       const decodedToken = await admin.auth().verifyIdToken(cleanToken);
       userId = decodedToken.uid;
       console.log('✅ User ID extraído del token:', userId);
-
+      const ownerUid = cuentaUid || userId;
       // 👇 NUEVO: Obtener datos del usuario
       try {
         console.log('👤 Obteniendo datos del usuario...');
-        datosUsuario = await this.usuariosService.getDatosParaTemplate(userId);
+        datosUsuario = await this.usuariosService.getDatosParaTemplate(ownerUid);
         console.log('✅ Datos del usuario obtenidos:', {
           nombre: datosUsuario.sucursal_nombre,
           rfc: datosUsuario.empresa_rfc
@@ -185,7 +187,7 @@ private async obtenerLogoUsuario(userId: string, token: string): Promise<string 
     let logoDataUri: string;
 
     if (token && userId) {
-      const logoUrl = await this.obtenerLogoUsuario(userId, token);
+      const logoUrl = await this.obtenerLogoUsuario(userId, token, cuentaUid);
       
       if (logoUrl) {
         logoDataUri = logoUrl;

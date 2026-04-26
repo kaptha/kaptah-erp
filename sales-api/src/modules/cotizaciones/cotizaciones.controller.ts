@@ -45,7 +45,7 @@ export class CotizacionesController {
   async create(
     @Body() createCotizacionDto: CreateCotizacionDto,
     @CurrentUser() user?: any,
-    @Query('cuentaUid') cuentaUid?: string
+    @Query('cuentaUid') cuentaUid?: string,
   ) {
     this.logger.log(`📬 POST /cotizaciones - Crear nueva cotización`);
     
@@ -71,6 +71,7 @@ export class CotizacionesController {
     @Param('style') estilo: string,
     @Res() res: Response,
     @Req() req: Request,
+    @Query('cuentaUid') cuentaUid: string,
     @CurrentUser() user?: any
   ) {
     this.logger.log(`📬 GET /cotizaciones/${id}/pdf/${estilo}`);
@@ -80,7 +81,7 @@ export class CotizacionesController {
     
     console.log('🔐 Token recibido:', token ? 'Sí' : 'No');
     
-    const pdf = await this.cotizacionesService.generarPdfEstiloCotizacion(id, estilo, token);
+    const pdf = await this.cotizacionesService.generarPdfEstiloCotizacion(id, estilo, token, cuentaUid);
 
     res.set({
       'Content-Type': 'application/pdf',
