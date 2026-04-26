@@ -16,7 +16,7 @@
 
   <!-- Acciones principales y búsqueda -->
   <div class="actions-container">
-    <button mat-raised-button class="btn-primary" (click)="agregarProveedor()">
+    <button mat-raised-button class="btn-primary" (click)="agregarProveedor()" *appHasPermission="'proveedores.crear'">
       <mat-icon>add</mat-icon> Agregar proveedor
     </button>
     
@@ -100,11 +100,11 @@
             <mat-icon>more_vert</mat-icon>
           </button>
           <mat-menu #menu="matMenu">
-            <button mat-menu-item (click)="editProveedor(proveedor)">
+            <button mat-menu-item (click)="editProveedor(proveedor)" *appHasPermission="'proveedores.editar'">
               <mat-icon>edit</mat-icon>
               <span>Editar</span>
             </button>
-            <button mat-menu-item (click)="deleteProveedor($event, proveedor.ID)">
+            <button mat-menu-item (click)="deleteProveedor($event, proveedor.ID)" *appHasPermission="'proveedores.eliminar'">
               <mat-icon color="warn">delete</mat-icon>
               <span>Eliminar</span>
             </button>
@@ -163,11 +163,11 @@
           <mat-icon>more_vert</mat-icon>
         </button>
         <mat-menu #mobileMenu="matMenu">
-          <button mat-menu-item (click)="editProveedor(proveedor)">
+          <button mat-menu-item (click)="editProveedor(proveedor)" *appHasPermission="'proveedores.editar'">
             <mat-icon>edit</mat-icon>
             <span>Editar</span>
           </button>
-          <button mat-menu-item (click)="deleteProveedor($event, proveedor.ID)">
+          <button mat-menu-item (click)="deleteProveedor($event, proveedor.ID)" *appHasPermission="'proveedores.eliminar'">
             <mat-icon color="warn">delete</mat-icon>
             <span>Eliminar</span>
           </button>
