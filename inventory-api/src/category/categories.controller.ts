@@ -17,7 +17,8 @@ import { CategoriesService } from './categories.service';
 import { CreateCategoryDto } from './dto/create-category.dto';
 import { UpdateCategoryDto } from './dto/update-category.dto';
 import { Request } from 'express';
-
+import { PermissionsGuard } from '../auth/guards/permissions.guard';
+import { RequirePermission } from '../auth/decorators/require-permission.decorator';
 interface RequestWithUser extends Request {
   user?: {
     firebaseUid: string;
@@ -57,7 +58,8 @@ export class CategoriesController {
   }
 
   @Post()
-  @UseGuards(FirebaseAuthGuard)
+  @UseGuards(FirebaseAuthGuard, PermissionsGuard)
+  @RequirePermission('categorias.crear')
   async create(@Body() createCategoryDto: CreateCategoryDto, @Req() req: RequestWithUser) {
     if (!req.user?.firebaseUid) {
       throw new UnauthorizedException('Usuario no autenticado');
@@ -66,7 +68,8 @@ export class CategoriesController {
   }
 
   @Put(':id')
-  @UseGuards(FirebaseAuthGuard)
+  @UseGuards(FirebaseAuthGuard, PermissionsGuard)
+  @RequirePermission('categorias.editar')
   async update(
     @Param('id', ParseIntPipe) id: number,
     @Body() updateCategoryDto: UpdateCategoryDto,
@@ -79,7 +82,8 @@ export class CategoriesController {
   }
 
   @Delete(':id')
-  @UseGuards(FirebaseAuthGuard)
+  @UseGuards(FirebaseAuthGuard, PermissionsGuard)
+  @RequirePermission('categorias.eliminar')
   async remove(@Param('id', ParseIntPipe) id: number, @Req() req: RequestWithUser) {
     if (!req.user?.firebaseUid) {
       throw new UnauthorizedException('Usuario no autenticado');
