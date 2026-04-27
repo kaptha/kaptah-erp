@@ -88,11 +88,16 @@ private handleFirebase401(request: HttpRequest<any>, next: HttpHandler): Observa
       switchMap((response: any) => {
         const newToken = response.id_token;
         localStorage.setItem('idToken', newToken);
-        console.log('✅ Firebase token refrescado exitosamente');
-        return next.handle(this.addFirebaseToken(request));
+        console.log('Firebase token refrescado exitosamente');
+        const clonedRequest = request.clone({
+          setHeaders: {
+            'Authorization': 'Bearer ' + newToken
+          }
+        });
+        return next.handle(clonedRequest);
       }),
       catchError(err => {
-        console.error('❌ Error al refrescar Firebase token:', err);
+        console.error('Error al refrescar Firebase token:', err);
         return throwError(() => err);
       })
     );
