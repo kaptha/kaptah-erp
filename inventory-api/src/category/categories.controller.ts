@@ -10,6 +10,7 @@ import {
   Req,
   UnauthorizedException,
   Logger,
+  Query,
   ParseIntPipe
 } from '@nestjs/common';
 import { FirebaseAuthGuard } from '../guards/firebase-auth.guard';
@@ -60,11 +61,12 @@ export class CategoriesController {
   @Post()
   @UseGuards(FirebaseAuthGuard, PermissionsGuard)
   @RequirePermission('categorias.crear')
-  async create(@Body() createCategoryDto: CreateCategoryDto, @Req() req: RequestWithUser) {
+  async create(@Body() createCategoryDto: CreateCategoryDto, @Req() req: RequestWithUser, @Query('cuentaUid') cuentaUid?: string) {
     if (!req.user?.firebaseUid) {
       throw new UnauthorizedException('Usuario no autenticado');
     }
-    return this.categoriesService.create(createCategoryDto, req.user.firebaseUid);
+    const ownerUid = cuentaUid || req.user.firebaseUid;
+    return this.categoriesService.create(createCategoryDto, ownerUid);
   }
 
   @Put(':id')
@@ -73,21 +75,22 @@ export class CategoriesController {
   async update(
     @Param('id', ParseIntPipe) id: number,
     @Body() updateCategoryDto: UpdateCategoryDto,
-    @Req() req: RequestWithUser
+    @Req() req: RequestWithUser,
+    @Query('cuentaUid') cuentaUid?: string
   ) {
     if (!req.user?.firebaseUid) {
       throw new UnauthorizedException('Usuario no autenticado');
     }
-    return this.categoriesService.update(id, updateCategoryDto, req.user.firebaseUid);
+    return this.categoriesService.update(id, updateCategoryDto, cuentaUid || req.user.firebaseUid);
   }
 
   @Delete(':id')
   @UseGuards(FirebaseAuthGuard, PermissionsGuard)
   @RequirePermission('categorias.eliminar')
-  async remove(@Param('id', ParseIntPipe) id: number, @Req() req: RequestWithUser) {
+  async remove(@Param('id', ParseIntPipe) id: number, @Req() req: RequestWithUser, @Query('cuentaUid') cuentaUid?: string) {
     if (!req.user?.firebaseUid) {
       throw new UnauthorizedException('Usuario no autenticado');
     }
-    return this.categoriesService.remove(id, req.user.firebaseUid);
+    return this.categoriesService.remove(id, cuentaUid || req.user.firebaseUid);
   }
 }
