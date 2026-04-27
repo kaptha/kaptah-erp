@@ -33,24 +33,30 @@ export class CategoryService {
   // Obtener todas las categorías
   getCategories(): Observable<Category[]> {
     const idToken = localStorage.getItem('idToken');
-    console.log('Token encontrado:', !!idToken);
-    
     if (!idToken) {
       return throwError(() => new Error('No token found'));
     }
-    
+
+    const cuentaUid = localStorage.getItem('activeCuentaUid');
+    if (cuentaUid) {
+      const headers = this.getHeaders();
+      return this.http.get<Category[]>(`${this.apiUrl}/firebase/${cuentaUid}`, { headers }).pipe(
+        tap(categories => console.log('Categorias recibidas:', categories)),
+        catchError(error => {
+          console.error('Error al obtener categorias:', error);
+          return throwError(() => error);
+        })
+      );
+    }
+
     return this.usersService.getUserByToken(idToken).pipe(
-      tap(user => console.log('Usuario encontrado:', user)),
       switchMap(user => {
         if (!user) {
           throw new Error('User not found');
         }
         const headers = this.getHeaders();
-        console.log('Headers:', headers);
-        
-        // CAMBIO: Usar endpoint con firebaseUid
         return this.http.get<Category[]>(`${this.apiUrl}/firebase/${user.id}`, { headers }).pipe(
-          tap(categories => console.log('Categorías recibidas:', categories))
+          tap(categories => console.log('Categorias recibidas:', categories))
         );
       }),
       catchError(error => {
