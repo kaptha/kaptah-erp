@@ -38,11 +38,12 @@ export class TokenInterceptor implements HttpInterceptor {
   console.log('🔹 Interceptor - Requiere Firebase token:', needsFirebaseToken);
 
   if (needsFirebaseToken) {
-    console.log('🔥 Usando idToken de Firebase para esta petición');
+    console.log('🔥 Usando idToken de Firebase para esta peticion');
     return next.handle(this.addFirebaseToken(request)).pipe(
       catchError(error => {
         if (error instanceof HttpErrorResponse && error.status === 401) {
-          console.log('❌ Error 401 detectado');
+          console.log('❌ Error 401 detectado, refrescando Firebase token...');
+          return this.handleFirebase401(request, next);
         }
         return throwError(() => error);
       })
@@ -77,6 +78,25 @@ private addFirebaseToken(request: HttpRequest<any>) {
   
   return request;
 }
+private handleFirebase401(request: HttpRequest<any>, next: HttpHandler): Observable<HttpEvent<any>> {
+    const refreshToken = localStorage.getItem('firebaseRefreshToken');
+    if (!refreshToken) {
+      return throwError(() => new Error('No Firebase refresh token available'));
+    }
+
+    return this.authService.refreshFirebaseToken(refreshToken).pipe(
+      switchMap((response: any) => {
+        const newToken = response.id_token;
+        localStorage.setItem('idToken', newToken);
+        console.log('✅ Firebase token refrescado exitosamente');
+        return next.handle(this.addFirebaseToken(request));
+      }),
+      catchError(err => {
+        console.error('❌ Error al refrescar Firebase token:', err);
+        return throwError(() => err);
+      })
+    );
+  }
 
   private addToken(request: HttpRequest<any>) {
     const token = localStorage.getItem('access_token') || localStorage.getItem('jwt_token');

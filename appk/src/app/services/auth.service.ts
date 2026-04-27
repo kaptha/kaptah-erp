@@ -145,6 +145,13 @@ export class AuthService {
   getAccessToken(): string | null {
     return localStorage.getItem('access_token');
   }
+refreshFirebaseToken(refreshToken: string): Observable<any> {
+    const url = 'https://securetoken.googleapis.com/v1/token?key=AIzaSyBo8MXnWkR0b5gMN_UqMKWDhK6JZef2bFA';
+    return this.http.post<any>(url, {
+      grant_type: 'refresh_token',
+      refresh_token: refreshToken
+    });
+  }
 
   /**
    * Obtener refresh token
