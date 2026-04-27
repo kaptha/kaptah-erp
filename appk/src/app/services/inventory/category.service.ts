@@ -69,19 +69,22 @@ export class CategoryService {
   // Crear una nueva categoría
   createCategory(category: Omit<Category, 'id'>): Observable<Category> {
     const headers = this.getHeaders(); 
-    return this.http.post<Category>(this.apiUrl, category, { headers });
+    const cuentaUid = localStorage.getItem('activeCuentaUid') || '';
+    return this.http.post<Category>(`${this.apiUrl}?cuentaUid=${cuentaUid}`, category, { headers });
   }
 
   // Actualizar una categoría
   updateCategory(id: number, category: Partial<Category>): Observable<Category> {
     const headers = this.getHeaders();
-    return this.http.put<Category>(`${this.apiUrl}/${id}`, category, { headers });
+    const cuentaUid = localStorage.getItem('activeCuentaUid') || '';
+    return this.http.put<Category>(`${this.apiUrl}/${id}?cuentaUid=${cuentaUid}`, category, { headers });
   }
 
   // Eliminar una categoría
   deleteCategory(id: number): Observable<void> {
     const headers = this.getHeaders();
-    return this.http.delete<void>(`${this.apiUrl}/${id}`, { headers });
+    const cuentaUid = localStorage.getItem('activeCuentaUid') || '';
+    return this.http.delete<void>(`${this.apiUrl}/${id}?cuentaUid=${cuentaUid}`, { headers });
   }
 
   // Editar un servicio

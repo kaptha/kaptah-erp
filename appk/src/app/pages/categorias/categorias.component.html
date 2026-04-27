@@ -6,7 +6,7 @@
   </div>
   
   <div class="actions">
-    <button mat-raised-button class="btn-primary" (click)="agregarCategoria()">
+    <button mat-raised-button class="btn-primary" (click)="agregarCategoria()" *appHasPermission="'categorias.crear'">
       <mat-icon>add</mat-icon> Agregar categoría
     </button>
     <span class="spacer"></span>
@@ -38,11 +38,11 @@
             <mat-icon>more_vert</mat-icon>
           </button>
           <mat-menu #menu="matMenu">
-            <button mat-menu-item (click)="editarCategoria(element)">
+            <button mat-menu-item (click)="editarCategoria(element)" *appHasPermission="'categorias.editar'">
               <mat-icon>edit</mat-icon>
               <span>Editar</span>
             </button>
-            <button mat-menu-item (click)="eliminarCategoria(element.id)">
+            <button mat-menu-item (click)="eliminarCategoria(element.id)" *appHasPermission="'categorias.eliminar'">
               <mat-icon color="warn">delete</mat-icon>
               <span class="text-warn">Eliminar</span>
             </button>
@@ -76,10 +76,10 @@
           </div>
         </div>
         <div class="mobile-card-actions">
-          <button mat-icon-button color="primary" (click)="editarCategoria(item)">
+          <button mat-icon-button color="primary" (click)="editarCategoria(item)" *appHasPermission="'categorias.editar'">
             <mat-icon>edit</mat-icon>
           </button>
-          <button mat-icon-button color="warn" (click)="eliminarCategoria(item.id)">
+          <button mat-icon-button color="warn" (click)="eliminarCategoria(item.id)" *appHasPermission="'categorias.eliminar'">
             <mat-icon>delete</mat-icon>
           </button>
         </div>
