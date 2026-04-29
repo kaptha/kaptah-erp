@@ -73,14 +73,9 @@ private getActiveCuentaUid(): string | null {
       refresh_token: refreshToken
     }).pipe(
       switchMap(response => {
-        const freshToken = response.id_token;
-        localStorage.setItem('idToken', freshToken);
-        const headers = new HttpHeaders({
-          'Content-Type': 'application/json',
-          'Authorization': 'Bearer ' + freshToken
-        });
+        localStorage.setItem('idToken', response.id_token);
         const cuentaUid = localStorage.getItem('activeCuentaUid') || '';
-        return this.http.post<Product>(this.apiUrl + '/products?cuentaUid=' + cuentaUid, productData, { headers });
+        return this.http.post<Product>(this.apiUrl + '/products?cuentaUid=' + cuentaUid, productData);
       }),
       tap(response => console.log('Respuesta del servidor:', response)),
       catchError(error => {
