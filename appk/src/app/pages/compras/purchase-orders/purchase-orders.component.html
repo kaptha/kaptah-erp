@@ -7,7 +7,7 @@
 
   <!-- Acciones principales y búsqueda -->
   <div class="actions-container">
-    <button mat-raised-button class="btn-primary" (click)="agregarOrden()">
+    <button mat-raised-button class="btn-primary" (click)="agregarOrden()" *appHasPermission="'ordenes_compra.crear'">
       <mat-icon>add</mat-icon> Nueva Orden de Compra
     </button>
     
@@ -93,10 +93,12 @@
               <mat-icon color="primary">email</mat-icon>
               <span>Enviar por Email</span>
             </button>
-            <button mat-menu-item (click)="editarOrden(order)" *ngIf="order.status === 'DRAFT'">
-              <mat-icon>edit</mat-icon>
-              <span>Editar</span>
-            </button>
+            <ng-container *appHasPermission="'ordenes_compra.editar'">
+  <button mat-menu-item (click)="editarOrden(order)" *ngIf="order.status === 'DRAFT'">
+    <mat-icon>edit</mat-icon>
+    <span>Editar</span>
+  </button>
+</ng-container>
             <mat-divider *ngIf="order.status === 'SENT' || order.status === 'PARTIAL'"></mat-divider>
             <button mat-menu-item (click)="recibirMercancia(order)" *ngIf="order.status === 'SENT' || order.status === 'PARTIAL'">
               <mat-icon>inventory</mat-icon>
@@ -111,7 +113,7 @@
               <mat-icon>cancel</mat-icon>
               <span>Cancelar Orden</span>
             </button>
-            <button mat-menu-item (click)="eliminarOrden(order)" class="delete-action">
+            <button mat-menu-item (click)="eliminarOrden(order)" class="delete-action" *appHasPermission="'ordenes_compra.eliminar'">
               <mat-icon>delete</mat-icon>
               <span>Eliminar</span>
             </button>

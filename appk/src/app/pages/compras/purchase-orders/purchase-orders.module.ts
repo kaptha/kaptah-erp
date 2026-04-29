@@ -3,7 +3,7 @@ import { CommonModule } from '@angular/common';
 import { provideHttpClient, withInterceptorsFromDi } from '@angular/common/http';
 import { ReactiveFormsModule, FormsModule } from '@angular/forms';
 import { PurchaseOrdersRoutingModule } from './purchase-orders-routing.module';
-
+import { SharedModule } from '../../../shared/shared.module';
 // Componentes
 import { PurchaseOrdersComponent } from './purchase-orders.component';
 import { PurchaseOrderFormModalComponent } from './purchase-order-form-modal/purchase-order-form-modal.component';
@@ -51,6 +51,7 @@ import { MatSnackBarModule } from '@angular/material/snack-bar';
         MatButtonModule,
         MatIconModule,
         MatMenuModule,
+        SharedModule,
         MatFormFieldModule,
         MatInputModule,
         MatProgressSpinnerModule,

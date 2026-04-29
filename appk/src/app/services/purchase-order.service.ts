@@ -173,7 +173,7 @@ private getActiveCuentaUid(): string | null {
   create(order: CreatePurchaseOrderDto): Observable<PurchaseOrder> {
   const cuentaUid = this.getActiveCuentaUid() || localStorage.getItem('firebaseUid');
   return this.http.post<PurchaseOrder>(
-    `${this.apiUrl}/firebase/${cuentaUid}`,
+    `${this.apiUrl}/firebase/${cuentaUid}?cuentaUid=${cuentaUid}`,
     order,
     { headers: this.getHeaders() }
   ).pipe(
@@ -182,13 +182,15 @@ private getActiveCuentaUid(): string | null {
 }
 
   update(id: number, order: Partial<CreatePurchaseOrderDto>): Observable<PurchaseOrder> {
-    return this.http.patch<PurchaseOrder>(`${this.apiUrl}/${id}`, order, { headers: this.getHeaders() }).pipe(
+    const cuentaUid = this.getActiveCuentaUid() || '';
+    return this.http.patch<PurchaseOrder>(`${this.apiUrl}/${id}?cuentaUid=${cuentaUid}`, order, { headers: this.getHeaders() }).pipe(
       catchError(this.handleError)
     );
   }
 
   delete(id: number): Observable<void> {
-    return this.http.delete<void>(`${this.apiUrl}/${id}`, { headers: this.getHeaders() }).pipe(
+    const cuentaUid = this.getActiveCuentaUid() || '';
+    return this.http.delete<void>(`${this.apiUrl}/${id}?cuentaUid=${cuentaUid}`, { headers: this.getHeaders() }).pipe(
       catchError(this.handleError)
     );
   }
