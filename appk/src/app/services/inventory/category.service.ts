@@ -98,4 +98,35 @@ export class CategoryService {
     const headers = this.getHeaders();
     return this.http.put<any>(`${this.apiUrl}/services/${id}`, serviceData, { headers });
   }
+getServiceCategories(): Observable<Category[]> {
+    const idToken = localStorage.getItem('idToken');
+    if (!idToken) {
+      return throwError(() => new Error('No token found'));
+    }
+    const cuentaUid = localStorage.getItem('activeCuentaUid');
+    const baseUrl = 'https://selfless-analysis-production.up.railway.app/api/service-categories';
+    if (cuentaUid) {
+      const headers = this.getHeaders();
+      return this.http.get<Category[]>(`${baseUrl}/firebase/${cuentaUid}`, { headers }).pipe(
+        tap(categories => console.log('Categorias de servicio recibidas:', categories)),
+        catchError(error => {
+          console.error('Error al obtener categorias de servicio:', error);
+          return throwError(() => error);
+        })
+      );
+    }
+    return this.usersService.getUserByToken(idToken).pipe(
+      switchMap(user => {
+        if (!user) { throw new Error('User not found'); }
+        const headers = this.getHeaders();
+        return this.http.get<Category[]>(`${baseUrl}/firebase/${user.id}`, { headers }).pipe(
+          tap(categories => console.log('Categorias de servicio recibidas:', categories))
+        );
+      }),
+      catchError(error => {
+        console.error('Error completo:', error);
+        return throwError(() => error);
+      })
+    );
+  }
 }

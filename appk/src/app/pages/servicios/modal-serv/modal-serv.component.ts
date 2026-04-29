@@ -43,9 +43,9 @@ export class ModalServComponent implements OnInit {
   this.setupAutocomplete();
   
   // Luego cargar las categorías
-  this.categoryService.getCategories().subscribe({
+  this.categoryService.getServiceCategories().subscribe({
     next: (categories) => {
-      this.categorias = categories.filter(cat => cat.tipo === 'servicio');
+      this.categorias = categories;
       console.log('Categorías disponibles:', this.categorias);
       
       // Si estamos en modo edición, establecer los valores
@@ -63,9 +63,9 @@ export class ModalServComponent implements OnInit {
   }
 
   private loadCategories(): void {
-    this.categoryService.getCategories().subscribe({
+    this.categoryService.getServiceCategories().subscribe({
       next: (categories) => {
-        this.categorias = categories.filter(cat => cat.tipo === 'servicio');
+        this.categorias = categories;
         console.log('Categorías de servicios:', this.categorias);
       },
       error: (error) => {
