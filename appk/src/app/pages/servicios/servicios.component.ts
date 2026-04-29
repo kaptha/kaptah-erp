@@ -317,15 +317,34 @@ private downloadFile(content: string, fileName: string, contentType: string) {
 
     dialogRef.afterClosed().subscribe(result => {
       if (result) {
-        this.loadData();
-        this.snackBar.open('Servicio agregado correctamente', 'Cerrar', {
-          duration: 3000
+        this.loading = true;
+        const serviceData = {
+          name: result.nombre,
+          categoryId: result.categoria,
+          description: result.descripcion,
+          satKey: result.claveSat,
+          unitId: result.unidadSat,
+          price: result.precioPublico,
+          moneda: result.moneda
+        };
+        this.serviceService.createService(serviceData).subscribe({
+          next: (response) => {
+            console.log('Servicio creado:', response);
+            this.loadData();
+            this.snackBar.open('Servicio agregado correctamente', 'Cerrar', { duration: 3000 });
+            this.loading = false;
+          },
+          error: (error) => {
+            console.error('Error al crear servicio:', error);
+            this.snackBar.open('Error al crear el servicio', 'Cerrar', { duration: 3000 });
+            this.loading = false;
+          }
         });
       }
     });
   }
 
-  // Métodos para paginación móvil
+  // Metodos para paginacion movil
   getMobileStartIndex(): number {
     return this.mobilePaginator.pageIndex * this.mobilePaginator.pageSize;
   }
