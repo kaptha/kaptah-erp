@@ -1,8 +1,9 @@
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
-import { Observable, throwError } from 'rxjs';
+import { Observable, throwError, from } from 'rxjs';
 import { tap, catchError, switchMap } from 'rxjs/operators';
 import { UsersService } from '../users.service';
+import { RefreshToken } from '../../config';
 
 @Injectable({
   providedIn: 'root'
@@ -61,19 +62,37 @@ private getActiveCuentaUid(): string | null {
 
   createService(serviceData: any): Observable<any> {
     console.log('Intentando crear servicio con datos:', serviceData);
-    const headers = this.getHeaders();
-    return this.http.post<any>(`${this.apiUrl}/services`, serviceData, { headers }).pipe(
-      tap(response => console.log('Respuesta del servidor:', response)),
-      catchError(error => {
-        console.error('Error en createService:', error);
-        return throwError(() => error);
+    const refreshToken = localStorage.getItem('firebaseRefreshToken');
+    if (!refreshToken) {
+      return throwError(() => new Error('No hay refresh token disponible'));
+    }
+    return from(
+      fetch(RefreshToken.url, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ grant_type: 'refresh_token', refresh_token: refreshToken })
       })
+      .then(r => r.json())
+      .then(tokenData => {
+        localStorage.setItem('idToken', tokenData.id_token);
+        const cuentaUid = localStorage.getItem('activeCuentaUid') || '';
+        return fetch(this.apiUrl + '/services?cuentaUid=' + cuentaUid, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + tokenData.id_token },
+          body: JSON.stringify(serviceData)
+        });
+      })
+      .then(r => { if (!r.ok) return r.json().then(err => { throw err; }); return r.json(); })
+    ).pipe(
+      tap(response => console.log('Respuesta del servidor:', response)),
+      catchError(error => { console.error('Error en createService:', error); return throwError(() => error); })
     );
   }
 
   deleteService(id: number): Observable<void> {
     const headers = this.getHeaders();
-    return this.http.delete<void>(`${this.apiUrl}/services/${id}`, { headers }).pipe(
+    const cuentaUid = localStorage.getItem('activeCuentaUid') || '';
+    return this.http.delete<void>(`${this.apiUrl}/services/${id}?cuentaUid=${cuentaUid}`, { headers }).pipe(
       tap(() => console.log(`Servicio ${id} eliminado`)),
       catchError((error: any) => {
         console.error('Error al eliminar servicio:', error);
@@ -84,7 +103,8 @@ private getActiveCuentaUid(): string | null {
   
   updateService(id: number, serviceData: any): Observable<any> {
     const headers = this.getHeaders();
-    return this.http.put<any>(`${this.apiUrl}/services/${id}`, serviceData, { headers }).pipe(
+   const cuentaUid = localStorage.getItem('activeCuentaUid') || '';
+    return this.http.put<any>(`${this.apiUrl}/services/${id}?cuentaUid=${cuentaUid}`, serviceData, { headers }).pipe(
       tap(response => console.log('Servicio actualizado:', response)),
       catchError(error => {
         console.error('Error al actualizar servicio:', error);
