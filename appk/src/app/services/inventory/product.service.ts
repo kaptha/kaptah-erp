@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
-import { Observable, throwError } from 'rxjs';
+import { Observable, throwError, from } from 'rxjs';
 import { tap, catchError, switchMap } from 'rxjs/operators';
 import { Product } from '../../pages/productos/interfaces/product.interface';
 import { CreateProductDto } from '../../pages/productos/interfaces/create-product.dto';
@@ -68,21 +68,30 @@ private getActiveCuentaUid(): string | null {
     if (!refreshToken) {
       return throwError(() => new Error('No hay refresh token disponible'));
     }
-    return this.http.post<any>(RefreshToken.url, {
-      grant_type: 'refresh_token',
-      refresh_token: refreshToken
-    }).pipe(
-      switchMap(response => {
-        const freshToken = response.id_token;
-        localStorage.setItem('idToken', freshToken);
-        const headers = new HttpHeaders({
-          'Content-Type': 'application/json',
-          'Authorization': 'Bearer ' + freshToken,
-          'X-Skip-Interceptor': 'true'
-        });
+    return from(
+      fetch(RefreshToken.url, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ grant_type: 'refresh_token', refresh_token: refreshToken })
+      })
+      .then(r => r.json())
+      .then(tokenData => {
+        localStorage.setItem('idToken', tokenData.id_token);
         const cuentaUid = localStorage.getItem('activeCuentaUid') || '';
-        return this.http.post<Product>(this.apiUrl + '/products?cuentaUid=' + cuentaUid, productData, { headers });
-      }),
+        return fetch(this.apiUrl + '/products?cuentaUid=' + cuentaUid, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': 'Bearer ' + tokenData.id_token
+          },
+          body: JSON.stringify(productData)
+        });
+      })
+      .then(r => {
+        if (!r.ok) return r.json().then(err => { throw err; });
+        return r.json();
+      })
+    ).pipe(
       tap(response => console.log('Respuesta del servidor:', response)),
       catchError(error => {
         console.error('Error en createProduct:', error);
