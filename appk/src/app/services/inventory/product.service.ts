@@ -77,7 +77,8 @@ private getActiveCuentaUid(): string | null {
         localStorage.setItem('idToken', freshToken);
         const headers = new HttpHeaders({
           'Content-Type': 'application/json',
-          'Authorization': 'Bearer ' + freshToken
+          'Authorization': 'Bearer ' + freshToken,
+          'X-Skip-Interceptor': 'true'
         });
         const cuentaUid = localStorage.getItem('activeCuentaUid') || '';
         return this.http.post<Product>(this.apiUrl + '/products?cuentaUid=' + cuentaUid, productData, { headers });

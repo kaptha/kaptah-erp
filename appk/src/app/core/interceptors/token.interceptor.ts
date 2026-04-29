@@ -38,7 +38,11 @@ export class TokenInterceptor implements HttpInterceptor {
   console.log('🔹 Interceptor - Requiere Firebase token:', needsFirebaseToken);
 
   if (needsFirebaseToken) {
-    console.log('🔥 Usando idToken de Firebase para esta peticion');
+    if (request.headers.has('X-Skip-Interceptor')) {
+      const cleanReq = request.clone({ headers: request.headers.delete('X-Skip-Interceptor') });
+      return next.handle(cleanReq);
+    }
+    console.log('Usando idToken de Firebase para esta peticion');
     return next.handle(this.addFirebaseToken(request)).pipe(
       catchError(error => {
         if (error instanceof HttpErrorResponse && error.status === 401) {
