@@ -32,7 +32,8 @@ import { ReceivePurchaseOrderDto } from './dto/receive-purchase-order.dto';
 import { PurchaseOrderStatus } from './enums/purchase-order-status.enum';
 import { FirebaseAuthGuard } from '../guards/firebase-auth.guard';
 import { SendPurchaseOrderEmailDto } from '../email-client/dto/send-purchase-order-email.dto';
-
+import { PermissionsGuard } from '../auth/guards/permissions.guard';
+import { RequirePermission } from '../auth/decorators/require-permission.decorator';
 interface RequestWithUser extends Request {
   user?: {
     firebaseUid: string;
@@ -136,7 +137,8 @@ async generarPdfDeOrdenFirebase(
   }
 
   @Post()
-  @ApiOperation({ summary: 'Crear nueva orden de compra' })
+  @UseGuards(FirebaseAuthGuard, PermissionsGuard)
+  @RequirePermission('ordenes_compra.crear')
   @ApiResponse({
     status: 201,
     description: 'Orden de compra creada exitosamente',
@@ -161,7 +163,8 @@ async findByFirebaseUid(@Param('firebaseUid') firebaseUid: string) {
   return this.purchaseOrderService.findAllByUser(firebaseUid);
 }
 @Post('firebase/:firebaseUid')
-@ApiOperation({ summary: 'Crear orden de compra (via Firebase UID)' })
+  @UseGuards(FirebaseAuthGuard, PermissionsGuard)
+  @RequirePermission('ordenes_compra.crear')
 async createByFirebaseUid(
   @Param('firebaseUid') firebaseUid: string,
   @Body() createPurchaseOrderDto: CreatePurchaseOrderDto,
@@ -239,6 +242,8 @@ async createByFirebaseUid(
   }
 
   @Patch(':id')
+  @UseGuards(FirebaseAuthGuard, PermissionsGuard)
+  @RequirePermission('ordenes_compra.editar')
   @ApiOperation({
     summary: 'Actualizar orden de compra (solo en estado DRAFT)',
   })
@@ -268,6 +273,8 @@ async createByFirebaseUid(
   }
 
   @Delete(':id')
+  @UseGuards(FirebaseAuthGuard, PermissionsGuard)
+  @RequirePermission('ordenes_compra.eliminar')
   @HttpCode(HttpStatus.NO_CONTENT)
   @ApiOperation({
     summary: 'Eliminar orden de compra (solo en estado DRAFT)',
