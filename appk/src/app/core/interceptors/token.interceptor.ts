@@ -66,16 +66,19 @@ export class TokenInterceptor implements HttpInterceptor {
 }
 
 private addFirebaseToken(request: HttpRequest<any>) {
+  if (request.headers.has('Authorization')) {
+    return request;
+  }
   const idToken = localStorage.getItem('idToken');
-  
+
   if (idToken) {
     return request.clone({
       setHeaders: {
-        'Authorization': `Bearer ${idToken}`
+        'Authorization': 'Bearer ' + idToken
       }
     });
   }
-  
+
   return request;
 }
 private handleFirebase401(request: HttpRequest<any>, next: HttpHandler): Observable<HttpEvent<any>> {
