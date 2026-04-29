@@ -123,3 +123,4 @@ export class ProductController {
     return this.productService.updateStock(id, quantity, req.user.firebaseUid);
   }
 }
+// deploy trigger
