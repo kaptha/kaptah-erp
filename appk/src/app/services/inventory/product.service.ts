@@ -64,9 +64,24 @@ private getActiveCuentaUid(): string | null {
 
   createProduct(productData: CreateProductDto): Observable<Product> {
     console.log('Intentando crear producto con datos:', productData);
-    const headers = this.getHeaders();
-    const cuentaUid = localStorage.getItem('activeCuentaUid') || '';
-    return this.http.post<Product>(`${this.apiUrl}/products?cuentaUid=${cuentaUid}`, productData, { headers }).pipe(
+    const refreshToken = localStorage.getItem('firebaseRefreshToken');
+    if (!refreshToken) {
+      return throwError(() => new Error('No hay refresh token disponible'));
+    }
+    return this.http.post<any>(RefreshToken.url, {
+      grant_type: 'refresh_token',
+      refresh_token: refreshToken
+    }).pipe(
+      switchMap(response => {
+        const freshToken = response.id_token;
+        localStorage.setItem('idToken', freshToken);
+        const headers = new HttpHeaders({
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer ' + freshToken
+        });
+        const cuentaUid = localStorage.getItem('activeCuentaUid') || '';
+        return this.http.post<Product>(this.apiUrl + '/products?cuentaUid=' + cuentaUid, productData, { headers });
+      }),
       tap(response => console.log('Respuesta del servidor:', response)),
       catchError(error => {
         console.error('Error en createProduct:', error);
