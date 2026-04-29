@@ -65,7 +65,8 @@ private getActiveCuentaUid(): string | null {
   createProduct(productData: CreateProductDto): Observable<Product> {
     console.log('Intentando crear producto con datos:', productData);
     const headers = this.getHeaders();
-    return this.http.post<Product>(`${this.apiUrl}/products`, productData, { headers }).pipe(
+    const cuentaUid = localStorage.getItem('activeCuentaUid') || '';
+    return this.http.post<Product>(`${this.apiUrl}/products?cuentaUid=${cuentaUid}`, productData, { headers }).pipe(
       tap(response => console.log('Respuesta del servidor:', response)),
       catchError(error => {
         console.error('Error en createProduct:', error);
@@ -77,7 +78,8 @@ private getActiveCuentaUid(): string | null {
   updateProduct(id: number, productData: Partial<Product>): Observable<Product> {
     const headers = this.getHeaders();
     console.log(`Actualizando producto ${id} con datos:`, productData);
-    return this.http.patch<Product>(`${this.apiUrl}/products/${id}`, productData, { headers }).pipe(
+    const cuentaUid = localStorage.getItem('activeCuentaUid') || '';
+    return this.http.patch<Product>(`${this.apiUrl}/products/${id}?cuentaUid=${cuentaUid}`, productData, { headers }).pipe(
       tap(response => console.log('Producto actualizado:', response)),
       catchError(error => {
         console.error('Error al actualizar producto:', error);
@@ -131,7 +133,8 @@ private getActiveCuentaUid(): string | null {
 
   deleteProduct(id: number): Observable<void> {
     const headers = this.getHeaders();
-    return this.http.delete<void>(`${this.apiUrl}/products/${id}`, { headers }).pipe(
+    const cuentaUid = localStorage.getItem('activeCuentaUid') || '';
+    return this.http.delete<void>(`${this.apiUrl}/products/${id}?cuentaUid=${cuentaUid}`, { headers }).pipe(
       tap(() => console.log(`Producto ${id} eliminado`)),
       catchError(error => {
         console.error('Error al eliminar producto:', error);
