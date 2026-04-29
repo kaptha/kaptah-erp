@@ -10,6 +10,7 @@ import {
   Req,
   UnauthorizedException,
   Logger,
+  Query,
   ParseIntPipe
 } from '@nestjs/common';
 import { FirebaseAuthGuard } from '../guards/firebase-auth.guard';
@@ -17,7 +18,8 @@ import { ServiceService } from './service.service';
 import { CreateServiceDto } from './dto/create-service.dto';
 import { UpdateServiceDto } from './dto/update-service.dto';
 import { Request } from 'express';
-
+import { PermissionsGuard } from '../auth/guards/permissions.guard';
+import { RequirePermission } from '../auth/decorators/require-permission.decorator';
 interface RequestWithUser extends Request {
   user?: {
     firebaseUid: string;
@@ -33,11 +35,14 @@ export class ServiceController {
   ) {}
 
   @Post()
-  async create(@Body() createServiceDto: CreateServiceDto, @Req() req: RequestWithUser) {
+  @UseGuards(FirebaseAuthGuard, PermissionsGuard)
+  @RequirePermission('servicios.crear')
+  async create(@Body() createServiceDto: CreateServiceDto, @Req() req: RequestWithUser, @Query('cuentaUid') cuentaUid?: string) {
     if (!req.user?.firebaseUid) {
       throw new UnauthorizedException('Usuario no autenticado');
     }
-    return this.serviceService.create(createServiceDto, req.user.firebaseUid);
+    const ownerUid = cuentaUid || req.user.firebaseUid;
+    return this.serviceService.create(createServiceDto, ownerUid);
   }
   @Get('firebase/:firebaseUid')
 async findByFirebaseUid(@Param('firebaseUid') firebaseUid: string) {
@@ -61,22 +66,29 @@ async findByFirebaseUid(@Param('firebaseUid') firebaseUid: string) {
   }
 
   @Put(':id')
+  @UseGuards(FirebaseAuthGuard, PermissionsGuard)
+  @RequirePermission('servicios.editar')
   async update(
     @Param('id', ParseIntPipe) id: number,
-    @Body() updateServiceDto: UpdateServiceDto,
-    @Req() req: RequestWithUser
+    @Body() updateServiceDto: any,
+    @Req() req: RequestWithUser,
+    @Query('cuentaUid') cuentaUid?: string,
   ) {
     if (!req.user?.firebaseUid) {
       throw new UnauthorizedException('Usuario no autenticado');
     }
-    return this.serviceService.update(id, updateServiceDto, req.user.firebaseUid);
+    const ownerUid = cuentaUid || req.user.firebaseUid;
+    return this.serviceService.update(id, updateServiceDto, ownerUid);
   }
 
   @Delete(':id')
-  async remove(@Param('id', ParseIntPipe) id: number, @Req() req: RequestWithUser) {
+  @UseGuards(FirebaseAuthGuard, PermissionsGuard)
+  @RequirePermission('servicios.eliminar')
+  async remove(@Param('id', ParseIntPipe) id: number, @Req() req: RequestWithUser, @Query('cuentaUid') cuentaUid?: string) {
     if (!req.user?.firebaseUid) {
       throw new UnauthorizedException('Usuario no autenticado');
     }
-    return this.serviceService.remove(id, req.user.firebaseUid);
+    const ownerUid = cuentaUid || req.user.firebaseUid;
+    return this.serviceService.remove(id, ownerUid);
   }
 }
