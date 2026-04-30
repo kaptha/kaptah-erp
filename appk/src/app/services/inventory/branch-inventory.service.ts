@@ -82,12 +82,12 @@ export class BranchInventoryService {
   }
 
   // Decodificar el token para obtener el firebaseUid
+  const cuentaUid = localStorage.getItem('activeCuentaUid');
   const payload = JSON.parse(atob(token.split('.')[1]));
-  const firebaseUid = payload.user_id;
+  const firebaseUid = cuentaUid || payload.user_id;
 
-  // CAMBIAR ESTA URL
   return this.http.get<BranchInventoryWithDetails[]>(
-    `${this.apiUrl}/branch-inventory/firebase/${firebaseUid}`,  // ← NUEVA URL
+    `${this.apiUrl}/branch-inventory/firebase/${firebaseUid}`,
     { headers, params }
   ).pipe(
     tap(response => console.log('Inventario recibido:', response)),
@@ -134,7 +134,8 @@ export class BranchInventoryService {
   }
 
   const payload = JSON.parse(atob(token.split('.')[1]));
-  const firebaseUid = payload.user_id;
+  const cuentaUid = localStorage.getItem('activeCuentaUid');
+  const firebaseUid = cuentaUid || payload.user_id;
 
   console.log('Creando inventario:', data);
   return this.http.post<BranchInventory>(

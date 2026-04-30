@@ -68,6 +68,8 @@ export class BranchTransferService {
   }
 
   private getFirebaseUid(): string {
+    const cuentaUid = localStorage.getItem('activeCuentaUid');
+    if (cuentaUid) return cuentaUid;
     const token = localStorage.getItem('idToken');
     if (!token) {
       throw new Error('No token found');
