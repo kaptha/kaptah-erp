@@ -8,14 +8,17 @@ import {
   Delete,
   Query,
   ParseIntPipe,
-  UnauthorizedException
+  UnauthorizedException,
+  UseGuards
 } from '@nestjs/common';
 import { BranchTransferService } from './branch-transfer.service';
 import { CreateBranchTransferDto } from './dto/create-branch-transfer.dto';
 import { UpdateTransferStatusDto } from './dto/update-transfer-status.dto';
 import { FilterBranchTransferDto } from './dto/filter-branch-transfer.dto';
 import { UsersService } from '../users/users.service';
-
+import { PermissionsGuard } from '../auth/guards/permissions.guard';
+import { RequirePermission } from '../auth/decorators/require-permission.decorator';
+import { FirebaseAuthGuard } from '../guards/firebase-auth.guard';
 @Controller('branch-transfers')
 export class BranchTransferController {
   constructor(
@@ -40,6 +43,8 @@ export class BranchTransferController {
   }
 
   // Crear transferencia
+  @UseGuards(FirebaseAuthGuard, PermissionsGuard)
+  @RequirePermission('inventario_multi_sucursal.crear')
   @Post('firebase/:firebaseUid')
   async create(
     @Param('firebaseUid') firebaseUid: string,
@@ -107,6 +112,8 @@ export class BranchTransferController {
   }
 
   // Eliminar transferencia
+  @UseGuards(FirebaseAuthGuard, PermissionsGuard)
+  @RequirePermission('inventario_multi_sucursal.eliminar')
   @Delete('firebase/:firebaseUid/:id')
   async remove(
     @Param('firebaseUid') firebaseUid: string,

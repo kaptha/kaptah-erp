@@ -19,7 +19,8 @@ import { CreateBranchInventoryDto } from './dto/create-branch-inventory.dto';
 import { UpdateBranchInventoryDto } from './dto/update-branch-inventory.dto';
 import { FilterBranchInventoryDto } from './dto/filter-branch-inventory.dto';
 import { UsersService } from '../users/users.service';
-
+import { PermissionsGuard } from '../auth/guards/permissions.guard';
+import { RequirePermission } from '../auth/decorators/require-permission.decorator';
 interface RequestWithUser extends Request {
   user?: {
     firebaseUid: string;
@@ -43,6 +44,8 @@ export class BranchInventoryController {
     console.log('📋 GET /branch-inventory/firebase/:firebaseUid - firebaseUid:', firebaseUid);
     return this.branchInventoryService.findAll(filterDto, firebaseUid);
   }
+  @UseGuards(FirebaseAuthGuard, PermissionsGuard)
+  @RequirePermission('inventario_multi_sucursal.crear')
   @Post('firebase/:firebaseUid')
 async createByFirebaseUid(
   @Param('firebaseUid') firebaseUid: string,
@@ -60,7 +63,8 @@ async createByFirebaseUid(
 }
 
   // ESTOS SÍ USAN GUARD
-  @UseGuards(FirebaseAuthGuard)
+  @UseGuards(FirebaseAuthGuard, PermissionsGuard)
+  @RequirePermission('inventario_multi_sucursal.crear')
   @Post()
   async create(@Body() createDto: CreateBranchInventoryDto, @Req() req: RequestWithUser) {
     if (!req.user?.firebaseUid) {
@@ -126,7 +130,9 @@ async createByFirebaseUid(
   }
 
 
-@Patch('firebase/:firebaseUid/:id')
+@UseGuards(FirebaseAuthGuard, PermissionsGuard)
+  @RequirePermission('inventario_multi_sucursal.editar')
+  @Patch('firebase/:firebaseUid/:id')
 async updateByFirebaseUid(
   @Param('firebaseUid') firebaseUid: string,
   @Param('id', ParseIntPipe) id: number,
@@ -137,8 +143,9 @@ async updateByFirebaseUid(
 }
 
 // Eliminar inventario sin guard
-@Delete('firebase/:firebaseUid/:id')
-async removeByFirebaseUid(
+@UseGuards(FirebaseAuthGuard, PermissionsGuard)
+  @RequirePermission('inventario_multi_sucursal.eliminar')
+  @Delete('firebase/:firebaseUid/:id')async removeByFirebaseUid(
   @Param('firebaseUid') firebaseUid: string,
   @Param('id', ParseIntPipe) id: number
 ) {
@@ -147,7 +154,8 @@ async removeByFirebaseUid(
   return { message: 'Inventario eliminado correctamente' };
 }
 
-  @UseGuards(FirebaseAuthGuard)
+  @UseGuards(FirebaseAuthGuard, PermissionsGuard)
+  @RequirePermission('inventario_multi_sucursal.eliminar')
   @Delete(':id')
   async remove(@Param('id', ParseIntPipe) id: number, @Req() req: RequestWithUser) {
     if (!req.user?.firebaseUid) {
