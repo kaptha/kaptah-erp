@@ -1,3 +1,4 @@
+import { SharedModule } from '../../../shared/shared.module';
 import { Component, OnInit, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
@@ -37,7 +38,8 @@ import { TransferFormModalComponent } from '../transfer-form-modal/transfer-form
     MatMenuModule,
     MatChipsModule,
     MatInputModule,
-    MatTooltipModule
+    MatTooltipModule,
+    SharedModule
   ],
   templateUrl: './branch-transfers-list.component.html',
   styleUrls: ['./branch-transfers-list.component.css']

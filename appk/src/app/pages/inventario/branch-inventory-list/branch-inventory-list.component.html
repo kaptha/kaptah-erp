@@ -16,7 +16,7 @@
 
   <!-- Acciones principales y búsqueda -->
   <div class="actions-container">
-    <button mat-raised-button class="btn-primary" (click)="openAddModal()">
+    <button mat-raised-button class="btn-primary" (click)="openAddModal()" *appHasPermission="'inventario_multi_sucursal.crear'">
       <mat-icon>add</mat-icon> Agregar
     </button>
 
@@ -153,11 +153,11 @@
             <mat-icon>more_vert</mat-icon>
           </button>
           <mat-menu #menu="matMenu">
-            <button mat-menu-item (click)="openEditModal(item)">
+            <button mat-menu-item (click)="openEditModal(item)" *appHasPermission="'inventario_multi_sucursal.editar'">
               <mat-icon>edit</mat-icon>
               <span>Editar</span>
             </button>
-            <button mat-menu-item (click)="deleteItem(item)">
+            <button mat-menu-item (click)="deleteItem(item)" *appHasPermission="'inventario_multi_sucursal.eliminar'">
               <mat-icon color="warn">delete</mat-icon>
               <span>Eliminar</span>
             </button>
@@ -224,11 +224,11 @@
           <mat-icon>more_vert</mat-icon>
         </button>
         <mat-menu #mobileMenu="matMenu">
-          <button mat-menu-item (click)="openEditModal(item)">
+          <button mat-menu-item (click)="openEditModal(item)" *appHasPermission="'inventario_multi_sucursal.editar'">
             <mat-icon>edit</mat-icon>
             <span>Editar</span>
           </button>
-          <button mat-menu-item (click)="deleteItem(item)">
+          <button mat-menu-item (click)="deleteItem(item)" *appHasPermission="'inventario_multi_sucursal.eliminar'">
             <mat-icon color="warn">delete</mat-icon>
             <span>Eliminar</span>
           </button>

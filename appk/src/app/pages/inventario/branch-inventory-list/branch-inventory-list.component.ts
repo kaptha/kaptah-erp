@@ -1,3 +1,4 @@
+import { SharedModule } from '../../../shared/shared.module';
 import { Component, OnInit, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
@@ -37,7 +38,8 @@ import { ExportService, ExportColumn } from '../../../services/export.service';
     MatProgressSpinnerModule,
     MatMenuModule,
     MatChipsModule,
-    MatTooltipModule
+    MatTooltipModule,
+    SharedModule
   ],
   templateUrl: './branch-inventory-list.component.html',
   styleUrls: ['./branch-inventory-list.component.css']

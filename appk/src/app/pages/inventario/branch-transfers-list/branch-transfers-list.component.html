@@ -16,7 +16,7 @@
 
   <!-- Acciones principales y búsqueda -->
   <div class="actions-container">
-    <button mat-raised-button class="btn-primary" (click)="openCreateModal()">
+    <button mat-raised-button class="btn-primary" (click)="openCreateModal()" *appHasPermission="'inventario_multi_sucursal.crear'">
       <mat-icon>add</mat-icon> Nueva Transferencia
     </button>
 
