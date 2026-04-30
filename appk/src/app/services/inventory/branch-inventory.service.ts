@@ -87,7 +87,7 @@ export class BranchInventoryService {
   const firebaseUid = cuentaUid || payload.user_id;
 
   return this.http.get<BranchInventoryWithDetails[]>(
-    `${this.apiUrl}/branch-inventory/firebase/${firebaseUid}`,
+    `${this.apiUrl}/branch-inventory/firebase/${firebaseUid}?cuentaUid=${firebaseUid}`,
     { headers, params }
   ).pipe(
     tap(response => console.log('Inventario recibido:', response)),
