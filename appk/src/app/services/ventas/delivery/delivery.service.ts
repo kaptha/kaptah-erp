@@ -99,7 +99,8 @@ export class DeliveryService {
     recipientEmail: string;
     customMessage?: string;
   }): Observable<{ jobId: string; logId: string; message: string }> {
-    const url = `${this.apiUrl}/${deliveryNoteId}/send-email`;
+    const cuentaUid = localStorage.getItem('activeCuentaUid') || '';
+    const url = `${this.apiUrl}/${deliveryNoteId}/send-email?cuentaUid=${cuentaUid}`;
     
     // Obtener el idToken original de Firebase
     const idToken = localStorage.getItem('idToken');
