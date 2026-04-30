@@ -144,12 +144,14 @@ export class DeliveryNotesController {
     @Param('id') id: string,
     @Body() emailData: SendInvoiceEmailDto,
     @CurrentUser() user: any,
+    @Query('cuentaUid') cuentaUid?: string,
   ) {
+    const ownerUid = cuentaUid || user.uid;
     return this.deliveryNotesService.sendDeliveryNoteByEmail(
       id,
       emailData.recipientEmail,
       emailData.customMessage,
-      user.uid,
+      ownerUid,
     );
   }
   /**
