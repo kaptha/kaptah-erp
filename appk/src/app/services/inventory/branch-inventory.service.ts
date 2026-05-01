@@ -87,7 +87,7 @@ export class BranchInventoryService {
   const firebaseUid = cuentaUid || payload.user_id;
 
   return this.http.get<BranchInventoryWithDetails[]>(
-    `${this.apiUrl}/branch-inventory/firebase/${firebaseUid}`,
+    `${this.apiUrl}/branch-inventory/firebase/${firebaseUid}?cuentaUid=${firebaseUid}`,
     { headers, params }
   ).pipe(
     tap(response => console.log('Inventario recibido:', response)),
@@ -163,7 +163,7 @@ export class BranchInventoryService {
 
   console.log(`Actualizando inventario ${id}:`, data);
   return this.http.patch<BranchInventory>(
-    `${this.apiUrl}/branch-inventory/firebase/${firebaseUid}/${id}`,
+    `${this.apiUrl}/branch-inventory/firebase/${firebaseUid}/${id}?cuentaUid=${firebaseUid}`,
     data,
     { headers }
   ).pipe(
@@ -186,7 +186,7 @@ deleteInventory(id: number): Observable<void> {
   const firebaseUid = payload.user_id;
 
   return this.http.delete<void>(
-    `${this.apiUrl}/branch-inventory/firebase/${firebaseUid}/${id}`,
+    `${this.apiUrl}/branch-inventory/firebase/${firebaseUid}/${id}?cuentaUid=${firebaseUid}`,
     { headers }
   ).pipe(
     tap(() => console.log(`Inventario ${id} eliminado`)),
