@@ -122,7 +122,7 @@ export class BranchTransferService {
 
     console.log('Creando transferencia:', data);
     return this.http.post<BranchTransfer>(
-      `${this.apiUrl}/branch-transfers/firebase/${firebaseUid}`,
+      `${this.apiUrl}/branch-transfers/firebase/${firebaseUid}?cuentaUid=${firebaseUid}`,
       data,
       { headers }
     ).pipe(
@@ -139,7 +139,7 @@ export class BranchTransferService {
     const firebaseUid = this.getFirebaseUid();
 
     return this.http.patch<BranchTransfer>(
-      `${this.apiUrl}/branch-transfers/firebase/${firebaseUid}/${id}/approve`,
+      `${this.apiUrl}/branch-transfers/firebase/${firebaseUid}/${id}/approve?cuentaUid=${firebaseUid}`,
       { approved_by },
       { headers }
     ).pipe(
@@ -156,7 +156,7 @@ export class BranchTransferService {
     const firebaseUid = this.getFirebaseUid();
 
     return this.http.patch<BranchTransfer>(
-      `${this.apiUrl}/branch-transfers/firebase/${firebaseUid}/${id}/complete`,
+      `${this.apiUrl}/branch-transfers/firebase/${firebaseUid}/${id}/complete?cuentaUid=${firebaseUid}`,
       {},
       { headers }
     ).pipe(
@@ -173,7 +173,7 @@ export class BranchTransferService {
     const firebaseUid = this.getFirebaseUid();
 
     return this.http.patch<BranchTransfer>(
-      `${this.apiUrl}/branch-transfers/firebase/${firebaseUid}/${id}/cancel`,
+      `${this.apiUrl}/branch-transfers/firebase/${firebaseUid}/${id}/cancel?cuentaUid=${firebaseUid}`,
       { reason },
       { headers }
     ).pipe(
@@ -190,7 +190,7 @@ export class BranchTransferService {
     const firebaseUid = this.getFirebaseUid();
 
     return this.http.delete<void>(
-      `${this.apiUrl}/branch-transfers/firebase/${firebaseUid}/${id}`,
+      `${this.apiUrl}/branch-transfers/firebase/${firebaseUid}/${id}?cuentaUid=${firebaseUid}`,
       { headers }
     ).pipe(
       tap(() => console.log(`Transferencia ${id} eliminada`)),
