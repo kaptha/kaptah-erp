@@ -13,12 +13,15 @@ import {
   HttpException,
   HttpStatus,
   UploadedFile,
-  UseInterceptors
+  UseInterceptors,
+  Query
 } from '@nestjs/common';
 import { Request, Response } from 'express';
 import * as path from 'path';
 import { CfdiService } from './cfdi.service';
 import { JwtAuthGuard } from '../../auth/jwt-auth.guard';
+import { PermissionsGuard } from '../../auth/guards/permissions.guard';
+import { RequirePermission } from '../../auth/decorators/require-permission.decorator';
 import { CurrentUser } from '../../auth/decorators/current-user.decorator';
 import { User } from '../../auth/interfaces/user.interface';
 import { FirebaseToken } from '../../auth/decorators/firebase-token.decorator';
@@ -35,7 +38,7 @@ interface RequestWithUser extends Request {
 }
 
 @Controller('cfdi')
-@UseGuards(JwtAuthGuard)
+@UseGuards(JwtAuthGuard, PermissionsGuard)
 export class CfdiController {
   private readonly logger = new Logger(CfdiController.name);
 
@@ -46,50 +49,37 @@ export class CfdiController {
     this.logger.log('CfdiController inicializado v2');
   }
 
-  /**
-   * Extrae el Firebase token del header Authorization
-   */
   private extractFirebaseToken(req: Request): string {
     const authHeader = req.headers.authorization;
-
     if (!authHeader || !authHeader.startsWith('Bearer ')) {
       throw new HttpException(
-        'Token de autenticación no encontrado en el header Authorization',
+        'Token de autenticacion no encontrado en el header Authorization',
         HttpStatus.UNAUTHORIZED
       );
     }
-
     return authHeader.replace('Bearer ', '');
   }
 
   // ==========================================
-  // RUTAS ESPECÍFICAS PRIMERO (antes de :id)
+  // RUTAS ESPECIFICAS PRIMERO (antes de :id)
   // ==========================================
 
-  /**
-   * Listar todos los CFDIs del usuario
-   */
   @Get('list')
-  async listCfdis(@Req() req: RequestWithUser) {
-    console.log('📋 Endpoint /cfdi/list llamado');
-    console.log('Usuario:', req.user);
-    this.logger.log(`📋 Listando CFDIs del usuario: ${req.user?.uid}`);
-    return this.cfdiService.findAll(req.user.uid);
+  async listCfdis(@Req() req: RequestWithUser, @Query('cuentaUid') cuentaUid?: string) {
+    const ownerUid = cuentaUid || req.user.uid;
+    this.logger.log(`Listando CFDIs del usuario: ${ownerUid}`);
+    return this.cfdiService.findAll(ownerUid);
   }
 
-  /**
-   * Validar par de llaves
-   */
   @Get('validate-keys')
   async validateKeys(@Req() req: RequestWithUser) {
     try {
       const firebaseToken = this.extractFirebaseToken(req);
       const isValid = await this.signService.validateKeyPair(firebaseToken);
-
       return {
         success: true,
         isValid,
-        message: isValid ? 'Par de llaves válido' : 'Par de llaves inválido'
+        message: isValid ? 'Par de llaves valido' : 'Par de llaves invalido'
       };
     } catch (error) {
       throw new HttpException(
@@ -99,45 +89,35 @@ export class CfdiController {
     }
   }
 
-  /**
-   * Obtener información del certificado
-   */
   @Get('certificate-info')
   async getCertificateInfo(@Req() req: RequestWithUser) {
     try {
       const firebaseToken = this.extractFirebaseToken(req);
-
       const certInfo = await this.signService.getCertificateInfo(firebaseToken);
       const isValid = await this.signService.validateCertificate(firebaseToken);
-
       return {
         success: true,
         certificateNumber: certInfo.number,
         isValid,
-        message: isValid ? 'Certificado válido' : 'Certificado no válido'
+        message: isValid ? 'Certificado valido' : 'Certificado no valido'
       };
     } catch (error) {
       throw new HttpException(
-        `Error obteniendo información del certificado: ${error.message}`,
+        `Error obteniendo informacion del certificado: ${error.message}`,
         HttpStatus.INTERNAL_SERVER_ERROR
       );
     }
   }
 
-  /**
-   * Validar certificado
-   */
   @Get('certificate/validate')
   async validateCertificate(@Req() req: RequestWithUser) {
     try {
       const firebaseToken = this.extractFirebaseToken(req);
-
       const isValid = await this.signService.validateCertificate(firebaseToken);
-
       return {
         success: true,
         isValid,
-        message: isValid ? 'Certificado válido y vigente' : 'Certificado no válido'
+        message: isValid ? 'Certificado valido y vigente' : 'Certificado no valido'
       };
     } catch (error) {
       throw new HttpException(
@@ -148,27 +128,27 @@ export class CfdiController {
   }
 
   // ==========================================
-  // RUTAS POST SIN PARÁMETROS
+  // RUTAS POST SIN PARAMETROS
   // ==========================================
 
   @Post('ingreso')
+  @RequirePermission('cfdi.crear')
   async createIngresoCfdi(
     @Body() createIngresoCfdiDto: CreateIngresoCfdiDto,
     @CurrentUser() user: User,
-    @FirebaseToken() firebaseToken: string
+    @FirebaseToken() firebaseToken: string,
+    @Query('cuentaUid') cuentaUid?: string,
   ) {
     try {
       const isCertificateValid = await this.cfdiService.validateUserCertificate(firebaseToken);
-
       if (!isCertificateValid) {
         throw new HttpException(
-          'Su certificado CSD no es válido o ha expirado.',
+          'Su certificado CSD no es valido o ha expirado.',
           HttpStatus.BAD_REQUEST
         );
       }
-
-      return await this.cfdiService.createIngresoCfdi(createIngresoCfdiDto, user, firebaseToken);
-
+      const ownerUid = cuentaUid || user.uid;
+      return await this.cfdiService.createIngresoCfdi(createIngresoCfdiDto, { ...user, uid: ownerUid }, firebaseToken);
     } catch (error) {
       this.logger.error('Error creando CFDI de ingreso:', error);
       throw error;
@@ -176,32 +156,27 @@ export class CfdiController {
   }
 
   @Post('egreso')
+  @RequirePermission('cfdi.crear')
   async generateEgressCfdi(
     @Body() data: CfdiEgreso,
     @CurrentUser() user: User,
-    @Req() req: RequestWithUser
+    @Req() req: RequestWithUser,
+    @Query('cuentaUid') cuentaUid?: string,
   ) {
     try {
       if (!user || !user.uid) {
-        throw new HttpException(
-          'Usuario no válido',
-          HttpStatus.UNAUTHORIZED
-        );
+        throw new HttpException('Usuario no valido', HttpStatus.UNAUTHORIZED);
       }
-
       const firebaseToken = this.extractFirebaseToken(req);
-
       const isCertificateValid = await this.cfdiService.validateUserCertificate(firebaseToken);
-
       if (!isCertificateValid) {
         throw new HttpException(
-          'Su certificado CSD no es válido o ha expirado.',
+          'Su certificado CSD no es valido o ha expirado.',
           HttpStatus.BAD_REQUEST
         );
       }
-
-      return await this.cfdiService.createEgresoCfdi(data, user, firebaseToken);
-
+      const ownerUid = cuentaUid || user.uid;
+      return await this.cfdiService.createEgresoCfdi(data, { ...user, uid: ownerUid }, firebaseToken);
     } catch (error) {
       this.logger.error('Error generando CFDI de egreso:', error);
       throw error;
@@ -209,65 +184,55 @@ export class CfdiController {
   }
 
   @Post('nomina')
+  @RequirePermission('cfdi.crear')
   async createNominaCfdi(
     @Body() createNominaCfdiDto: CreateNominaCfdiDto,
     @CurrentUser() user: User,
-    @Req() req: RequestWithUser
+    @Req() req: RequestWithUser,
+    @Query('cuentaUid') cuentaUid?: string,
   ) {
     try {
       if (!user || !user.uid) {
-        throw new HttpException(
-          'Usuario no válido',
-          HttpStatus.UNAUTHORIZED
-        );
+        throw new HttpException('Usuario no valido', HttpStatus.UNAUTHORIZED);
       }
-
       const firebaseToken = this.extractFirebaseToken(req);
-
       const isCertificateValid = await this.cfdiService.validateUserCertificate(firebaseToken);
-
       if (!isCertificateValid) {
         throw new HttpException(
-          'Su certificado CSD no es válido o ha expirado.',
+          'Su certificado CSD no es valido o ha expirado.',
           HttpStatus.BAD_REQUEST
         );
       }
-
-      return await this.cfdiService.createNominaCfdi(createNominaCfdiDto, user, firebaseToken);
-
+      const ownerUid = cuentaUid || user.uid;
+      return await this.cfdiService.createNominaCfdi(createNominaCfdiDto, { ...user, uid: ownerUid }, firebaseToken);
     } catch (error) {
-      this.logger.error('Error creando CFDI de nómina:', error);
+      this.logger.error('Error creando CFDI de nomina:', error);
       throw error;
     }
   }
 
   @Post('pago')
+  @RequirePermission('cfdi.crear')
   async createPagoCfdi(
     @Body() createPagoCfdiDto: CreatePagoCfdiDto,
     @CurrentUser() user: User,
-    @Req() req: RequestWithUser
+    @Req() req: RequestWithUser,
+    @Query('cuentaUid') cuentaUid?: string,
   ) {
     try {
       if (!user || !user.uid) {
-        throw new HttpException(
-          'Usuario no válido',
-          HttpStatus.UNAUTHORIZED
-        );
+        throw new HttpException('Usuario no valido', HttpStatus.UNAUTHORIZED);
       }
-
       const firebaseToken = this.extractFirebaseToken(req);
-
       const isCertificateValid = await this.cfdiService.validateUserCertificate(firebaseToken);
-
       if (!isCertificateValid) {
         throw new HttpException(
-          'Su certificado CSD no es válido o ha expirado.',
+          'Su certificado CSD no es valido o ha expirado.',
           HttpStatus.BAD_REQUEST
         );
       }
-
-      return await this.cfdiService.createPagoCfdi(createPagoCfdiDto, user, firebaseToken);
-
+      const ownerUid = cuentaUid || user.uid;
+      return await this.cfdiService.createPagoCfdi(createPagoCfdiDto, { ...user, uid: ownerUid }, firebaseToken);
     } catch (error) {
       this.logger.error('Error creando CFDI de pago:', error);
       throw error;
@@ -281,24 +246,19 @@ export class CfdiController {
   ) {
     try {
       const firebaseToken = this.extractFirebaseToken(req);
-
       if (!body.csdPassword) {
         throw new HttpException(
-          'Se requiere la contraseña del certificado en el body',
+          'Se requiere la contrasena del certificado en el body',
           HttpStatus.BAD_REQUEST
         );
       }
-
       const cadenaOriginal = '||4.0|F|1001|2025-02-24T19:52:23|03|800.00|MXN|928.00|I|01|PPD|94734|EKU9003173C9|ESCUELA KEMPER URGATE SA DE CV|601|CAHZ7608262P1|ZARATE HUERTA CARLOS ALBERTO|44100|612|G03||';
-
       const sello = await this.signService.sign(
         cadenaOriginal,
         firebaseToken,
         body.csdPassword
       );
-
       const certInfo = await this.signService.getCertificateInfo(firebaseToken);
-
       return {
         success: true,
         cadenaOriginal,
@@ -322,11 +282,9 @@ export class CfdiController {
     @CurrentUser() user: User
   ) {
     if (!file) {
-      throw new HttpException('No se recibió archivo', HttpStatus.BAD_REQUEST);
+      throw new HttpException('No se recibio archivo', HttpStatus.BAD_REQUEST);
     }
-
-    this.logger.log(`📦 Recibido ZIP: ${file.originalname} (${file.size} bytes)`);
-
+    this.logger.log(`Recibido ZIP: ${file.originalname} (${file.size} bytes)`);
     return await this.cfdiService.processBatchZip(
       file,
       user.uid,
@@ -336,16 +294,13 @@ export class CfdiController {
 
   @Post('send-overdue-reminders')
   async sendOverdueReminders(@Req() req: RequestWithUser) {
-    // placeholder si lo necesitas
+    // placeholder
   }
 
   // ==========================================
-  // RUTAS CON PARÁMETROS (al final)
+  // RUTAS CON PARAMETROS (al final)
   // ==========================================
 
-  /**
-   * Generar PDF del CFDI
-   */
   @Public()
   @Get(':id/pdf/:style')
   async generarPdfDeCfdi(
@@ -354,13 +309,10 @@ export class CfdiController {
     @Req() req: Request,
     @Res() res: Response,
   ) {
-    console.log('📄 Request para generar PDF de CFDI');
-
+    console.log('Request para generar PDF de CFDI');
     const authHeader = req.headers.authorization;
     const token = authHeader?.startsWith('Bearer ') ? authHeader : null;
-
-    console.log('🔑 Token recibido:', token ? 'Sí' : 'No');
-
+    console.log('Token recibido:', token ? 'Si' : 'No');
     try {
       const pdf = await this.cfdiService.generarPdfCfdi(
         id,
@@ -368,16 +320,14 @@ export class CfdiController {
         estilo,
         token
       );
-
       res.set({
         'Content-Type': 'application/pdf',
         'Content-Disposition': `inline; filename=cfdi_${id}.pdf`,
         'Content-Length': pdf.length,
       });
-
       res.end(pdf);
     } catch (error) {
-      this.logger.error('❌ Error generando PDF de CFDI:', error);
+      this.logger.error('Error generando PDF de CFDI:', error);
       res.status(500).json({
         success: false,
         message: 'Error al generar PDF del CFDI',
@@ -386,9 +336,6 @@ export class CfdiController {
     }
   }
 
-  /**
-   * Obtener estado de batch
-   */
   @Get('batch/:batchId/status')
   async getBatchStatus(
     @Param('batchId') batchId: string,
@@ -397,101 +344,87 @@ export class CfdiController {
     return await this.cfdiService.getBatchStatus(batchId, user.uid);
   }
 
-  /**
-   * Obtener CFDI por ID
-   */
   @Get(':id')
-  async getCfdi(@Param('id') id: string, @Req() req: RequestWithUser) {
-    this.logger.log(`🔍 Obteniendo CFDI ${id} para usuario: ${req.user?.uid}`);
-    return this.cfdiService.findOne(id, req.user.uid);
+  async getCfdi(@Param('id') id: string, @Req() req: RequestWithUser, @Query('cuentaUid') cuentaUid?: string) {
+    const ownerUid = cuentaUid || req.user.uid;
+    this.logger.log(`Obteniendo CFDI ${id} para usuario: ${ownerUid}`);
+    return this.cfdiService.findOne(id, ownerUid);
   }
 
-  /**
-   * Eliminar CFDI
-   */
   @Delete(':id')
-  async deleteCfdi(@Param('id') id: string, @Req() req: RequestWithUser) {
-    this.logger.log(`🗑️ Eliminando CFDI ${id} para usuario: ${req.user?.uid}`);
-    return this.cfdiService.delete(id, req.user.uid);
+  @RequirePermission('cfdi.eliminar')
+  async deleteCfdi(@Param('id') id: string, @Req() req: RequestWithUser, @Query('cuentaUid') cuentaUid?: string) {
+    const ownerUid = cuentaUid || req.user.uid;
+    this.logger.log(`Eliminando CFDI ${id} para usuario: ${ownerUid}`);
+    return this.cfdiService.delete(id, ownerUid);
   }
 
-  /**
-   * Cancelar CFDI
-   */
   @Post(':id/cancelar')
+  @RequirePermission('cfdi.eliminar')
   async cancelarCfdi(
     @Param('id') id: string,
     @Body() body: { motivo: string; uuidSustitucion?: string },
     @CurrentUser() user: User,
-    @Req() req: RequestWithUser
+    @Req() req: RequestWithUser,
+    @Query('cuentaUid') cuentaUid?: string,
   ) {
     const firebaseToken = this.extractFirebaseToken(req);
-
+    const ownerUid = cuentaUid || user.uid;
     return await this.cfdiService.cancelarCfdi(
       id,
       body.motivo,
       body.uuidSustitucion || null,
-      user.uid,
+      ownerUid,
       firebaseToken
     );
   }
 
-  /**
-   * Reenviar email de CFDI
-   */
   @Post(':id/reenviar-email')
   async reenviarEmail(
     @Param('id') id: string,
-    @CurrentUser() user: User
+    @CurrentUser() user: User,
+    @Query('cuentaUid') cuentaUid?: string,
   ) {
-    return await this.cfdiService.reenviarEmail(id, user.uid);
-  }
-@Post(':id/enviar-email')
-async enviarCfdiEmail(
-  @Param('id') id: string,
-  @Body() body: { 
-    clienteEmail: string; 
-    customMessage?: string;
-    pdfStyle?: string;
-  },
-  @CurrentUser() user: User,
-  @Req() req: RequestWithUser
-) {
-  if (!body.clienteEmail) {
-    throw new HttpException('El email del destinatario es requerido', HttpStatus.BAD_REQUEST);
+    const ownerUid = cuentaUid || user.uid;
+    return await this.cfdiService.reenviarEmail(id, ownerUid);
   }
 
- const firebaseToken = req.headers['x-firebase-token'] as string || this.extractFirebaseToken(req);
+  @Post(':id/enviar-email')
+  @RequirePermission('cfdi.crear')
+  async enviarCfdiEmail(
+    @Param('id') id: string,
+    @Body() body: {
+      clienteEmail: string;
+      customMessage?: string;
+      pdfStyle?: string;
+    },
+    @CurrentUser() user: User,
+    @Req() req: RequestWithUser,
+    @Query('cuentaUid') cuentaUid?: string,
+  ) {
+    if (!body.clienteEmail) {
+      throw new HttpException('El email del destinatario es requerido', HttpStatus.BAD_REQUEST);
+    }
+    const ownerUid = cuentaUid || user.uid;
+    const firebaseToken = req.headers['x-firebase-token'] as string || this.extractFirebaseToken(req);
+    return await this.cfdiService.sendCfdiByEmail(id, body.clienteEmail, body.customMessage || '', ownerUid, firebaseToken, body.pdfStyle || 'classic');
+  }
 
-  return await this.cfdiService.sendCfdiByEmail(
-    id,
-    body.clienteEmail,
-    body.customMessage || '',
-    user.uid,
-    firebaseToken,
-    body.pdfStyle || 'classic'
-  );
-}
-
-  /**
-   * Regenerar PDF de CFDI
-   */
   @Post(':id/regenerar-pdf')
   async regenerarPDF(
     @Param('id') id: string,
     @Body() body: { templateType?: string },
-    @CurrentUser() user: User
+    @CurrentUser() user: User,
+    @Query('cuentaUid') cuentaUid?: string,
   ) {
+    const ownerUid = cuentaUid || user.uid;
     return await this.cfdiService.regenerarPDF(
       id,
-      user.uid,
+      ownerUid,
       body.templateType || 'clasico'
     );
   }
 
-  /**
-   * Actualización interna de CFDI (service-to-service)
-   */
   @Patch(':id/internal-update')
   @Public()
   async internalUpdateCfdi(
@@ -509,17 +442,13 @@ async enviarCfdiEmail(
     @Req() req: Request
   ) {
     const serviceToken = req.headers.authorization?.replace('Bearer ', '');
-
     if (serviceToken !== process.env.SERVICE_TOKEN) {
       throw new HttpException('No autorizado', HttpStatus.UNAUTHORIZED);
     }
-
     await this.cfdiService.internalUpdateCfdi(id, updateData);
-
     return {
       success: true,
       message: 'CFDI actualizado correctamente'
     };
   }
 }
-

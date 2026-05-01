@@ -8,6 +8,7 @@ import { SignService } from './security/digital-sign/sign.service';
 import { OriginalStringService } from './security/digital-sign/original-string.service';
 import { CertVaultClientService } from './security/digital-sign/cert-vault-client.service';
 import { Cfdi } from './entities/cfdi.entity';
+import { AuthModule } from '../../auth/auth.module';
 // ⭐ NUEVO: Servicios de timbrado
 import { TimbradoService } from './timbrado/timbrado.service';
 import { SifeiClientService } from './timbrado/sifei-client.service';
@@ -28,6 +29,7 @@ import { QueueClientModule } from '../queue-client/queue-client.module';
     // TypeORM entities (si usas base de datos)
     TypeOrmModule.forFeature([Cfdi]),
     QueueClientModule,
+    AuthModule,
   ],
   controllers: [CfdiController],
   providers: [
