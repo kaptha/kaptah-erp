@@ -139,7 +139,7 @@ export class BranchInventoryService {
 
   console.log('Creando inventario:', data);
   return this.http.post<BranchInventory>(
-    `${this.apiUrl}/branch-inventory/firebase/${firebaseUid}`,
+    `${this.apiUrl}/branch-inventory/firebase/${firebaseUid}?cuentaUid=${firebaseUid}`,
     data,
     { headers }
   ).pipe(
