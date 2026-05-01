@@ -1,7 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
 import { RolesService } from '../../services/roles.service';
-
+import { UsersService } from '../../services/users.service';
 @Component({
   selector: 'app-account-selector',
   templateUrl: './account-selector.component.html',
@@ -16,7 +16,8 @@ export class AccountSelectorComponent implements OnInit {
 
   constructor(
     private rolesService: RolesService,
-    private router: Router
+    private router: Router,
+    private usersService: UsersService
   ) {}
 
   ngOnInit(): void {
@@ -58,7 +59,17 @@ export class AccountSelectorComponent implements OnInit {
     localStorage.setItem('activeCuentaUid', account.cuentaFirebaseUid);
     localStorage.setItem('activeCuentaNombre', account.nombreCuenta);
     localStorage.setItem('activeRol', account.rol);
-
+    // Guardar RFC de la cuenta activa (dueño)
+    this.usersService.getUserFromMySQL(account.cuentaFirebaseUid).subscribe({
+      next: (user: any) => {
+        if (user?.rfc) {
+          localStorage.setItem('activeCuentaRfc', user.rfc);
+        }
+      },
+      error: () => {
+        console.warn('No se pudo obtener RFC de la cuenta activa');
+      }
+    });
     // Cargar permisos de esta cuenta
     const firebaseUid = localStorage.getItem('firebaseUid') || '';
     this.rolesService.getUserPermissions(firebaseUid).subscribe({
@@ -77,6 +88,15 @@ export class AccountSelectorComponent implements OnInit {
   private selectOwnAccount(firebaseUid: string): void {
     localStorage.setItem('activeCuentaUid', firebaseUid);
     localStorage.setItem('activeRol', 'Administrador');
+    // Guardar RFC propio
+    this.usersService.getUserFromMySQL(firebaseUid).subscribe({
+      next: (user: any) => {
+        if (user?.rfc) {
+          localStorage.setItem('activeCuentaRfc', user.rfc);
+        }
+      },
+      error: () => {}
+    });
 
     this.rolesService.getUserPermissions(firebaseUid).subscribe({
       next: (permisos) => {

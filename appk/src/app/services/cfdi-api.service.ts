@@ -184,6 +184,12 @@ export class CfdiApiService {
   }
 
   private getCurrentUserRfc(): string {
+    // Primero intentar RFC de la cuenta activa (para sub-usuarios)
+    const activeCuentaRfc = localStorage.getItem('activeCuentaRfc');
+    if (activeCuentaRfc) {
+      return activeCuentaRfc;
+    }
+    // Fallback: RFC del usuario logueado
     try {
       const userStr = localStorage.getItem('user');
       if (userStr) {
