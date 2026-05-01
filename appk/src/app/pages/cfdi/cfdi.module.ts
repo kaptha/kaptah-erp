@@ -2,7 +2,7 @@ import { NgModule, CUSTOM_ELEMENTS_SCHEMA, NO_ERRORS_SCHEMA } from '@angular/cor
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
-
+import { SharedModule } from '../../shared/shared.module';
 // Importa MaterialModule y componentes específicos de Material
 import { MaterialModule } from '../../shared/material.module';
 import { MatTableModule } from '@angular/material/table';
@@ -72,7 +72,8 @@ const routes = [
     MatTooltipModule,
     MatProgressSpinnerModule,
     // Otras importaciones
-    NgxMatSelectSearchModule
+    NgxMatSelectSearchModule,
+    SharedModule
   ],
   exports: [
     CFDIComponent,

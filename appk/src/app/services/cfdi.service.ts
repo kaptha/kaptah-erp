@@ -67,9 +67,14 @@ export class CFDIService {
   createIngresoCfdi(cfdiData: any): Observable<any> {
     console.log('📤 Enviando CFDI de Ingreso:', cfdiData);
     
+    const activeCuentaUid = localStorage.getItem('activeCuentaUid');
     return this.getHeaders().pipe(
       switchMap((headers: HttpHeaders) => {
-        return this.http.post(`${this.apiUrl}/ingreso`, cfdiData, { headers });
+        let url = `${this.apiUrl}/ingreso`;
+        if (activeCuentaUid) {
+          url += `?cuentaUid=${activeCuentaUid}`;
+        }
+        return this.http.post(url, cfdiData, { headers });
       }),
       tap(response => console.log('✅ Respuesta del servidor:', response)),
       catchError(error => {
@@ -83,9 +88,14 @@ export class CFDIService {
    * Crea un CFDI de Nómina
    */
   createCFDINomina(cfdiData: any): Observable<any> {
+    const activeCuentaUid = localStorage.getItem('activeCuentaUid');
     return this.getHeaders().pipe(
       switchMap((headers: HttpHeaders) => {
-        return this.http.post(`${this.apiUrl}/nomina`, cfdiData, { headers });
+        let url = `${this.apiUrl}/nomina`;
+        if (activeCuentaUid) {
+          url += `?cuentaUid=${activeCuentaUid}`;
+        }
+        return this.http.post(url, cfdiData, { headers });
       }),
       catchError(this.handleError)
     );
@@ -95,9 +105,14 @@ export class CFDIService {
    * Crea un CFDI de Pago
    */
   createCFDIPago(cfdiData: any): Observable<any> {
+    const activeCuentaUid = localStorage.getItem('activeCuentaUid');
     return this.getHeaders().pipe(
       switchMap((headers: HttpHeaders) => {
-        return this.http.post(`${this.apiUrl}/pago`, cfdiData, { headers });
+        let url = `${this.apiUrl}/pago`;
+        if (activeCuentaUid) {
+          url += `?cuentaUid=${activeCuentaUid}`;
+        }
+        return this.http.post(url, cfdiData, { headers });
       }),
       catchError(this.handleError)
     );
@@ -135,9 +150,14 @@ export class CFDIService {
   getCFDIs(): Observable<CFDI[]> {
     console.log('📥 Obteniendo lista de CFDIs...');
     
+    const activeCuentaUid = localStorage.getItem('activeCuentaUid');
     return this.getHeaders().pipe(
       switchMap((headers: HttpHeaders) => {
-        return this.http.get<any[]>(`${this.apiUrl}/list`, { headers });
+        let url = `${this.apiUrl}/list`;
+        if (activeCuentaUid) {
+          url += `?cuentaUid=${activeCuentaUid}`;
+        }
+        return this.http.get<any[]>(url, { headers });
       }),
       map(cfdis => {
         console.log('✅ CFDIs recibidos:', cfdis);
@@ -230,9 +250,14 @@ export class CFDIService {
   deleteCFDI(id: string): Observable<any> {
     console.log('🗑️ Eliminando CFDI con ID:', id);
     
+    const activeCuentaUid = localStorage.getItem('activeCuentaUid');
     return this.getHeaders().pipe(
       switchMap((headers: HttpHeaders) => {
-        return this.http.delete(`${this.apiUrl}/${id}`, { headers });
+        let url = `${this.apiUrl}/${id}`;
+        if (activeCuentaUid) {
+          url += `?cuentaUid=${activeCuentaUid}`;
+        }
+        return this.http.delete(url, { headers });
       }),
       catchError(error => {
         console.error('❌ Error en deleteCFDI:', error);
@@ -245,9 +270,14 @@ export class CFDIService {
    * Actualiza un CFDI
    */
   updateCFDI(id: string, cfdiData: any): Observable<any> {
+    const activeCuentaUid = localStorage.getItem('activeCuentaUid');
     return this.getHeaders().pipe(
       switchMap((headers: HttpHeaders) => {
-        return this.http.put(`${this.apiUrl}/${id}`, cfdiData, { headers });
+        let url = `${this.apiUrl}/${id}`;
+        if (activeCuentaUid) {
+          url += `?cuentaUid=${activeCuentaUid}`;
+        }
+        return this.http.put(url, cfdiData, { headers });
       }),
       catchError(this.handleError)
     );
@@ -259,7 +289,12 @@ enviarPorEmail(cfdiId: string, clienteEmail: string, customMessage?: string, pdf
   console.log('📧 Enviando CFDI por email:', cfdiId, 'a:', clienteEmail, 'estilo:', pdfStyle);
   return this.getHeaders().pipe(
     switchMap((headers: HttpHeaders) => {
-      return this.http.post(`${this.apiUrl}/${cfdiId}/enviar-email`, {
+      let url = `${this.apiUrl}/${cfdiId}/enviar-email`;
+        const activeCuentaUid = localStorage.getItem('activeCuentaUid');
+        if (activeCuentaUid) {
+          url += `?cuentaUid=${activeCuentaUid}`;
+        }
+        return this.http.post(url, {
         clienteEmail,
         customMessage: customMessage || '',
         pdfStyle: pdfStyle || 'classic',

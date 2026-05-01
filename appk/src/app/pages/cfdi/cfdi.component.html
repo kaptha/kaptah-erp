@@ -16,7 +16,7 @@
 
   <!-- Acciones principales y búsqueda -->
   <div class="actions-container">
-    <button mat-raised-button class="btn-primary" [matMenuTriggerFor]="cfdiMenu">
+    <button mat-raised-button class="btn-primary" [matMenuTriggerFor]="cfdiMenu" *appHasPermission="'cfdi.crear'">
       <mat-icon>add</mat-icon> Crear CFDI
     </button>
     <mat-menu #cfdiMenu="matMenu">
@@ -135,14 +135,14 @@
             <mat-icon>more_vert</mat-icon>
           </button>
           <mat-menu #actionMenu="matMenu">
-            <button mat-menu-item (click)="editCFDI(cfdi)">
-              <mat-icon>edit</mat-icon>
-              <span>Editar</span>
-            </button>
-            <button mat-menu-item (click)="deleteCFDI($event, cfdi.ID)">
-              <mat-icon>delete</mat-icon>
-              <span>Eliminar</span>
-            </button>
+            <button mat-menu-item (click)="editCFDI(cfdi)" *appHasPermission="'cfdi.editar'">
+  <mat-icon>edit</mat-icon>
+  <span>Editar</span>
+</button>
+            <button mat-menu-item (click)="deleteCFDI($event, cfdi.ID)" *appHasPermission="'cfdi.eliminar'">
+  <mat-icon>delete</mat-icon>
+  <span>Eliminar</span>
+</button>
             <mat-divider></mat-divider>
             <button mat-menu-item (click)="verDetalleCFDI(cfdi)">
               <mat-icon>print</mat-icon>
@@ -225,10 +225,10 @@
       </div>
       
       <div class="mobile-card-actions">
-        <button mat-icon-button color="primary" matTooltip="Editar" (click)="editCFDI(cfdi)">
+        <button mat-icon-button color="primary" matTooltip="Editar" (click)="editCFDI(cfdi)" *appHasPermission="'cfdi.editar'">
           <mat-icon>edit</mat-icon>
         </button>
-        <button mat-icon-button color="warn" matTooltip="Eliminar" (click)="deleteCFDI($event, cfdi.ID)">
+       <button mat-icon-button color="warn" matTooltip="Eliminar" (click)="deleteCFDI($event, cfdi.ID)" *appHasPermission="'cfdi.eliminar'">
           <mat-icon>delete</mat-icon>
         </button>
         <button mat-icon-button color="accent" [matMenuTriggerFor]="mobileActionMenu" matTooltip="Más opciones">
