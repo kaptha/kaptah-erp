@@ -157,9 +157,14 @@ export class AccountsPayableService {
       return throwError('concept es requerido');
     }
 
+    const activeCuentaUid = localStorage.getItem('activeCuentaUid');
     return this.getHeaders().pipe(
       switchMap((headers: HttpHeaders) => {
-        return this.http.post<AccountPayable>(this.apiUrl, data, { headers });
+        let url = this.apiUrl;
+        if (activeCuentaUid) {
+          url += `?cuentaUid=${activeCuentaUid}`;
+        }
+        return this.http.post<AccountPayable>(url, data, { headers });
       }),
       tap(response => console.log('Respuesta del backend:', response)),
       catchError(error => {
@@ -170,41 +175,66 @@ export class AccountsPayableService {
   }
 
   getAll(): Observable<AccountPayable[]> {
+    const activeCuentaUid = localStorage.getItem('activeCuentaUid');
     return this.getHeaders().pipe(
       switchMap((headers: HttpHeaders) => {
-        return this.http.get<AccountPayable[]>(this.apiUrl, { headers });
+        let url = this.apiUrl;
+        if (activeCuentaUid) {
+          url += `?cuentaUid=${activeCuentaUid}`;
+        }
+        return this.http.get<AccountPayable[]>(url, { headers });
       })
     );
   }
 
   getById(id: string): Observable<AccountPayable> {
+   const activeCuentaUid = localStorage.getItem('activeCuentaUid');
     return this.getHeaders().pipe(
       switchMap((headers: HttpHeaders) => {
-        return this.http.get<AccountPayable>(`${this.apiUrl}/${id}`, { headers });
+        let url = `${this.apiUrl}/${id}`;
+        if (activeCuentaUid) {
+          url += `?cuentaUid=${activeCuentaUid}`;
+        }
+        return this.http.get<AccountPayable>(url, { headers });
       })
     );
   }
 
   update(id: string, data: UpdateAccountPayableDto): Observable<AccountPayable> {
+    const activeCuentaUid = localStorage.getItem('activeCuentaUid');
     return this.getHeaders().pipe(
       switchMap((headers: HttpHeaders) => {
-        return this.http.put<AccountPayable>(`${this.apiUrl}/${id}`, data, { headers });
+        let url = `${this.apiUrl}/${id}`;
+        if (activeCuentaUid) {
+          url += `?cuentaUid=${activeCuentaUid}`;
+        }
+        return this.http.put<AccountPayable>(url, data, { headers });
       })
     );
   }
 
   delete(id: string): Observable<void> {
+    const activeCuentaUid = localStorage.getItem('activeCuentaUid');
     return this.getHeaders().pipe(
       switchMap((headers: HttpHeaders) => {
-        return this.http.delete<void>(`${this.apiUrl}/${id}`, { headers });
+        let url = `${this.apiUrl}/${id}`;
+        if (activeCuentaUid) {
+          url += `?cuentaUid=${activeCuentaUid}`;
+        }
+        return this.http.delete<void>(url, { headers });
       })
     );
   }
 
   registerPayment(id: string, paymentData: PaymentData): Observable<AccountPayable> {
+    const activeCuentaUid = localStorage.getItem('activeCuentaUid');
     return this.getHeaders().pipe(
       switchMap((headers: HttpHeaders) => {
-        return this.http.post<AccountPayable>(`${this.apiUrl}/${id}/payments`, paymentData, { headers });
+        let url = `${this.apiUrl}/${id}/payments`;
+        if (activeCuentaUid) {
+          url += `?cuentaUid=${activeCuentaUid}`;
+        }
+        return this.http.post<AccountPayable>(url, paymentData, { headers });
       })
     );
   }

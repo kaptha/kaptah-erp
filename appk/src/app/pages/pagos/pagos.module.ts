@@ -3,7 +3,7 @@ import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { provideHttpClient, withInterceptorsFromDi } from '@angular/common/http';
-
+import { SharedModule } from '../../shared/shared.module';
 // Importa MaterialModule
 import { MaterialModule } from '../../shared/material.module';
 
@@ -51,5 +51,6 @@ import { PagoFormModalComponent } from './pago-form-modal/pago-form-modal.compon
         MatDatepickerModule,
         MatSnackBarModule,
         MatProgressSpinnerModule,
+        SharedModule,
         MatNativeDateModule], providers: [provideHttpClient(withInterceptorsFromDi())] })
 export class PagosModule { }

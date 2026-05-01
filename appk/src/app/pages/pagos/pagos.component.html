@@ -64,7 +64,7 @@
 
   <!-- Acciones principales y búsqueda -->
   <div class="actions-container">
-    <button mat-raised-button class="btn-primary" (click)="openPagoDialog()">
+    <button mat-raised-button class="btn-primary" (click)="openPagoDialog()" *appHasPermission="'cuentas_pagar.crear'">
       <mat-icon>add</mat-icon> Nuevo pago
     </button>
     
@@ -157,18 +157,20 @@
             <mat-icon>more_vert</mat-icon>
           </button>
           <mat-menu #menu="matMenu">
-            <button mat-menu-item (click)="marcarPagado(pago)" *ngIf="!isEstadoPagado(pago)">
-              <mat-icon>payments</mat-icon>
-              <span>Marcar como pagado</span>
-            </button>
-            <button mat-menu-item (click)="editPago(pago)">
-              <mat-icon>edit</mat-icon>
-              <span>Editar</span>
-            </button>
-            <button mat-menu-item (click)="deletePago($event, pago.id)">
-              <mat-icon color="warn">delete</mat-icon>
-              <span>Eliminar</span>
-            </button>
+            <ng-container *appHasPermission="'cuentas_pagar.editar'">
+  <button mat-menu-item (click)="marcarPagado(pago)" *ngIf="!isEstadoPagado(pago)">
+    <mat-icon>payments</mat-icon>
+    <span>Marcar como pagado</span>
+  </button>
+</ng-container>
+            <button mat-menu-item (click)="editPago(pago)" *appHasPermission="'cuentas_pagar.editar'">
+  <mat-icon>edit</mat-icon>
+  <span>Editar</span>
+</button>
+            <button mat-menu-item (click)="deletePago($event, pago.id)" *appHasPermission="'cuentas_pagar.eliminar'">
+  <mat-icon color="warn">delete</mat-icon>
+  <span>Eliminar</span>
+</button>
           </mat-menu>
         </td>
       </ng-container>
@@ -234,15 +236,17 @@
           <mat-icon>more_vert</mat-icon>
         </button>
         <mat-menu #mobileMenu="matMenu">
-          <button mat-menu-item (click)="marcarPagado(pago)" *ngIf="!isEstadoPagado(pago)">
-            <mat-icon>payments</mat-icon>
-            <span>Marcar como pagado</span>
-          </button>
+          <ng-container *appHasPermission="'cuentas_pagar.editar'">
+  <button mat-menu-item (click)="marcarPagado(pago)" *ngIf="!isEstadoPagado(pago)">
+    <mat-icon>payments</mat-icon>
+    <span>Marcar como pagado</span>
+  </button>
+</ng-container>
           <button mat-menu-item (click)="editPago(pago)">
             <mat-icon>edit</mat-icon>
             <span>Editar</span>
           </button>
-          <button mat-menu-item (click)="deletePago($event, pago.id)">
+          <button mat-menu-item (click)="deletePago($event, pago.id)" *appHasPermission="'cuentas_pagar.eliminar'">
             <mat-icon color="warn">delete</mat-icon>
             <span>Eliminar</span>
           </button>
