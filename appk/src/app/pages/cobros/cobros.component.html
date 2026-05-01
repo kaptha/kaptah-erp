@@ -64,7 +64,7 @@
 
   <!-- Acciones principales y búsqueda -->
   <div class="actions-container">
-    <button mat-raised-button class="btn-primary" (click)="openCobroDialog()">
+    <button mat-raised-button class="btn-primary" (click)="openCobroDialog()" *appHasPermission="'cuentas_cobrar.crear'">
       <mat-icon>add</mat-icon> Nuevo cobro
     </button>
     
@@ -157,22 +157,24 @@
             <mat-icon>more_vert</mat-icon>
           </button>
           <mat-menu #menu="matMenu">
-            <button mat-menu-item (click)="enviarRecordatorio(cobro)" *ngIf="!isEstadoPagado(cobro)">
-              <mat-icon color="primary">email</mat-icon>
-              <span>Enviar Recordatorio</span>
-            </button>
-            <button mat-menu-item (click)="marcarPagado(cobro)" *ngIf="!isEstadoPagado(cobro)">
-              <mat-icon>payments</mat-icon>
-              <span>Marcar como pagado</span>
-            </button>
-            <button mat-menu-item (click)="editCobro(cobro)">
-              <mat-icon>edit</mat-icon>
-              <span>Editar</span>
-            </button>
-            <button mat-menu-item (click)="deleteCobro($event, cobro.id)">
-              <mat-icon color="warn">delete</mat-icon>
-              <span>Eliminar</span>
-            </button>
+            <ng-container *appHasPermission="'cuentas_cobrar.editar'">
+  <button mat-menu-item (click)="enviarRecordatorio(cobro)" *ngIf="!isEstadoPagado(cobro)">
+    <mat-icon color="primary">email</mat-icon>
+    <span>Enviar Recordatorio</span>
+  </button>
+  <button mat-menu-item (click)="marcarPagado(cobro)" *ngIf="!isEstadoPagado(cobro)">
+    <mat-icon>payments</mat-icon>
+    <span>Marcar como pagado</span>
+  </button>
+</ng-container>
+            <button mat-menu-item (click)="editCobro(cobro)" *appHasPermission="'cuentas_cobrar.editar'">
+  <mat-icon>edit</mat-icon>
+  <span>Editar</span>
+</button>
+            <button mat-menu-item (click)="deleteCobro($event, cobro.id)" *appHasPermission="'cuentas_cobrar.eliminar'">
+  <mat-icon color="warn">delete</mat-icon>
+  <span>Eliminar</span>
+</button>
           </mat-menu>
         </td>
       </ng-container>
@@ -238,22 +240,24 @@
           <mat-icon>more_vert</mat-icon>
         </button>
         <mat-menu #mobileMenu="matMenu">
-          <button mat-menu-item (click)="enviarRecordatorio(cobro)" *ngIf="!isEstadoPagado(cobro)">
-            <mat-icon color="primary">email</mat-icon>
-            <span>Enviar Recordatorio</span>
-          </button>
-          <button mat-menu-item (click)="marcarPagado(cobro)" *ngIf="!isEstadoPagado(cobro)">
-            <mat-icon>payments</mat-icon>
-            <span>Marcar como pagado</span>
-          </button>
-          <button mat-menu-item (click)="editCobro(cobro)">
-            <mat-icon>edit</mat-icon>
-            <span>Editar</span>
-          </button>
-          <button mat-menu-item (click)="deleteCobro($event, cobro.id)">
-            <mat-icon color="warn">delete</mat-icon>
-            <span>Eliminar</span>
-          </button>
+          <ng-container *appHasPermission="'cuentas_cobrar.editar'">
+  <button mat-menu-item (click)="enviarRecordatorio(cobro)" *ngIf="!isEstadoPagado(cobro)">
+    <mat-icon color="primary">email</mat-icon>
+    <span>Enviar Recordatorio</span>
+  </button>
+  <button mat-menu-item (click)="marcarPagado(cobro)" *ngIf="!isEstadoPagado(cobro)">
+    <mat-icon>payments</mat-icon>
+    <span>Marcar como pagado</span>
+  </button>
+</ng-container>
+<button mat-menu-item (click)="editCobro(cobro)" *appHasPermission="'cuentas_cobrar.editar'">
+  <mat-icon>edit</mat-icon>
+  <span>Editar</span>
+</button>
+<button mat-menu-item (click)="deleteCobro($event, cobro.id)" *appHasPermission="'cuentas_cobrar.eliminar'">
+  <mat-icon color="warn">delete</mat-icon>
+  <span>Eliminar</span>
+</button>
         </mat-menu>
       </div>
     </div>

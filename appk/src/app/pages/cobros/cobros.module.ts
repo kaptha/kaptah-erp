@@ -3,7 +3,7 @@ import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { provideHttpClient, withInterceptorsFromDi } from '@angular/common/http';
-
+import { SharedModule } from '../../shared/shared.module';
 // Importa MaterialModule y componentes específicos de Material
 import { MaterialModule } from '../../shared/material.module';
 import { MatTableModule } from '@angular/material/table';
@@ -58,5 +58,6 @@ const routes = [
         MatSnackBarModule,
         MatDatepickerModule,
         MatProgressSpinnerModule,
+        SharedModule,
         MatNativeDateModule], providers: [provideHttpClient(withInterceptorsFromDi())] })
 export class CobrosModule { }

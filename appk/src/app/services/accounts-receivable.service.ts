@@ -128,9 +128,14 @@ export class AccountsReceivableService {
       return throwError(() => new Error('Campos requeridos faltantes: ' + missingFields.join(', ')));
     }
 
+    const activeCuentaUid = localStorage.getItem('activeCuentaUid');
     return this.getHeaders().pipe(
       switchMap((headers: HttpHeaders) => {
-        return this.http.post<AccountReceivable>(this.apiUrl, data, { headers });
+        let url = this.apiUrl;
+        if (activeCuentaUid) {
+          url += `?cuentaUid=${activeCuentaUid}`;
+        }
+        return this.http.post<AccountReceivable>(url, data, { headers });
       }),
       tap(response => console.log('Respuesta del backend:', response)),
       catchError(error => {
@@ -141,41 +146,66 @@ export class AccountsReceivableService {
   }
 
   getAll(): Observable<AccountReceivable[]> {
+    const activeCuentaUid = localStorage.getItem('activeCuentaUid');
     return this.getHeaders().pipe(
       switchMap((headers: HttpHeaders) => {
-        return this.http.get<AccountReceivable[]>(this.apiUrl, { headers });
+        let url = this.apiUrl;
+        if (activeCuentaUid) {
+          url += `?cuentaUid=${activeCuentaUid}`;
+        }
+        return this.http.get<AccountReceivable[]>(url, { headers });
       })
     );
   }
 
   getById(id: string): Observable<AccountReceivable> {
+    const activeCuentaUid = localStorage.getItem('activeCuentaUid');
     return this.getHeaders().pipe(
       switchMap((headers: HttpHeaders) => {
-        return this.http.get<AccountReceivable>(`${this.apiUrl}/${id}`, { headers });
+        let url = `${this.apiUrl}/${id}`;
+        if (activeCuentaUid) {
+          url += `?cuentaUid=${activeCuentaUid}`;
+        }
+        return this.http.get<AccountReceivable>(url, { headers });
       })
     );
   }
 
   update(id: string, data: UpdateAccountReceivableDto): Observable<AccountReceivable> {
+    const activeCuentaUid = localStorage.getItem('activeCuentaUid');
     return this.getHeaders().pipe(
       switchMap((headers: HttpHeaders) => {
-        return this.http.put<AccountReceivable>(`${this.apiUrl}/${id}`, data, { headers });
+        let url = `${this.apiUrl}/${id}`;
+        if (activeCuentaUid) {
+          url += `?cuentaUid=${activeCuentaUid}`;
+        }
+        return this.http.put<AccountReceivable>(url, data, { headers });
       })
     );
   }
 
   delete(id: string): Observable<void> {
+    const activeCuentaUid = localStorage.getItem('activeCuentaUid');
     return this.getHeaders().pipe(
       switchMap((headers: HttpHeaders) => {
-        return this.http.delete<void>(`${this.apiUrl}/${id}`, { headers });
+        let url = `${this.apiUrl}/${id}`;
+        if (activeCuentaUid) {
+          url += `?cuentaUid=${activeCuentaUid}`;
+        }
+        return this.http.delete<void>(url, { headers });
       })
     );
   }
 
   registerPayment(id: string, paymentData: PaymentData): Observable<AccountReceivable> {
+    const activeCuentaUid = localStorage.getItem('activeCuentaUid');
     return this.getHeaders().pipe(
       switchMap((headers: HttpHeaders) => {
-        return this.http.post<AccountReceivable>(`${this.apiUrl}/${id}/payments`, paymentData, { headers });
+        let url = `${this.apiUrl}/${id}/payments`;
+        if (activeCuentaUid) {
+          url += `?cuentaUid=${activeCuentaUid}`;
+        }
+        return this.http.post<AccountReceivable>(url, paymentData, { headers });
       })
     );
   }
@@ -216,10 +246,15 @@ export class AccountsReceivableService {
     recipientEmail: string;
     customMessage?: string;
   }): Observable<{ jobId: string; logId: string; message: string }> {
+    const activeCuentaUid = localStorage.getItem('activeCuentaUid');
     return this.getHeaders().pipe(
       switchMap((headers: HttpHeaders) => {
+        let url = `${this.apiUrl}/${accountId}/send-reminder`;
+        if (activeCuentaUid) {
+          url += `?cuentaUid=${activeCuentaUid}`;
+        }
         return this.http.post<{ jobId: string; logId: string; message: string }>(
-          `${this.apiUrl}/${accountId}/send-reminder`,
+          url,
           emailData,
           { headers }
         );
