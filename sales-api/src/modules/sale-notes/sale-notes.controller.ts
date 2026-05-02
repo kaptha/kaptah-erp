@@ -30,8 +30,9 @@ export class SaleNotesController {
     @Res() res: Response,
   ) {
     console.log('🔥 Request para generar PDF de nota de venta');
+    const firebaseToken = req.headers['x-firebase-token'] as string;
     const authHeader = req.headers.authorization;
-    const token = authHeader?.startsWith('Bearer ') ? authHeader : null;
+    const token = firebaseToken ? `Bearer ${firebaseToken}` : (authHeader?.startsWith('Bearer ') ? authHeader : null);
     console.log('🔐 Token recibido:', token ? 'Sí' : 'No');
     const pdf = await this.saleNotesService.generarPdfEstiloRemision(
       id,

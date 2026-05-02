@@ -311,8 +311,9 @@ export class CfdiController {
     @Query('cuentaUid') cuentaUid?: string,
   ) {
     console.log('Request para generar PDF de CFDI');
+    const firebaseToken = req.headers['x-firebase-token'] as string;
     const authHeader = req.headers.authorization;
-    const token = authHeader?.startsWith('Bearer ') ? authHeader : null;
+    const token = firebaseToken ? `Bearer ${firebaseToken}` : (authHeader?.startsWith('Bearer ') ? authHeader : null);
     console.log('Token recibido:', token ? 'Si' : 'No');
     try {
       const pdf = await this.cfdiService.generarPdfCfdi(
