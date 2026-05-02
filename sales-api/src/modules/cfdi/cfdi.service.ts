@@ -51,15 +51,17 @@ export class CfdiService {
     /**
    * Obtiene el logo del usuario
    */
-  private async obtenerLogoUsuario(userId: string, token: string): Promise<string | null> {
+  private async obtenerLogoUsuario(userId: string, token: string, cuentaUid?: string): Promise<string | null> {
     try {
       console.log('🔍 Solicitando logo...');
-      
-      const logoApiUrl = `${this.bizEntitiesApiUrl}/api/logos/current`;
-      
-      const response = await axios.get<{ url?: string }>(logoApiUrl, { // ⭐ TIPAR
+
+      const cuentaParam = cuentaUid ? `?cuentaUid=${cuentaUid}` : '';
+      const logoApiUrl = `${this.bizEntitiesApiUrl}/api/logos/current${cuentaParam}`;
+
+      const response = await axios.get<{ url?: string }>(logoApiUrl, {
         headers: {
-          'Authorization': token
+          'Authorization': token,
+          'x-internal-api-key': process.env.INTERNAL_API_KEY
         }
       });
       
@@ -121,7 +123,7 @@ export class CfdiService {
       let logoDataUri = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg==';
  if (token) {
       try {
-        const logoUrl = await this.obtenerLogoUsuario(finalUserId, token);
+        const logoUrl = await this.obtenerLogoUsuario(finalUserId, token, cuentaUid);
         if (logoUrl) {
           // Descargar y convertir a base64 (como en SaleNotesService)
           console.log('📥 Descargando logo desde:', logoUrl);
