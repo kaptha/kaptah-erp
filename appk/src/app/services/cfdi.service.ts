@@ -126,8 +126,13 @@ export class CFDIService {
     
     console.log('📥 Solicitando PDF del CFDI:', cfdiId, 'con estilo:', estilo);
     
+    const activeCuentaUid = localStorage.getItem('activeCuentaUid');
+    let pdfUrl = `${this.apiUrl}/${cfdiId}/pdf/${estilo}`;
+    if (activeCuentaUid) {
+      pdfUrl += `?cuentaUid=${activeCuentaUid}`;
+    }
     return this.http.get(
-      `${this.apiUrl}/${cfdiId}/pdf/${estilo}`, 
+      pdfUrl, 
       { 
         headers, 
         responseType: 'blob'
