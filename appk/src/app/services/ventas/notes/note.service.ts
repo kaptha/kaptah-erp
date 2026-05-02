@@ -29,7 +29,8 @@ export class NoteService {
       map((response: AuthResponse) => {
         return new HttpHeaders({
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${response.access_token}`
+          'Authorization': `Bearer ${response.access_token}`,
+          'X-Firebase-Token': idToken
         });
       })
     );
