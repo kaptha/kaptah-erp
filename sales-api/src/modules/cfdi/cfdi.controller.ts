@@ -308,6 +308,7 @@ export class CfdiController {
     @Param('style') estilo: string,
     @Req() req: Request,
     @Res() res: Response,
+    @Query('cuentaUid') cuentaUid?: string,
   ) {
     console.log('Request para generar PDF de CFDI');
     const authHeader = req.headers.authorization;
@@ -318,7 +319,8 @@ export class CfdiController {
         id,
         null,
         estilo,
-        token
+        token,
+        cuentaUid
       );
       res.set({
         'Content-Type': 'application/pdf',

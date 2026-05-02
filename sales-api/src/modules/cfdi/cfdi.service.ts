@@ -82,23 +82,32 @@ export class CfdiService {
     id: string,
     userId: string,
     estilo: string,
-    token: string | null
+    token: string | null,
+    cuentaUid?: string
   ): Promise<Buffer> {
     console.log('📄 Iniciando generación de PDF de CFDI');
   console.log('🎨 Estilo recibido:', estilo); 
 
     // Extraer userId del token si no se proporciona
     let finalUserId = userId;
+
+    // Si hay cuentaUid, usarlo directamente (sub-usuarios)
+    if (!finalUserId && cuentaUid) {
+      finalUserId = cuentaUid;
+      console.log('Usando cuentaUid como userId:', finalUserId);
+    }
     
     if (!finalUserId && token) {
       try {
         const cleanToken = token.replace('Bearer ', '');
         const decodedToken = await admin.auth().verifyIdToken(cleanToken);
         finalUserId = decodedToken.uid;
-        console.log('✅ User ID extraído del token:', finalUserId);
+        console.log('User ID extraido del token:', finalUserId);
       } catch (error) {
-        console.error('❌ Error al decodificar token:', error.message);
-        throw new Error('Token inválido');
+        console.error('Error al decodificar token:', error.message);
+        if (!cuentaUid) {
+          throw new Error('Token invalido');
+        }
       }
     }
     

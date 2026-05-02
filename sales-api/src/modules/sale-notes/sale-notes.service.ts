@@ -167,6 +167,12 @@ private async obtenerLogoUsuario(userId: string, token: string, cuentaUid?: stri
   // Extraer userId del token si no se proporciona
   let finalUserId = userId;
   let datosUsuario = null;
+
+  // Si hay cuentaUid, usarlo directamente (sub-usuarios)
+  if (!finalUserId && cuentaUid) {
+    finalUserId = cuentaUid;
+    console.log('✅ Usando cuentaUid como userId:', finalUserId);
+  }
   
   if (!finalUserId && token) {
     try {
@@ -177,7 +183,10 @@ private async obtenerLogoUsuario(userId: string, token: string, cuentaUid?: stri
       console.log('✅ User ID extraído del token:', finalUserId);
     } catch (error) {
       console.error('❌ Error al decodificar token:', error.message);
-      throw new Error('Token inválido');
+      // Si falla el token pero hay cuentaUid en el query, no lanzar error
+      if (!cuentaUid) {
+        throw new Error('Token inválido');
+      }
     }
   }
   
