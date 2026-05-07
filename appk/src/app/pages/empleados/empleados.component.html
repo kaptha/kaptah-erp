@@ -16,7 +16,7 @@
 
   <!-- Acciones principales y búsqueda -->
   <div class="actions-container">
-    <button mat-raised-button class="btn-primary" (click)="openEmployeeDialog()">
+    <button mat-raised-button class="btn-primary" (click)="openEmployeeDialog()" *appHasPermission="'empleados.crear'">
       <mat-icon>add</mat-icon> Agregar empleado
     </button>
     
@@ -109,14 +109,14 @@
             <mat-icon>more_vert</mat-icon>
           </button>
           <mat-menu #menu="matMenu">
-            <button mat-menu-item (click)="editEmployee(empleado)">
-              <mat-icon>edit</mat-icon>
-              <span>Editar</span>
-            </button>
-            <button mat-menu-item (click)="deleteEmployee($event, empleado.id)">
-              <mat-icon color="warn">delete</mat-icon>
-              <span>Eliminar</span>
-            </button>
+            <button mat-menu-item (click)="editEmployee(empleado)" *appHasPermission="'empleados.editar'">
+  <mat-icon>edit</mat-icon>
+  <span>Editar</span>
+</button>
+            <button mat-menu-item (click)="deleteEmployee($event, empleado.id)" *appHasPermission="'empleados.eliminar'">
+  <mat-icon color="warn">delete</mat-icon>
+  <span>Eliminar</span>
+</button>
           </mat-menu>
         </td>
       </ng-container>
@@ -179,14 +179,14 @@
           <mat-icon>more_vert</mat-icon>
         </button>
         <mat-menu #mobileMenu="matMenu">
-          <button mat-menu-item (click)="editEmployee(empleado)">
-            <mat-icon>edit</mat-icon>
-            <span>Editar</span>
-          </button>
-          <button mat-menu-item (click)="deleteEmployee($event, empleado.id)">
-            <mat-icon color="warn">delete</mat-icon>
-            <span>Eliminar</span>
-          </button>
+          <button mat-menu-item (click)="editEmployee(empleado)" *appHasPermission="'empleados.editar'">
+  <mat-icon>edit</mat-icon>
+  <span>Editar</span>
+</button>
+<button mat-menu-item (click)="deleteEmployee($event, empleado.id)" *appHasPermission="'empleados.eliminar'">
+  <mat-icon color="warn">delete</mat-icon>
+  <span>Eliminar</span>
+</button>
         </mat-menu>
       </div>
     </div>

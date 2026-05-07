@@ -16,7 +16,7 @@ import { MaterialModule } from '../../shared/material.module';
 // Importa los componentes específicos
 import { EmpleadosComponent } from './empleados.component';
 import { EmpleadoFormComponent } from './empleado-form/empleado-form.component';
-
+import { SharedModule } from '../../shared/shared.module';
 @NgModule({
   declarations: [
     EmpleadosComponent,
@@ -35,7 +35,8 @@ import { EmpleadoFormComponent } from './empleado-form/empleado-form.component';
     MatIconModule,
     MatFormFieldModule,
     MatInputModule,
-    MatMenuModule
+    MatMenuModule,
+    SharedModule
   ],
   exports: [
     EmpleadosComponent,
