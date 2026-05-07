@@ -5,12 +5,14 @@ import { EmployeesController } from './employees.controller';
 import { Employee } from './entities/employee.entity';
 import { UsersModule } from '../users/users.module';
 import { UserEntityRelationsModule } from '../user-entity-relations/user-entity-relations.module';
+import { RolesModule } from '../roles/roles.module';
 
 @Module({
   imports: [
     TypeOrmModule.forFeature([Employee]),
     UsersModule,
-    UserEntityRelationsModule
+    UserEntityRelationsModule,
+    RolesModule
   ],
   controllers: [EmployeesController],
   providers: [EmployeesService],
