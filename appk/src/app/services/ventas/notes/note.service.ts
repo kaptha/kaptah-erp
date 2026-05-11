@@ -94,7 +94,9 @@ sendNoteByEmail(noteId: string, emailData: {
   customMessage?: string;
   pdfStyle?: string;
 }): Observable<any> {
-  const url = `${this.apiUrl}/${noteId}/send-email`;
+  const cuentaUid = localStorage.getItem('activeCuentaUid') || '';
+  const cuentaParam = cuentaUid ? `?cuentaUid=${cuentaUid}` : '';
+  const url = `${this.apiUrl}/${noteId}/send-email${cuentaParam}`;
   
   // âœ… Obtener el idToken original de Firebase
   const idToken = localStorage.getItem('idToken');
