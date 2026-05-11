@@ -125,7 +125,8 @@ private getActiveCuentaUid(): string | null {
   createEmpleado(empleadoData: Omit<Empleado, 'id'>): Observable<Empleado> {
     const headers = this.getHeaders();
     console.log('Datos enviados al crear empleado:', JSON.stringify(empleadoData));
-    return this.http.post<Empleado>(`${this.apiUrl}/employees`, empleadoData, { headers })
+    const cuentaUid = localStorage.getItem('activeCuentaUid') || '';
+    return this.http.post<Empleado>(`${this.apiUrl}/employees?cuentaUid=${cuentaUid}`, empleadoData, { headers })
       .pipe(
         catchError(this.handleError)
       );
@@ -133,9 +134,9 @@ private getActiveCuentaUid(): string | null {
 
   updateEmpleado(id: number, empleadoData: Empleado): Observable<Empleado> {
     const headers = this.getHeaders();
-    // Crear una copia del objeto empleadoData sin la propiedad id
     const { id: empleadoId, ...empleadoDataWithoutId } = empleadoData;
-    return this.http.put<Empleado>(`${this.apiUrl}/employees/${id}`, empleadoDataWithoutId, { headers })
+    const cuentaUid = localStorage.getItem('activeCuentaUid') || '';
+    return this.http.put<Empleado>(`${this.apiUrl}/employees/${id}?cuentaUid=${cuentaUid}`, empleadoDataWithoutId, { headers })
       .pipe(
         catchError(this.handleError)
       );
@@ -145,7 +146,8 @@ private getActiveCuentaUid(): string | null {
     console.log(`Enviando solicitud para eliminar empleado con ID: ${id}`);
     const token = localStorage.getItem('idToken');
     const headers = new HttpHeaders().set('Authorization', `Bearer ${token}`);
-    return this.http.delete(`${this.apiUrl}/employees/${id}`, { headers })
+    const cuentaUid = localStorage.getItem('activeCuentaUid') || '';
+    return this.http.delete(`${this.apiUrl}/employees/${id}?cuentaUid=${cuentaUid}`, { headers })
       .pipe(
         catchError(this.handleError)
       );
