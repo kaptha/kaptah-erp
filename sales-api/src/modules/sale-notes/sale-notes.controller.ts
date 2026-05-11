@@ -122,15 +122,16 @@ create(@Body() createSaleNoteDto: CreateSaleNoteDto, @CurrentUser() user: any, @
     @Body() emailData: SendInvoiceEmailDto,
     @CurrentUser() user: any,
     @Headers('x-firebase-token') firebaseToken: string,
+    @Query('cuentaUid') cuentaUid?: string,
   ) {
-    console.log('🔐 Firebase idToken recibido:', firebaseToken ? 'Sí ✅' : 'NO ❌');
-    console.log('🔐 Token (primeros 50):', firebaseToken?.substring(0, 50));
+    const ownerUid = cuentaUid || user.uid;
+    console.log('Firebase idToken recibido:', firebaseToken ? 'Si' : 'NO');
 
     return this.saleNotesService.sendSaleNoteByEmail(
       id,
       emailData.recipientEmail,
       emailData.customMessage,
-      user.uid,
+      ownerUid,
       firebaseToken,
       emailData.pdfStyle || 'classic-delivery',
     );
