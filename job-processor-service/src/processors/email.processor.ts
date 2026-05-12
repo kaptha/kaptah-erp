@@ -870,6 +870,74 @@ async sendCFDI(job: Job): Promise<any> {
 
     return results;
   }
+// Enviar documento genérico (usado por EmailService via HTTP)
+  @Process({ name: 'send-document', concurrency: 5 })
+  async handleSendDocument(job: Job): Promise<any> {
+    const { emailLogId, recipient, documentType, documentData, attachments, customMessage, recipientName } = job.data;
+
+    this.logger.log(`📧 Procesando send-document tipo ${documentType} a ${recipient}`);
+
+    try {
+      // Mapear documentType a template
+      const templateMap = {
+        'invoice': 'cfdi-timbrado',
+        'quotation': 'cotizacion',
+        'delivery_note': 'nota-entrega',
+        'payment_reminder': 'recordatorio-pago',
+        'sale_order': 'nota-venta',
+        'purchase_order': 'nota-venta',
+      };
+
+      const template = templateMap[documentType] || documentType;
+
+      const html = this.generateEmailHtml(template, {
+        ...documentData,
+        cliente: recipientName || documentData.clientName || 'Cliente',
+        customMessage,
+        empresaNombre: documentData.companyName || 'Kaptah',
+        emisorNombre: documentData.companyName || 'Kaptah',
+      });
+
+      const processedAttachments = [];
+      if (attachments && attachments.length > 0) {
+        for (const att of attachments) {
+          processedAttachments.push({
+            filename: att.filename,
+            content: Buffer.from(att.content, 'base64'),
+            contentType: att.contentType,
+          });
+        }
+      }
+
+      const subjects = {
+        invoice: `Factura ${documentData.folio}`,
+        quotation: `Cotizacion ${documentData.folio}`,
+        delivery_note: `Remision ${documentData.folio}`,
+        payment_reminder: `Recordatorio de pago - Factura ${documentData.folio}`,
+        sale_order: `Orden de Venta ${documentData.folio}`,
+      };
+
+      const subject = subjects[documentType] || 'Documento';
+
+      const result = await this.resendService.send({
+        to: recipient,
+        subject,
+        html,
+        attachments: processedAttachments.length > 0 ? processedAttachments : undefined,
+      });
+
+      this.logger.log(`✅ Documento ${documentType} enviado: ${result.messageId}`);
+
+      return {
+        success: true,
+        messageId: result.messageId,
+        to: recipient,
+      };
+    } catch (error) {
+      this.logger.error(`❌ Error enviando documento ${documentType}: ${error.message}`, error.stack);
+      throw error;
+    }
+  }
 
   // ========== METODOS AUXILIARES ==========
 
