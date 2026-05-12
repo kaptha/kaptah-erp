@@ -410,4 +410,38 @@ private async extraerDatosCompletosDelXml(contenidoXml: string): Promise<Partial
       porEstado,
     };
   }
+/**
+   * Procesar contenido XML directamente (usado por sincronizacion automatica con SIFEI)
+   */
+  async procesarXmlDesdeContenido(contenidoXml: string, usuarioId: string): Promise<{ success: boolean; message: string }> {
+    try {
+      const { rfcEmisor, rfcReceptor } = await this.extraerRfcsDelXml(contenidoXml);
+
+      // Verificar si ya existe por RFC emisor + contenido
+      const existe = await this.xmlRepository.findOne({
+        where: { rfc_emisor: rfcEmisor, rfc_receptor: rfcReceptor, xml_completo: contenidoXml },
+      });
+
+      if (existe) {
+        this.logger.debug(`XML duplicado, omitiendo: ${rfcEmisor} -> ${rfcReceptor}`);
+        return { success: false, message: 'XML duplicado' };
+      }
+
+      const xmlRecord = this.xmlRepository.create({
+        rfc_emisor: rfcEmisor,
+        rfc_receptor: rfcReceptor,
+        fecha_recepcion: new Date(),
+        xml_completo: contenidoXml,
+        usuario_id: usuarioId,
+        estado_procesamiento: 'IMPORTADO',
+      });
+      await this.xmlRepository.save(xmlRecord);
+
+      this.logger.log(`XML importado via SIFEI: ${rfcEmisor} -> ${rfcReceptor}`);
+      return { success: true, message: 'XML importado correctamente' };
+    } catch (error) {
+      this.logger.error(`Error procesando XML desde SIFEI: ${error.message}`);
+      return { success: false, message: error.message };
+    }
+  }
 }

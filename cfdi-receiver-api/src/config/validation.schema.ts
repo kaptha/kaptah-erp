@@ -1,4 +1,4 @@
-import { IsString, IsNumber, validateSync } from 'class-validator';
+import { IsString, IsNumber, validateSync, IsOptional } from 'class-validator';
 import { plainToClass } from 'class-transformer';
 
 export class EnvironmentVariables {
@@ -43,6 +43,13 @@ export class EnvironmentVariables {
 
   @IsString()
   FIREBASE_CLIENT_X509_CERT_URL: string;
+
+  @IsString()
+  ACI_DESCARGASAT_TOKEN: string;
+
+  @IsOptional()
+  @IsString()
+  ACI_DESCARGASAT_URL: string;
 }
 
 export function validate(config: Record<string, unknown>) {
