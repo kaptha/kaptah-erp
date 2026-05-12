@@ -890,13 +890,34 @@ async sendCFDI(job: Job): Promise<any> {
 
       const template = templateMap[documentType] || documentType;
 
-      const html = this.generateEmailHtml(template, {
+      // Mapear campos según el tipo de documento
+      let templateContext: any = {
         ...documentData,
-        cliente: recipientName || documentData.clientName || 'Cliente',
+        cliente: recipientName || documentData.clientName || documentData.customerName || 'Cliente',
         customMessage,
         empresaNombre: documentData.companyName || 'Kaptah',
         emisorNombre: documentData.companyName || 'Kaptah',
-      });
+      };
+
+      // Mapeo específico para recordatorio de pago
+      if (documentType === 'payment_reminder') {
+        const dueDate = documentData.dueDate ? new Date(documentData.dueDate) : new Date();
+        const today = new Date();
+        const diffTime = today.getTime() - dueDate.getTime();
+        const diasVencido = Math.max(0, Math.floor(diffTime / (1000 * 60 * 60 * 24)));
+
+        templateContext = {
+          ...templateContext,
+          folio: documentData.invoiceNumber || documentData.folio || 'S/N',
+          fechaVencimiento: dueDate.toLocaleDateString('es-MX'),
+          diasVencido: diasVencido,
+          monto: documentData.dueAmount || documentData.totalAmount || 0,
+          cliente: recipientName || documentData.customerName || 'Cliente',
+          empresaNombre: documentData.companyName || 'Kaptah',
+        };
+      }
+
+      const html = this.generateEmailHtml(template, templateContext);
 
       const processedAttachments = [];
       if (attachments && attachments.length > 0) {
