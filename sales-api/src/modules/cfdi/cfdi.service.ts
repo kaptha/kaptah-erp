@@ -1737,7 +1737,7 @@ async sendCfdiByEmail(
     let pdfBase64: string | null = null;
     try {
       this.logger.log('📄 Generando PDF del CFDI...');
-      const pdfBuffer = await this.generarPdfCfdi(cfdiId, userId, pdfStyle, `Bearer ${firebaseToken}`);
+      const pdfBuffer = await this.generarPdfCfdi(cfdiId, userId, pdfStyle, `Bearer ${firebaseToken}`, userId);
       pdfBase64 = pdfBuffer.toString('base64');
       this.logger.log(`✅ PDF generado, tamaño base64: ${pdfBase64.length}`);
     } catch (e) {

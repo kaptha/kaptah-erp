@@ -701,7 +701,7 @@ this.logger.log(`📦 Job de stock encolado exitosamente: ${stockJob.id}`);
       let pdfBase64: string | null = null;
       try {
         this.logger.log('📄 Generando PDF para adjuntar al email...');
-        const pdfBuffer = await this.generarPdfEstiloRemision(id, userId, pdfStyle, idToken);
+        const pdfBuffer = await this.generarPdfEstiloRemision(id, userId, pdfStyle, idToken, userId);
         pdfBase64 = pdfBuffer.toString('base64');
         this.logger.log('✅ PDF generado, tamaño base64: ' + pdfBase64.length);
       } catch (e) {
