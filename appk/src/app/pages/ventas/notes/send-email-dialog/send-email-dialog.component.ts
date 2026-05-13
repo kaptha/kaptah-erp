@@ -17,7 +17,7 @@ import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
             El email es requerido
           </mat-error>
           <mat-error *ngIf="emailForm.get('recipientEmail')?.hasError('email')">
-            Email inválido
+            Email invalido
           </mat-error>
         </mat-form-field>
 
@@ -30,7 +30,7 @@ import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
         <mat-form-field appearance="outline" class="full-width">
           <mat-label>Estilo del PDF</mat-label>
           <mat-select formControlName="pdfStyle">
-            <mat-option value="classic-delivery">Clásico</mat-option>
+            <mat-option value="classic-delivery">Clasico</mat-option>
             <mat-option value="modern-delivery">Moderno</mat-option>
             <mat-option value="creative-delivery">Creativo</mat-option>
             <mat-option value="minimal-delivery">Minimalista</mat-option>
@@ -46,12 +46,18 @@ import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
         <div class="preview-card">
           <span class="preview-badge">Vista previa</span>
           <div class="preview-content">
-            <p><strong>Para:</strong> {{emailForm.get('recipientEmail')?.value || '---'}}</p>
-            <p><strong>Asunto:</strong> Nota de Venta #{{data.noteId.substring(0, 8)}}</p>
-            <p class="attachment">
+            <div class="preview-row">
+              <strong>Para:</strong>
+              <span class="preview-value">{{emailForm.get('recipientEmail')?.value || '---'}}</span>
+            </div>
+            <div class="preview-row">
+              <strong>Asunto:</strong>
+              <span class="preview-value">Nota de Venta #{{data.noteId.substring(0, 8)}}</span>
+            </div>
+            <div class="attachment">
               <mat-icon>attach_file</mat-icon>
-              nota_venta_{{data.noteId.substring(0, 8)}}.pdf
-            </p>
+              <span class="preview-value">nota_venta_{{data.noteId.substring(0, 8)}}.pdf</span>
+            </div>
           </div>
         </div>
       </form>
@@ -59,7 +65,7 @@ import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
 
     <mat-dialog-actions align="end" class="actions-container">
       <button mat-button (click)="onCancel()" [disabled]="sending">Cancelar</button>
-      <button mat-raised-button color="primary" 
+      <button mat-raised-button class="btn-primary" 
         (click)="onSend()" 
         [disabled]="!emailForm.valid || sending"
         class="main-send-button">
@@ -70,10 +76,15 @@ import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
     </mat-dialog-actions>
   `,
   styles: [`
-    /* Estructura Base */
+    :host {
+      display: block;
+    }
+
     .dialog-container {
-      min-width: 280px;
+      min-width: 0;
       max-width: 500px;
+      padding: 0 24px;
+      overflow-x: hidden;
       margin-bottom: 8px;
     }
 
@@ -88,7 +99,6 @@ import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
       margin-bottom: 4px;
     }
 
-    /* Tarjeta de Vista Previa Estilizada */
     .preview-card {
       background-color: #f9fafb;
       border: 1px solid #e5e7eb;
@@ -112,34 +122,53 @@ import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
       border: 1px solid #e5e7eb;
     }
 
-    .preview-content p {
-      margin: 4px 0;
+    .preview-content {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .preview-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 4px;
       font-size: 13px;
       color: #4b5563;
       line-height: 1.4;
+    }
+
+    .preview-value {
+      min-width: 0;
+      word-break: break-word;
     }
 
     .attachment {
       display: flex;
       align-items: center;
       gap: 4px;
-      color: #2563eb !important; /* Azul para resaltar el archivo */
+      color: #2563eb;
       font-weight: 500;
+      font-size: 13px;
+      min-width: 0;
     }
 
     .attachment mat-icon {
       font-size: 16px;
       width: 16px;
       height: 16px;
+      min-width: 16px;
     }
 
-    /* Spinner */
     mat-spinner {
       display: inline-block;
       margin-right: 8px;
     }
 
-    /* Responsividad */
+    .actions-container {
+      padding: 12px 24px 16px;
+      gap: 8px;
+    }
+
     @media (min-width: 600px) {
       .dialog-container {
         width: 450px;
@@ -147,10 +176,14 @@ import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
     }
 
     @media (max-width: 480px) {
+      .dialog-container {
+        padding: 0 16px;
+      }
+
       .actions-container {
         flex-direction: column-reverse;
-        padding: 16px !important;
-        gap: 10px;
+        padding: 12px 16px 16px;
+        gap: 8px;
       }
 
       .actions-container button {
@@ -161,6 +194,19 @@ import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
       .dialog-header {
         font-size: 1.1rem;
         line-height: 1.2;
+      }
+
+      .preview-card {
+        padding: 10px;
+      }
+
+      .preview-row {
+        flex-direction: column;
+        gap: 0;
+      }
+
+      .attachment {
+        word-break: break-all;
       }
     }
   `],
@@ -179,6 +225,12 @@ export class SendEmailDialogComponent {
       defaultEmail?: string;
     }
   ) {
+    const isMobile = window.innerWidth < 480;
+    this.dialogRef.updateSize(
+      isMobile ? '95vw' : '480px',
+      'auto'
+    );
+
     this.emailForm = this.fb.group({
       recipientEmail: [data.defaultEmail || '', [Validators.required, Validators.email]],
       customMessage: ['Le enviamos su nota de venta. Gracias por su preferencia.'],
@@ -197,5 +249,3 @@ export class SendEmailDialogComponent {
     }
   }
 }
-
-

@@ -5,7 +5,7 @@ import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
 @Component({
     selector: 'app-send-order-dialog',
   template: `
-    <h2 mat-dialog-title class="order-header">Confirmar Envío de Orden</h2>
+    <h2 mat-dialog-title class="order-header">Confirmar Envio de Orden</h2>
     
     <mat-dialog-content class="scrollable-content">
       <form [formGroup]="emailForm" class="order-form">
@@ -38,12 +38,12 @@ import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
           
           <div class="summary-row detail-data">
             <mat-icon>person</mat-icon>
-            <span>{{data.customerName}}</span>
+            <span class="detail-value">{{data.customerName}}</span>
           </div>
           
           <div class="summary-row detail-data">
             <mat-icon>alternate_email</mat-icon>
-            <span class="truncate">{{emailForm.get('recipientEmail')?.value || 'Sin email'}}</span>
+            <span class="detail-value truncate">{{emailForm.get('recipientEmail')?.value || 'Sin email'}}</span>
           </div>
         </div>
       </form>
@@ -51,7 +51,7 @@ import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
 
     <mat-dialog-actions align="end" class="order-actions">
       <button mat-button (click)="onCancel()" [disabled]="sending">Cancelar</button>
-      <button mat-raised-button color="accent" 
+      <button mat-raised-button class="btn-primary" 
         (click)="onSend()" 
         [disabled]="!emailForm.valid || sending"
         class="confirm-button">
@@ -62,9 +62,15 @@ import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
     </mat-dialog-actions>
   `,
   styles: [`
+    :host {
+      display: block;
+    }
+
     .scrollable-content {
-      min-width: 280px;
-      max-width: 450px; /* Un poco más estrecho para parecer un ticket */
+      min-width: 0;
+      max-width: 450px;
+      padding: 0 24px;
+      overflow-x: hidden;
     }
 
     .order-form {
@@ -78,7 +84,6 @@ import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
       margin-bottom: 4px;
     }
 
-    /* Estilo tipo Ticket/Resumen */
     .order-summary-card {
       background-color: #fff;
       border: 2px solid #f0f0f0;
@@ -97,18 +102,22 @@ import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
 
     .main-data {
       margin-bottom: 12px;
+      flex-wrap: wrap;
+      gap: 8px;
     }
 
     .order-id {
       font-weight: 700;
       color: #1a1a1a;
       font-size: 1rem;
+      white-space: nowrap;
     }
 
     .order-total {
       font-size: 1.2rem;
       font-weight: 800;
-      color: #2e7d32; /* Verde éxito para el dinero */
+      color: #2e7d32;
+      white-space: nowrap;
     }
 
     .summary-divider {
@@ -122,13 +131,20 @@ import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
       gap: 10px;
       color: #666;
       font-size: 0.85rem;
+      min-width: 0;
     }
 
     .detail-data mat-icon {
       font-size: 16px;
       width: 16px;
       height: 16px;
+      min-width: 16px;
       color: #999;
+    }
+
+    .detail-value {
+      min-width: 0;
+      word-break: break-word;
     }
 
     .truncate {
@@ -137,23 +153,32 @@ import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
       text-overflow: ellipsis;
     }
 
-    /* Spinner */
     mat-spinner {
       display: inline-block;
       margin-right: 8px;
     }
 
-    /* Responsividad */
+    .order-actions {
+      padding: 12px 24px 16px;
+      gap: 8px;
+    }
+
+    /* Desktop */
     @media (min-width: 600px) {
       .scrollable-content {
         width: 420px;
       }
     }
 
-    @media (max-width: 450px) {
+    /* Mobile */
+    @media (max-width: 480px) {
+      .scrollable-content {
+        padding: 0 16px;
+      }
+
       .order-actions {
         flex-direction: column-reverse;
-        padding: 16px !important;
+        padding: 12px 16px 16px;
         gap: 8px;
       }
 
@@ -162,8 +187,23 @@ import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
         margin: 0 !important;
       }
 
+      .main-data {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 4px;
+      }
+
       .order-total {
         font-size: 1.1rem;
+      }
+
+      .order-summary-card {
+        padding: 12px;
+      }
+
+      .truncate {
+        white-space: normal;
+        word-break: break-all;
       }
     }
   `],
@@ -183,9 +223,15 @@ export class SendOrderDialogComponent {
       defaultEmail?: string;
     }
   ) {
+    const isMobile = window.innerWidth < 480;
+    this.dialogRef.updateSize(
+      isMobile ? '95vw' : '480px',
+      'auto'
+    );
+
     this.emailForm = this.fb.group({
       recipientEmail: [data.defaultEmail || '', [Validators.required, Validators.email]],
-      customMessage: ['Gracias por su compra. Adjuntamos la confirmación de su orden.']
+      customMessage: ['Gracias por su compra. Adjuntamos la confirmacion de su orden.']
     });
   }
 

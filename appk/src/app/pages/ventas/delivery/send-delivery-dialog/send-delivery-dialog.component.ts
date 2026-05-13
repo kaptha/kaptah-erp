@@ -5,7 +5,7 @@ import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
 @Component({
     selector: 'app-send-delivery-dialog',
   template: `
-    <h2 mat-dialog-title class="dialog-title">Enviar Guía de Remisión</h2>
+    <h2 mat-dialog-title class="dialog-title">Enviar Guia de Remision</h2>
     
     <mat-dialog-content class="responsive-container">
       <form [formGroup]="emailForm" class="form-layout">
@@ -18,7 +18,7 @@ import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
             El email es requerido
           </mat-error>
           <mat-error *ngIf="emailForm.get('recipientEmail')?.hasError('email')">
-            Email inválido
+            Email invalido
           </mat-error>
         </mat-form-field>
 
@@ -31,7 +31,7 @@ import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
         <div class="preview-box">
           <div class="preview-header">
             <mat-icon>visibility</mat-icon>
-            <span>Vista previa del envío</span>
+            <span>Vista previa del envio</span>
           </div>
           
           <div class="preview-grid">
@@ -40,7 +40,7 @@ import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
               <span class="value">{{emailForm.get('recipientEmail')?.value || '---'}}</span>
             </div>
             <div class="grid-item">
-              <span class="label">Guía:</span>
+              <span class="label">Guia:</span>
               <span class="value">#{{data.deliveryNoteId.substring(0, 8)}}</span>
             </div>
             <div class="grid-item">
@@ -58,20 +58,26 @@ import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
 
     <mat-dialog-actions align="end" class="actions-group">
       <button mat-button (click)="onCancel()" [disabled]="sending">Cancelar</button>
-      <button mat-raised-button color="primary" 
+      <button mat-raised-button class="btn-primary" 
         (click)="onSend()" 
         [disabled]="!emailForm.valid || sending"
         class="send-btn">
         <mat-icon *ngIf="!sending">local_shipping</mat-icon>
         <mat-spinner *ngIf="sending" diameter="20"></mat-spinner>
-        <span>{{sending ? 'Enviando...' : 'Enviar Guía'}}</span>
+        <span>{{sending ? 'Enviando...' : 'Enviar Guia'}}</span>
       </button>
     </mat-dialog-actions>
   `,
   styles: [`
+    :host {
+      display: block;
+    }
+
     .responsive-container {
-      min-width: 280px;
+      min-width: 0;
       max-width: 500px;
+      padding: 0 24px;
+      overflow-x: hidden;
     }
 
     .form-layout {
@@ -85,7 +91,6 @@ import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
       margin-bottom: 4px;
     }
 
-    /* Caja de Vista Previa mejorada */
     .preview-box {
       background: #fafafa;
       border: 1px dashed #ccc;
@@ -108,17 +113,19 @@ import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
       font-size: 18px;
       width: 18px;
       height: 18px;
+      min-width: 18px;
     }
 
     .preview-grid {
       display: grid;
-      grid-template-columns: 1fr; /* Una columna en móvil */
+      grid-template-columns: 1fr;
       gap: 10px;
     }
 
     .grid-item {
       display: flex;
       flex-direction: column;
+      min-width: 0;
     }
 
     .label {
@@ -131,7 +138,8 @@ import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
     .value {
       font-size: 13px;
       color: #333;
-      word-break: break-all;
+      word-break: break-word;
+      overflow-wrap: break-word;
     }
 
     mat-spinner {
@@ -139,28 +147,42 @@ import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
       margin-right: 8px;
     }
 
-    /* Media Queries */
+    .actions-group {
+      padding: 12px 24px 16px;
+      gap: 8px;
+    }
+
     @media (min-width: 480px) {
       .preview-grid {
-        grid-template-columns: 1fr 1fr; /* Dos columnas en tablets/PC */
+        grid-template-columns: 1fr 1fr;
       }
       .responsive-container {
         width: 480px;
       }
     }
 
-    @media (max-width: 400px) {
+    @media (max-width: 480px) {
+      .responsive-container {
+        padding: 0 16px;
+      }
+
       .actions-group {
         flex-direction: column-reverse;
-        padding: 16px !important;
+        padding: 12px 16px 16px;
         gap: 8px;
       }
+
       .actions-group button {
         width: 100%;
         margin: 0 !important;
       }
+
       .dialog-title {
         font-size: 1.1rem;
+      }
+
+      .preview-box {
+        padding: 12px;
       }
     }
   `],
@@ -180,9 +202,15 @@ export class SendDeliveryDialogComponent {
       defaultEmail?: string;
     }
   ) {
+    const isMobile = window.innerWidth < 480;
+    this.dialogRef.updateSize(
+      isMobile ? '95vw' : '480px',
+      'auto'
+    );
+
     this.emailForm = this.fb.group({
       recipientEmail: [data.defaultEmail || '', [Validators.required, Validators.email]],
-      customMessage: ['Adjuntamos la guía de remisión de su pedido. Por favor, tenga a la mano su identificación para recibir.']
+      customMessage: ['Adjuntamos la guia de remision de su pedido. Por favor, tenga a la mano su identificacion para recibir.']
     });
   }
 

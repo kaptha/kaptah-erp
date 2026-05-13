@@ -5,7 +5,7 @@ import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
 @Component({
     selector: 'app-send-quotation-dialog',
   template: `
-    <h2 mat-dialog-title class="dialog-title">Enviar Cotización por Email</h2>
+    <h2 mat-dialog-title class="dialog-title">Enviar Cotizacion por Email</h2>
     
     <mat-dialog-content class="responsive-content">
       <form [formGroup]="emailForm" class="flex-form">
@@ -17,7 +17,7 @@ import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
             El email es requerido
           </mat-error>
           <mat-error *ngIf="emailForm.get('recipientEmail')?.hasError('email')">
-            Email inválido
+            Email invalido
           </mat-error>
         </mat-form-field>
 
@@ -30,7 +30,7 @@ import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
         <mat-form-field appearance="outline" class="full-width">
           <mat-label>Estilo del PDF</mat-label>
           <mat-select formControlName="pdfStyle">
-            <mat-option value="classic-quote">Clásico</mat-option>
+            <mat-option value="classic-quote">Clasico</mat-option>
             <mat-option value="modern-quote">Moderno</mat-option>
             <mat-option value="creative-quote">Creativo</mat-option>
             <mat-option value="minimal-quote">Minimalista</mat-option>
@@ -46,9 +46,18 @@ import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
         <div class="email-preview">
           <p class="preview-title">Vista previa:</p>
           <div class="preview-details">
-            <p><strong>Para:</strong> {{emailForm.get('recipientEmail')?.value || 'No especificado'}}</p>
-            <p><strong>Asunto:</strong> Cotización COT-{{data.cotizacionId.toString().padStart(6, '0')}}</p>
-            <p><strong>Adjuntos:</strong> cotizacion_{{data.cotizacionId}}.pdf</p>
+            <div class="preview-row">
+              <strong>Para:</strong>
+              <span class="preview-value">{{emailForm.get('recipientEmail')?.value || 'No especificado'}}</span>
+            </div>
+            <div class="preview-row">
+              <strong>Asunto:</strong>
+              <span class="preview-value">Cotizacion COT-{{data.cotizacionId.toString().padStart(6, '0')}}</span>
+            </div>
+            <div class="preview-row">
+              <strong>Adjuntos:</strong>
+              <span class="preview-value">cotizacion_{{data.cotizacionId}}.pdf</span>
+            </div>
           </div>
         </div>
       </form>
@@ -56,7 +65,7 @@ import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
 
     <mat-dialog-actions align="end" class="dialog-actions">
       <button mat-button (click)="onCancel()">Cancelar</button>
-      <button mat-raised-button color="primary" 
+      <button mat-raised-button class="btn-primary" 
         (click)="onSend()" 
         [disabled]="!emailForm.valid || sending"
         class="send-button">
@@ -67,14 +76,18 @@ import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
     </mat-dialog-actions>
   `,
   styles: [`
-    /* Contenedor principal */
+    :host {
+      display: block;
+    }
+
     .responsive-content {
       display: flex;
       flex-direction: column;
       gap: 8px;
-      min-width: 300px; /* Base para móviles */
-      max-width: 100%;
-      padding-top: 10px !important;
+      min-width: 0;
+      max-width: 500px;
+      padding: 10px 24px 0;
+      overflow-x: hidden;
     }
 
     .flex-form {
@@ -87,7 +100,6 @@ import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
       margin-bottom: 8px;
     }
 
-    /* Vista previa */
     .email-preview {
       margin-top: 8px;
       padding: 16px;
@@ -105,41 +117,72 @@ import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
       letter-spacing: 0.5px;
     }
 
-    .preview-details p {
-      margin: 4px 0;
-      font-size: 13px;
-      color: #666;
-      word-break: break-all; /* Evita que emails largos rompan el diseño */
+    .preview-details {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
     }
 
-    /* Spinner */
+    .preview-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 4px;
+      font-size: 13px;
+      color: #666;
+      line-height: 1.4;
+    }
+
+    .preview-value {
+      min-width: 0;
+      word-break: break-word;
+      overflow-wrap: break-word;
+    }
+
     mat-spinner {
       display: inline-block;
       margin-right: 8px;
       vertical-align: middle;
     }
 
-    /* Media Queries para pantallas más grandes */
+    .dialog-actions {
+      padding: 12px 24px 16px;
+      gap: 8px;
+    }
+
     @media (min-width: 600px) {
       .responsive-content {
-        width: 500px; /* Ancho fijo en escritorio */
+        width: 500px;
       }
     }
 
-    /* Ajustes para pantallas muy pequeñas */
-    @media (max-width: 400px) {
-      .dialog-title {
-        font-size: 1.2rem;
+    @media (max-width: 480px) {
+      .responsive-content {
+        padding: 10px 16px 0;
       }
+
+      .dialog-title {
+        font-size: 1.1rem;
+      }
+
       .dialog-actions {
         flex-direction: column-reverse;
         align-items: stretch;
         gap: 8px;
-        padding: 16px !important;
+        padding: 12px 16px 16px;
       }
+
       .dialog-actions button {
         width: 100%;
         margin: 0 !important;
+      }
+
+      .email-preview {
+        padding: 12px;
+      }
+
+      .preview-row {
+        flex-direction: column;
+        gap: 0;
       }
     }
   `],
@@ -158,9 +201,15 @@ export class SendQuotationDialogComponent {
       defaultEmail?: string;
     }
   ) {
+    const isMobile = window.innerWidth < 480;
+    this.dialogRef.updateSize(
+      isMobile ? '95vw' : '480px',
+      'auto'
+    );
+
     this.emailForm = this.fb.group({
       recipientEmail: [data.defaultEmail || '', [Validators.required, Validators.email]],
-      customMessage: ['Le enviamos nuestra cotización. Válida por 15 días.'],
+      customMessage: ['Le enviamos nuestra cotizacion. Valida por 15 dias.'],
       pdfStyle: ['classic-quote']
     });
   }
@@ -176,4 +225,3 @@ export class SendQuotationDialogComponent {
     }
   }
 }
-
