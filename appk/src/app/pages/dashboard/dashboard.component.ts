@@ -239,7 +239,7 @@ export class DashboardComponent implements OnInit {
         icono: 'money_off',
         titulo: `${this.formatCurrency(montoCancelado)} en ingresos cancelados`,
         detalle: 'Revisa los detalles en el modulo de Ingresos',
-        ruta: '/ingresos'
+        ruta: '/dashboard/ingresos'
       });
     }
 
@@ -251,7 +251,7 @@ export class DashboardComponent implements OnInit {
         icono: 'person_add',
         titulo: `${provNuevos.length} proveedor${provNuevos.length > 1 ? 'es' : ''} nuevo${provNuevos.length > 1 ? 's' : ''}`,
         detalle: 'Detectados en el periodo actual',
-        ruta: '/egresos'
+        ruta: '/dashboard/egresos'
       });
     }
 
@@ -263,7 +263,7 @@ export class DashboardComponent implements OnInit {
         icono: 'error_outline',
         titulo: `Solo ${this.formatPercentage(pctVigentes)} de CFDIs vigentes`,
         detalle: 'El porcentaje de cancelacion es alto',
-        ruta: '/ingresos'
+        ruta: '/dashboard/ingresos'
       });
     }
   }
