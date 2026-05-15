@@ -31,7 +31,7 @@
   </form>
 </mat-dialog-content>
 <mat-dialog-actions align="end">
-  <button mat-button (click)="cancel()">Cancelar</button>
+  <button mat-button class="btn-danger" (click)="cancel()">Cancelar</button>
   <button mat-raised-button class="btn-primary" (click)="save()" [disabled]="form.invalid">
     Crear Usuario
   </button>

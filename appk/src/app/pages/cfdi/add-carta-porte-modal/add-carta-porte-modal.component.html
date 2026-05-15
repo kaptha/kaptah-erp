@@ -679,11 +679,11 @@
   </mat-dialog-content>
   
   <mat-dialog-actions align="end">
-    <button mat-button (click)="onCancel()" [disabled]="loading">Cancelar</button>
+    <button mat-button class="btn-danger" (click)="onCancel()" [disabled]="loading">Cancelar</button>
     <button mat-button color="accent" (click)="onPreview()" [disabled]="loading || cartaPorteForm.invalid">
       <mat-icon>visibility</mat-icon> Vista Previa JSON
     </button>
-    <button mat-raised-button color="primary" (click)="onSubmit()" [disabled]="loading || cartaPorteForm.invalid">
+    <button mat-raised-button class="btn-primary" (click)="onSubmit()" [disabled]="loading || cartaPorteForm.invalid">
       {{ isEditing ? 'Actualizar' : 'Crear Carta Porte' }}
     </button>
   </mat-dialog-actions>

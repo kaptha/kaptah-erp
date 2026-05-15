@@ -196,12 +196,12 @@
 </mat-dialog-content>
 
 <mat-dialog-actions align="end">
-  <button mat-button (click)="onClose()" [disabled]="loading">
+  <button mat-button class="btn-danger" (click)="onClose()" [disabled]="loading">
     Cancelar
   </button>
   <button 
     mat-raised-button 
-    color="primary" 
+    class="btn-primary" 
     (click)="onSubmit()" 
     [disabled]="!receiveForm.valid || loading || !hasQuantityToReceive()">
     <mat-spinner diameter="20" *ngIf="loading" style="display: inline-block; margin-right: 8px;"></mat-spinner>

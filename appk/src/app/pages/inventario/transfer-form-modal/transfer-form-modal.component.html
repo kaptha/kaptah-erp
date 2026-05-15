@@ -162,10 +162,10 @@
 </mat-dialog-content>
 
 <mat-dialog-actions align="end">
-  <button mat-button (click)="onCancel()">Cancelar</button>
+  <button mat-button class="btn-danger" (click)="onCancel()">Cancelar</button>
   <button
     mat-raised-button
-    color="primary"
+    class="btn-primary"
     (click)="onSubmit()"
     [disabled]="loading || transferForm.invalid || transferItems.length === 0"
   >

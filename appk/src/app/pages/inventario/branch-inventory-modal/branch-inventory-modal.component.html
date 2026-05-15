@@ -87,7 +87,7 @@
 
 <mat-dialog-actions align="end">
   <button mat-button (click)="onCancel()" [disabled]="loading" class="btn-danger">Cancelar</button>
-  <button mat-raised-button color="primary" (click)="onSubmit()" [disabled]="loading || inventoryForm.invalid">
+  <button mat-raised-button class="btn-primary" (click)="onSubmit()" [disabled]="loading || inventoryForm.invalid">
     <mat-spinner diameter="20" *ngIf="loading" class="spinner-inline"></mat-spinner>
     {{ mode === 'create' ? 'Crear' : 'Actualizar' }}
   </button>

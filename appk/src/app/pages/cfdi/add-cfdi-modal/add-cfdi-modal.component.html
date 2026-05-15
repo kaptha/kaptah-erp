@@ -456,8 +456,8 @@
 
   
   <mat-dialog-actions align="end">
-    <button mat-button (click)="onCancel()" [disabled]="loading">Cancelar</button>
-    <button mat-raised-button color="primary" (click)="onSubmit()" [disabled]="loading || cfdiForm.invalid">
+    <button mat-button class="btn-danger" (click)="onCancel()" [disabled]="loading">Cancelar</button>
+    <button mat-raised-button class="btn-primary" (click)="onSubmit()" [disabled]="loading || cfdiForm.invalid">
       {{ isEditing ? 'Actualizar' : 'Crear CFDI' }}
     </button>
   </mat-dialog-actions>

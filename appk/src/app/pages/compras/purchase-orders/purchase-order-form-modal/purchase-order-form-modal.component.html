@@ -230,10 +230,10 @@
 </mat-dialog-content>
 
 <mat-dialog-actions align="end">
-  <button mat-button (click)="onClose()">
+  <button mat-button class="btn-danger" (click)="onClose()">
     {{ viewMode ? 'Cerrar' : 'Cancelar' }}
   </button>
-  <button mat-raised-button color="primary" (click)="onSubmit()" 
+  <button mat-raised-button class="btn-primary" (click)="onSubmit()" 
           [disabled]="!orderForm.valid || loading || viewMode">
     <mat-spinner diameter="20" *ngIf="loading" style="display: inline-block; margin-right: 8px;"></mat-spinner>
     <span *ngIf="!loading">

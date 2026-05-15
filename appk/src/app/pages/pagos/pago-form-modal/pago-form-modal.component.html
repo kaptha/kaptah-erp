@@ -377,7 +377,7 @@
     Cancelar
   </button>
   
-  <button mat-raised-button color="accent" class="btn-primary" (click)="onSubmit()" 
+  <button mat-raised-button class="btn-primary" (click)="onSubmit()" 
           [disabled]="!pagoForm.valid || loading">
     <mat-icon *ngIf="!loading">{{data?.id ? 'update' : 'save'}}</mat-icon>
     <mat-spinner diameter="20" *ngIf="loading"></mat-spinner>

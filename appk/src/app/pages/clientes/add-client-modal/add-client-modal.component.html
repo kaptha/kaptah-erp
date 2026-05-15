@@ -129,7 +129,7 @@
 </mat-dialog-content>
 <mat-dialog-actions align="end">
   <button mat-button (click)="onCancel()" class="btn-danger">Cancelar</button>
-  <button mat-raised-button color="primary" (click)="onSubmit()" [disabled]="!clientForm.valid">
+  <button mat-raised-button class="btn-primary" (click)="onSubmit()" [disabled]="!clientForm.valid">
     {{ isEditMode ? 'Actualizar' : 'Agregar' }}
   </button>
 </mat-dialog-actions>
