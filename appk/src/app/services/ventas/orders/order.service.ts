@@ -111,7 +111,7 @@ sendSaleOrderByEmail(orderId: string, emailData: {
   return this.getHeaders().pipe(
     switchMap((headers: HttpHeaders) => {
       return this.http.post<{ jobId: string; logId: string; message: string }>(
-        `${this.apiUrl}/${orderId}/send-email`,
+        `${this.apiUrl}/${orderId}/send-email?cuentaUid=${localStorage.getItem('activeCuentaUid') || ''}`,
         emailData,
         { headers }
       );
