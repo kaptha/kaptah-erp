@@ -636,6 +636,7 @@ private async obtenerLogoUsuario(userId: string, token: string, cuentaUid?: stri
     userId: string,
     pdfStyle: string = 'classic',
     firebaseToken?: string,
+    cuentaUid?: string,
   ): Promise<any> {
     this.logger.log(`Enviando cotización ${id} por email a ${recipientEmail}`);
 
@@ -659,7 +660,7 @@ private async obtenerLogoUsuario(userId: string, token: string, cuentaUid?: stri
       let pdfBase64: string | null = null;
       try {
         this.logger.log('📄 Generando PDF de cotización para adjuntar al email...');
-        const pdfBuffer = await this.generarPdfEstiloCotizacion(id, pdfStyle, firebaseToken || null);
+        const pdfBuffer = await this.generarPdfEstiloCotizacion(id, pdfStyle, firebaseToken || null, userId);
         pdfBase64 = pdfBuffer.toString('base64');
         this.logger.log('✅ PDF generado, tamaño base64: ' + pdfBase64.length);
       } catch (e) {

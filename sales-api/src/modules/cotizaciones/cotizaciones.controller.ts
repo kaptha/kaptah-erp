@@ -276,6 +276,7 @@ export class CotizacionesController {
       ownerUid,
       emailData.pdfStyle || 'classic-quote',
       firebaseToken,
+      ownerUid,
     );
   }
   /**
