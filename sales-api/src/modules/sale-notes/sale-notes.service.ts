@@ -691,8 +691,8 @@ this.logger.log(`📦 Job de stock encolado exitosamente: ${stockJob.id}`);
       // 2. Obtener nombre de empresa
       let empresaNombre = 'Kaptah';
       try {
-        const datosUsuario = await this.usuariosService.findByFirebaseUid(userId);
-        empresaNombre = (datosUsuario as any)?.empresa_nombre || (datosUsuario as any)?.sucursal_nombre || 'Kaptah';
+        const datosUsuario = await this.usuariosService.getDatosParaTemplate(userId);
+        empresaNombre = datosUsuario?.sucursal_nombre || 'Kaptah';
       } catch (e) {
         this.logger.warn('No se pudo obtener nombre de empresa');
       }

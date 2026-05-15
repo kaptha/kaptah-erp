@@ -649,8 +649,8 @@ private async obtenerLogoUsuario(userId: string, token: string, cuentaUid?: stri
       // 1. Obtener nombre de empresa
       let empresaNombre = 'Kaptah';
       try {
-        const datosUsuario = await this.usuariosService.findByFirebaseUid(userId);
-        empresaNombre = datosUsuario?.nombreComercial || datosUsuario?.Nombre || 'Kaptah';
+        const datosUsuario = await this.usuariosService.getDatosParaTemplate(userId);
+        empresaNombre = datosUsuario?.sucursal_nombre || 'Kaptah';
       } catch (e) {
         this.logger.warn('No se pudo obtener nombre de empresa');
       }

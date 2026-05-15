@@ -265,13 +265,15 @@ export class CotizacionesController {
     },
     @CurrentUser() user: any,
     @Headers('x-firebase-token') firebaseToken: string,
+    @Query('cuentaUid') cuentaUid?: string,
   ) {
-    this.logger.log(`📬 POST /cotizaciones/${id}/send-email - Usuario: ${user.email || user.uid || "unknown"}`);
+    const ownerUid = cuentaUid || user.uid;
+    this.logger.log(`📬 POST /cotizaciones/${id}/send-email - Usuario: ${user.email || user.uid || "unknown"} - Cuenta: ${ownerUid}`);
     return this.cotizacionesService.sendQuotationByEmail(
       id,
       emailData.recipientEmail,
       emailData.customMessage,
-      user.uid,
+      ownerUid,
       emailData.pdfStyle || 'classic-quote',
       firebaseToken,
     );
