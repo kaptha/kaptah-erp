@@ -366,7 +366,28 @@ private async obtenerLogoUsuario(userId: string, token: string, cuentaUid?: stri
       const customerName = deliveryNote.salesOrder?.customerName || 'Cliente - Orden: ' + deliveryNote.salesOrderId.slice(0, 8);
       const customerAddress = deliveryNote.salesOrder?.customerAddress || 'Ver orden de venta para detalles';
       const customerRfc = deliveryNote.salesOrder?.customerRfc || 'N/A';
+      // Obtener datos del usuario/empresa
+      const ownerUid = cuentaUid || userId;
+      let datosUsuario = null;
+      try {
+        datosUsuario = await this.usuariosService.getDatosParaTemplate(ownerUid);
+        console.log('✅ Datos del usuario obtenidos:', {
+          nombre: datosUsuario?.sucursal_nombre,
+          rfc: datosUsuario?.empresa_rfc,
+        });
+      } catch (error) {
+        console.error('⚠️ Error al obtener datos del usuario:', error.message);
+      }
 
+      const empresaNombre = datosUsuario?.sucursal_nombre || sucursal?.alias || 'Mi Empresa';
+      const empresaRfc = datosUsuario?.empresa_rfc || 'XAXX010101000';
+
+      // Separar fecha
+      const fechaEntrega = new Date(deliveryNote.deliveryDate || deliveryNote.createdAt);
+      const dia = fechaEntrega.getDate().toString().padStart(2, '0');
+      const meses = ['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'];
+      const mes = meses[fechaEntrega.getMonth()];
+      const anio = fechaEntrega.getFullYear().toString();
       // Reemplazar variables básicas
       let htmlFinal = templateHtml
         .replace('{{logo}}', logoDataUri)
@@ -381,7 +402,16 @@ private async obtenerLogoUsuario(userId: string, token: string, cuentaUid?: stri
         .replace('{{items}}', itemsHtml)
         .replace('{{subtotal}}', '0.00')
         .replace('{{impuestos}}', '0.00')
-        .replace('{{total}}', '0.00');
+        .replace('{{total}}', '0.00')
+        .replace(/\{\{dia\}\}/g, dia)
+        .replace(/\{\{mes\}\}/g, mes)
+        .replace(/\{\{anio\}\}/g, anio)
+        .replace(/\{\{sucursal_nombre\}\}/g, empresaNombre)
+        .replace(/\{\{empresa_nombre\}\}/g, empresaNombre)
+        .replace(/\{\{empresa_rfc\}\}/g, empresaRfc)
+        .replace(/\{\{observaciones\}\}/g, deliveryNote.notasEntrega || 'Sin observaciones')
+        .replace(/\{\{qr_folio\}\}/g, deliveryNote.folio || '')
+        .replace(/\{\{qr_fecha\}\}/g, format(fechaEntrega, 'dd/MM/yyyy'));
 
       // ✨ NUEVO: Reemplazar variables de la sucursal
       if (sucursal) {
