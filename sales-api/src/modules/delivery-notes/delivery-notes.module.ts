@@ -8,10 +8,11 @@ import { EmailClientModule } from '../email-client/email-client.module';
 import { LogoClientModule } from '../logo-client/logo-client.module';
 import { QueueClientModule } from '../queue-client/queue-client.module';
 import { UsuariosModule } from '../usuarios/usuarios.module';
+import { QrGeneratorService } from '../cfdi/services/qr-generator.service';
 @Module({
   imports: [TypeOrmModule.forFeature([DeliveryNote]), QueueClientModule, SucursalesModule, EmailClientModule, LogoClientModule, UsuariosModule],
   controllers: [DeliveryNotesController],
-  providers: [DeliveryNotesService],
+  providers: [DeliveryNotesService, QrGeneratorService],
   exports: [DeliveryNotesService]
 })
 export class DeliveryNotesModule {}

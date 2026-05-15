@@ -8,6 +8,7 @@ import { UsuariosService } from '../usuarios/usuarios.service';
 import { SucursalesService } from '../sucursales/sucursales.service'; 
 import { EmailClientService } from '../email-client/email-client.service';
 import { QueueClientService } from '../queue-client/queue-client.service';
+import { QrGeneratorService } from '../cfdi/services/qr-generator.service';
 import * as fs from 'fs'; 
 import * as path from 'path'; 
 import { Buffer } from 'buffer'; 
@@ -36,6 +37,7 @@ export class DeliveryNotesService {
     private emailClientService: EmailClientService,
     private readonly queueClient: QueueClientService,
     private readonly usuariosService: UsuariosService,
+    private readonly qrGeneratorService: QrGeneratorService,
   ) {}
 
    /**
@@ -309,18 +311,16 @@ private async obtenerLogoUsuario(userId: string, token: string, cuentaUid?: stri
       const htmlPath = path.join(templatesPath, `remision-${estilo}.html`);
       const templateHtml = fs.readFileSync(htmlPath, 'utf8');
       // Obtener logo dinamico del usuario/cuenta
-      let logoDataUri = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg==';
-      if (token) {
+     let logoDataUri = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg==';
+      {
         const finalCuentaUid = cuentaUid || userId;
-        const logoFromApi = await this.obtenerLogoUsuario(userId, token, finalCuentaUid);
+        const logoFromApi = await this.obtenerLogoUsuario(userId, token || '', finalCuentaUid);
         if (logoFromApi) {
           logoDataUri = logoFromApi;
           console.log('✅ Usando logo del usuario desde API');
         } else {
           console.log('⚠️ No se obtuvo logo, usando pixel transparente');
         }
-      } else {
-        console.log('⚠️ No hay token, usando pixel transparente');
       }
 
       console.log('✅ Archivos leídos correctamente');
@@ -381,13 +381,28 @@ private async obtenerLogoUsuario(userId: string, token: string, cuentaUid?: stri
 
       const empresaNombre = datosUsuario?.sucursal_nombre || sucursal?.alias || 'Mi Empresa';
       const empresaRfc = datosUsuario?.empresa_rfc || 'XAXX010101000';
-
       // Separar fecha
       const fechaEntrega = new Date(deliveryNote.deliveryDate || deliveryNote.createdAt);
       const dia = fechaEntrega.getDate().toString().padStart(2, '0');
       const meses = ['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'];
       const mes = meses[fechaEntrega.getMonth()];
       const anio = fechaEntrega.getFullYear().toString();
+      // Generar QR
+      let qrDataUri = '';
+      try {
+        const qrResult = await this.qrGeneratorService.generateNoteQR({
+          folio: deliveryNote.folio,
+          fecha: format(fechaEntrega, 'dd/MM/yyyy'),
+          rfcEmisor: empresaRfc,
+          total: 0,
+          clienteNombre: customerName,
+        });
+        qrDataUri = qrResult.image || '';
+        console.log('✅ QR generado');
+      } catch (error) {
+        console.error('⚠️ Error generando QR:', error.message);
+      }
+      
       // Reemplazar variables básicas
       let htmlFinal = templateHtml
         .replace('{{logo}}', logoDataUri)
@@ -411,7 +426,9 @@ private async obtenerLogoUsuario(userId: string, token: string, cuentaUid?: stri
         .replace(/\{\{empresa_rfc\}\}/g, empresaRfc)
         .replace(/\{\{observaciones\}\}/g, deliveryNote.notasEntrega || 'Sin observaciones')
         .replace(/\{\{qr_folio\}\}/g, deliveryNote.folio || '')
-        .replace(/\{\{qr_fecha\}\}/g, format(fechaEntrega, 'dd/MM/yyyy'));
+        .replace(/\{\{qr_fecha\}\}/g, format(fechaEntrega, 'dd/MM/yyyy'))
+        .replace(/\{\{qr_code\}\}/g, qrDataUri)
+        .replace(/\{\{qr\}\}/g, qrDataUri);
 
       // ✨ NUEVO: Reemplazar variables de la sucursal
       if (sucursal) {
