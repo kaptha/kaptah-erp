@@ -90,7 +90,10 @@ private async obtenerLogoUsuario(userId: string, token: string, cuentaUid?: stri
     const cuentaParam = cuentaUid ? `?cuentaUid=${cuentaUid}` : '';
     const logoApiUrl = `${this.bizEntitiesApiUrl}/api/logos/current${cuentaParam}`;
     const response = await axios.get<LogoResponse>(logoApiUrl, {
-      headers: { 'Authorization': token }
+      headers: {
+        'Authorization': token,
+        'x-internal-api-key': process.env.INTERNAL_API_KEY
+      }
     });
     
     if (response.data?.url) {

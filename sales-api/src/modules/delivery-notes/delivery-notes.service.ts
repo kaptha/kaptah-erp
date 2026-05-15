@@ -5,15 +5,15 @@ import { DeliveryNote } from './entities/delivery-note.entity';
 import { CreateDeliveryNoteDto } from './dto/create-delivery-note.dto';
 import { UpdateDeliveryNoteDto } from './dto/update-delivery-note.dto';
 import { UsuariosService } from '../usuarios/usuarios.service';
-import { SucursalesService } from '../sucursales/sucursales.service'; // ✨ NUEVO
+import { SucursalesService } from '../sucursales/sucursales.service'; 
 import { EmailClientService } from '../email-client/email-client.service';
 import { QueueClientService } from '../queue-client/queue-client.service';
-import * as fs from 'fs'; // ✨ NUEVO
-import * as path from 'path'; // ✨ NUEVO
-import { Buffer } from 'buffer'; // ✨ NUEVO
-import { format } from 'date-fns'; // ✨ NUEVO
-import * as puppeteer from 'puppeteer'; // ✨ NUEVO
-
+import * as fs from 'fs'; 
+import * as path from 'path'; 
+import { Buffer } from 'buffer'; 
+import { format } from 'date-fns'; 
+import * as puppeteer from 'puppeteer'; 
+import axios from 'axios';
 // ✨ NUEVO: Constantes para valores por defecto
 const DEFAULT_SUCURSAL_VALUES = {
   alias: 'Matriz',
@@ -28,6 +28,7 @@ const DEFAULT_SUCURSAL_VALUES = {
 @Injectable()
 export class DeliveryNotesService {
   private readonly logger = new Logger(DeliveryNotesService.name);
+  private readonly bizEntitiesApiUrl = process.env.BIZ_ENTITIES_API_URL;
   constructor(
     @InjectRepository(DeliveryNote)
     private deliveryNoteRepository: Repository<DeliveryNote>,
@@ -267,9 +268,33 @@ export class DeliveryNotesService {
     await this.deliveryNoteRepository.remove(deliveryNote);
     this.logger.log(`✓ Nota de entrega ${id} eliminada`);
   }
+private async obtenerLogoUsuario(userId: string, token: string, cuentaUid?: string): Promise<string | null> {
+    try {
+      const cuentaParam = cuentaUid ? `?cuentaUid=${cuentaUid}` : '';
+      const logoApiUrl = `${this.bizEntitiesApiUrl}/api/logos/current${cuentaParam}`;
+      console.log('🔍 Solicitando logo al biz-entities-api:', logoApiUrl);
+      const response = await axios.get<{ url?: string }>(logoApiUrl, {
+        headers: {
+          'Authorization': token,
+          'x-internal-api-key': process.env.INTERNAL_API_KEY
+        }
+      });
+      if (response.data?.url) {
+        console.log('✅ Logo URL obtenida:', response.data.url);
+        const logoResponse = await axios.get<ArrayBuffer>(response.data.url, { responseType: 'arraybuffer' });
+        const base64Logo = Buffer.from(logoResponse.data).toString('base64');
+        const mimeType = logoResponse.headers['content-type'] || 'image/png';
+        return `data:${mimeType};base64,${base64Logo}`;
+      }
+      return null;
+    } catch (error) {
+      console.error('❌ Error obteniendo logo:', error.message);
+      return null;
+    }
+  }
 
   // ✨ NUEVO: Generar PDF con soporte de sucursales
-  async generarPdfEstiloRemision(id: string, userId: string, estilo: string = 'profesional'): Promise<Buffer> {
+  async generarPdfEstiloRemision(id: string, userId: string, estilo: string = 'profesional', token?: string, cuentaUid?: string): Promise<Buffer> {
     console.log('📄 Iniciando generación de PDF de Nota de Entrega');
     console.log('📋 Delivery Note ID:', id);
     console.log('👤 User ID:', userId);
@@ -282,27 +307,21 @@ export class DeliveryNotesService {
       const templatesPath = path.join(process.cwd(), 'src', 'templates');
       
       const htmlPath = path.join(templatesPath, `remision-${estilo}.html`);
-      const logoPath = path.join(templatesPath, 'logo.png');
-
-      console.log('📄 HTML path:', htmlPath);
-      console.log('🖼️ Logo path:', logoPath);
-      
-      console.log('📄 HTML exists?', fs.existsSync(htmlPath));
-      console.log('🖼️ Logo exists?', fs.existsSync(logoPath));
-
-      // Verificar que los archivos existan
-      if (!fs.existsSync(htmlPath)) {
-        throw new NotFoundException(`Template HTML no encontrado en: ${htmlPath}`);
-      }
-      if (!fs.existsSync(logoPath)) {
-        throw new NotFoundException(`Logo no encontrado en: ${logoPath}`);
-      }
-
-      console.log('✅ Todos los archivos existen');
-
       const templateHtml = fs.readFileSync(htmlPath, 'utf8');
-      const logoBase64 = fs.readFileSync(logoPath).toString('base64');
-      const logoDataUri = `data:image/png;base64,${logoBase64}`;
+      // Obtener logo dinamico del usuario/cuenta
+      let logoDataUri = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg==';
+      if (token) {
+        const finalCuentaUid = cuentaUid || userId;
+        const logoFromApi = await this.obtenerLogoUsuario(userId, token, finalCuentaUid);
+        if (logoFromApi) {
+          logoDataUri = logoFromApi;
+          console.log('✅ Usando logo del usuario desde API');
+        } else {
+          console.log('⚠️ No se obtuvo logo, usando pixel transparente');
+        }
+      } else {
+        console.log('⚠️ No hay token, usando pixel transparente');
+      }
 
       console.log('✅ Archivos leídos correctamente');
 

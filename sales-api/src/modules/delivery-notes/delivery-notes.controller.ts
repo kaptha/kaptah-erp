@@ -29,22 +29,23 @@ export class DeliveryNotesController {
   async generarPdfDeGuia(
     @Param('id') id: string,
     @CurrentUser('uid') userId: string,
+    @Query('cuentaUid') cuentaUid: string,
     @Req() req: Request,
     @Res() res: Response,
   ) {
-    console.log('📦 Request para generar PDF de guía de remisión');
+    console.log('📦 Request para generar PDF de guia de remision');
     console.log('📋 Delivery Note ID:', id);
     console.log('👤 User ID:', userId);
-    
+    console.log('🏢 Cuenta UID:', cuentaUid);
     const authHeader = req.headers.authorization;
     const token = authHeader?.startsWith('Bearer ') ? authHeader : null;
-    
-    console.log('🔐 Token recibido:', token ? 'Sí' : 'No');
-    
+    console.log('🔐 Token recibido:', token ? 'Si' : 'No');
     const pdf = await this.deliveryNotesService.generarPdfEstiloRemision(
-      id, 
+      id,
       userId,
-      'profesional' // Estilo por defecto
+      'profesional',
+      token,
+      cuentaUid
     );
 
     res.set({
