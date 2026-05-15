@@ -767,7 +767,14 @@ async sendSaleOrderByEmail(
 
       // 1. Obtener la orden con sus items
       const order = await this.findOne(orderId, userId);
-
+      // Obtener nombre de empresa
+      let empresaNombre = 'Kaptah';
+      try {
+        const datosUsuario = await this.usuariosService.getDatosParaTemplate(userId);
+        empresaNombre = datosUsuario?.sucursal_nombre || 'Kaptah';
+      } catch (e) {
+        this.logger.warn('No se pudo obtener nombre de empresa');
+      }
       if (!order) {
         throw new NotFoundException(`Orden de venta ${orderId} no encontrada`);
       }
@@ -800,6 +807,7 @@ async sendSaleOrderByEmail(
         status: this.getStatusText(order.status),
         notes: '',
         customMessage: customMessage || `Confirmación de su orden de venta`,
+        empresaNombre,
       };
 
       // 4. Enviar email

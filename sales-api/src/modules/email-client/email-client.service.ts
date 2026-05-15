@@ -267,6 +267,8 @@ async sendSaleOrder(data: {
       customMessage: data.customMessage,
       documentData: {
         orderNumber: data.orderNumber,
+        folio: data.orderNumber,
+        companyName: (data as any).empresaNombre || 'Kaptah',
         customerName: data.customerName,
         customerAddress: data.customerAddress,
         customerRfc: data.customerRfc,
