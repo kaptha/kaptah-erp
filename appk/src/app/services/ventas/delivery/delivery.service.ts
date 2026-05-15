@@ -80,7 +80,9 @@ export class DeliveryService {
    * Descargar PDF de guÃ­a de remisiÃ³n desde el backend
    */
   descargarPDF(deliveryNoteId: string): Observable<Blob> {
-    const url = `${this.apiUrl}/${deliveryNoteId}/pdf`;
+    const cuentaUid = localStorage.getItem('activeCuentaUid') || '';
+    const cuentaParam = cuentaUid ? `?cuentaUid=${cuentaUid}` : '';
+    const url = `${this.apiUrl}/${deliveryNoteId}/pdf${cuentaParam}`;
     
     return this.getHeaders().pipe(
       switchMap((headers: HttpHeaders) => {

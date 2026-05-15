@@ -257,7 +257,9 @@ export class CotizacionesService {
     customMessage?: string;
     pdfStyle?: string;
   }): Observable<any> {
-    const url = `${this.apiUrl}/${cotizacionId}/send-email`;
+    const cuentaUid = localStorage.getItem('activeCuentaUid') || '';
+    const cuentaParam = cuentaUid ? `?cuentaUid=${cuentaUid}` : '';
+    const url = `${this.apiUrl}/${cotizacionId}/send-email${cuentaParam}`;
     
     console.log('📧 Enviando cotización por email:', {
       cotizacionId,
