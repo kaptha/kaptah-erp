@@ -1,5 +1,6 @@
 import { Component, ViewEncapsulation } from '@angular/core';
 import { FormBuilder, Validators } from '@angular/forms';
+import { HttpClient } from '@angular/common/http';
 @Component({
   selector: 'app-landing',
   templateUrl: './landing.component.html',
@@ -27,7 +28,7 @@ contactForm = this.fb.group({
   message: ['', [Validators.required, Validators.minLength(10)]],
 });
 
-constructor(private fb: FormBuilder) {}
+constructor(private fb: FormBuilder, private http: HttpClient) {}
 
 submitContact() {
   if (this.contactForm.invalid) {
@@ -38,8 +39,19 @@ submitContact() {
   this.sending = true;
   this.sentOk = false;
 
-  // TODO: aquí conectas a tu endpoint real (biz-entities-api/email/send o un contact endpoint)
-  // Ejemplo: this.http.post('/api/contact', this.contactForm.value).subscribe(...)
+  this.http.post('https://kaptah-erp-production.up.railway.app/api/contact', this.contactForm.value)
+    .subscribe({
+      next: (res: any) => {
+        this.sending = false;
+        if (res.success) {
+          this.sentOk = true;
+          this.contactForm.reset();
+        }
+      },
+      error: () => {
+        this.sending = false;
+      }
+    });
 
   setTimeout(() => {
     this.sending = false;
