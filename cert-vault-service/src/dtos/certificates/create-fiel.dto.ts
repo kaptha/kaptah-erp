@@ -3,8 +3,8 @@ import { ApiProperty } from '@nestjs/swagger';
 
 export class CreateFielCertificateDto {
     @ApiProperty({ description: 'ID del usuario' })
-    @IsString()  // Cambiado de @IsUUID() a @IsString()
-    @IsNotEmpty()
+    @IsString()
+    @IsOptional()
     userId: string;
 
     @ApiProperty({ description: 'Número de certificado' })
