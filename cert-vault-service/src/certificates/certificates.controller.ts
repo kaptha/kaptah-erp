@@ -50,20 +50,18 @@ export class CertificatesController {
   @UseInterceptors(FileFieldsInterceptor([
     { name: 'cer', maxCount: 1 },
     { name: 'key', maxCount: 1 },
-  ]))
+  ], {
+    fileFilter: (req, file, callback) => {
+      const ext = file.originalname.split('.').pop()?.toLowerCase();
+      if (ext === 'cer' || ext === 'key') {
+        callback(null, true);
+      } else {
+        callback(new Error('Solo se permiten archivos .cer y .key'), false);
+      }
+    }
+  }))
   async uploadFiel(
-    @UploadedFiles(
-      new ParseFilePipeBuilder()
-        .addFileTypeValidator({
-          fileType: /(cer|key)$/,
-        })
-        .addMaxSizeValidator({
-          maxSize: 5 * 1024 * 1024 // 5MB
-        })
-        .build({
-          errorHttpStatusCode: HttpStatus.UNPROCESSABLE_ENTITY
-        })
-    ) files: { cer: Express.Multer.File[], key: Express.Multer.File[] },
+    @UploadedFiles() files: { cer: Express.Multer.File[], key: Express.Multer.File[] },
     @Body() createFielDto: CreateFielCertificateDto,
     @CurrentUser() user: FirebaseUser,
   ) {
