@@ -60,8 +60,9 @@ export class PerfilComponent implements OnInit {
   // Perfil
   perfilForm!: FormGroup;
   email: string = '';
-  isLoading: boolean = false;
   isOwner: boolean = true;
+  canEditConfig: boolean = true;
+  isLoading: boolean = false;
   
   // Tipo de persona y régimen fiscal
   tipoPersona: 'fisica' | 'moral' = 'fisica';
@@ -130,6 +131,10 @@ export class PerfilComponent implements OnInit {
     const uid = localStorage.getItem('firebaseUid');
     const cuentaUid = localStorage.getItem('activeCuentaUid');
     this.isOwner = !cuentaUid || uid === cuentaUid;
+    
+    // Permitir que Administrador y Contador editen configuración
+    const activeRol = localStorage.getItem('activeRol');
+    this.canEditConfig = this.isOwner || activeRol === 'Administrador' || activeRol === 'Contador';
 
     if (!this.isOwner) {
       this.displayedColumnsSucursales = ['alias', 'telefono', 'direccion', 'codigoPostal', 'colonia'];

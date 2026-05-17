@@ -173,7 +173,7 @@
     <mat-tab label="Sucursales">
       <div class="sucursales-container">
         <h2>Configurar sucursales</h2>
-        <div class="actions-row" *ngIf="isOwner">
+        <div class="actions-row" *ngIf="canEditConfig">
           <button mat-raised-button color="primary" class="btn-primary" (click)="openSucursalModal()">
             <mat-icon>add</mat-icon> Agregar
           </button>
@@ -215,7 +215,7 @@
             <ng-container matColumnDef="acciones">
               <th mat-header-cell *matHeaderCellDef></th>
               <td mat-cell *matCellDef="let element">
-                <button mat-icon-button color="warn" (click)="eliminarSucursal(element.id)">
+                <button mat-icon-button color="warn" (click)="eliminarSucursal(element.id)" *ngIf="canEditConfig">
                   <mat-icon>delete</mat-icon>
                 </button>
               </td>
@@ -343,7 +343,7 @@
               <ng-container matColumnDef="acciones">
                 <th mat-header-cell *matHeaderCellDef></th>
                 <td mat-cell *matCellDef="let impuesto">
-                  <button mat-icon-button color="warn" (click)="eliminarImpuesto(impuesto.id)">
+                  <button mat-icon-button color="warn" (click)="eliminarImpuesto(impuesto.id)" *ngIf="canEditConfig">
                     <mat-icon>delete</mat-icon>
                   </button>
                 </td>
@@ -355,7 +355,7 @@
           </div>
           
           <div class="button-container">
-            <button mat-raised-button color="primary" class="btn-primary section-button" (click)="openImpuestoModal()">
+            <button mat-raised-button color="primary" class="btn-primary section-button" (click)="openImpuestoModal()" *ngIf="canEditConfig">
               <mat-icon>add</mat-icon> Agregar impuesto
             </button>
           </div>    
@@ -366,7 +366,7 @@
           <div class="archivos-container">
             <div class="csd-section">
               <h4>CSD para facturación</h4>
-              <button mat-raised-button color="primary" class="btn-primary" (click)="openCsdUploadModal()" *ngIf="isOwner">
+              <button mat-raised-button color="primary" class="btn-primary" (click)="openCsdUploadModal()" *ngIf="canEditConfig">
                 <mat-icon>upload_file</mat-icon> Cargar CSD
               </button>
               <p *ngIf="csdExpiryDate">
@@ -379,7 +379,7 @@
             
             <div class="fiel-section">
               <h4>FIEL para descarga masiva</h4>
-              <button mat-raised-button color="primary" class="btn-primary" (click)="openFielUploadModal()" *ngIf="isOwner">
+              <button mat-raised-button color="primary" class="btn-primary" (click)="openFielUploadModal()" *ngIf="canEditConfig">
                 <mat-icon>upload_file</mat-icon> Cargar FIEL
               </button>
               <p *ngIf="fielExpiryDate">
