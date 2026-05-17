@@ -106,15 +106,17 @@ private async obtenerLogoUsuario(userId: string, token: string, cuentaUid?: stri
    * 👇 NUEVO: Obtiene datos del cliente desde biz-entities-api por RFC
    */
   private async obtenerDatosCliente(
-    rfc: string, 
+    rfc: string,
     nombre: string,
-    token: string
+    token: string,
+    cuentaUid?: string
   ): Promise<ClientResponse | null> {
     try {
       console.log('👤 Buscando cliente por RFC en biz-entities-api...');
       console.log('📋 RFC:', rfc);
       
-      const clientApiUrl = `${this.bizEntitiesApiUrl}/api/clients/by-rfc/${encodeURIComponent(rfc)}`;
+      const cuentaParam = cuentaUid ? `?cuentaUid=${cuentaUid}` : '';
+      const clientApiUrl = `${this.bizEntitiesApiUrl}/api/clients/by-rfc/${encodeURIComponent(rfc)}${cuentaParam}`;
       console.log('🌐 URL destino:', clientApiUrl);
       
       const response = await axios.get<ClientResponse>(clientApiUrl, {
@@ -273,7 +275,7 @@ private async obtenerLogoUsuario(userId: string, token: string, cuentaUid?: stri
     let clienteDireccion = 'Dirección del cliente';
 
     if (saleNote.customerRfc && token) {
-      const cliente = await this.obtenerDatosCliente(saleNote.customerRfc, saleNote.customerName, token);
+      const cliente = await this.obtenerDatosCliente(saleNote.customerRfc, saleNote.customerName, token, cuentaUid);
       
       if (cliente) {
         clienteTelefono = cliente.Telefono || 'N/A';
