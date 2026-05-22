@@ -86,7 +86,10 @@ export class CategoriesService {
   
   console.log('📦 Categorías encontradas - Productos:', productCategories.length, 'Servicios:', serviceCategories.length);
   
-  return [...productCategories, ...serviceCategories];
+  return [
+    ...productCategories.map(c => this.mapToResponse(c, 'producto')),
+    ...serviceCategories.map(c => this.mapToResponse(c, 'servicio'))
+  ];
 }
 
   async findOne(id: number, firebaseUid: string): Promise<CategoryResponse> {
