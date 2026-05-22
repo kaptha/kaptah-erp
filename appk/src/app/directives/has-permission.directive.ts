@@ -30,15 +30,23 @@ export class HasPermissionDirective implements OnInit {
     }
   }
 
-  private checkPermission(): boolean {
+ private checkPermission(): boolean {
     try {
+      // Si el usuario es el dueño de la cuenta, tiene acceso completo
+      const firebaseUid = localStorage.getItem('firebaseUid');
+      const activeCuentaUid = localStorage.getItem('activeCuentaUid');
+      if (!activeCuentaUid || firebaseUid === activeCuentaUid) {
+        const permisos = localStorage.getItem('userPermissions');
+        if (!permisos || permisos === 'null') {
+          return true;
+        }
+      }
+
       const permisos = JSON.parse(localStorage.getItem('userPermissions') || '{}');
       const parts = this.permission.split('.');
       if (parts.length !== 2) return false;
-
       const modulo = parts[0];
       const accion = parts[1];
-
       return permisos[modulo]?.[accion] === true;
     } catch {
       return false;
