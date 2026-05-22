@@ -1,11 +1,11 @@
-import { Injectable, Logger } from '@nestjs/common';
+import { Injectable, Logger, OnModuleInit } from '@nestjs/common';
 import { Cron, CronExpression } from '@nestjs/schedule';
 import { DescargaSatService } from './descarga-sat.service';
 import { XmlImportService } from '../xml/services/xml-import.service';
 import { format, subDays, subMonths, startOfMonth } from 'date-fns';
 
 @Injectable()
-export class DescargaSatSyncService {
+export class DescargaSatSyncService implements OnModuleInit {
   private readonly logger = new Logger(DescargaSatSyncService.name);
   private primeraEjecucion = true;
 
@@ -13,7 +13,9 @@ export class DescargaSatSyncService {
     private readonly descargaSatService: DescargaSatService,
     private readonly xmlImportService: XmlImportService,
   ) {}
-
+  onModuleInit() {
+    this.logger.log('=== DescargaSatSyncService INICIADO - Cron programado a las 2:00 AM UTC ===');
+  }
   /**
    * Cron job - se ejecuta todos los dias a las 2:00 AM
    */
