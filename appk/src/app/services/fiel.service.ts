@@ -46,7 +46,8 @@ export class FielService {
         const headers = new HttpHeaders({
           'Authorization': `Bearer ${token}`
         });
-        return this.http.get<FielResponse>(`${this.apiUrl}/certificates/fiel/active`, { headers });
+        const cuentaUid = localStorage.getItem('activeCuentaUid') || '';
+        return this.http.get<FielResponse>(`${this.apiUrl}/certificates/fiel/active?cuentaUid=${cuentaUid}`, { headers });
       })
     );
   }
@@ -79,7 +80,8 @@ export class FielService {
           'Authorization': `Bearer ${token}`
         });
 
-        return this.http.post(`${this.apiUrl}/certificates/fiel`, formData, { headers });
+        const cuentaUid = localStorage.getItem('activeCuentaUid') || '';
+        return this.http.post(`${this.apiUrl}/certificates/fiel?cuentaUid=${cuentaUid}`, formData, { headers });
       })
     );
   }

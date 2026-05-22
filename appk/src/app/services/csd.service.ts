@@ -50,7 +50,8 @@ export class CsdService {
         const headers = new HttpHeaders({
           'Authorization': `Bearer ${token}`
         });
-        return this.http.get<CsdResponse>(`${this.apiUrl}/certificates/csd/active`, { headers });
+        const cuentaUid = localStorage.getItem('activeCuentaUid') || '';
+        return this.http.get<CsdResponse>(`${this.apiUrl}/certificates/csd/active?cuentaUid=${cuentaUid}`, { headers });
       })
     );
   }
@@ -83,8 +84,9 @@ export class CsdService {
           'Authorization': `Bearer ${token}`
         });
 
-        return this.http.post<CsdResponse>(
-          `${this.apiUrl}/certificates/csd`,
+        const cuentaUid = localStorage.getItem('activeCuentaUid') || '';
+       return this.http.post<CsdResponse>(
+          `${this.apiUrl}/certificates/csd?cuentaUid=${cuentaUid}`,
           formData,
           { headers }
         );
