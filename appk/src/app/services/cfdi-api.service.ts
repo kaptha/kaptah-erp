@@ -746,4 +746,46 @@ export class CfdiApiService {
       catchError(this.handleError)
     );
   }
+/* =========================================================
+     DESCARGA SAT - SIFEI
+  ========================================================= */
+
+  subirEfirmaASifei(cerFile: File, keyFile: File, password: string): Observable<any> {
+    return new Observable(observer => {
+      const readFileAsBase64 = (file: File): Promise<string> => {
+        return new Promise((resolve, reject) => {
+          const reader = new FileReader();
+          reader.onload = () => {
+            const arrayBuffer = reader.result as ArrayBuffer;
+            const bytes = new Uint8Array(arrayBuffer);
+            let binary = '';
+            bytes.forEach(b => binary += String.fromCharCode(b));
+            resolve(btoa(binary));
+          };
+          reader.onerror = reject;
+          reader.readAsArrayBuffer(file);
+        });
+      };
+
+      Promise.all([readFileAsBase64(cerFile), readFileAsBase64(keyFile)])
+        .then(([cerBase64, keyBase64]) => {
+          this.http.post(
+            'https://energetic-communication-production-5b96.up.railway.app/descarga-sat/efirma',
+            {
+              certificado: cerBase64,
+              llave: keyBase64,
+              password: password
+            },
+            { headers: this.getHeaders() }
+          ).subscribe({
+            next: (res) => {
+              observer.next(res);
+              observer.complete();
+            },
+            error: (err) => observer.error(err)
+          });
+        })
+        .catch(err => observer.error(err));
+    });
+  }
 }

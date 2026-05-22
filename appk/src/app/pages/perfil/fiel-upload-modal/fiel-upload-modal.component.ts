@@ -5,7 +5,7 @@ import { MatSnackBar } from '@angular/material/snack-bar';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import * as forge from 'node-forge';
 import { Sweetalert } from '../../../functions';
-
+import { CfdiApiService } from '../../../services/cfdi-api.service';
 @Component({
     selector: 'app-fiel-upload-modal',
     templateUrl: './fiel-upload-modal.component.html',
@@ -27,6 +27,7 @@ export class FielUploadModalComponent {
     public dialogRef: MatDialogRef<FielUploadModalComponent>,
     @Inject(MAT_DIALOG_DATA) public data: { userRfc: string },
     private fielService: FielService,
+    private cfdiApiService: CfdiApiService,
     private snackBar: MatSnackBar,
     private fb: FormBuilder
   ) {
@@ -414,8 +415,24 @@ export class FielUploadModalComponent {
       formValues.issuerSerial
     ).subscribe({
       next: (response) => {
-        this.snackBar.open('FIEL cargada exitosamente', 'Cerrar', { duration: 3000 });
-        this.dialogRef.close(response);
+        // Enviar e-firma a SIFEI para vincular RFC
+        this.cfdiApiService.subirEfirmaASifei(
+          this.cerFile!,
+          this.keyFile!,
+          formValues.password
+        ).subscribe({
+          next: (sifeiRes) => {
+            console.log('E-firma vinculada en SIFEI:', sifeiRes);
+            this.snackBar.open('FIEL cargada y vinculada con SIFEI exitosamente', 'Cerrar', { duration: 3000 });
+            this.dialogRef.close(response);
+          },
+          error: (sifeiErr) => {
+            console.error('Error al vincular en SIFEI:', sifeiErr);
+            // La FIEL se guardo en Kaptah, solo fallo SIFEI
+            this.snackBar.open('FIEL cargada, pero hubo un error al vincular con SIFEI. Intenta de nuevo mas tarde.', 'Cerrar', { duration: 5000 });
+            this.dialogRef.close(response);
+          }
+        });
       },
       error: (error) => {
         console.error('Error al cargar FIEL:', error);
