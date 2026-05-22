@@ -138,11 +138,11 @@ export class DescargaSatService {
     }
   }
 
-  /**
+ /**
    * Subir e-firma (CER + KEY) a SIFEI para vincular RFC
    */
   async subirEfirma(cerBase64: string, keyBase64: string, password: string) {
-    const url = `${this.baseUrl}/api/v2/descargasatsifei/efirma/upload`;
+    const url = `${this.baseUrl}/api/v2/descargasatsifei/certificado`;
     this.logger.log('Subiendo e-firma a SIFEI');
 
     try {
@@ -150,15 +150,15 @@ export class DescargaSatService {
         this.httpService.post(
           url,
           {
-            certificado: cerBase64,
-            llave: keyBase64,
-            password: password,
+            cert: cerBase64,
+            key: keyBase64,
+            pass: password,
           },
           { headers: this.getHeaders() },
         ),
       );
 
-      this.logger.log(`Respuesta subir e-firma: ${data.status}`);
+      this.logger.log(`Respuesta subir e-firma: ${data.status} - ${data.message}`);
       return data;
     } catch (error) {
       this.logger.error(`Error al subir e-firma: ${error.message}`);
