@@ -68,44 +68,20 @@ export class CategoriasComponent implements OnInit {
       });
   }
 
-  // Agregar categoría
+ // Agregar categoría
   agregarCategoria(): void {
     const dialogRef = this.dialog.open(ModalCatComponent, {
       width: this.isMobile ? '95%' : '400px',
       maxWidth: this.isMobile ? '100vw' : '500px',
       disableClose: true
     });
-
     dialogRef.afterClosed().subscribe(result => {
       if (result) {
-        // Crear nueva categoría
-        const newCategory = {
-          name: result.name,
-          tipo: result.tipo,
-          description: result.description || ''
-        };
-
-        this.loading = true;
-        this.categoryService.createCategory(newCategory)
-          .pipe(
-            finalize(() => {
-              this.loading = false;
-            })
-          )
-          .subscribe({
-            next: () => {
-              this.snackBar.open('Categoría creada con éxito', 'Cerrar', {
-                duration: 3000
-              });
-              this.loadCategories();
-            },
-            error: (error) => {
-              console.error('Error al crear categoría:', error);
-              this.snackBar.open('Error al crear la categoría', 'Cerrar', {
-                duration: 3000
-              });
-            }
-          });
+        // El modal ya creó/actualizó la categoría, solo recargar la lista
+        this.loadCategories();
+        this.snackBar.open('Categoría guardada exitosamente', 'Cerrar', {
+          duration: 3000
+        });
       }
     });
   }
