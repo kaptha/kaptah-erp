@@ -6,6 +6,7 @@ import {
   UploadedFiles,
   UseInterceptors,
   Body,
+  Query,
   Request,
   BadRequestException,
   ParseFilePipeBuilder,
@@ -64,12 +65,13 @@ export class CertificatesController {
     @UploadedFiles() files: { cer: Express.Multer.File[], key: Express.Multer.File[] },
     @Body() createFielDto: CreateFielCertificateDto,
     @CurrentUser() user: FirebaseUser,
+    @Query('cuentaUid') cuentaUid?: string,
   ) {
     if (!files.cer || !files.key) {
       throw new BadRequestException('Both .cer and .key files are required');
     }
 
-    createFielDto.userId = user.id;
+    createFielDto.userId = cuentaUid || user.id;
     
     return await this.fielService.create(
       createFielDto,
@@ -98,8 +100,8 @@ async uploadCsd(
     @UploadedFiles() files: { cer: Express.Multer.File[], key: Express.Multer.File[] },
     @Body() createCsdDto: CreateCsdCertificateDto,
     @CurrentUser() user: FirebaseUser,
-) {
-    createCsdDto.userId = user.id;
+    @Query('cuentaUid') cuentaUid?: string,
+) {    createCsdDto.userId = cuentaUid || user.id;
     return await this.csdService.create(
         createCsdDto,
         files.cer[0].buffer,
@@ -111,23 +113,23 @@ async uploadCsd(
   @ApiOperation({ summary: 'Get active FIEL certificate' })
   @ApiResponse({ status: 200, description: 'Returns the active FIEL certificate' })
   @ApiResponse({ status: 404, description: 'No active FIEL certificate found' })
-  async getActiveFiel(@CurrentUser() user: FirebaseUser) {
-    return await this.fielService.findActive(user.id);
+  async getActiveFiel(@CurrentUser() user: FirebaseUser, @Query('cuentaUid') cuentaUid?: string) {
+    return await this.fielService.findActive(cuentaUid || user.id);
   }
 
   @Get('csd/active')
   @ApiOperation({ summary: 'Get active CSD certificate' })
   @ApiResponse({ status: 200, description: 'Returns the active CSD certificate' })
   @ApiResponse({ status: 404, description: 'No active CSD certificate found' })
-  async getActiveCsd(@CurrentUser() user: FirebaseUser) {
-    return await this.csdService.findActive(user.id);
+ async getActiveCsd(@CurrentUser() user: FirebaseUser, @Query('cuentaUid') cuentaUid?: string) {
+    return await this.csdService.findActive(cuentaUid || user.id);
   }
   @Get('csd/check')
   @ApiOperation({ summary: 'Check if user has a valid active CSD certificate' })
   @ApiResponse({ status: 200, description: 'Returns certificate validation status' })
-  async checkCsd(@CurrentUser() user: FirebaseUser) {
+  async checkCsd(@CurrentUser() user: FirebaseUser, @Query('cuentaUid') cuentaUid?: string) {
     try {
-      const isValid = await this.csdService.checkActive(user.id);
+      const isValid = await this.csdService.checkActive(cuentaUid || user.id);
       
       return {
         valid: isValid,
