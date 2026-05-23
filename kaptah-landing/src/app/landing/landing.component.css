@@ -282,7 +282,7 @@ p {
 
 /* CONTENIDO */
 .hero-content {
-  max-width: 720px;
+  max-width: 850px;
   text-align: center;
   position: relative;
   z-index: 2;
@@ -297,7 +297,7 @@ p {
   background: rgba(15,14,23,0.8);
   border: 1px solid rgba(164,107,255,0.5);
   margin-bottom: 20px;
-  font-size: 1rem;
+  font-size: clamp(0.9rem, 1.2vw, 1.1rem);
   color: #EFE8FF;
   backdrop-filter: blur(10px);
 }
@@ -311,24 +311,41 @@ p {
 }
 
 .hero h1 {
-  font-size: 3.6rem;
+  font-size: clamp(2.4rem, 4.5vw, 4.5rem);
   font-weight: 700;
   margin-bottom: 16px;
   text-shadow: 0 2px 16px rgba(0,0,0,0.5);
 }
 
 .hero p {
-  font-size: 1.25rem;
+  font-size: clamp(1.1rem, 1.5vw, 1.4rem);
   color: #D3D3E0;
   margin-bottom: 32px;
   line-height: 1.7rem;
 }
 
 .hero-buttons {
-  display: flex;
-  justify-content: center;
-  gap: 18px;
+  text-align: center;
   margin-bottom: 24px;
+}
+.hero-cta {
+  display: inline-block;
+  padding: 14px 38px;
+  border-radius: 999px;
+  background: #7F3FF0;
+  color: #fff !important;
+  font-weight: 600;
+  font-size: 1.1rem;
+  text-decoration: none;
+  letter-spacing: 0.5px;
+  box-shadow: 0 4px 15px rgba(127, 63, 240, 0.5);
+  transition: all 0.3s ease;
+}
+
+.hero-cta:hover {
+  background: #A46BFF;
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(164, 107, 255, 0.6);
 }
 
 .hero-note {
@@ -336,7 +353,7 @@ p {
   align-items: center;
   gap: 8px;
   color: #BDBDC7;
-  font-size: 0.95rem;
+  font-size: clamp(0.95rem, 1.2vw, 1.15rem);
 }
 
 .hero-note mat-icon {
@@ -558,18 +575,36 @@ button[mat-stroked-button] {
 
 .pricing-cards {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-  gap: 35px;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 25px;
   justify-content: center;
+  max-width: 1400px;
+  margin: 0 auto;
+}
+@media (max-width: 1200px) {
+  .pricing-cards {
+    grid-template-columns: repeat(2, 1fr);
+  }
 }
 
+@media (max-width: 700px) {
+  .pricing-cards {
+    grid-template-columns: 1fr;
+  }
+}
 /* CARD */
 /* HOVER ANIMATION EFFECT */
 .pricing-card {
   transition: 0.35s ease;
   transform: translateY(0px);
 }
-
+.pricing-card .btn-primary {
+  display: inline-block;
+  text-decoration: none;
+  text-align: center;
+  width: 100%;
+  box-sizing: border-box;
+}
 .pricing-card:hover {
   transform: translateY(-12px) scale(1.02);
   box-shadow: 0 0 35px rgba(164,107,255,0.35);
@@ -771,6 +806,21 @@ button[mat-stroked-button] {
 
 .tag.enterprise {
   background: #A46BFF;
+}
+.tag.starter {
+  background: #2196F3;
+}
+
+.tag.fiscal {
+  background: #7F3FF0;
+}
+
+.tag.erp {
+  background: linear-gradient(135deg, #7F3FF0, #A46BFF);
+}
+
+.tag.ilimitado {
+  background: linear-gradient(135deg, #FF6B00, #FFB800);
 }
 
 /* PRICE */
