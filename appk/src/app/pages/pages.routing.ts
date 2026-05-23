@@ -2,6 +2,7 @@ import { Routes, RouterModule } from '@angular/router';
 import { NgModule } from '@angular/core';
 import { authGuard } from '../guards/auth.guard';
 import { PermissionGuard } from '../guards/permission.guard';
+import { PlanAccessGuard } from '../guards/plan-access.guard';
 import { PagesComponent } from './pages.component';
 import { DashboardComponent } from './dashboard/dashboard.component';
 import { PerfilComponent } from './perfil/perfil.component';
@@ -30,33 +31,33 @@ const routes: Routes = [
         children: [
             { path: '', component: DashboardComponent },
             { path: 'perfil', component: PerfilComponent },
-            { path: 'clientes', component: ClientesComponent, canActivate: [PermissionGuard], data: { module: 'clientes' } },
-            { path: 'categorias', component: CategoriasComponent, canActivate: [PermissionGuard], data: { module: 'categorias' } },
-            { path: 'productos', component: ProductosComponent, canActivate: [PermissionGuard], data: { module: 'productos' } },
-            { path: 'proveedores', component: ProveedoresComponent, canActivate: [PermissionGuard], data: { module: 'proveedores' } },
-            { path: 'servicios', component: ServiciosComponent, canActivate: [PermissionGuard], data: { module: 'servicios' } },
-            { path: 'cotizaciones', component: CotizacionesComponent, canActivate: [PermissionGuard], data: { module: 'cotizaciones' } },
-            { path: 'ventas/orders', component: OrdersComponent, canActivate: [PermissionGuard], data: { module: 'ordenes_venta' } },
-            { path: 'ventas/notes', component: NotesComponent, canActivate: [PermissionGuard], data: { module: 'notas_venta' } },
-            { path: 'ventas/delivery', component: DeliveryComponent, canActivate: [PermissionGuard], data: { module: 'guias_remision' } },
-            { path: 'ingresos', component: IngresosComponent, canActivate: [PermissionGuard], data: { module: 'ingresos' } },
-            { path: 'egresos', component: EgresosComponent, canActivate: [PermissionGuard], data: { module: 'egresos' } },
-            { path: 'cobros', component: CobrosComponent, canActivate: [PermissionGuard], data: { module: 'cuentas_cobrar' } },
-            { path: 'pagos', component: PagosComponent, canActivate: [PermissionGuard], data: { module: 'cuentas_pagar' } },
-            { path: 'empleados', component: EmpleadosComponent, canActivate: [PermissionGuard], data: { module: 'empleados' } },
-            { path: 'cfdi', component: CFDIComponent, canActivate: [PermissionGuard], data: { module: 'cfdi' } },
-            { path: 'invoice-design-selector', component: InvoiceDesignSelectorComponent, canActivate: [PermissionGuard], data: { module: 'descarga_cfdi' } },
+            { path: 'clientes', component: ClientesComponent, canActivate: [PlanAccessGuard, PermissionGuard], data: { module: 'clientes' } },
+            { path: 'categorias', component: CategoriasComponent, canActivate: [PlanAccessGuard, PermissionGuard], data: { module: 'categorias' } },
+            { path: 'productos', component: ProductosComponent, canActivate: [PlanAccessGuard, PermissionGuard], data: { module: 'productos' } },
+            { path: 'proveedores', component: ProveedoresComponent, canActivate: [PlanAccessGuard, PermissionGuard], data: { module: 'proveedores' } },
+            { path: 'servicios', component: ServiciosComponent, canActivate: [PlanAccessGuard, PermissionGuard], data: { module: 'servicios' } },
+            { path: 'cotizaciones', component: CotizacionesComponent, canActivate: [PlanAccessGuard, PermissionGuard], data: { module: 'cotizaciones' } },
+            { path: 'ventas/orders', component: OrdersComponent, canActivate: [PlanAccessGuard, PermissionGuard], data: { module: 'ordenes_venta' } },
+            { path: 'ventas/notes', component: NotesComponent, canActivate: [PlanAccessGuard, PermissionGuard], data: { module: 'notas_venta' } },
+            { path: 'ventas/delivery', component: DeliveryComponent, canActivate: [PlanAccessGuard, PermissionGuard], data: { module: 'guias_remision' } },
+            { path: 'ingresos', component: IngresosComponent, canActivate: [PlanAccessGuard, PermissionGuard], data: { module: 'ingresos' } },
+            { path: 'egresos', component: EgresosComponent, canActivate: [PlanAccessGuard, PermissionGuard], data: { module: 'egresos' } },
+            { path: 'cobros', component: CobrosComponent, canActivate: [PlanAccessGuard, PermissionGuard], data: { module: 'cuentas_cobrar' } },
+            { path: 'pagos', component: PagosComponent, canActivate: [PlanAccessGuard, PermissionGuard], data: { module: 'cuentas_pagar' } },
+            { path: 'empleados', component: EmpleadosComponent, canActivate: [PlanAccessGuard, PermissionGuard], data: { module: 'empleados' } },
+            { path: 'cfdi', component: CFDIComponent, canActivate: [PlanAccessGuard, PermissionGuard], data: { module: 'cfdi' } },
+            { path: 'invoice-design-selector', component: InvoiceDesignSelectorComponent, canActivate: [PlanAccessGuard, PermissionGuard], data: { module: 'descarga_cfdi' } },
             {
                 path: 'compras/purchase-orders',
                 loadChildren: () => import('./compras/purchase-orders/purchase-orders.module')
                     .then(m => m.PurchaseOrdersModule),
-                canActivate: [PermissionGuard], data: { module: 'ordenes_compra' }
+                canActivate: [PlanAccessGuard, PermissionGuard], data: { module: 'ordenes_compra' }
             },
             {
                 path: 'inventario',
                 loadChildren: () => import('./inventario/inventario.module')
                     .then(m => m.InventarioModule),
-                canActivate: [PermissionGuard], data: { module: 'inventario_multi_sucursal' }
+                canActivate: [PlanAccessGuard, PermissionGuard], data: { module: 'inventario_multi_sucursal' }
             },
         ]
     },

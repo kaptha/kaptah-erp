@@ -128,7 +128,8 @@ export class AuthService {
     localStorage.removeItem('expiresIn');
     
     // Limpiar cualquier otro dato de sesiÃ³n
-    localStorage.removeItem('jwt_token'); // Por si existe el nombre antiguo
+    localStorage.removeItem('jwt_token');
+    localStorage.removeItem('activePlan'); // Por si existe el nombre antiguo
     
     // Resetear el subject
     this.currentUserSubject.next(null);
@@ -196,3 +197,4 @@ refreshFirebaseToken(refreshToken: string): Observable<any> {
     return throwError(() => new Error(errorMessage));
   }
 }
+

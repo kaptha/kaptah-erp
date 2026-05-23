@@ -2,6 +2,7 @@ import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
 import { Router, NavigationEnd } from '@angular/router';
 import { filter } from 'rxjs/operators';
 import { LogoService } from '../../services/logo.service';
+import { PlanService } from '../../services/plan.service';
 
 interface LogoResponse {
   url: string;
@@ -23,13 +24,13 @@ export class SidebarComponent implements OnInit {
   currentUrl: string = '';
   logoUrl: string | null = null;
 
-  // Permisos del usuario
   private userPermissions: Record<string, any> | null = null;
 
   constructor(
     private router: Router,
     private logoService: LogoService,
-    private cdr: ChangeDetectorRef
+    private cdr: ChangeDetectorRef,
+    private planService: PlanService
   ) {
     this.router.events.pipe(
       filter(event => event instanceof NavigationEnd)
@@ -46,15 +47,11 @@ export class SidebarComponent implements OnInit {
     this.loadPermissions();
   }
 
-  /**
-   * Carga los permisos del usuario desde localStorage
-   */
   loadPermissions(): void {
     const permisos = localStorage.getItem('userPermissions');
     if (permisos) {
       try {
         this.userPermissions = JSON.parse(permisos);
-        console.log('Permisos cargados en sidebar:', this.userPermissions);
       } catch (e) {
         console.error('Error al parsear permisos:', e);
         this.userPermissions = null;
@@ -63,10 +60,14 @@ export class SidebarComponent implements OnInit {
   }
 
   /**
-   * Verifica si el usuario tiene acceso de lectura a un modulo
+   * Verifica si el usuario tiene acceso a un modulo
+   * Combina validacion de RBAC (permisos) + Plan
    */
   hasAccess(module: string): boolean {
-    // Si no hay permisos cargados, mostrar todo (admin por defecto o permisos no cargados aun)
+    // 1. Verificar acceso por plan
+    if (!this.planService.hasAccess(module)) return false;
+
+    // 2. Verificar acceso por permisos RBAC
     if (!this.userPermissions) return true;
     return this.userPermissions[module]?.leer === true;
   }
@@ -75,8 +76,7 @@ export class SidebarComponent implements OnInit {
    * Verifica si el usuario tiene acceso a al menos un modulo de un grupo
    */
   hasGroupAccess(modules: string[]): boolean {
-    if (!this.userPermissions) return true;
-    return modules.some(m => this.userPermissions![m]?.leer === true);
+    return modules.some(m => this.hasAccess(m));
   }
 
   updateExpandedPanels(): void {
@@ -89,19 +89,15 @@ export class SidebarComponent implements OnInit {
   }
 
   loadLogoData(): void {
-    console.log('=== Cargando logo en sidebar ===');
     this.logoService.getLogo().subscribe({
       next: (data: LogoResponse) => {
-        console.log('Logo recibido en sidebar:', data);
         if (data && data.url) {
           this.logoUrl = data.url;
           this.cdr.detectChanges();
         }
       },
       error: (error: any) => {
-        if (error.status === 404) {
-          console.log('Usuario no tiene logo personalizado');
-        } else {
+        if (error.status !== 404) {
           console.error('Error al cargar logo en sidebar:', error);
         }
       }
@@ -109,7 +105,6 @@ export class SidebarComponent implements OnInit {
   }
 
   onImageError(event: any): void {
-    console.error('Error al cargar imagen en sidebar:', event);
     this.logoUrl = null;
     this.cdr.detectChanges();
   }
