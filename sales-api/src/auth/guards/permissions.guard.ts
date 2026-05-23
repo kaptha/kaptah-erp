@@ -44,7 +44,18 @@ export class PermissionsGuard implements CanActivate {
         throw new ForbiddenException('No se pudieron verificar los permisos');
       }
 
-      const data = await response.json();
+      const text = await response.text();
+      if (!text || text === 'null' || text === '') {
+        this.logger.warn('No se encontraron permisos para usuario ' + user.uid + ' en cuenta ' + cuentaUid);
+        throw new ForbiddenException('No tienes permisos asignados en esta cuenta');
+      }
+      let data;
+      try {
+        data = JSON.parse(text);
+      } catch (e) {
+        this.logger.error('Respuesta invalida del servicio de permisos: ' + text.substring(0, 100));
+        throw new ForbiddenException('Error al verificar permisos');
+      }
       const permisos = data.permisos || data.data?.permisos || data;
 
       if (!permisos[modulo] || permisos[modulo][accion] !== true) {
