@@ -17,7 +17,6 @@ export class DescargaSatController {
    */
   @Post('sincronizar')
   async sincronizarManual() {
-    // Ejecutar el mismo flujo del cron pero bajo demanda
     await this.descargaSatSyncService.sincronizacionDiaria();
     return {
       status: 'success',
@@ -35,14 +34,14 @@ export class DescargaSatController {
   }
 
   /**
-   * Programar descarga manual con rango de fechas
-   * POST /descarga-sat/programar
+   * Descargar CFDIs por rango de fechas
+   * POST /descarga-sat/descargar
    */
-  @Post('programar')
-  async programarDescarga(
-    @Body() body: { fechaInicial: string; fechaFinal: string; tipo: 'EMITIDOS' | 'RECIBIDOS' },
+  @Post('descargar')
+  async descargarCfdis(
+    @Body() body: { fechaInicial: string; fechaFinal: string; tipo: 'E' | 'R' },
   ) {
-    return await this.descargaSatService.programarDescarga(
+    return await this.descargaSatService.descargarCfdis(
       body.fechaInicial,
       body.fechaFinal,
       body.tipo,
