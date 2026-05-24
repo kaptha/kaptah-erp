@@ -94,97 +94,150 @@
     Elige el plan que mejor se adapte a tu negocio. Todos incluyen soporte y actualizaciones.
   </p>
 
-  <div class="pricing-cards">
-
-    <!-- STARTER -->
-    <div class="pricing-card">
-      <span class="tag starter">Starter</span>
-      <mat-icon class="plan-icon">storefront</mat-icon>
-      <h3 class="price">$599 MXN</h3>
-      <p class="per">por ano (pago unico)</p>
-
-      <ul class="features">
-        <li><span>&#10004;</span> Notas de remision ilimitadas</li>
-        <li><span>&#10004;</span> Clientes y productos ilimitados</li>
-        <li><span>&#10004;</span> Cotizaciones ilimitadas</li>
-        <li><span>&#10004;</span> Dashboard de ingresos/egresos</li>
-        <li><span>&#10004;</span> 15 timbres CFDI/ano</li>
-        <li><span>&#10004;</span> 1 usuario</li>
-        <li><span>&#10004;</span> 5 GB almacenamiento</li>
-        <li><span>&#10004;</span> Respaldo en la nube</li>
-      </ul>
-
-      <a href="https://app.kaptah.mx/register" class="btn-primary">Comenzar ahora</a>
-    </div>
-
-    <!-- FISCAL -->
-    <div class="pricing-card">
-      <span class="tag fiscal">Fiscal</span>
-      <mat-icon class="plan-icon">receipt_long</mat-icon>
-      <h3 class="price">$299 MXN</h3>
-      <p class="per">por mes (o $2,990/ano)</p>
-
-      <ul class="features">
-        <li><span>&#10004;</span> Todo lo del plan Starter</li>
-        <li><span>&#10004;</span> 100 timbres CFDI/mes</li>
-        <li><span>&#10004;</span> Descarga masiva SAT</li>
-        <li><span>&#10004;</span> CxC y CxP completo</li>
-        <li><span>&#10004;</span> Ordenes de compra</li>
-        <li><span>&#10004;</span> Dashboard fiscal avanzado</li>
-        <li><span>&#10004;</span> Reportes para contador</li>
-        <li><span>&#10004;</span> 3 usuarios (vendedor, contador, etc.)</li>
-        <li><span>&#10004;</span> 20 GB almacenamiento</li>
-      </ul>
-
-      <a href="https://app.kaptah.mx/register" class="btn-primary">Comenzar ahora</a>
-    </div>
-
-    <!-- ERP -->
-    <div class="pricing-card featured">
-      <span class="tag erp">ERP</span>
-      <mat-icon class="plan-icon">apartment</mat-icon>
-      <h3 class="price">$599 MXN</h3>
-      <p class="per">por mes (o $5,990/ano)</p>
-
-      <ul class="features">
-        <li><span>&#10004;</span> Todo lo del plan Fiscal</li>
-        <li><span>&#10004;</span> 250 timbres CFDI/mes</li>
-        <li><span>&#10004;</span> Inventario multisucursal</li>
-        <li><span>&#10004;</span> Ordenes de venta y guias de remision</li>
-        <li><span>&#10004;</span> Antiguedad de saldos</li>
-        <li><span>&#10004;</span> Dashboard ejecutivo con KPIs</li>
-        <li><span>&#10004;</span> 10 usuarios (admin, vendedor, almacenista, contador, facturador)</li>
-        <li><span>&#10004;</span> 100 GB almacenamiento</li>
-        <li><span>&#10004;</span> API para integraciones</li>
-        <li><span>&#10004;</span> Soporte prioritario</li>
-      </ul>
-
-      <a href="https://app.kaptah.mx/register" class="btn-primary big">Comenzar ahora</a>
-    </div>
-
-    <!-- ILIMITADO -->
-    <div class="pricing-card">
-      <span class="tag ilimitado">Ilimitado</span>
-      <mat-icon class="plan-icon">workspace_premium</mat-icon>
-      <h3 class="price">$999 MXN</h3>
-      <p class="per">por mes (o $9,990/ano)</p>
-
-      <ul class="features">
-        <li><span>&#10004;</span> Todo lo del plan ERP</li>
-        <li><span>&#10004;</span> Timbres CFDI ilimitados</li>
-        <li><span>&#10004;</span> Sucursales ilimitadas</li>
-        <li><span>&#10004;</span> Usuarios ilimitados</li>
-        <li><span>&#10004;</span> 500 GB almacenamiento</li>
-        <li><span>&#10004;</span> Modulo de nomina</li>
-        <li><span>&#10004;</span> Integraciones personalizadas</li>
-        <li><span>&#10004;</span> Gerente de cuenta dedicado</li>
-        <li><span>&#10004;</span> SLA soporte 4 hrs</li>
-      </ul>
-
-      <a href="https://app.kaptah.mx/register" class="btn-primary">Comenzar ahora</a>
-    </div>
-
+  <!-- TABS -->
+  <div class="pricing-tabs">
+    <div class="tab-slider" [style.left]="activeTab === 'plataforma' ? '6px' : '50%'"></div>
+    <button class="tab-btn" [class.active]="activeTab === 'plataforma'" (click)="switchTab('plataforma')">
+      <mat-icon class="tab-icon">dashboard</mat-icon> Plataforma
+    </button>
+    <button class="tab-btn" [class.active]="activeTab === 'contabilidad'" (click)="switchTab('contabilidad')">
+      <mat-icon class="tab-icon">calculate</mat-icon> Contabilidad
+    </button>
   </div>
+
+  <!-- TAB: PLATAFORMA -->
+  <div *ngIf="activeTab === 'plataforma'" class="fade-animation">
+    <div class="pricing-cards">
+
+      <!-- STARTER -->
+      <div class="pricing-card">
+        <span class="tag starter">Starter</span>
+        <mat-icon class="plan-icon">storefront</mat-icon>
+        <h3 class="price">$599 MXN</h3>
+        <p class="per">por ano (pago unico)</p>
+        <ul class="features">
+          <li><span>&#10004;</span> Notas de remision ilimitadas</li>
+          <li><span>&#10004;</span> Clientes y productos ilimitados</li>
+          <li><span>&#10004;</span> Cotizaciones ilimitadas</li>
+          <li><span>&#10004;</span> Dashboard de ingresos/egresos</li>
+          <li><span>&#10004;</span> 15 timbres CFDI/ano</li>
+          <li><span>&#10004;</span> 1 usuario</li>
+          <li><span>&#10004;</span> 5 GB almacenamiento</li>
+          <li><span>&#10004;</span> Respaldo en la nube</li>
+        </ul>
+        <a href="https://app.kaptah.mx/register" class="btn-primary">Comenzar ahora</a>
+      </div>
+
+      <!-- FISCAL -->
+      <div class="pricing-card">
+        <span class="tag fiscal">Fiscal</span>
+        <mat-icon class="plan-icon">receipt_long</mat-icon>
+        <h3 class="price">$299 MXN</h3>
+        <p class="per">por mes (o $2,990/ano)</p>
+        <ul class="features">
+          <li><span>&#10004;</span> Todo lo del plan Starter</li>
+          <li><span>&#10004;</span> 100 timbres CFDI/mes</li>
+          <li><span>&#10004;</span> Descarga masiva SAT</li>
+          <li><span>&#10004;</span> CxC y CxP completo</li>
+          <li><span>&#10004;</span> Ordenes de compra</li>
+          <li><span>&#10004;</span> Dashboard fiscal avanzado</li>
+          <li><span>&#10004;</span> Reportes para contador</li>
+          <li><span>&#10004;</span> 3 usuarios (vendedor, contador, etc.)</li>
+          <li><span>&#10004;</span> 20 GB almacenamiento</li>
+        </ul>
+        <a href="https://app.kaptah.mx/register" class="btn-primary">Comenzar ahora</a>
+      </div>
+
+      <!-- ERP -->
+      <div class="pricing-card featured">
+        <span class="tag erp">ERP</span>
+        <mat-icon class="plan-icon">apartment</mat-icon>
+        <h3 class="price">$599 MXN</h3>
+        <p class="per">por mes (o $5,990/ano)</p>
+        <ul class="features">
+          <li><span>&#10004;</span> Todo lo del plan Fiscal</li>
+          <li><span>&#10004;</span> 250 timbres CFDI/mes</li>
+          <li><span>&#10004;</span> Inventario multisucursal</li>
+          <li><span>&#10004;</span> Ordenes de venta y guias de remision</li>
+          <li><span>&#10004;</span> Antiguedad de saldos</li>
+          <li><span>&#10004;</span> Dashboard ejecutivo con KPIs</li>
+          <li><span>&#10004;</span> 10 usuarios (admin, vendedor, almacenista, contador, facturador)</li>
+          <li><span>&#10004;</span> 100 GB almacenamiento</li>
+          <li><span>&#10004;</span> API para integraciones</li>
+          <li><span>&#10004;</span> Soporte prioritario</li>
+        </ul>
+        <a href="https://app.kaptah.mx/register" class="btn-primary big">Comenzar ahora</a>
+      </div>
+
+      <!-- ILIMITADO -->
+      <div class="pricing-card">
+        <span class="tag ilimitado">Ilimitado</span>
+        <mat-icon class="plan-icon">workspace_premium</mat-icon>
+        <h3 class="price">$999 MXN</h3>
+        <p class="per">por mes (o $9,990/ano)</p>
+        <ul class="features">
+          <li><span>&#10004;</span> Todo lo del plan ERP</li>
+          <li><span>&#10004;</span> Timbres CFDI ilimitados</li>
+          <li><span>&#10004;</span> Sucursales ilimitadas</li>
+          <li><span>&#10004;</span> Usuarios ilimitados</li>
+          <li><span>&#10004;</span> 500 GB almacenamiento</li>
+          <li><span>&#10004;</span> Modulo de nomina</li>
+          <li><span>&#10004;</span> Integraciones personalizadas</li>
+          <li><span>&#10004;</span> Gerente de cuenta dedicado</li>
+          <li><span>&#10004;</span> SLA soporte 4 hrs</li>
+        </ul>
+        <a href="https://app.kaptah.mx/register" class="btn-primary">Comenzar ahora</a>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- TAB: CONTABILIDAD -->
+  <div *ngIf="activeTab === 'contabilidad'" class="fade-animation">
+    <p class="contabilidad-intro">Deja tu contabilidad en manos de expertos. Nos encargamos de tus declaraciones, contabilidad electronica y cumplimiento fiscal.</p>
+    <div class="pricing-cards contabilidad-cards">
+
+      <!-- PERSONA FISICA -->
+      <div class="pricing-card">
+        <span class="tag starter">Persona Fisica</span>
+        <mat-icon class="plan-icon">person</mat-icon>
+        <h3 class="price">$599 MXN</h3>
+        <p class="per">por mes</p>
+        <ul class="features">
+          <li><span>&#10004;</span> Declaraciones mensuales de impuestos</li>
+          <li><span>&#10004;</span> Declaracion anual</li>
+          <li><span>&#10004;</span> Contabilidad electronica</li>
+          <li><span>&#10004;</span> Calculo y entero de ISR e IVA</li>
+          <li><span>&#10004;</span> Envio de DIOT</li>
+          <li><span>&#10004;</span> Atencion personalizada por WhatsApp</li>
+          <li><span>&#10004;</span> Recordatorios de obligaciones fiscales</li>
+          <li><span>&#10004;</span> Ideal para freelancers y profesionistas</li>
+        </ul>
+        <a href="https://app.kaptah.mx/register" class="btn-primary">Solicitar servicio</a>
+      </div>
+
+      <!-- PERSONA MORAL -->
+      <div class="pricing-card featured">
+        <span class="tag erp">Persona Moral</span>
+        <mat-icon class="plan-icon">business</mat-icon>
+        <h3 class="price">$1,499 MXN</h3>
+        <p class="per">por mes</p>
+        <ul class="features">
+          <li><span>&#10004;</span> Todo lo de Persona Fisica</li>
+          <li><span>&#10004;</span> Estados financieros mensuales</li>
+          <li><span>&#10004;</span> Conciliaciones bancarias</li>
+          <li><span>&#10004;</span> Cumplimiento de obligaciones patronales</li>
+          <li><span>&#10004;</span> Atencion a requerimientos del SAT</li>
+          <li><span>&#10004;</span> Asesoria fiscal estrategica</li>
+          <li><span>&#10004;</span> Soporte prioritario</li>
+          <li><span>&#10004;</span> Ideal para PyMEs y empresas en crecimiento</li>
+        </ul>
+        <a href="https://app.kaptah.mx/register" class="btn-primary big">Solicitar servicio</a>
+      </div>
+
+    </div>
+  </div>
+
 </section>
 
 
@@ -516,5 +569,6 @@
 <button class="scroll-to-top" [class.visible]="showScrollTop" (click)="scrollToTop()">
   <mat-icon>keyboard_arrow_up</mat-icon>
 </button>
+
 
 

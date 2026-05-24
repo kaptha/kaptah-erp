@@ -8,7 +8,7 @@ import { HttpClient } from '@angular/common/http';
   encapsulation: ViewEncapsulation.None
 })
 export class LandingComponent {
-  activeTab = 'freelancer';
+  activeTab = 'plataforma';
   fade = false;
   ngOnInit() {
   window.addEventListener('scroll', this.revealOnScroll);

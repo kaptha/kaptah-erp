@@ -1795,3 +1795,43 @@ button[mat-stroked-button] {
   width: 28px;
   height: 28px;
 }
+
+/* ===========================
+   PRICING CARDS SPACING
+=========================== */
+.pricing-cards {
+  gap: 35px !important;
+}
+
+.pricing-card {
+  background: rgba(26, 25, 38, 0.6);
+  border-radius: 22px;
+  padding: 45px 30px 35px;
+  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.3);
+  color: #fff;
+  border: 1px solid rgba(127, 63, 240, 0.15);
+  backdrop-filter: blur(12px);
+  position: relative;
+}
+
+/* CONTABILIDAD TAB */
+.contabilidad-intro {
+  color: #BDBDC7;
+  margin-bottom: 50px;
+  font-size: 1.05rem;
+  max-width: 700px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.contabilidad-cards {
+  grid-template-columns: repeat(2, 1fr) !important;
+  max-width: 900px !important;
+  margin: 0 auto;
+}
+
+@media (max-width: 700px) {
+  .contabilidad-cards {
+    grid-template-columns: 1fr !important;
+  }
+}
