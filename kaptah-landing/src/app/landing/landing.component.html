@@ -244,17 +244,44 @@
 
 <!-- ===== POR QUÉ ELEGIRNOS ===== -->
 <section class="why">
-  <h2>¿Por qué elegir Kaptah?</h2>
-  <ul>
-    <li><mat-icon>check_circle</mat-icon> Interfaz intuitiva y moderna</li>
-    <li><mat-icon>check_circle</mat-icon> Seguridad con Firebase Auth</li>
-    <li><mat-icon>check_circle</mat-icon> Arquitectura en microservicios</li>
-    <li><mat-icon>check_circle</mat-icon> Soporte humano y rápido</li>
-  </ul>
+  <h2>¿Por que elegir Kaptah?</h2>
+  <p class="why-subtitle">Mas que un sistema de facturacion, somos tu aliado tecnologico para crecer.</p>
+  <div class="why-grid">
+    <div class="why-card">
+      <mat-icon>speed</mat-icon>
+      <h3>Rapido y moderno</h3>
+      <p>Interfaz intuitiva que no requiere capacitacion. Empieza a facturar en minutos.</p>
+    </div>
+    <div class="why-card">
+      <mat-icon>security</mat-icon>
+      <h3>Seguridad bancaria</h3>
+      <p>Tus datos protegidos con autenticacion avanzada y cifrado de extremo a extremo.</p>
+    </div>
+    <div class="why-card">
+      <mat-icon>cloud_done</mat-icon>
+      <h3>100% en la nube</h3>
+      <p>Accede desde cualquier dispositivo, sin instalaciones ni actualizaciones manuales.</p>
+    </div>
+    <div class="why-card">
+      <mat-icon>support_agent</mat-icon>
+      <h3>Soporte humano</h3>
+      <p>Equipo real que responde rapido por WhatsApp y email. Nada de bots.</p>
+    </div>
+    <div class="why-card">
+      <mat-icon>trending_up</mat-icon>
+      <h3>Crece sin limites</h3>
+      <p>Desde un freelancer hasta una empresa con multiples sucursales, Kaptah escala contigo.</p>
+    </div>
+    <div class="why-card">
+      <mat-icon>integration_instructions</mat-icon>
+      <h3>Conectado al SAT</h3>
+      <p>Descarga masiva, timbrado CFDI 4.0 y cumplimiento fiscal automatico.</p>
+    </div>
+  </div>
 </section>
 <section id="faq" class="faq-section">
   <h2 class="faq-title">Preguntas Frecuentes</h2>
-  <p class="faq-subtitle">Resolvemos tus dudas más comunes.</p>
+  <p class="faq-subtitle">Resolvemos tus dudas mas comunes sobre la plataforma y el servicio contable.</p>
 
   <mat-accordion class="faq-accordion">
 
@@ -262,28 +289,56 @@
       <mat-expansion-panel-header>
         <mat-panel-title>¿Puedo cambiar de plan en cualquier momento?</mat-panel-title>
       </mat-expansion-panel-header>
-      <p>Sí. Puedes mejorar o bajar tu plan en cualquier momento desde tu cuenta.</p>
+      <p>Si, puedes mejorar o bajar tu plan en cualquier momento desde tu cuenta. El cambio se aplica de inmediato y solo pagas la diferencia proporcional.</p>
     </mat-expansion-panel>
 
     <mat-expansion-panel>
       <mat-expansion-panel-header>
-        <mat-panel-title>¿Cómo funciona la descarga masiva del SAT?</mat-panel-title>
+        <mat-panel-title>¿Como funciona la descarga masiva del SAT?</mat-panel-title>
       </mat-expansion-panel-header>
-      <p>Conectas tu e.firma y Kaptah sincroniza automáticamente tus CFDIs emitidos y recibidos.</p>
+      <p>Conectas tu e.firma (FIEL) desde tu cuenta y Kaptah sincroniza automaticamente todos tus CFDIs emitidos y recibidos. Se actualizan periodicamente sin que tengas que hacer nada.</p>
     </mat-expansion-panel>
 
     <mat-expansion-panel>
       <mat-expansion-panel-header>
-        <mat-panel-title>¿Qué métodos de pago aceptan?</mat-panel-title>
+        <mat-panel-title>¿Que metodos de pago aceptan?</mat-panel-title>
       </mat-expansion-panel-header>
-      <p>Tarjeta de crédito/débito y pago anual con descuento.</p>
+      <p>Aceptamos tarjeta de credito/debito, transferencia bancaria (SPEI) y pago en OXXO. Tambien ofrecemos descuento al pagar anualmente.</p>
     </mat-expansion-panel>
 
     <mat-expansion-panel>
       <mat-expansion-panel-header>
-        <mat-panel-title>¿Puedo cancelar mi suscripción?</mat-panel-title>
+        <mat-panel-title>¿Puedo cancelar mi suscripcion?</mat-panel-title>
       </mat-expansion-panel-header>
-      <p>Sí, puedes cancelar cuando quieras desde tu panel de configuración.</p>
+      <p>Si, puedes cancelar cuando quieras desde tu panel de configuracion. No hay contratos forzosos ni penalizaciones.</p>
+    </mat-expansion-panel>
+
+    <mat-expansion-panel>
+      <mat-expansion-panel-header>
+        <mat-panel-title>¿En que consiste el servicio de Contabilidad?</mat-panel-title>
+      </mat-expansion-panel-header>
+      <p>Es un servicio adicional donde un equipo de contadores profesionales se encarga de tus declaraciones mensuales y anuales, contabilidad electronica, calculo de impuestos (ISR, IVA), envio de DIOT y cumplimiento fiscal completo. Tu solo facturas, nosotros nos encargamos del resto.</p>
+    </mat-expansion-panel>
+
+    <mat-expansion-panel>
+      <mat-expansion-panel-header>
+        <mat-panel-title>¿Cual es la diferencia entre Persona Fisica y Persona Moral en Contabilidad?</mat-panel-title>
+      </mat-expansion-panel-header>
+      <p>El plan de Persona Fisica ($599/mes) cubre declaraciones mensuales y anual, ideal para freelancers y profesionistas. El de Persona Moral ($1,499/mes) incluye ademas estados financieros, conciliaciones bancarias, obligaciones patronales y asesoria fiscal estrategica para empresas.</p>
+    </mat-expansion-panel>
+
+    <mat-expansion-panel>
+      <mat-expansion-panel-header>
+        <mat-panel-title>¿Puedo contratar la plataforma y la contabilidad juntos?</mat-panel-title>
+      </mat-expansion-panel-header>
+      <p>Si, de hecho es la combinacion ideal. Usas Kaptah para facturar y gestionar tu negocio, y nuestro equipo contable se encarga de tus declaraciones usando la misma informacion. Todo integrado.</p>
+    </mat-expansion-panel>
+
+    <mat-expansion-panel>
+      <mat-expansion-panel-header>
+        <mat-panel-title>¿Mis datos estan seguros?</mat-panel-title>
+      </mat-expansion-panel-header>
+      <p>Absolutamente. Usamos autenticacion avanzada, cifrado de datos y servidores seguros en la nube. Tu informacion fiscal nunca se comparte con terceros.</p>
     </mat-expansion-panel>
 
   </mat-accordion>
@@ -569,6 +624,7 @@
 <button class="scroll-to-top" [class.visible]="showScrollTop" (click)="scrollToTop()">
   <mat-icon>keyboard_arrow_up</mat-icon>
 </button>
+
 
 
 

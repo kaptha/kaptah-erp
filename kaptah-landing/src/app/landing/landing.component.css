@@ -1835,3 +1835,75 @@ button[mat-stroked-button] {
     grid-template-columns: 1fr !important;
   }
 }
+
+/* ===========================
+   WHY SECTION ENRICHED
+=========================== */
+.why-subtitle {
+  color: #BDBDC7;
+  margin-bottom: 50px;
+  font-size: 1.1rem;
+}
+
+.why-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 30px;
+  max-width: 1200px;
+  margin: 0 auto;
+  text-align: left;
+}
+
+.why-card {
+  background: rgba(26, 25, 38, 0.6);
+  border-radius: 20px;
+  padding: 35px 28px;
+  border: 1px solid rgba(127, 63, 240, 0.15);
+  backdrop-filter: blur(12px);
+  transition: all 0.35s ease;
+}
+
+.why-card:hover {
+  transform: translateY(-8px);
+  box-shadow: 0 12px 35px rgba(164, 107, 255, 0.25);
+  border-color: rgba(164, 107, 255, 0.4);
+}
+
+.why-card mat-icon {
+  font-size: 40px;
+  width: 40px;
+  height: 40px;
+  color: #A46BFF;
+  margin-bottom: 16px;
+  text-shadow: 0 0 12px rgba(164, 107, 255, 0.4);
+}
+
+.why-card h3 {
+  color: #fff;
+  font-size: 1.2rem;
+  margin-bottom: 10px;
+  font-weight: 600;
+}
+
+.why-card p {
+  color: #C8C8D5;
+  font-size: 0.95rem;
+  line-height: 1.5;
+}
+
+@media (max-width: 900px) {
+  .why-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 600px) {
+  .why-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* FAQ enriched */
+.faq-accordion {
+  max-width: 900px;
+}
