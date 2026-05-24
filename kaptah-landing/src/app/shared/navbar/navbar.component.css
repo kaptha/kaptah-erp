@@ -199,6 +199,7 @@
 }
 
 .mobile-cta {
+  text-align: center;
   margin-top: 10px;
   background: #7F3FF0 !important;
   border-radius: 50px !important;
@@ -225,6 +226,7 @@
 
 /* Fix: quitar subrayado en botones CTA */
 .login-btn, .cta-btn, .mobile-login, .mobile-cta {
+  text-align: center;
   text-decoration: none !important;
 }
 
