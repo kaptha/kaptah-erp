@@ -183,67 +183,30 @@ export class AddCfdiModalComponent implements OnInit, OnDestroy {
     this.destroy$.complete();
   }
 
-  // ✅ NUEVO: Cargar datos del usuario desde la base de datos
+  // ✅ Cargar datos del usuario desde MySQL
   loadDatosUsuario(): void {
-    const idToken = localStorage.getItem('idToken');
-    
-    if (!idToken) {
-      console.error('❌ No se encontró token de autenticación');
+    const firebaseUid = localStorage.getItem('activeCuentaUid');
+    if (!firebaseUid) {
+      console.error('❌ No se encontró activeCuentaUid');
       this.datosEmisor = this.obtenerDatosUsuario();
       return;
     }
-
-    this.usersService.getUserByToken(idToken)
+    this.usersService.getUserFromMySQL(firebaseUid)
       .pipe(takeUntil(this.destroy$))
       .subscribe({
         next: (user: any) => {
           if (!user) {
-            console.error('❌ No se encontró el usuario');
+            console.error('❌ No se encontró el usuario en MySQL');
             this.datosEmisor = this.obtenerDatosUsuario();
             return;
           }
-
-          console.log('🔍 OBJETO USER COMPLETO:', user);
-          console.log('🔍 TODAS LAS PROPIEDADES:', Object.keys(user));
-
-          // ✅ Intentar obtener cada campo probando TODAS las variaciones
-          const rfc = user.rfc || user.Rfc || user.RFC || user['rfc'] || user['Rfc'] || '';
-          const nombre = user.nombre || user.Nombre || user.nombreComercial || user.NombreComercial || user['nombre'] || user['Nombre'] || '';
-          
-          // ✅ Intentar obtener régimen fiscal de TODAS las formas posibles
-          let fiscalReg = user.fiscalReg || user.FiscalReg || user.regimenFiscal || user.RegimenFiscal || 
-                          user.fiscal_reg || user.RegFiscal || user['fiscalReg'] || user['FiscalReg'];
-
-          console.log('🔍 Régimen fiscal obtenido:', fiscalReg);
-          
-          // ✅ SOLUCIÓN TEMPORAL: Si no se obtuvo o es incorrecto, determinarlo por el RFC
-          if (!fiscalReg || fiscalReg === '612') {
-            console.warn('⚠️ Régimen fiscal no encontrado o incorrecto, determinando por RFC...');
-            
-            // RFC de 12 caracteres = Persona Moral → 601
-            // RFC de 13 caracteres = Persona Física → 612
-            const esPersonaMoral = rfc.length === 12;
-            fiscalReg = esPersonaMoral ? '601' : '612';
-            
-            console.log(`✅ Régimen fiscal determinado por RFC (${rfc.length} caracteres):`, fiscalReg);
-            console.log(`   Tipo de persona: ${esPersonaMoral ? 'Moral' : 'Física'}`);
-          }
-
+          console.log('✅ Usuario desde MySQL:', user);
           this.datosEmisor = {
-            rfc: rfc,
-            nombre: nombre,
-            fiscalReg: fiscalReg
+            rfc: user.rfc || '',
+            nombre: user.nombre || user.nombreComercial || '',
+            fiscalReg: user.fiscalReg || '612'
           };
-          
           console.log('✅ DATOS DEL EMISOR FINALES:', this.datosEmisor);
-          
-          // ✅ Validación final
-          const esPersonaMoral = rfc.length === 12;
-          if (esPersonaMoral && (fiscalReg === '612' || fiscalReg === '605' || fiscalReg === '606')) {
-            console.error('⚠️ ¡ERROR! RFC de persona moral con régimen de persona física');
-            console.error('⚠️ Corrigiendo automáticamente a 601...');
-            this.datosEmisor.fiscalReg = '601';
-          }
         },
         error: (error) => {
           console.error('❌ Error cargando datos del usuario:', error);
