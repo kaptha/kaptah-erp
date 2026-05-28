@@ -116,7 +116,7 @@
       <div *ngFor="let item of items.controls; let i=index" [formGroupName]="i" class="item-row mb-4">
         <div class="item-header">
           <!-- Selector de tipo (Producto/Servicio) -->
-          <mat-form-field appearance="outline">
+          <mat-form-field appearance="outline" class="field-tipo">
             <mat-label>Tipo</mat-label>
             <mat-select formControlName="type" (selectionChange)="onTypeChange(i)">
               <mat-option value="product">Producto</mat-option>
@@ -125,7 +125,7 @@
           </mat-form-field>
 
           <!-- Selector de Producto/Servicio -->
-          <mat-form-field appearance="outline">
+          <mat-form-field appearance="outline" class="field-producto">
             <mat-label>{{item.get('type')?.value === 'product' ? 'Producto' : 'Servicio'}}</mat-label>
             <mat-select formControlName="itemId" (selectionChange)="onItemSelect($event, i)">
               <mat-option>
@@ -142,29 +142,31 @@
           </mat-form-field>
 
           <!-- Cantidad -->
-          <mat-form-field appearance="outline">
+          <mat-form-field appearance="outline" class="field-cantidad">
             <mat-label>Cantidad</mat-label>
             <input matInput type="number" min="1" formControlName="quantity" 
                  (change)="calculateItemTotal(i)">
           </mat-form-field>
 
           <!-- Precio unitario -->
-          <mat-form-field appearance="outline">
+          <mat-form-field appearance="outline" class="field-precio">
             <mat-label>Precio unitario</mat-label>
             <input matInput type="number" formControlName="unitPrice" readonly>
           </mat-form-field>
 
           <!-- Subtotal -->
-          <mat-form-field appearance="outline">
+          <mat-form-field appearance="outline" class="field-subtotal">
             <mat-label>Subtotal</mat-label>
             <input matInput type="number" formControlName="subtotal" readonly>
           </mat-form-field>
 
           <!-- Botón eliminar item -->
-          <button mat-icon-button color="warn" (click)="removeItem(i)" 
-                *ngIf="items.length > 1" type="button">
-            <mat-icon>delete</mat-icon>
-          </button>
+          <div class="field-delete">
+            <button mat-icon-button color="warn" (click)="removeItem(i)" 
+                  *ngIf="items.length > 1" type="button">
+              <mat-icon>delete</mat-icon>
+            </button>
+          </div>
         </div>
 
         <!-- Impuestos por ítem -->

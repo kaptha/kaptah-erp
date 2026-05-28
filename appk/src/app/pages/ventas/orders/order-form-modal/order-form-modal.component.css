@@ -93,11 +93,40 @@
 }
 
 .item-header {
-  display: grid;
-  grid-template-columns: 1fr 1.5fr 1fr 1fr 1fr auto;
-  gap: 10px;
-  align-items: center;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  align-items: flex-start;
   margin-bottom: 10px;
+}
+
+.item-header .field-tipo {
+  flex: 0 0 130px;
+}
+
+.item-header .field-producto {
+  flex: 1 1 250px;
+  min-width: 200px;
+}
+
+.item-header .field-cantidad {
+  flex: 0 0 120px;
+}
+
+.item-header .field-precio {
+  flex: 0 0 140px;
+}
+
+.item-header .field-subtotal {
+  flex: 0 0 140px;
+}
+
+.item-header .field-delete {
+  flex: 0 0 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding-top: 10px;
 }
 
 .items-container {
@@ -286,3 +315,4 @@
     align-items: flex-start;
   }
 }
+
