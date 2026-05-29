@@ -494,11 +494,23 @@ async verifyCfdi(
     );
     this.logger.log('✅ CFDI firmado digitalmente');
 
-    // 5. Crear registro en BD con status 'timbrando' (SIN XML aún)
+    // 5. Timbrar directamente con SIFEI PAC
+    this.logger.log('📤 Enviando a timbrar con PAC SIFEI...');
+    const resultadoTimbrado = await this.timbradoService.timbrarCfdi(xmlFirmado);
+
+    if (!resultadoTimbrado.success) {
+      throw new BadRequestException(
+        `Error de timbrado: ${resultadoTimbrado.error || 'Error desconocido del PAC'}`,
+      );
+    }
+
+    this.logger.log(`✅ CFDI timbrado - UUID: ${resultadoTimbrado.uuid}`);
+
+    // 6. Guardar en BD con todos los datos del timbrado
     const cfdi = this.cfdiRepository.create({
       user_id: user.uid,
       tipo_cfdi: 'ingreso',
-      status: 'timbrando', // 👈 Estado inicial
+      status: 'vigente',
       emisor_rfc: createDto.emisor?.rfc,
       emisor_nombre: createDto.emisor?.nombre,
       receptor_rfc: createDto.receptor?.rfc,
@@ -509,36 +521,28 @@ async verifyCfdi(
       metodo_pago: createDto.metodoPago,
       subtotal: this.calculateSubtotal(createDto.conceptos),
       total: this.calculateTotal(createDto.conceptos),
-      moneda: 'MXN',
-      tipo_cambio: 1,
+      moneda: createDto.moneda || 'MXN',
+      tipo_cambio: Number(createDto.tipoCambio) || 1,
       createdAt: new Date(),
-      // 👇 NO guardar XML ni UUID aún
-      xml: null,
-      uuid: null,
+      xml: resultadoTimbrado.cfdiTimbrado,
+      uuid: resultadoTimbrado.uuid,
+      selloCFD: xmlFirmado.match(/Sello="([^"]+)"/)?.[1] || null,
+      selloSAT: resultadoTimbrado.selloSAT || null,
+      noCertificadoSAT: resultadoTimbrado.noCertificadoSAT || null,
+      fechaTimbrado: resultadoTimbrado.fechaTimbrado ? new Date(resultadoTimbrado.fechaTimbrado) : null,
     });
 
     const savedCfdi = await this.cfdiRepository.save(cfdi);
-    this.logger.log(`📋 CFDI registrado con ID: ${savedCfdi.id}`);
+    this.logger.log(`📋 CFDI guardado con ID: ${savedCfdi.id}`);
 
-    // 6. 🔥 Enviar a cola de timbrado (AQUÍ es donde se timbrará)
-    await this.queueClient.timbrarCFDI({
-      cfdiId: savedCfdi.id,
-      xmlSinTimbrar: xmlFirmado, // 👈 XML ya firmado
-      userId: user.uid,
-      empresaId: user.uid,
-      certificadoId: 'default', // O el ID real del certificado
-      csdPassword: createDto.csdPassword, // 👈 Necesario para el procesador
-    });
-
-    this.logger.log('✅ Job de timbrado enviado a cola');
-
-    // 7. Retornar respuesta inmediata
+    // 7. Retornar respuesta completa
     return {
       success: true,
-      message: 'CFDI firmado y enviado a timbrado. Recibirás una notificación cuando esté listo.',
+      message: 'CFDI timbrado exitosamente',
       cfdiId: savedCfdi.id,
-      status: 'timbrando',
-      // 👇 NO retornar XML ni UUID aún porque no se ha timbrado
+      uuid: resultadoTimbrado.uuid,
+      fechaTimbrado: resultadoTimbrado.fechaTimbrado,
+      status: 'vigente',
     };
 
   } catch (error) {
