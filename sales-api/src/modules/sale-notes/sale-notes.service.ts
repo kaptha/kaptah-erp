@@ -674,6 +674,70 @@ this.logger.log(`📦 Job de stock encolado exitosamente: ${stockJob.id}`);
       lastFolio: lastSaleNote?.folio || `${prefix}0000`,
     };
   }
+async getStatsPeriodo(
+    userId: string,
+    desde: string,
+    hasta: string,
+  ): Promise<{
+    totalNotas: number;
+    totalVendido: number;
+    totalCosto: number;
+    utilidadBruta: number;
+  }> {
+    const notas = await this.saleNoteRepository
+      .createQueryBuilder('sn')
+      .where('sn.userId = :userId', { userId })
+      .andWhere('sn.saleDate >= :desde', { desde })
+      .andWhere('sn.saleDate <= :hasta', { hasta })
+      .andWhere("sn.status != 'CANCELLED'")
+      .getMany();
+
+    if (notas.length === 0) {
+      return { totalNotas: 0, totalVendido: 0, totalCosto: 0, utilidadBruta: 0 };
+    }
+
+    // Sumar total vendido
+    const totalVendido = notas.reduce((sum, n) => sum + Number(n.total), 0);
+
+    // Extraer productIds y cantidades de los items JSONB
+    const productMap = new Map<number, number>(); // productId -> cantidad total
+    for (const nota of notas) {
+      for (const item of nota.items) {
+        const pid = Number(item.productId);
+        if (!pid || isNaN(pid)) continue;
+        productMap.set(pid, (productMap.get(pid) || 0) + Number(item.quantity));
+      }
+    }
+
+    const productIds = Array.from(productMap.keys());
+    let totalCosto = 0;
+
+    if (productIds.length > 0) {
+      try {
+        const inventoryApiUrl = process.env.INVENTORY_API_URL || 'http://localhost:3002';
+        const response = await axios.post<{ id: number; cost: number }[]>(
+          `${inventoryApiUrl}/products/internal/costs-by-ids`,
+          { ids: productIds },
+          { headers: { 'x-internal-api-key': process.env.INTERNAL_API_KEY } }
+        );
+
+        const costs = response.data;
+        for (const c of costs) {
+          const cantidad = productMap.get(c.id) || 0;
+          totalCosto += c.cost * cantidad;
+        }
+      } catch (error) {
+        this.logger.warn(`⚠️ No se pudo obtener costos de inventory-api: ${error.message}`);
+      }
+    }
+
+    return {
+      totalNotas: notas.length,
+      totalVendido: Number(totalVendido.toFixed(2)),
+      totalCosto: Number(totalCosto.toFixed(2)),
+      utilidadBruta: Number((totalVendido - totalCosto).toFixed(2)),
+    };
+  }
  async sendSaleNoteByEmail(
     id: string,
     recipientEmail: string,

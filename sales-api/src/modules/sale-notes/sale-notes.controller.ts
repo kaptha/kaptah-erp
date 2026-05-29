@@ -87,6 +87,20 @@ create(@Body() createSaleNoteDto: CreateSaleNoteDto, @CurrentUser() user: any, @
   getFolioStats(@Query('year') year?: number) {
     return this.saleNotesService.getFolioStats(year);
   }
+@Get('stats/periodo')
+  @ApiOperation({ summary: 'Obtener estadísticas de ventas por periodo' })
+  @ApiQuery({ name: 'desde', required: true, description: 'Fecha inicio (YYYY-MM-DD)' })
+  @ApiQuery({ name: 'hasta', required: true, description: 'Fecha fin (YYYY-MM-DD)' })
+  @ApiQuery({ name: 'cuentaUid', required: false })
+  getStatsPeriodo(
+    @CurrentUser() user: any,
+    @Query('desde') desde: string,
+    @Query('hasta') hasta: string,
+    @Query('cuentaUid') cuentaUid?: string,
+  ) {
+    const uid = cuentaUid || user.uid;
+    return this.saleNotesService.getStatsPeriodo(uid, desde, hasta);
+  }
 
   @Get(':id')
   @ApiOperation({ summary: 'Obtener una nota de venta por ID' })
