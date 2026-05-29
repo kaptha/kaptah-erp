@@ -43,6 +43,9 @@ export class CreateCsdCertificateDto {
     issuerSerial: string;
 
     // Estos campos se manejarán en el servicio
-    cerFile: Buffer;
-    keyFile: Buffer;
+    @IsOptional()
+    cerFile?: Buffer;
+
+    @IsOptional()
+    keyFile?: Buffer;
 }
