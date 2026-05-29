@@ -121,5 +121,20 @@ sendNoteByEmail(noteId: string, emailData: {
     })
   );
 }
+getStatsPeriodo(desde: string, hasta: string): Observable<{
+    totalNotas: number;
+    totalVendido: number;
+    totalCosto: number;
+    utilidadBruta: number;
+  }> {
+    const cuentaUid = localStorage.getItem('activeCuentaUid') || '';
+    const cuentaParam = cuentaUid ? `&cuentaUid=${cuentaUid}` : '';
+    const url = `${this.apiUrl}/stats/periodo?desde=${desde}&hasta=${hasta}${cuentaParam}`;
+    return this.getHeaders().pipe(
+      switchMap((headers: HttpHeaders) => {
+        return this.http.get<any>(url, { headers });
+      })
+    );
+  }
 }
 

@@ -35,9 +35,8 @@
     <mat-icon>arrow_drop_down</mat-icon>
   </button>
       <mat-menu #statsMenu="matMenu" class="stats-menu-panel" xPosition="before">
-    <!-- Evitar que clicks adentro cierren el menú -->
     <div (click)="$event.stopPropagation()" class="stats-menu-content">
-      
+
       <!-- Título -->
       <div class="stats-menu-title">
         <mat-icon>insights</mat-icon>
@@ -46,37 +45,60 @@
 
       <!-- Chips de periodo -->
       <div class="stats-period-chips">
-        <span class="period-chip" 
-              [class.active]="selectedPeriod === 'today'"
-              (click)="onPeriodChange('today')">Hoy</span>
-        <span class="period-chip" 
-              [class.active]="selectedPeriod === 'week'"
-              (click)="onPeriodChange('week')">Semana</span>
-        <span class="period-chip" 
-              [class.active]="selectedPeriod === 'month'"
-              (click)="onPeriodChange('month')">Mes</span>
-        <span class="period-chip" 
-              [class.active]="selectedPeriod === 'year'"
-              (click)="onPeriodChange('year')">Año</span>
+        <span class="period-chip"
+              [class.active]="selectedPeriod === 'currentMonth'"
+              (click)="onPeriodChange('currentMonth')">Mes actual</span>
+        <span class="period-chip"
+              [class.active]="selectedPeriod === 'lastMonth'"
+              (click)="onPeriodChange('lastMonth')">Mes anterior</span>
+        <span class="period-chip"
+              [class.active]="selectedPeriod === 'custom'"
+              (click)="onPeriodChange('custom')">Personalizado</span>
+      </div>
+
+      <!-- Rango personalizado -->
+      <div class="stats-custom-range" *ngIf="selectedPeriod === 'custom'">
+        <input type="date" [(ngModel)]="customDesde" class="date-input" placeholder="Desde">
+        <span class="date-separator">—</span>
+        <input type="date" [(ngModel)]="customHasta" class="date-input" placeholder="Hasta">
+        <button mat-flat-button color="primary" class="btn-buscar" (click)="onCustomRangeSearch()">
+          <mat-icon>search</mat-icon>
+        </button>
+      </div>
+
+      <!-- Loading -->
+      <div class="stats-loading" *ngIf="statsLoading">
+        <mat-spinner diameter="24"></mat-spinner>
       </div>
 
       <!-- Tarjetas de métricas -->
-      <div class="stats-cards-row">
+      <div class="stats-cards-grid" *ngIf="!statsLoading">
         <div class="stat-card">
           <mat-icon class="stat-icon notes-icon">receipt_long</mat-icon>
           <div class="stat-info">
-            <span class="stat-value">{{ stats.count }}</span>
+            <span class="stat-value">{{ stats.totalNotas }}</span>
             <span class="stat-label">Notas</span>
           </div>
         </div>
-        
-        <div class="stat-divider"></div>
-        
         <div class="stat-card">
           <mat-icon class="stat-icon total-icon">payments</mat-icon>
           <div class="stat-info">
-            <span class="stat-value">{{ stats.total | currency:'MXN':'symbol':'1.0-0' }}</span>
-            <span class="stat-label">Total ventas</span>
+            <span class="stat-value">{{ stats.totalVendido | currency:'MXN':'symbol':'1.0-0' }}</span>
+            <span class="stat-label">Total vendido</span>
+          </div>
+        </div>
+        <div class="stat-card">
+          <mat-icon class="stat-icon cost-icon">shopping_cart</mat-icon>
+          <div class="stat-info">
+            <span class="stat-value">{{ stats.totalCosto | currency:'MXN':'symbol':'1.0-0' }}</span>
+            <span class="stat-label">Costo total</span>
+          </div>
+        </div>
+        <div class="stat-card">
+          <mat-icon class="stat-icon profit-icon">trending_up</mat-icon>
+          <div class="stat-info">
+            <span class="stat-value">{{ stats.utilidadBruta | currency:'MXN':'symbol':'1.0-0' }}</span>
+            <span class="stat-label">Utilidad bruta</span>
           </div>
         </div>
       </div>

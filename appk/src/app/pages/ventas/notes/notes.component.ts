@@ -82,51 +82,61 @@ export class NotesComponent implements OnInit, AfterViewInit {
     this.isMobile = window.innerWidth < 600;
   }
   // --- Estadísticas ---
-selectedPeriod: string = 'month';
-stats = { count: 0, total: 0 };
+selectedPeriod: string = 'currentMonth';
+customDesde: string = '';
+customHasta: string = '';
+stats = { totalNotas: 0, totalVendido: 0, totalCosto: 0, utilidadBruta: 0 };
 statsLoading = false;
 
-loadStats() {
-  this.statsLoading = true;
-  
+getPeriodoDates(): { desde: string; hasta: string } {
   const now = new Date();
-  let startDate: Date;
-  
+  let desde: Date;
+  let hasta: Date = now;
+
   switch (this.selectedPeriod) {
-    case 'today':
-      startDate = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+    case 'currentMonth':
+      desde = new Date(now.getFullYear(), now.getMonth(), 1);
       break;
-    case 'week':
-      startDate = new Date(now);
-      startDate.setDate(now.getDate() - 7);
+    case 'lastMonth':
+      desde = new Date(now.getFullYear(), now.getMonth() - 1, 1);
+      hasta = new Date(now.getFullYear(), now.getMonth(), 0);
       break;
-    case 'month':
-      startDate = new Date(now.getFullYear(), now.getMonth(), 1);
-      break;
-    case 'year':
-      startDate = new Date(now.getFullYear(), 0, 1);
-      break;
+    case 'custom':
+      return { desde: this.customDesde, hasta: this.customHasta };
     default:
-      startDate = new Date(now.getFullYear(), now.getMonth(), 1);
+      desde = new Date(now.getFullYear(), now.getMonth(), 1);
   }
 
-  // Calcular desde los datos ya cargados (sin llamada extra al backend)
-  const filtered = this.dataSource.data.filter(note => {
-    const noteDate = new Date(note.saleDate);
-    return noteDate >= startDate && noteDate <= now;
-  });
-
-  this.stats = {
-    count: filtered.length,
-    total: filtered.reduce((sum, note) => sum + this.getSafeTotal(note.total), 0)
+  return {
+    desde: desde.toISOString().split('T')[0],
+    hasta: hasta.toISOString().split('T')[0]
   };
-  
-  this.statsLoading = false;
+}
+
+loadStats() {
+  const { desde, hasta } = this.getPeriodoDates();
+  if (!desde || !hasta) return;
+
+  this.statsLoading = true;
+  this.saleNotesService.getStatsPeriodo(desde, hasta).subscribe({
+    next: (data) => {
+      this.stats = data;
+      this.statsLoading = false;
+    },
+    error: (err) => {
+      console.error('Error cargando stats:', err);
+      this.statsLoading = false;
+    }
+  });
 }
 
 onPeriodChange(period: string) {
   this.selectedPeriod = period;
-  this.loadStats();
+  if (period !== 'custom') this.loadStats();
+}
+
+onCustomRangeSearch() {
+  if (this.customDesde && this.customHasta) this.loadStats();
 }
 
   /**
