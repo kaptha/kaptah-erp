@@ -3,8 +3,8 @@ import { ApiProperty } from '@nestjs/swagger';
 
 export class CreateCsdCertificateDto {
     @ApiProperty({ description: 'ID del usuario' })
+    @IsOptional()
     @IsString()
-    @IsNotEmpty()
     userId: string;
 
     @ApiProperty({ description: 'Número de certificado' })
