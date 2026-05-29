@@ -715,6 +715,7 @@ async getStatsPeriodo(
     if (productIds.length > 0) {
       try {
         const inventoryApiUrl = process.env.INVENTORY_API_URL || 'http://localhost:3002';
+        this.logger.log(`🔍 Llamando inventory-api: ${inventoryApiUrl}/products/internal/costs-by-ids con IDs: ${productIds}`);
         const response = await axios.post<{ id: number; cost: number }[]>(
           `${inventoryApiUrl}/products/internal/costs-by-ids`,
           { ids: productIds },
