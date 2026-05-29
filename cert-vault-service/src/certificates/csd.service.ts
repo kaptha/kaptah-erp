@@ -84,62 +84,36 @@ export class CsdService {
     }
   }
 
-  private async convertToPem(file: Buffer, password?: string): Promise<string> {
+ private async convertToPem(file: Buffer, password?: string): Promise<string> {
   try {
     if (!file) {
       throw new Error('Archivo no proporcionado');
     }
 
-    // Para archivos .cer (certificado)
+    // Para archivos .cer (certificado) - sin contraseña
     if (!password) {
       const base64Cert = file.toString('base64');
       const pemCert = `-----BEGIN CERTIFICATE-----\n${base64Cert.match(/.{1,64}/g)?.join('\n')}\n-----END CERTIFICATE-----`;
       return pemCert;
     }
 
-    // Para archivos .key (llave privada)
-    const fs = require('fs');
-    const path = require('path');
-    const { exec } = require('child_process');
-    const { promisify } = require('util');
-    const execPromise = promisify(exec);
-    
-    const tempDir = path.join(process.cwd(), 'temp');
-    if (!fs.existsSync(tempDir)) {
-      fs.mkdirSync(tempDir, { recursive: true });
+    // Para archivos .key (llave privada DER cifrada) - usando node-forge puro
+    const derBytes = forge.util.createBuffer(file.toString('binary'));
+    const asn1 = forge.asn1.fromDer(derBytes);
+
+    // Convertir ASN1 a PEM encriptado para poder desencriptar
+    const encryptedPem = forge.pki.encryptedPrivateKeyToPem(asn1 as any);
+    const privateKey = forge.pki.decryptRsaPrivateKey(encryptedPem, password);
+
+    if (!privateKey) {
+      throw new Error('Contrasena incorrecta o archivo .key invalido');
     }
-    
-    const timestamp = Date.now();
-    const keyDerPath = path.join(tempDir, `key_${timestamp}.key`);
-    const keyPemPath = path.join(tempDir, `key_${timestamp}.pem`);
-    
-    try {
-      // Guardar el archivo .key (DER) temporalmente
-      fs.writeFileSync(keyDerPath, file);
-      
-      // Convertir de DER a PEM usando openssl
-      const command = `openssl pkcs8 -inform DER -in "${keyDerPath}" -passin pass:${password} -out "${keyPemPath}"`;
-      await execPromise(command);
-      
-      // Leer el PEM generado
-      const pemKey = fs.readFileSync(keyPemPath, 'utf8');
-      
-      // Limpiar archivos temporales
-      fs.unlinkSync(keyDerPath);
-      fs.unlinkSync(keyPemPath);
-      
-      return pemKey;
-    } catch (error) {
-      // Limpiar archivos en caso de error
-      if (fs.existsSync(keyDerPath)) fs.unlinkSync(keyDerPath);
-      if (fs.existsSync(keyPemPath)) fs.unlinkSync(keyPemPath);
-      
-      console.error('Error convirtiendo .key a PEM:', error);
-      throw new Error(`Error convirtiendo llave privada a PEM: ${error.message}`);
-    }
+
+    return forge.pki.privateKeyToPem(privateKey);
+
   } catch (error) {
-    console.error('Error en conversión:', error);
-    throw new BadRequestException(`Error en conversión: ${error.message}`);
+    console.error('Error en conversion:', error);
+    throw new BadRequestException(`Error en conversion: ${error.message}`);
   }
 }
 
