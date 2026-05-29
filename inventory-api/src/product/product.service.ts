@@ -151,4 +151,9 @@ export class ProductService {
     product.currentStock = newStock;
     return await this.productsRepository.save(product);
   }
+async getCostsByIds(ids: number[]): Promise<{ id: number; cost: number }[]> {
+    if (!ids || ids.length === 0) return [];
+    const products = await this.productsRepository.findByIds(ids);
+    return products.map(p => ({ id: p.id, cost: Number(p.cost) }));
+  }
 }

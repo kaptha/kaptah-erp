@@ -58,6 +58,11 @@ export class ProductController {
   ) {
     return this.productService.updateStock(body.productId, -body.quantity, body.firebaseUid);
   }
+@Post('internal/costs-by-ids')
+  @UseGuards(InternalApiKeyGuard)
+  async getCostsByIds(@Body() body: { ids: number[] }) {
+    return this.productService.getCostsByIds(body.ids);
+  }
 
   @Get('firebase/:firebaseUid')
   async findByFirebaseUid(@Param('firebaseUid') firebaseUid: string) {
