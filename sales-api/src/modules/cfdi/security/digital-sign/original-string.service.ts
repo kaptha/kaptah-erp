@@ -5,7 +5,7 @@ import * as path from 'path';
 import { spawn } from 'child_process';
 import { promisify } from 'util';
 import { exec } from 'child_process';
-
+import { Xslt, XmlParser } from 'xslt-processor';
 const execPromise = promisify(exec);
 
 // Definir tipos compatibles con @xmldom/xmldom
@@ -55,9 +55,22 @@ export class OriginalStringService {
       const correctedXml = serializer.serializeToString(xmlDoc);
       
       // Paso 5: Aplicar transformación XSLT
-      // Intentar múltiples métodos para asegurar que la cadena original se genere correctamente
-      
-      // Opción 1: Usar xsltproc (si está disponible en el sistema)
+
+      // Opción 1: Usar xslt-processor (JavaScript puro, sin dependencias del sistema)
+      try {
+        const xsltContent = fs.readFileSync(this.xsltPath, 'utf-8');
+        const xslt = new Xslt();
+        const xmlParser = new XmlParser();
+        const result = await xslt.xsltProcess(xmlParser.xmlParse(correctedXml), xmlParser.xmlParse(xsltContent));
+        if (result && result.trim().startsWith('||')) {
+          this.logger.debug('Cadena original generada exitosamente con xslt-processor');
+          return result.trim();
+        }
+      } catch (xsltError) {
+        this.logger.debug('Error usando xslt-processor: ' + xsltError.message);
+      }
+
+      // Opción 2: Usar xsltproc del sistema (si está disponible)
       try {
         const result = await this.transformWithXsltproc(correctedXml);
         if (result && result.trim().startsWith('||')) {
@@ -65,10 +78,10 @@ export class OriginalStringService {
           return result.trim();
         }
       } catch (xsltprocError) {
-        this.logger.debug('Error usando xsltproc, intentando otro método:', xsltprocError.message);
+        this.logger.debug('Error usando xsltproc, intentando método manual:', xsltprocError.message);
       }
-      
-      // Opción 2: Usar el método de transformación manual
+
+      // Opción 3: Método manual como último recurso
       try {
         const result = await this.manualTransformation(correctedXml);
         if (result && result.trim().startsWith('||')) {
@@ -78,9 +91,8 @@ export class OriginalStringService {
       } catch (manualError) {
         this.logger.debug('Error usando transformación manual:', manualError.message);
       }
-      
-      // Si llegamos aquí, todas las opciones fallaron
-      throw new Error('No se pudo generar la cadena original. Verifique que el archivo XSLT es correcto.');
+
+      throw new Error('No se pudo generar la cadena original.');
       
     } catch (error) {
       this.logger.error('Error generando cadena original:', error);
