@@ -25,8 +25,7 @@ RUN npx nest build
 
 FROM node:18-alpine
 
-RUN apk add --no-cache libxslt
-
+RUN apk add --no-cache libxslt openssl
 WORKDIR /app
 COPY --from=builder /app/dist ./dist
 COPY --from=builder /app/node_modules ./node_modules
