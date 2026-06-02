@@ -17,10 +17,10 @@ type XmlNodeList = ReturnType<XmlDocument['getElementsByTagName']>;
 export class OriginalStringService {
   private readonly logger = new Logger(OriginalStringService.name);
   private readonly xsltPath: string;
-
+  private readonly xsltSimplePath: string;
   constructor() {
     this.xsltPath = path.join(process.cwd(), 'resources', 'xslt', 'cadenaoriginal_4_0.xslt');
-    
+    this.xsltSimplePath = path.join(process.cwd(), 'resources', 'xslt', 'cadenaoriginal_simple.xslt');
     // Verificar que el archivo XSLT existe
     if (!fs.existsSync(this.xsltPath)) {
       this.logger.warn(`¡ADVERTENCIA! No se encontró el archivo XSLT: ${this.xsltPath}`);
@@ -36,7 +36,8 @@ export class OriginalStringService {
   async generateOriginalString(xmlContent: string): Promise<string> {
     try {
       this.logger.debug('Iniciando generación de cadena original');
-      
+
+           
       // Paso 1: Asegurarse de que el XML tiene el formato correcto
       const parser = new DOMParser();
       const xmlDoc = parser.parseFromString(xmlContent, 'text/xml');
@@ -53,6 +54,17 @@ export class OriginalStringService {
       // Paso 4: Serializar el XML corregido
       const serializer = new XMLSerializer();
       const correctedXml = serializer.serializeToString(xmlDoc);
+
+       // Opción 0: Usar xsltproc con XSLT simplificado (sin includes remotos)
+      try {
+        const result = await this.transformWithXsltprocSimple(correctedXml);
+        if (result && result.trim().startsWith('||')) {
+          this.logger.debug('Cadena original generada exitosamente con xsltproc (XSLT simplificado)');
+          return result.trim();
+        }
+      } catch (err) {
+        this.logger.debug('Error usando xsltproc simplificado: ' + err.message);
+      }
       
       // Paso 5: Aplicar transformación XSLT
 
@@ -237,7 +249,26 @@ export class OriginalStringService {
       }
     });
   }
-  
+
+  private async transformWithXsltprocSimple(xmlContent: string): Promise<string> {
+    return new Promise((resolve, reject) => {
+      const tempDir = path.join(process.cwd(), 'temp');
+      if (!fs.existsSync(tempDir)) fs.mkdirSync(tempDir, { recursive: true });
+      const ts = Date.now();
+      const tempXml = path.join(tempDir, `cfdi_${ts}.xml`);
+      fs.writeFileSync(tempXml, xmlContent, 'utf8');
+      const proc = spawn('xsltproc', [this.xsltSimplePath, tempXml]);
+      let stdout = '', stderr = '';
+      proc.stdout.on('data', d => stdout += d.toString());
+      proc.stderr.on('data', d => stderr += d.toString());
+      proc.on('close', code => {
+        try { fs.unlinkSync(tempXml); } catch(e) {}
+        if (code === 0 && stdout.trim()) resolve(stdout);
+        else reject(new Error(`xsltproc simple failed (${code}): ${stderr}`));
+      });
+      proc.on('error', e => reject(e));
+    });
+  }
   /**
    * =========================================================================
    * TRANSFORMACIÓN MANUAL CORREGIDA
