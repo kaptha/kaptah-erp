@@ -255,21 +255,27 @@ export class OriginalStringService {
       
       // Datos del comprobante
       const comprobante = xmlDoc.documentElement;
-      cadena += [
+      // Atributos del Comprobante en orden EXACTO del XSLT oficial del SAT
+      const comprobanteAttrs = [
         getAttr(comprobante, 'Version'),
         getAttr(comprobante, 'Serie'),
         getAttr(comprobante, 'Folio'),
         getAttr(comprobante, 'Fecha'),
         getAttr(comprobante, 'FormaPago'),
         getAttr(comprobante, 'NoCertificado'),
+        getAttr(comprobante, 'CondicionesDePago'),
         getAttr(comprobante, 'SubTotal'),
+        getAttr(comprobante, 'Descuento'),
         getAttr(comprobante, 'Moneda'),
+        getAttr(comprobante, 'TipoCambio'),
         getAttr(comprobante, 'Total'),
         getAttr(comprobante, 'TipoDeComprobante'),
         getAttr(comprobante, 'Exportacion'),
         getAttr(comprobante, 'MetodoPago'),
-        getAttr(comprobante, 'LugarExpedicion')
-      ].join('|');
+        getAttr(comprobante, 'LugarExpedicion'),
+        getAttr(comprobante, 'Confirmacion'),
+      ].filter(v => v !== '').join('|');
+      cadena += comprobanteAttrs;
       
       // Datos del emisor
       const emisor = xmlDoc.getElementsByTagName('cfdi:Emisor')[0];
@@ -278,9 +284,9 @@ export class OriginalStringService {
           getAttr(emisor, 'Rfc'),
           getAttr(emisor, 'Nombre'),
           getAttr(emisor, 'RegimenFiscal')
-        ].join('|');
+        ].filter(v => v !== '').join('|');
       }
-      
+
       // Datos del receptor
       const receptor = xmlDoc.getElementsByTagName('cfdi:Receptor')[0];
       if (receptor) {
@@ -290,7 +296,7 @@ export class OriginalStringService {
           getAttr(receptor, 'DomicilioFiscalReceptor'),
           getAttr(receptor, 'RegimenFiscalReceptor'),
           getAttr(receptor, 'UsoCFDI')
-        ].join('|');
+        ].filter(v => v !== '').join('|');
       }
       
       // Conceptos
