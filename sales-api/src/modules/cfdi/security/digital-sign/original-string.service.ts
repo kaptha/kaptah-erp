@@ -341,10 +341,9 @@ export class OriginalStringService {
       }
       
       // =========================================================================
-      // SECCIÓN CRÍTICA CORREGIDA: Impuestos a nivel comprobante
+      // Impuestos a nivel comprobante (orden según XSLT oficial del SAT)
       // =========================================================================
-      
-      // CORRECCIÓN 1: Obtener el nodo de Impuestos que es hijo directo del Comprobante
+
       let impuestosComprobante = null;
       for (let i = 0; i < comprobante.childNodes.length; i++) {
         const node = comprobante.childNodes[i];
@@ -353,64 +352,50 @@ export class OriginalStringService {
           break;
         }
       }
-      
+
       if (impuestosComprobante) {
-        // CORRECCIÓN 2: Obtener solo los nodos hijos directos de Retenciones y Traslados
-        let retencionesNode = null;
-        let trasladosNode = null;
-        
-        for (let i = 0; i < impuestosComprobante.childNodes.length; i++) {
-          const node = impuestosComprobante.childNodes[i];
-          if (node.nodeName === 'cfdi:Retenciones') {
-            retencionesNode = node;
-          } else if (node.nodeName === 'cfdi:Traslados') {
-            trasladosNode = node;
-          }
-        }
-        
-        // PASO 1: Procesar Retenciones a nivel comprobante
-        if (retencionesNode) {
-          const retencionesComprobante = retencionesNode.getElementsByTagName('cfdi:Retencion');
-          for (let i = 0; i < retencionesComprobante.length; i++) {
-            const retencion = retencionesComprobante[i];
-            cadena += '|' + [
-              getAttr(retencion, 'Impuesto'),
-              getAttr(retencion, 'Importe')
-            ].join('|');
-          }
-        }
-        
-        // PASO 2: Agregar TotalImpuestosRetenidos si existe
+        // PASO 1: Atributos del nodo Impuestos (van PRIMERO)
         if (impuestosComprobante.hasAttribute('TotalImpuestosRetenidos')) {
           cadena += '|' + getAttr(impuestosComprobante, 'TotalImpuestosRetenidos');
         }
-        
-        // *** CORRECCIÓN 3: AGREGAR SubTotal del Comprobante ***
-        // Este es el valor que faltaba en la cadena original
-        cadena += '|' + getAttr(comprobante, 'SubTotal');
-        
-        // PASO 3: Procesar Traslados a nivel comprobante
-        // *** CORRECCIÓN 4: SIN incluir el atributo Base ***
-        if (trasladosNode) {
-          const trasladosComprobante = trasladosNode.getElementsByTagName('cfdi:Traslado');
-          for (let i = 0; i < trasladosComprobante.length; i++) {
-            const traslado = trasladosComprobante[i];
-            // IMPORTANTE: Los traslados a nivel comprobante NO incluyen Base
-            cadena += '|' + [
-              getAttr(traslado, 'Impuesto'),
-              getAttr(traslado, 'TipoFactor'),
-              getAttr(traslado, 'TasaOCuota'),
-              getAttr(traslado, 'Importe')
-            ].join('|');
-          }
-        }
-        
-        // PASO 4: Agregar TotalImpuestosTrasladados si existe
         if (impuestosComprobante.hasAttribute('TotalImpuestosTrasladados')) {
           cadena += '|' + getAttr(impuestosComprobante, 'TotalImpuestosTrasladados');
         }
+
+        // PASO 2: Retenciones a nivel comprobante
+        let retencionesNode = null;
+        let trasladosNode = null;
+        for (let i = 0; i < impuestosComprobante.childNodes.length; i++) {
+          const node = impuestosComprobante.childNodes[i];
+          if (node.nodeName === 'cfdi:Retenciones') retencionesNode = node;
+          if (node.nodeName === 'cfdi:Traslados') trasladosNode = node;
+        }
+
+        if (retencionesNode) {
+          const retenciones = retencionesNode.getElementsByTagName('cfdi:Retencion');
+          for (let i = 0; i < retenciones.length; i++) {
+            cadena += '|' + [
+              getAttr(retenciones[i], 'Impuesto'),
+              getAttr(retenciones[i], 'Importe')
+            ].join('|');
+          }
+        }
+
+        // PASO 3: Traslados a nivel comprobante (SÍ incluyen Base)
+        if (trasladosNode) {
+          const traslados = trasladosNode.getElementsByTagName('cfdi:Traslado');
+          for (let i = 0; i < traslados.length; i++) {
+            cadena += '|' + [
+              getAttr(traslados[i], 'Base'),
+              getAttr(traslados[i], 'Impuesto'),
+              getAttr(traslados[i], 'TipoFactor'),
+              getAttr(traslados[i], 'TasaOCuota'),
+              getAttr(traslados[i], 'Importe')
+            ].join('|');
+          }
+        }
       }
-      
+
       // Finalizar la cadena
       cadena += '||';
       
