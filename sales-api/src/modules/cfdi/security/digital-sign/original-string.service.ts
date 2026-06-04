@@ -37,7 +37,17 @@ export class OriginalStringService {
     try {
       this.logger.debug('Iniciando generación de cadena original');
 
-           
+       // Opción 0: Usar xsltproc con XSLT simplificado (sin includes remotos)
+      try {
+        const result = await this.transformWithXsltprocSimple(xmlContent);
+        if (result && result.trim().startsWith('||')) {
+          this.logger.debug('Cadena original generada con xsltproc (XSLT simplificado)');
+          this.logger.log('CADENA_COMPLETA: ' + result.trim());
+          return result.trim();
+        }
+      } catch (err) {
+        this.logger.debug('Error usando xsltproc simplificado: ' + err.message);
+      }
       // Paso 1: Asegurarse de que el XML tiene el formato correcto
       const parser = new DOMParser();
       const xmlDoc = parser.parseFromString(xmlContent, 'text/xml');
@@ -54,18 +64,7 @@ export class OriginalStringService {
       // Paso 4: Serializar el XML corregido
       const serializer = new XMLSerializer();
       const correctedXml = serializer.serializeToString(xmlDoc);
-
-       // Opción 0: Usar xsltproc con XSLT simplificado (sin includes remotos)
-      try {
-        const result = await this.transformWithXsltprocSimple(correctedXml);
-        if (result && result.trim().startsWith('||')) {
-          this.logger.debug('Cadena original generada con xsltproc (XSLT simplificado)');
-          this.logger.log('CADENA_COMPLETA: ' + result.trim());
-          return result.trim();
-        }
-      } catch (err) {
-        this.logger.debug('Error usando xsltproc simplificado: ' + err.message);
-      }
+       
       
       // Paso 5: Aplicar transformación XSLT
 
