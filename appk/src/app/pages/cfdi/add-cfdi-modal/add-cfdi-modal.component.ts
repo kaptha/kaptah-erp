@@ -435,7 +435,14 @@ onTipoConceptoChange(index: number): void {
     if (cliente) {
       this.selectedCliente = cliente;
       
-      const regimenFiscal = cliente.RegFiscal || '612';
+      let regimenFiscal = cliente.RegFiscal || '612';
+      if (regimenFiscal && !/^\d{3}$/.test(regimenFiscal)) {
+        const found = this.regimenesFiscales.find(r => 
+          r.descripcion.toLowerCase().includes(regimenFiscal.toLowerCase())
+        );
+        regimenFiscal = found ? found.clave : '612';
+        console.warn('⚠️ RegFiscal del cliente era texto, convertido a código:', regimenFiscal);
+      }
       
       console.log('✅ Cliente seleccionado:', {
         nombre: cliente.nombre,
