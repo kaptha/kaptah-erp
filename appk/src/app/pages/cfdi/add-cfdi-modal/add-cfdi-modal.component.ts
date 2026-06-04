@@ -568,7 +568,7 @@ private obtenerNombreUnidad(claveUnidad?: string): string {
   if (!claveUnidad) return 'Pieza';
   
   const unidad = this.unidadesSAT.find(u => u.clave === claveUnidad);
-  return unidad ? unidad.descripcion : 'Pieza';
+  return unidad ? unidad.descripcion.replace(/^\s*-\s*/, '') : 'Pieza';
 }
 
   // ✅ NUEVO: Método para agregar impuestos configurados a un concepto
