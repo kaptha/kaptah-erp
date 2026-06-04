@@ -59,7 +59,8 @@ export class OriginalStringService {
       try {
         const result = await this.transformWithXsltprocSimple(correctedXml);
         if (result && result.trim().startsWith('||')) {
-          this.logger.debug('Cadena original generada exitosamente con xsltproc (XSLT simplificado)');
+          this.logger.debug('Cadena original generada con xsltproc (XSLT simplificado)');
+          this.logger.log('CADENA_COMPLETA: ' + result.trim());
           return result.trim();
         }
       } catch (err) {
