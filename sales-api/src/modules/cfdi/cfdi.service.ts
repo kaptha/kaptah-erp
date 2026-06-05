@@ -495,6 +495,19 @@ async verifyCfdi(
     this.logger.log('✅ CFDI firmado digitalmente');
 
     // 5. Timbrar directamente con SIFEI PAC
+// Verificación local del sello
+    try {
+      const verification = await this.verifyCfdi(xmlFirmado, firebaseToken);
+      this.logger.log(`🔍 Verificación local del sello: ${verification.valid ? '✅ VÁLIDO' : '❌ INVÁLIDO'}`);
+      if (verification.originalString) {
+        this.logger.log('🔍 Cadena original (verificación): ' + verification.originalString);
+      }
+      if (verification.error) {
+        this.logger.warn('🔍 Error verificación: ' + verification.error);
+      }
+    } catch (e) {
+      this.logger.warn('🔍 No se pudo verificar localmente: ' + e.message);
+    }
     this.logger.log('📤 Enviando a timbrar con PAC SIFEI...');
     const resultadoTimbrado = await this.timbradoService.timbrarCfdi(xmlFirmado);
 
