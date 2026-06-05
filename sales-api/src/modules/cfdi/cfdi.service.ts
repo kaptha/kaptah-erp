@@ -508,6 +508,8 @@ async verifyCfdi(
     } catch (e) {
       this.logger.warn('🔍 No se pudo verificar localmente: ' + e.message);
     }
+    // Log del XML completo para debug
+    this.logger.log('XML_COMPLETO_PARA_PAC: ' + xmlFirmado);
     this.logger.log('📤 Enviando a timbrar con PAC SIFEI...');
     const resultadoTimbrado = await this.timbradoService.timbrarCfdi(xmlFirmado);
 

@@ -28,40 +28,46 @@ export class SignService {
    */
  async sign(originalString: string, firebaseToken: string, password: string): Promise<string> {
   try {
-    this.logger.debug('Iniciando proceso de firma con node-forge');
+    this.logger.debug('Iniciando proceso de firma con OpenSSL');
     this.logger.debug(`Longitud cadena original: ${originalString.length} caracteres`);
 
     const csdCert = await this.certVaultClient.getActiveCsd(firebaseToken);
     this.logger.debug(`Certificado obtenido - Número: ${csdCert.certificateNumber}`);
     this.logger.debug('✅ Usando contraseña proporcionada por el usuario');
 
-    // Desencriptar llave privada con la contraseña
-    const privateKey = forge.pki.decryptRsaPrivateKey(csdCert.keyPem, password);
-    if (!privateKey) {
-      throw new Error('No se pudo desencriptar la llave privada. Verifique la contraseña del CSD.');
+    const tempDir = path.join(process.cwd(), 'temp');
+    if (!fs.existsSync(tempDir)) fs.mkdirSync(tempDir, { recursive: true });
+
+    const ts = Date.now();
+    const uid = csdCert.userId;
+    const cadenaPath = path.join(tempDir, `cadena_${uid}_${ts}.txt`);
+    const keyPemPath = path.join(tempDir, `key_${uid}_${ts}.pem`);
+    const selloPath = path.join(tempDir, `sello_${uid}_${ts}.bin`);
+    const selloB64Path = path.join(tempDir, `sello_${uid}_${ts}.txt`);
+
+    await fs.promises.writeFile(cadenaPath, originalString, 'utf8');
+    await fs.promises.writeFile(keyPemPath, csdCert.keyPem, 'utf8');
+
+    try {
+      await execPromise(`openssl dgst -sha256 -sign "${keyPemPath}" -passin pass:${password} -out "${selloPath}" "${cadenaPath}"`);
+      this.logger.debug('✅ Cadena firmada exitosamente');
+
+      await execPromise(`openssl base64 -in "${selloPath}" -out "${selloB64Path}" -A`);
+      this.logger.debug('✅ Convertido a Base64');
+
+      let sello = await fs.promises.readFile(selloB64Path, 'utf8');
+      sello = sello.replace(/\s/g, '');
+
+      this.logger.debug(`Sello generado: ${sello.substring(0, 80)}...`);
+      this.logger.debug(`Longitud del sello: ${sello.length} caracteres`);
+      return sello;
+    } finally {
+      await this.cleanupTempFiles([cadenaPath, keyPemPath, selloPath, selloB64Path]);
     }
-
-    // Crear digest SHA-256 de la cadena original
-    const md = forge.md.sha256.create();
-    md.update(originalString, 'utf8');
-
-    // Firmar con PKCS#1 v1.5
-    const signature = privateKey.sign(md);
-
-    // Convertir a Base64
-    const selloBase64 = forge.util.encode64(signature);
-
-    this.logger.debug(`Sello generado: ${selloBase64.substring(0, 80)}...`);
-    this.logger.debug(`Longitud del sello: ${selloBase64.length} caracteres`);
-
-    return selloBase64;
   } catch (error) {
     this.logger.error('❌ Error firmando:', error);
     if (error instanceof HttpException) throw error;
-    throw new HttpException(
-      `Error generando sello digital: ${error.message}`,
-      HttpStatus.INTERNAL_SERVER_ERROR
-    );
+    throw new HttpException(`Error generando sello digital: ${error.message}`, HttpStatus.INTERNAL_SERVER_ERROR);
   }
 }
 
