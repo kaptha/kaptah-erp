@@ -1,11 +1,13 @@
 export class SatFormatHelper {
   static formatDateTime(date: Date = new Date()): string {
-    return `${date.getFullYear()}-` +
-      `${String(date.getMonth() + 1).padStart(2, '0')}-` +
-      `${String(date.getDate()).padStart(2, '0')}T` +
-      `${String(date.getHours()).padStart(2, '0')}:` +
-      `${String(date.getMinutes()).padStart(2, '0')}:` +
-      `${String(date.getSeconds()).padStart(2, '0')}`;
+    // Convertir a hora de México (America/Mexico_City)
+    const mexicoDate = new Date(date.toLocaleString('en-US', { timeZone: 'America/Mexico_City' }));
+    return `${mexicoDate.getFullYear()}-` +
+      `${String(mexicoDate.getMonth() + 1).padStart(2, '0')}-` +
+      `${String(mexicoDate.getDate()).padStart(2, '0')}T` +
+      `${String(mexicoDate.getHours()).padStart(2, '0')}:` +
+      `${String(mexicoDate.getMinutes()).padStart(2, '0')}:` +
+      `${String(mexicoDate.getSeconds()).padStart(2, '0')}`;
   }
 
   static validateDateTime(dateStr: string): boolean {
