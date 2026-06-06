@@ -235,10 +235,27 @@ private buildSoapEnvelopeGetCFDI(xmlSinTimbrar: string): string {
         };
       }
 
-      // Decodificar base64
+      // Decodificar: puede ser Base64 de XML o Base64 de ZIP
       if (!cfdiTimbrado.includes('<?xml')) {
-        this.logger.log('🔄 Decodificando CFDI de Base64...');
-        cfdiTimbrado = Buffer.from(cfdiTimbrado, 'base64').toString('utf-8');
+        const decoded = Buffer.from(cfdiTimbrado, 'base64');
+        // Verificar si es ZIP (firma: PK = 0x50 0x4B)
+        if (decoded[0] === 0x50 && decoded[1] === 0x4B) {
+          this.logger.log('🔄 Respuesta es ZIP, descomprimiendo...');
+          const JSZip = require('jszip');
+          const zip = await JSZip.loadAsync(decoded);
+          const files = Object.keys(zip.files);
+          this.logger.log('📁 Archivos en ZIP: ' + files.join(', '));
+          const xmlFile = files.find(f => f.endsWith('.xml'));
+          if (xmlFile) {
+            cfdiTimbrado = await zip.file(xmlFile).async('string');
+            this.logger.log('✅ XML extraído del ZIP: ' + xmlFile);
+          } else {
+            return { success: false, error: 'No se encontró XML en el ZIP', codigoError: 'NO_XML_IN_ZIP' };
+          }
+        } else {
+          this.logger.log('🔄 Decodificando CFDI de Base64...');
+          cfdiTimbrado = decoded.toString('utf-8');
+        }
       }
 
       this.logger.log('✅ CFDI timbrado recibido');
