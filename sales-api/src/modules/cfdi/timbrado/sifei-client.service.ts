@@ -223,7 +223,7 @@ private buildSoapEnvelopeGetCFDI(xmlSinTimbrar: string): string {
       }
 
       // Extraer CFDI
-      let cfdiTimbrado = returnData.cfdi || returnData.xmlTimbrado;
+      let cfdiTimbrado = returnData.cfdi || returnData.xmlTimbrado || (typeof returnData === 'string' ? returnData : null);
 
       if (!cfdiTimbrado) {
         this.logger.error('❌ No se encontró CFDI timbrado');
