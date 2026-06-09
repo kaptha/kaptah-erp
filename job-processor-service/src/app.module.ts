@@ -1,5 +1,6 @@
 import { HttpModule } from '@nestjs/axios';
 import { InventoryProcessor } from './processors/inventory.processor';
+import { CfdiCancelacionProcessor } from './processors/cfdi-cancelacion.processor';
 import { QueueName } from './config/queue.config';
 
 import { Module } from '@nestjs/common';
@@ -73,6 +74,7 @@ import { AppService } from './app.service';
     ScheduleModule.forRoot(),
     // Cola de inventario
     BullModule.registerQueue({ name: QueueName.INVENTORY_UPDATE }),
+    BullModule.registerQueue({ name: QueueName.CFDI_TIMBRADO }),
     BullModule.registerQueue({ name: QueueName.NOTIFICATION }),
     HttpModule,
 
@@ -84,6 +86,9 @@ import { AppService } from './app.service';
     SchedulerModule,
   ],
   controllers: [AppController],
-  providers: [AppService, InventoryProcessor],
+  providers: [AppService, InventoryProcessor, CfdiCancelacionProcessor],
 })
 export class AppModule {}
+
+
+
