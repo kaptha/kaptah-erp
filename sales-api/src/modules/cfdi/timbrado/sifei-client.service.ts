@@ -322,4 +322,185 @@ private buildSoapEnvelopeGetCFDI(xmlSinTimbrar: string): string {
       return {};
     }
   }
+
+  // ==========================================
+  // CANCELACIÓN DE CFDI
+  // ==========================================
+
+  /**
+   * Cancelar CFDI usando el WS SOAP de cancelación de SIFEI
+   */
+  async cancelarCfdi(
+    cerPem: string,
+    keyPem: string,
+    csdPassword: string,
+    rfcEmisor: string,
+    uuid: string,
+    motivo: string,
+    uuidSustitucion?: string,
+  ): Promise<{ success: boolean; codigoSAT?: string; mensaje?: string; acuse?: string; error?: string }> {
+    this.logger.log(`🚫 Iniciando cancelación CFDI UUID: ${uuid} Motivo: ${motivo}`);
+
+    const cancelUrl = process.env.SIFEI_CANCEL_URL || 'http://devcfdi.sifei.com.mx:8080/CancelacionSIFEI/Cancelacion';
+
+    try {
+      // 1. Generar PFX en memoria desde cerPem + keyPem
+      const { execSync } = require('child_process');
+      const fs = require('fs');
+      const os = require('os');
+      const path = require('path');
+
+      const tmpDir = os.tmpdir();
+      const tmpCer = path.join(tmpDir, `cer_${Date.now()}.pem`);
+      const tmpKey = path.join(tmpDir, `key_${Date.now()}.pem`);
+      const tmpPfx = path.join(tmpDir, `pfx_${Date.now()}.pfx`);
+      const pfxPassword = 'kaptah_tmp_123';
+
+      fs.writeFileSync(tmpCer, cerPem, 'utf8');
+      fs.writeFileSync(tmpKey, keyPem, 'utf8');
+
+      try {
+        execSync(
+          `openssl pkcs12 -export -in "${tmpCer}" -inkey "${tmpKey}" -out "${tmpPfx}" -passout pass:${pfxPassword} -passin pass:${csdPassword}`,
+          { stdio: 'pipe' }
+        );
+      } catch (opensslErr) {
+        // Si falla con passin (key sin cifrado), intentar sin -passin
+        this.logger.warn('⚠️ Intentando sin -passin...');
+        execSync(
+          `openssl pkcs12 -export -in "${tmpCer}" -inkey "${tmpKey}" -out "${tmpPfx}" -passout pass:${pfxPassword}`,
+          { stdio: 'pipe' }
+        );
+      }
+
+      const pfxBase64 = fs.readFileSync(tmpPfx).toString('base64');
+
+      // Limpiar archivos temporales
+      try { fs.unlinkSync(tmpCer); fs.unlinkSync(tmpKey); fs.unlinkSync(tmpPfx); } catch {}
+
+      this.logger.log('✅ PFX generado en memoria');
+
+      // 2. Construir el string de UUID con formato SIFEI
+      // Formato: |UUID|MotivoCancelacion|FolioSustitucion| o |UUID|MotivoCancelacion||
+      const uuidString = motivo === '01' && uuidSustitucion
+        ? `|${uuid}|${motivo}|${uuidSustitucion}|`
+        : `|${uuid}|${motivo}||`;
+
+      // 3. Construir SOAP Envelope
+      const soapEnvelope = `<?xml version="1.0" encoding="UTF-8"?>
+<soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" xmlns:map="http://service.sifei.cancelacion/">
+  <soapenv:Header/>
+  <soapenv:Body>
+    <map:cancelaCFDI>
+      <usuarioSIFEI>${this.usuario}</usuarioSIFEI>
+      <passwordSifei>${this.password}</passwordSifei>
+      <rfcEmisor>${rfcEmisor}</rfcEmisor>
+      <pfx>${pfxBase64}</pfx>
+      <passwordPfx>${pfxPassword}</passwordPfx>
+      <uuids>${uuidString}</uuids>
+    </map:cancelaCFDI>
+  </soapenv:Body>
+</soapenv:Envelope>`;
+
+      this.logger.log(`🌐 Enviando cancelación a: ${cancelUrl}`);
+      this.logger.debug(`📄 UUID string: ${uuidString}`);
+
+      const response = await axios.post(cancelUrl, soapEnvelope, {
+        headers: {
+          'Content-Type': 'text/xml; charset=utf-8',
+          'SOAPAction': '',
+        },
+        timeout: 30000,
+        validateStatus: () => true,
+      });
+
+      this.logger.log(`📥 Respuesta cancelación - Status: ${response.status}`);
+      this.logger.debug(`📄 Respuesta raw: ${typeof response.data === 'string' ? response.data.substring(0, 1000) : JSON.stringify(response.data)}`);
+
+      if (response.status !== 200) {
+        return { success: false, error: `Error HTTP ${response.status}` };
+      }
+
+      // 4. Parsear respuesta SOAP
+      return await this.parseCancelacionResponse(response.data as string);
+
+    } catch (error) {
+      this.logger.error('❌ Error en cancelación:', error.message);
+      return { success: false, error: error.message };
+    }
+  }
+
+  /**
+   * Parsear respuesta SOAP de cancelación
+   */
+  private async parseCancelacionResponse(
+    soapResponse: string,
+  ): Promise<{ success: boolean; codigoSAT?: string; mensaje?: string; acuse?: string; error?: string }> {
+    try {
+      const parser = new xml2js.Parser({
+        explicitArray: false,
+        ignoreAttrs: false,
+        tagNameProcessors: [xml2js.processors.stripPrefix],
+      });
+
+      const resultado = await parser.parseStringPromise(soapResponse);
+      const body = resultado?.Envelope?.Body;
+
+      if (!body) {
+        return { success: false, error: 'Respuesta SOAP malformada' };
+      }
+
+      const fault = body.Fault;
+      if (fault) {
+        this.logger.error('❌ SOAP Fault cancelación:', JSON.stringify(fault));
+        return { success: false, error: fault.faultstring || 'SOAP Fault' };
+      }
+
+      // La respuesta viene en cancelaCFDIResponse.return como CDATA
+      const cancelResponse = body.cancelaCFDIResponse;
+      if (!cancelResponse) {
+        return { success: false, error: 'Sin respuesta cancelaCFDI' };
+      }
+
+      const returnData = cancelResponse.return;
+      if (!returnData) {
+        return { success: false, error: 'Sin datos de retorno' };
+      }
+
+      // El return puede ser un string CDATA con el acuse XML del SAT
+      const acuseRaw = typeof returnData === 'string' ? returnData : returnData._ || JSON.stringify(returnData);
+
+      this.logger.log('📋 Acuse raw recibido:');
+      this.logger.log(acuseRaw.substring(0, 500));
+
+      // Extraer código SAT del acuse (atributo en el XML de acuse)
+      // El acuse contiene <Folios EstatusUUID="201"> o similar
+      const estatusMatch = acuseRaw.match(/EstatusUUID="(\d+)"/);
+      const codigoSAT = estatusMatch ? estatusMatch[1] : null;
+
+      // Códigos de éxito: 201 (cancelado/pendiente aceptación), 202 (ya cancelado)
+      const codigosExito = ['201', '202'];
+      const success = codigoSAT ? codigosExito.includes(codigoSAT) : true;
+
+      const mensajes: Record<string, string> = {
+        '201': 'Solicitud de cancelación enviada correctamente',
+        '202': 'El CFDI ya fue cancelado previamente',
+        '203': 'El UUID no corresponde al emisor',
+        '204': 'El UUID no aplica para cancelación',
+        '205': 'El UUID no existe',
+      };
+
+      return {
+        success,
+        codigoSAT: codigoSAT || 'OK',
+        mensaje: mensajes[codigoSAT] || 'Solicitud procesada',
+        acuse: acuseRaw,
+      };
+
+    } catch (error) {
+      this.logger.error('❌ Error parseando respuesta cancelación:', error.message);
+      return { success: false, error: `Error parseando: ${error.message}` };
+    }
+  }
 }
+
