@@ -1,10 +1,9 @@
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpHeaders, HttpErrorResponse } from '@angular/common/http';
 import { Observable, throwError, tap, of } from 'rxjs';
-import { catchError, switchMap } from 'rxjs/operators';
+import { catchError, switchMap, map } from 'rxjs/operators';
 import { UsersService } from './users.service';
 
-// Interfaz para el modelo de Impuesto
 interface Impuesto {
   id?: number;
   alias: string;
@@ -12,8 +11,8 @@ interface Impuesto {
   tipo_impuesto: string;
   impuesto: string;
   tasa: number;
-  valor_cuota: string;  
-  userId: number; // Si necesitas asociarlo al usuario como en clientes
+  valor_cuota: string;
+  userId: number;
 }
 
 @Injectable({
@@ -26,87 +25,91 @@ export class ImpuestosService {
     private http: HttpClient,
     private usersService: UsersService
   ) {}
-private getActiveCuentaUid(): string | null {
+
+  private getActiveCuentaUid(): string | null {
     return localStorage.getItem('activeCuentaUid') || null;
   }
 
-  private getHeaders(): HttpHeaders {
-    const token = localStorage.getItem('idToken');
-    if (!token) {
-      throw new Error('No se encontrÃ³ token de autenticaciÃ³n');
+  private getFreshToken(): Observable<string> {
+    const refreshToken = localStorage.getItem('firebaseRefreshToken');
+    if (!refreshToken) {
+      return throwError(() => new Error('No se encontro token de autenticacion'));
     }
-    return new HttpHeaders({
-      'Authorization': `Bearer ${token}`,
-      'Content-Type': 'application/json'
-    });
+    return this.http.post<any>(
+      'https://securetoken.googleapis.com/v1/token?key=AIzaSyBo8MXnWkR0b5gMN_UqMKWDhK6JZef2bFA',
+      { grant_type: 'refresh_token', refresh_token: refreshToken }
+    ).pipe(
+      map(res => {
+        const newToken = res.id_token;
+        localStorage.setItem('idToken', newToken);
+        return newToken;
+      }),
+      catchError(() => {
+        const token = localStorage.getItem('idToken');
+        if (token) return of(token);
+        return throwError(() => new Error('No se pudo obtener token'));
+      })
+    );
+  }
+
+  private getHeaders(): Observable<HttpHeaders> {
+    return this.getFreshToken().pipe(
+      map(token => new HttpHeaders({
+        'Authorization': `Bearer ${token}`,
+        'Content-Type': 'application/json'
+      }))
+    );
   }
 
   getImpuestos(): Observable<Impuesto[]> {
-    const idToken = localStorage.getItem('idToken');
-    if (!idToken) {
-      return throwError(() => new Error('No se encontrÃ³ el token de autenticaciÃ³n'));
-    }
     const cuentaUid = this.getActiveCuentaUid();
-    if (cuentaUid) {
-      const headers = this.getHeaders();
-      return this.http.get<Impuesto[]>(`${this.apiUrl}/taxes/firebase/${cuentaUid}`, { headers }).pipe(
-        catchError((error: any) => {
-          if (error?.status === 404 || error?.error?.statusCode === 404) {
-            return of([]);
-          }
-          return throwError(() => new Error(error.error?.message || 'Error desconocido'));
-        })
-      );
+    const uid = cuentaUid || localStorage.getItem('firebaseUid');
+    if (!uid) {
+      return throwError(() => new Error('No se encontro el UID del usuario'));
     }
-    return this.usersService.getUserByToken(idToken).pipe(
-    switchMap(user => {
-      if (!user) {
-        throw new Error('No se encontrÃ³ el usuario');
-      }
-      console.log('Haciendo peticiÃ³n para userId:', user.id); // Agrega este log
-      const headers = this.getHeaders();
-      return this.http.get<Impuesto[]>(`${this.apiUrl}/taxes/firebase/${user.firebaseUid}`, { headers });
-    }),
-    tap(response => console.log('Respuesta del servidor:', response)), // Agrega este log
-    catchError((error: any) => {
-        if (error?.status === 404 || error?.error?.statusCode === 404) {
-          return of([]);
-        }
-        return throwError(() => new Error(error.error?.message || 'Error desconocido'));
-      })
+    return this.getHeaders().pipe(
+      switchMap(headers =>
+        this.http.get<Impuesto[]>(`${this.apiUrl}/taxes/firebase/${uid}`, { headers }).pipe(
+          catchError((error: any) => {
+            if (error?.status === 404 || error?.error?.statusCode === 404) {
+              return of([]);
+            }
+            return throwError(() => new Error(error.error?.message || 'Error desconocido'));
+          })
+        )
+      )
     );
   }
 
-  // impuestos.service.ts
-createImpuesto(impuestoData: any): Observable<any> {
-  const headers = this.getHeaders();
-  console.log('Enviando datos:', impuestoData); // Debug
-  return this.http.post<any>(`${this.apiUrl}/taxes`, impuestoData, { headers })
-    .pipe(
-      tap(response => console.log('Respuesta del servidor:', response)),
+  createImpuesto(impuestoData: any): Observable<any> {
+    const cuentaUid = this.getActiveCuentaUid();
+    return this.getHeaders().pipe(
+      switchMap(headers => {
+        const url = cuentaUid
+          ? `${this.apiUrl}/taxes?cuentaUid=${cuentaUid}`
+          : `${this.apiUrl}/taxes`;
+        return this.http.post<any>(url, impuestoData, { headers });
+      }),
+      tap(response => console.log('Impuesto creado:', response)),
       catchError(error => {
-        console.error('Error en la peticiÃ³n:', error);
+        console.error('Error en la peticion:', error);
         return throwError(() => error);
       })
     );
-}
+  }
 
   deleteImpuesto(id: number): Observable<any> {
-    const headers = this.getHeaders();
-    return this.http.delete(`${this.apiUrl}/taxes/${id}`, { headers })
-      .pipe(
-        catchError((error: any) => {
-        if (error?.status === 404 || error?.error?.statusCode === 404) {
-          return of([]);
-        }
-        return throwError(() => new Error(error.error?.message || 'Error desconocido'));
-      })
+    return this.getHeaders().pipe(
+      switchMap(headers =>
+        this.http.delete(`${this.apiUrl}/taxes/${id}`, { headers }).pipe(
+          catchError((error: any) => {
+            if (error?.status === 404 || error?.error?.statusCode === 404) {
+              return of([]);
+            }
+            return throwError(() => new Error(error.error?.message || 'Error desconocido'));
+          })
+        )
+      )
     );
   }
-
-  private handleError(error: any) {
-    console.error('Error en la solicitud:', error);
-    return throwError(() => new Error(error.error?.message || 'Error desconocido'));
-  }
 }
-
