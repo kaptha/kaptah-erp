@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpHeaders, HttpErrorResponse } from '@angular/common/http';
-import { Observable, throwError, tap, of } from 'rxjs';
-import { catchError, switchMap } from 'rxjs/operators';
+import { Observable, throwError, tap, of, from } from 'rxjs';
+import { catchError, switchMap, map } from 'rxjs/operators';
 import { UsersService } from './users.service';
 import { Sucursal } from '../models/sucursal.model';
 
@@ -15,108 +15,107 @@ export class SucursalesService {
     private http: HttpClient,
     private usersService: UsersService
   ) {}
-private getActiveCuentaUid(): string | null {
+
+  private getActiveCuentaUid(): string | null {
     return localStorage.getItem('activeCuentaUid') || null;
   }
-  private getHeaders(): HttpHeaders {
-    const token = localStorage.getItem('idToken');
-    if (!token) {
-      throw new Error('No se encontrÃ³ token de autenticaciÃ³n');
-    }
-    return new HttpHeaders({
-      'Authorization': `Bearer ${token}`,
-      'Content-Type': 'application/json'
-    });
-  }
 
-  getSucursales(): Observable<Sucursal[]> {
-    const idToken = localStorage.getItem('idToken');
-    if (!idToken) {
-      return throwError(() => new Error('No se encontrÃ³ el token de autenticaciÃ³n'));
+  private getFreshToken(): Observable<string> {
+    const refreshToken = localStorage.getItem('firebaseRefreshToken');
+    if (!refreshToken) {
+      return throwError(() => new Error('No se encontro token de autenticacion'));
     }
-    const cuentaUid = this.getActiveCuentaUid();
-    if (cuentaUid) {
-      const headers = this.getHeaders();
-      return this.http.get<Sucursal[]>(`${this.apiUrl}/branches/firebase/${cuentaUid}`, { headers }).pipe(
-        catchError((error: any) => {
-          if (error?.status === 404 || error?.error?.statusCode === 404) {
-            return of([]);
-          }
-          return throwError(() => new Error(error.error?.message || 'Error desconocido'));
-        })
-      );
-    }
-    return this.usersService.getUserByToken(idToken).pipe(
-      switchMap(user => {
-        if (!user) {
-          throw new Error('No se encontrÃ³ el usuario');
-        }
-        const headers = this.getHeaders();
-        return this.http.get<Sucursal[]>(`${this.apiUrl}/branches/firebase/${user.firebaseUid}`, { headers });
+    return this.http.post<any>(
+      'https://securetoken.googleapis.com/v1/token?key=AIzaSyBo8MXnWkR0b5gMN_UqMKWDhK6JZef2bFA',
+      { grant_type: 'refresh_token', refresh_token: refreshToken }
+    ).pipe(
+      map(res => {
+        const newToken = res.id_token;
+        localStorage.setItem('idToken', newToken);
+        return newToken;
       }),
-      catchError((error: any) => {
-        if (error?.status === 404 || error?.error?.statusCode === 404) {
-          return of([]);
-        }
-        return throwError(() => new Error(error.error?.message || 'Error desconocido'));
+      catchError(() => {
+        const token = localStorage.getItem('idToken');
+        if (token) return of(token);
+        return throwError(() => new Error('No se pudo obtener token'));
       })
     );
   }
 
+  private getHeaders(): Observable<HttpHeaders> {
+    return this.getFreshToken().pipe(
+      map(token => new HttpHeaders({
+        'Authorization': `Bearer ${token}`,
+        'Content-Type': 'application/json'
+      }))
+    );
+  }
+
+  getSucursales(): Observable<Sucursal[]> {
+    const cuentaUid = this.getActiveCuentaUid();
+    const uid = cuentaUid || localStorage.getItem('firebaseUid');
+    if (!uid) {
+      return throwError(() => new Error('No se encontro el UID del usuario'));
+    }
+    return this.getHeaders().pipe(
+      switchMap(headers =>
+        this.http.get<Sucursal[]>(`${this.apiUrl}/branches/firebase/${uid}`, { headers }).pipe(
+          catchError((error: any) => {
+            if (error?.status === 404 || error?.error?.statusCode === 404) {
+              return of([]);
+            }
+            return throwError(() => new Error(error.error?.message || 'Error desconocido'));
+          })
+        )
+      )
+    );
+  }
+
   createSucursal(sucursalData: Omit<Sucursal, 'id'>): Observable<Sucursal> {
-  const headers = this.getHeaders();
-  
-  // Quitamos la parte del userId ya que el backend lo obtiene del token
-  const { codigoPostal, ...rest } = sucursalData;
-  const dataToSend = {
-    ...rest,
-    codigoPostal: Number(codigoPostal) // Aseguramos que sea nÃºmero
-  };
+    const cuentaUid = this.getActiveCuentaUid();
+    const { codigoPostal, ...rest } = sucursalData;
+    const dataToSend = {
+      ...rest,
+      codigoPostal: Number(codigoPostal)
+    };
 
-  console.log('Datos a enviar:', dataToSend);
-  
-  return this.http.post<Sucursal>(
-    `${this.apiUrl}/branches`, 
-    dataToSend, 
-    { headers }
-  ).pipe(
-    tap(response => console.log('Respuesta del servidor:', response)),
-    catchError((error: HttpErrorResponse) => {
-      console.error('Error completo:', error);
-      let errorMessage = 'OcurriÃ³ un error al crear la sucursal';
-      
-      if (error.error?.message) {
-        errorMessage = Array.isArray(error.error.message) 
-          ? error.error.message.join(', ') 
-          : error.error.message;
-      }
-      
-      return throwError(() => new Error(errorMessage));
-    })
-  );
-}
-
-  deleteSucursal(id: number): Observable<any> {
-  const headers = this.getHeaders();
-  return this.http.delete(`${this.apiUrl}/branches/${id}`, { headers })
-    .pipe(
-      tap(response => console.log('Sucursal eliminada:', response)),
+    return this.getHeaders().pipe(
+      switchMap(headers => {
+        const url = cuentaUid
+          ? `${this.apiUrl}/branches?cuentaUid=${cuentaUid}`
+          : `${this.apiUrl}/branches`;
+        return this.http.post<Sucursal>(url, dataToSend, { headers });
+      }),
+      tap(response => console.log('Sucursal creada:', response)),
       catchError((error: HttpErrorResponse) => {
-        console.error('Error al eliminar:', error);
-        let errorMessage = 'Error al eliminar la sucursal';
+        console.error('Error completo:', error);
+        let errorMessage = 'Ocurrio un error al crear la sucursal';
         if (error.error?.message) {
-          errorMessage = Array.isArray(error.error.message) 
-            ? error.error.message.join(', ') 
+          errorMessage = Array.isArray(error.error.message)
+            ? error.error.message.join(', ')
             : error.error.message;
         }
         return throwError(() => new Error(errorMessage));
       })
     );
-}
+  }
 
-  private handleError(error: any) {
-    console.error('Error en la solicitud:', error);
-    return throwError(() => new Error(error.error?.message || 'Error desconocido'));
+  deleteSucursal(id: number): Observable<any> {
+    return this.getHeaders().pipe(
+      switchMap(headers =>
+        this.http.delete(`${this.apiUrl}/branches/${id}`, { headers }).pipe(
+          tap(response => console.log('Sucursal eliminada:', response)),
+          catchError((error: HttpErrorResponse) => {
+            let errorMessage = 'Error al eliminar la sucursal';
+            if (error.error?.message) {
+              errorMessage = Array.isArray(error.error.message)
+                ? error.error.message.join(', ')
+                : error.error.message;
+            }
+            return throwError(() => new Error(errorMessage));
+          })
+        )
+      )
+    );
   }
 }
-
