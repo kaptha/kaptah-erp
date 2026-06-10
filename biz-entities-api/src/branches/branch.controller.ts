@@ -1,73 +1,59 @@
 import {
-  Controller,
-  Get,
-  Post,
-  Body,
-  Put,
-  Param,
-  Delete,
-  ParseIntPipe,
-  UseGuards,
-  Req,
-  InternalServerErrorException,
-  UnauthorizedException,
-  NotFoundException,
-  Logger,
-  ConflictException,
-  ValidationPipe
+  Controller, Get, Post, Body, Put, Param,
+  Delete, UseGuards, Req, UnauthorizedException,
+  NotFoundException, Logger, Query
 } from '@nestjs/common';
 import { FirebaseAuthGuard } from '../guards/firebase-auth.guard';
 import { BranchService } from './branch.service';
 import { CreateBranchDto } from './dto/create-branch.dto';
 import { UpdateBranchDto } from './dto/update-branch.dto';
 import { Request } from 'express';
-import { UsersService } from 'src/users/users.service';
 
 interface RequestWithUser extends Request {
-  user?: {
-    firebaseUid: string;
-  };
+  user?: { firebaseUid?: string; uid?: string; };
 }
 
 @Controller('branches')
 export class BranchController {
   private readonly logger = new Logger(BranchController.name);
-  
-  constructor(
-    private readonly branchService: BranchService,
-    private readonly usersService: UsersService
-  ) {}
 
-  // ✅ RUTAS ESPECÍFICAS PRIMERO
+  constructor(private readonly branchService: BranchService) {}
+
   @Get('firebase/:firebaseUid')
   async findByFirebaseUid(@Param('firebaseUid') firebaseUid: string) {
-    console.log('📋 GET /branches/firebase/:firebaseUid - firebaseUid:', firebaseUid);
     return this.branchService.findAllByUser(firebaseUid);
   }
 
-  // ✅ RUTAS GENÉRICAS AL FINAL
   @Get(':realtimeDbKey')
   async findAll(@Param('realtimeDbKey') realtimeDbKey: string) {
     return this.branchService.findAllByRealtimeDbKey(realtimeDbKey);
   }
 
   @Post()
-  async create(@Body() createBranchDto: CreateBranchDto, @Req() req: RequestWithUser) {
-    this.logger.log('Datos recibidos en el backend:', createBranchDto);
-    if (!req.user || !req.user.firebaseUid) {
+  @UseGuards(FirebaseAuthGuard)
+  async create(
+    @Body() createBranchDto: CreateBranchDto,
+    @Req() req: RequestWithUser,
+    @Query('cuentaUid') cuentaUid?: string
+  ) {
+    const tokenUid = req.user?.firebaseUid || req.user?.uid;
+    const ownerUid = cuentaUid || tokenUid;
+    if (!ownerUid) {
       throw new UnauthorizedException('No se pudo obtener el UID de Firebase del usuario');
     }
-    return this.branchService.create(createBranchDto, req.user.firebaseUid);
+    this.logger.log(`Creando sucursal para ownerUid: ${ownerUid}`);
+    return this.branchService.create(createBranchDto, ownerUid);
   }
 
   @Put(':id')
+  @UseGuards(FirebaseAuthGuard)
   async update(@Param('id') id: string, @Body() updateBranchDto: UpdateBranchDto) {
     return this.branchService.update(+id, updateBranchDto);
   }
 
   @Delete(':ID')
+  @UseGuards(FirebaseAuthGuard)
   async remove(@Param('ID') ID: string) {
-    this.logger.log(`Recibida solicitud para eliminar sucursal con ID: ${ID}`);
     return this.branchService.remove(+ID);
   }
 }
