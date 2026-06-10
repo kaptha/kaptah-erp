@@ -330,6 +330,31 @@ enviarPorEmail(cfdiId: string, clienteEmail: string, customMessage?: string, pdf
   }
 
   // ==========================================
+  // CANCELACIÓN
+  // ==========================================
+
+  /**
+   * Cancelar un CFDI timbrado
+   */
+  cancelarCFDI(cfdiId: string, motivo: string, uuidSustitucion?: string): Observable<any> {
+    const activeCuentaUid = localStorage.getItem('activeCuentaUid');
+    return this.getHeaders().pipe(
+      switchMap((headers: HttpHeaders) => {
+        let url = `${this.apiUrl}/${cfdiId}/cancelar`;
+        if (activeCuentaUid) {
+          url += `?cuentaUid=${activeCuentaUid}`;
+        }
+        return this.http.post(url, { motivo, uuidSustitucion }, { headers });
+      }),
+      tap(response => console.log('✅ Cancelación encolada:', response)),
+      catchError(error => {
+        console.error('❌ Error cancelando CFDI:', error);
+        return throwError(() => error);
+      })
+    );
+  }
+
+  // ==========================================
   // MANEJO DE ERRORES
   // ==========================================
 
@@ -351,5 +376,6 @@ enviarPorEmail(cfdiId: string, clienteEmail: string, customMessage?: string, pdf
     return throwError(() => new Error(errorMessage));
   }
 }
+
 
 

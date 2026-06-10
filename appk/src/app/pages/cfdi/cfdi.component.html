@@ -158,9 +158,14 @@
             </button>
             <mat-divider></mat-divider>
             <button mat-menu-item (click)="enviarCfdiPorEmail(cfdi)">
-  		<mat-icon>email</mat-icon>
-  		<span>Enviar por email</span>
-	    </button>
+  <mat-icon>email</mat-icon>
+  <span>Enviar por email</span>
+    </button>
+            <mat-divider></mat-divider>
+            <button mat-menu-item (click)="cancelarCFDI(cfdi)" *appHasPermission="'cfdi.eliminar'">
+              <mat-icon style="color:#d33">cancel</mat-icon>
+              <span style="color:#d33">Cancelar CFDI</span>
+            </button>
           </mat-menu>
         </td>
       </ng-container>
@@ -271,3 +276,4 @@
     </div>
   </div>
 </div>
+

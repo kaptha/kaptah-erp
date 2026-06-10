@@ -356,7 +356,73 @@ private createCFDI(cfdiData: Omit<CFDI, 'ID'>) {
 /**
  * Enviar CFDI por email
  */
-async enviarCfdiPorEmail(cfdi: CFDI) {
+
+  async cancelarCFDI(cfdi: any) {
+    if (cfdi.estado !== 'Vigente') {
+      Sweetalert.fnc('error', 'Solo se pueden cancelar CFDIs vigentes (timbrados)', null);
+      return;
+    }
+
+    // Pedir motivo de cancelacion
+    const { value: formValues } = await Swal.fire({
+      title: 'Cancelar CFDI',
+      html:
+        `<p style="margin-bottom:12px;font-size:13px;color:#666;">UUID: <b>${cfdi.uuid || 'N/D'}</b></p>` +
+        `<select id="swal-motivo" class="swal2-select" style="width:100%;padding:8px;border:1px solid #ccc;border-radius:4px;margin-bottom:10px;">` +
+        `<option value="">-- Selecciona motivo --</option>` +
+        `<option value="01">01 - Comprobante emitido con errores con relacion</option>` +
+        `<option value="02">02 - Comprobante emitido con errores sin relacion</option>` +
+        `<option value="03">03 - No se llevo a cabo la operacion</option>` +
+        `<option value="04">04 - Operacion nominativa relacionada en factura global</option>` +
+        `</select>` +
+        `<input id="swal-sustitucion" class="swal2-input" placeholder="UUID de sustitucion (solo motivo 01)" style="margin-top:6px;">`,
+      focusConfirm: false,
+      showCancelButton: true,
+      confirmButtonText: 'Cancelar CFDI',
+      cancelButtonText: 'Cerrar',
+      confirmButtonColor: '#d33',
+      preConfirm: () => {
+        const motivo = (document.getElementById('swal-motivo') as HTMLSelectElement).value;
+        if (!motivo) {
+          Swal.showValidationMessage('Selecciona un motivo de cancelacion');
+          return false;
+        }
+        if (motivo === '01') {
+          const sust = (document.getElementById('swal-sustitucion') as HTMLInputElement).value;
+          if (!sust) {
+            Swal.showValidationMessage('El motivo 01 requiere UUID de sustitucion');
+            return false;
+          }
+          return { motivo, uuidSustitucion: sust };
+        }
+        return { motivo, uuidSustitucion: null };
+      }
+    });
+
+    if (!formValues) return;
+
+    const confirmed = await Sweetalert.confirmDelete(
+  'Confirmar cancelacion',
+  'Esta accion cancelara el CFDI ante el SAT. Esta operacion no se puede deshacer.'
+);
+    if (!confirmed) return;
+
+    Sweetalert.fnc('loading', 'Enviando solicitud de cancelacion...', null);
+
+    this.cfdiService.cancelarCFDI(cfdi.ID, formValues.motivo, formValues.uuidSustitucion)
+      .subscribe({
+        next: () => {
+          Sweetalert.fnc('close', '', null);
+          Sweetalert.fnc('success', 'Solicitud de cancelacion enviada. El CFDI sera cancelado en unos momentos.', null);
+          this.loadCFDIs();
+        },
+        error: (error) => {
+          Sweetalert.fnc('error', 'Error al cancelar el CFDI: ' + this.getErrorMessage(error), null);
+        }
+      });
+  }
+
+  async enviarCfdiPorEmail(cfdi: CFDI) {
   if (cfdi.estado !== 'Vigente') {
     Sweetalert.fnc('error', 'Solo se pueden enviar CFDIs timbrados (vigentes)', null);
     return;
@@ -616,3 +682,6 @@ async enviarCfdiPorEmail(cfdi: CFDI) {
     return this.mobilePaginator.pageIndex >= maxPageIndex;
   }
 }
+
+
+
