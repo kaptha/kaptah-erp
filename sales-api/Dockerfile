@@ -1,37 +1,39 @@
-FROM node:18-alpine
-
-WORKDIR /app
-
-# Instalar dependencias
-COPY package*.json ./
-RUN npm ci
-
-# Copiar código
-COPY . .
-
-# Exponer puerto
-EXPOSE 4000
-
-# Comando por defecto (se sobrescribe en docker-compose)
-CMD ["npm", "run", "start:dev"]
-
 FROM node:18-alpine AS builder
-
 WORKDIR /app
 COPY package*.json ./
 RUN npm ci
 COPY . .
 RUN npx nest build
 
-FROM node:18-alpine
+FROM node:18-slim
+RUN apt-get update && apt-get install -y \
+    libxslt1.1 \
+    openssl \
+    ca-certificates \
+    fonts-liberation \
+    libasound2 \
+    libatk-bridge2.0-0 \
+    libatk1.0-0 \
+    libcups2 \
+    libdbus-1-3 \
+    libdrm2 \
+    libgbm1 \
+    libgtk-3-0 \
+    libnspr4 \
+    libnss3 \
+    libx11-xcb1 \
+    libxcomposite1 \
+    libxdamage1 \
+    libxrandr2 \
+    xdg-utils \
+    wget \
+    --no-install-recommends \
+    && rm -rf /var/lib/apt/lists/*
 
-RUN apk add --no-cache libxslt openssl
 WORKDIR /app
 COPY --from=builder /app/dist ./dist
 COPY --from=builder /app/node_modules ./node_modules
 COPY --from=builder /app/package*.json ./
 COPY --from=builder /app/resources ./resources
-
 EXPOSE 3001
-
 CMD ["node", "dist/src/main.js"]
