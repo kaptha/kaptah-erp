@@ -145,8 +145,8 @@
 </button>
             <mat-divider></mat-divider>
             <button mat-menu-item (click)="verDetalleCFDI(cfdi)">
-              <mat-icon>print</mat-icon>
-              <span>Imprimir</span>
+              <mat-icon>visibility</mat-icon>
+              <span>Ver Detalle</span>
             </button>
             <button mat-menu-item>
               <mat-icon>picture_as_pdf</mat-icon>
@@ -240,9 +240,9 @@
           <mat-icon>more_vert</mat-icon>
         </button>
         <mat-menu #mobileActionMenu="matMenu" (click)="verDetalleCFDI(cfdi)">
-          <button mat-menu-item>
-            <mat-icon>print</mat-icon>
-            <span>Imprimir</span>
+          <button mat-menu-item (click)="verDetalleCFDI(cfdi)">
+            <mat-icon>visibility</mat-icon>
+            <span>Ver Detalle</span>
           </button>
           <button mat-menu-item (click)="verDetalleCFDI(cfdi)">
             <mat-icon>picture_as_pdf</mat-icon>

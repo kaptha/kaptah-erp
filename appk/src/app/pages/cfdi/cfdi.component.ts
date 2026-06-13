@@ -429,40 +429,75 @@ private createCFDI(cfdiData: Omit<CFDI, 'ID'>) {
   }
 
   const { value: formValues } = await Swal.fire({
-    title: 'Enviar CFDI por correo',
-    html:
-      `<input id="swal-email" class="swal2-input" placeholder="Email del destinatario" type="email" style="margin-bottom:10px;">` +
-      `<textarea id="swal-message" class="swal2-textarea" placeholder="Mensaje personalizado (opcional)" style="height:80px;"></textarea>` +
-      `<select id="swal-pdfStyle" class="swal2-select" style="margin-top:10px;width:100%;padding:8px;border:1px solid #ccc;border-radius:4px;">` +
-        `<option value="classic">Clásico</option>` +
-        `<option value="modern">Moderno</option>` +
-        `<option value="minimal">Minimalista</option>` +
-        `<option value="professional">Profesional</option>` +
-        `<option value="wave">Wave</option>` +
-        `<option value="elegant">Elegante</option>` +
-        `<option value="aqua">Aqua</option>` +
-        `<option value="simple">Simple</option>` +
-        `<option value="corporate">Corporate</option>` +
-        `<option value="creative">Creativo</option>` +
-      `</select>`,
-    focusConfirm: false,
-    showCancelButton: true,
-    confirmButtonText: 'Enviar',
-    cancelButtonText: 'Cancelar',
-    confirmButtonColor: '#8e24aa',
-    preConfirm: () => {
-      const email = (document.getElementById('swal-email') as HTMLInputElement).value;
-      if (!email || !email.includes('@')) {
-        Swal.showValidationMessage('Ingresa un email válido');
-        return false;
-      }
-      return {
-        email,
-        message: (document.getElementById('swal-message') as HTMLTextAreaElement).value,
-        pdfStyle: (document.getElementById('swal-pdfStyle') as HTMLSelectElement).value
-      };
+  title: 'Enviar CFDI por correo',
+  width: window.innerWidth < 600 ? '95%' : '460px',
+  padding: '1.5rem',
+  html: `
+    <div style="display:flex;flex-direction:column;gap:12px;text-align:left;">
+      <p style="margin:0 0 4px;font-size:12px;color:#888;">Se adjuntará PDF y XML al mensaje.</p>
+
+      <div>
+        <label style="display:block;font-size:12px;color:#888;margin-bottom:4px;">
+          Correo del destinatario *
+        </label>
+        <input id="swal-email" type="email"
+          placeholder="ejemplo@empresa.com"
+          style="width:100%;box-sizing:border-box;padding:8px 10px;font-size:14px;
+                 border:1px solid #ddd;border-radius:6px;outline:none;">
+      </div>
+
+      <div>
+        <label style="display:block;font-size:12px;color:#888;margin-bottom:4px;">
+          Mensaje personalizado <span style="color:#bbb;">(opcional)</span>
+        </label>
+        <textarea id="swal-message" rows="3"
+          placeholder="Adjunto su CFDI correspondiente..."
+          style="width:100%;box-sizing:border-box;padding:8px 10px;font-size:14px;
+                 border:1px solid #ddd;border-radius:6px;resize:vertical;
+                 font-family:inherit;outline:none;"></textarea>
+      </div>
+
+      <div>
+        <label style="display:block;font-size:12px;color:#888;margin-bottom:4px;">
+          Estilo de PDF
+        </label>
+        <select id="swal-pdfStyle"
+          style="width:100%;box-sizing:border-box;padding:8px 10px;font-size:14px;
+                 border:1px solid #ddd;border-radius:6px;background:#fff;outline:none;">
+          <option value="classic">Clásico</option>
+          <option value="modern">Moderno</option>
+          <option value="minimal">Minimalista</option>
+          <option value="professional">Profesional</option>
+          <option value="wave">Wave</option>
+          <option value="elegant">Elegante</option>
+          <option value="aqua">Aqua</option>
+          <option value="simple">Simple</option>
+          <option value="corporate">Corporate</option>
+          <option value="creative">Creativo</option>
+        </select>
+      </div>
+    </div>`,
+  focusConfirm: false,
+  showCancelButton: true,
+  confirmButtonText: 'Enviar CFDI',
+  cancelButtonText: 'Cancelar',
+  confirmButtonColor: '#8e24aa',
+  customClass: {
+    popup: 'swal-cfdi-email-popup'
+  },
+  preConfirm: () => {
+    const email = (document.getElementById('swal-email') as HTMLInputElement).value.trim();
+    if (!email || !email.includes('@')) {
+      Swal.showValidationMessage('Ingresa un correo electrónico válido');
+      return false;
     }
-  });
+    return {
+      email,
+      message: (document.getElementById('swal-message') as HTMLTextAreaElement).value,
+      pdfStyle: (document.getElementById('swal-pdfStyle') as HTMLSelectElement).value
+    };
+  }
+});
 
   if (formValues) {
     Sweetalert.fnc('loading', 'Enviando CFDI por correo...', null);
