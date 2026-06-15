@@ -4,6 +4,7 @@ import { Repository } from 'typeorm';
 import { XmlRecibido } from '../entities/xml-recibido.entity';
 import { XmlFinanciero } from '../entities/xml-financiero.entity';
 import { XmlParserService, ParsedXmlData } from './xml-parser.service';
+import { SalesApiService, CfdiFromSales } from './sales-api.service';
 import * as fs from 'fs';
 import * as path from 'path';
 import { format } from 'date-fns';
@@ -37,11 +38,12 @@ export class XmlFinancieroService {
   constructor(
     @InjectRepository(XmlRecibido)
     private xmlRecibidoRepository: Repository<XmlRecibido>,
-    
+
     @InjectRepository(XmlFinanciero)
     private xmlFinancieroRepository: Repository<XmlFinanciero>,
-    
+
     private xmlParserService: XmlParserService,
+    private salesApiService: SalesApiService,
   ) {}
 
   /**
@@ -526,15 +528,34 @@ async getEstadisticasEgresos(
 async getAnalisisCompletoIngresos(
   rfcUsuario: string,
   fechaInicio: string,
-  fechaFin: string
+  fechaFin: string,
+  token: string = '',
+  userUid: string = ''
 ): Promise<any> {
   this.logger.log('====== ANÁLISIS COMPLETO DE INGRESOS ======');
   this.logger.log(`RFC Usuario: ${rfcUsuario}`);
   this.logger.log(`Período: ${fechaInicio} a ${fechaFin}`);
 
   try {
-    // Obtener todos los CFDIs de ingreso
-    const cfdis = await this.getCfdisIngreso(rfcUsuario, fechaInicio, fechaFin);
+    // Obtener todos los CFDIs de ingreso (xmls_financieros + sales-api)
+    const cfdisLocales = await this.getCfdisIngreso(rfcUsuario, fechaInicio, fechaFin);
+
+    let cfdisSales: any[] = [];
+    try {
+      if (token && userUid) {
+        cfdisSales = await this.salesApiService.getCfdisTimbrados(userUid, token, {
+          fechaInicio,
+          fechaFin,
+        });
+        // Evitar duplicados
+        const foliosExistentes = new Set(cfdisLocales.map((c: any) => c.folio_fiscal));
+        cfdisSales = cfdisSales.filter(c => !foliosExistentes.has(c.folio_fiscal));
+      }
+    } catch (e) {
+      this.logger.warn('No se pudieron obtener CFDIs de sales-api para analisis:', e.message);
+    }
+
+    const cfdis = [...cfdisLocales, ...cfdisSales];
 
     // 1. RESUMEN GENERAL
     const resumenGeneral = await this.calcularResumenGeneral(cfdis);
@@ -1466,7 +1487,9 @@ async buscarCfdisEgresos(
  */
 async buscarCfdisIngresos(
   rfcUsuario: string,
-  filtros: BuscarCfdisIngresosFiltros
+  filtros: BuscarCfdisIngresosFiltros,
+  token: string = '',
+  userUid: string = ''
 ): Promise<{ cfdis: any[]; total: number }> {
   this.logger.debug('=== INICIO buscarCfdisIngresos ===');
   this.logger.debug('RFC Usuario:', rfcUsuario);
@@ -1580,9 +1603,30 @@ async buscarCfdisIngresos(
 
     this.logger.debug('=== FIN buscarCfdisIngresos ===');
 
+    // Mezclar con CFDIs de sales-api
+    let cfdisSales: any[] = [];
+    try {
+      if (token && userUid) {
+        const salesCfdis = await this.salesApiService.getCfdisTimbrados(userUid, token, {
+          fechaInicio: filtros.fechaInicio,
+          fechaFin: filtros.fechaFin,
+          query: filtros.query,
+        });
+        // Evitar duplicados por folio_fiscal
+        const foliosFiscalesExistentes = new Set(cfdisConEtiqueta.map(c => c.folio_fiscal));
+        cfdisSales = salesCfdis
+          .filter(c => !foliosFiscalesExistentes.has(c.folio_fiscal))
+          .map(c => ({ ...c, tipo_documento_label: 'Ingreso', fuente: 'sales-api' }));
+      }
+    } catch (e) {
+      this.logger.warn('No se pudieron obtener CFDIs de sales-api:', e.message);
+    }
+
+    const todosCfdis = [...cfdisConEtiqueta, ...cfdisSales];
+
     return {
-      cfdis: cfdisConEtiqueta,
-      total
+      cfdis: todosCfdis,
+      total: total + cfdisSales.length
     };
   } catch (error) {
     this.logger.error('❌ Error en búsqueda de ingresos:', error.message);
@@ -1751,7 +1795,7 @@ async busquedaAvanzadaIngresos(rfcUsuario: string, filtros: any): Promise<any> {
 /**
  * Obtiene los detalles completos de un CFDI por UUID
  */
-async getDetallesCfdi(uuid: string): Promise<any> {
+async getDetallesCfdi(uuid: string, token: string = '', userUid: string = ''): Promise<any> {
   this.logger.debug('🔍 Obteniendo detalles de CFDI:', uuid);
 
   try {
@@ -1759,14 +1803,29 @@ async getDetallesCfdi(uuid: string): Promise<any> {
       where: { folio_fiscal: uuid }
     });
 
-    if (!cfdi) {
-      throw new Error('CFDI no encontrado');
+    if (cfdi) {
+      return {
+        success: true,
+        cfdi
+      };
     }
 
-    return {
-      success: true,
-      cfdi
-    };
+    // Fallback: buscar en sales-api
+    if (token && userUid) {
+      const cfdiSales = await this.salesApiService.getCfdiByUuid(uuid, token);
+      if (cfdiSales) {
+        // Si tiene XML, extraer conceptos
+        if (cfdiSales.xml) {
+          cfdiSales.conceptos_detalle = this.salesApiService.parseConceptosFromXml(cfdiSales.xml);
+        }
+        return {
+          success: true,
+          cfdi: cfdiSales
+        };
+      }
+    }
+
+    throw new Error('CFDI no encontrado');
   } catch (error) {
     this.logger.error('❌ Error obteniendo detalles de CFDI:', error);
     throw error;

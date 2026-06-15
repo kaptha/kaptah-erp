@@ -230,12 +230,15 @@ async getAnalisisCompletoIngresos(
   this.logger.debug('Período:', fechaInicio, 'a', fechaFin);
 
   try {
+    const token = req.headers?.authorization?.replace('Bearer ', '') || '';
+    const userUid = req.user?.uid || '';
     const analisis = await this.xmlFinancieroService.getAnalisisCompletoIngresos(
       rfcUsuario,
       fechaInicio,
-      fechaFin
+      fechaFin,
+      token,
+      userUid
     );
-
     return {
       success: true,
       analisis
@@ -504,6 +507,8 @@ async busquedaRapidaIngresos(
     limit
   });
 
+  const token = req.headers?.authorization?.replace('Bearer ', '') || '';
+  const userUid = req.user?.uid || '';
   const filtros = {
     query,
     fechaInicio,
@@ -517,8 +522,7 @@ async busquedaRapidaIngresos(
     offset: offset ? Number(offset) : 0,
     limit: limit ? Number(limit) : 50
   };
-
-  return this.xmlFinancieroService.buscarCfdisIngresos(rfcUsuario, filtros);
+  return this.xmlFinancieroService.buscarCfdisIngresos(rfcUsuario, filtros, token, userUid);
 }
 
 // ====== ENDPOINTS DE DETALLES DE CFDI ======
@@ -532,9 +536,10 @@ async getDetallesCfdi(
   @Req() req?: any
 ) {
   this.logger.debug('🔍 Obteniendo detalles de CFDI:', uuid);
-
+  const token = req.headers?.authorization?.replace('Bearer ', '') || '';
+  const userUid = req.user?.uid || '';
   try {
-    return await this.xmlFinancieroService.getDetallesCfdi(uuid);
+    return await this.xmlFinancieroService.getDetallesCfdi(uuid, token, userUid);
   } catch (error) {
     this.logger.error('❌ Error obteniendo detalles:', error);
     throw error;
