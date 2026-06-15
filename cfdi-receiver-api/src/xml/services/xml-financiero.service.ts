@@ -541,8 +541,10 @@ async getAnalisisCompletoIngresos(
     const cfdisLocales = await this.getCfdisIngreso(rfcUsuario, fechaInicio, fechaFin);
 
     let cfdisSales: any[] = [];
+    this.logger.log(`[SalesAPI] token presente: ${!!token}, userUid: ${userUid}`);
     try {
       if (token && userUid) {
+        this.logger.log(`[SalesAPI] Consultando CFDIs timbrados para uid: ${userUid}`);
         cfdisSales = await this.salesApiService.getCfdisTimbrados(userUid, token, {
           fechaInicio,
           fechaFin,
