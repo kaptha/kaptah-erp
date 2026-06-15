@@ -102,12 +102,16 @@ export class SalesApiService {
       );
 
       let cfdis: any[] = Array.isArray(response.data) ? response.data : (response.data?.cfdis || []);
-
+      this.logger.log(`[SalesAPI] Total recibidos: ${cfdis.length}`);
+      if (cfdis.length > 0) {
+        this.logger.log(`[SalesAPI] Muestra: status=${cfdis[0].status}, tipo_cfdi=${cfdis[0].tipo_cfdi}, uuid=${cfdis[0].uuid}`);
+      }
       // Solo ingresos timbrados o cancelados
       cfdis = cfdis.filter(c =>
-        (c.status === 'timbrado' || c.status === 'cancelado') &&
-        (c.tipo_cfdi === 'I' || c.tipo_cfdi === 'ingreso' || !c.tipo_cfdi)
+        (c.status === 'timbrado' || c.status === 'cancelado' || c.status === 'vigente') &&
+        (c.tipo_cfdi === 'I' || c.tipo_cfdi === 'ingreso' || c.tipo_cfdi === 'Ingreso' || !c.tipo_cfdi)
       );
+      this.logger.log(`[SalesAPI] Tras filtro tipo/status: ${cfdis.length}`);
 
       // Filtrar por fecha si aplica
       if (filtros?.fechaInicio || filtros?.fechaFin) {
