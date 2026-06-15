@@ -90,7 +90,7 @@ export class SalesApiService {
   }): Promise<CfdiFromSales[]> {
     try {
       const response = await firstValueFrom(
-        this.httpService.get(`${this.salesApiUrl}/cfdi/list`, {
+        this.httpService.get(`${this.salesApiUrl}/api/cfdi/list`, {
           headers: {
             Authorization: `Bearer ${token}`,
             'x-internal-api-key': process.env.INTERNAL_API_KEY || '',
@@ -147,7 +147,7 @@ export class SalesApiService {
     try {
       // El sales-api guarda por ID interno, no por UUID — buscamos en la lista
       const response = await firstValueFrom(
-        this.httpService.get(`${this.salesApiUrl}/cfdi/list`, {
+        this.httpService.get(`${this.salesApiUrl}/api/cfdi/list`, {
           headers: {
             Authorization: `Bearer ${token}`,
             'x-internal-api-key': process.env.INTERNAL_API_KEY || '',
@@ -172,7 +172,7 @@ export class SalesApiService {
   async getXmlByCfdiUuid(uuid: string, token: string): Promise<string | null> {
     try {
       const response = await firstValueFrom(
-        this.httpService.get(`${this.salesApiUrl}/cfdi/list`, {
+        this.httpService.get(`${this.salesApiUrl}/api/cfdi/list`, {
           headers: {
             Authorization: `Bearer ${token}`,
             'x-internal-api-key': process.env.INTERNAL_API_KEY || '',
