@@ -1091,7 +1091,7 @@ private generateComplementoPagos(data: any): string {
       throw new NotFoundException('CFDI no encontrado');
     }
 
-    if (cfdi.status !== 'timbrado') {
+    if (cfdi.status !== 'timbrado' && cfdi.status !== 'vigente') {
       throw new BadRequestException('Solo se pueden cancelar CFDIs timbrados');
     }
 
@@ -1803,4 +1803,5 @@ async sendCfdiByEmail(
   }
 }
 }
+
 
