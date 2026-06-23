@@ -175,9 +175,8 @@ export class RegisterComponent implements OnInit {
   private registerInFirebaseAuth(formData: any): void {
     this.usersService.registerAuth(formData).subscribe(
       (resp: any) => {
-        if (resp["email"] == formData.email) {
-          this.sendEmailVerification(resp, formData);
-        }
+        // Guardar en BD inmediatamente; el email de verificación es un paso posterior no bloqueante
+        this.registerUserInDatabases(resp, formData);
       },
       error => {
         this.isLoading = false;
@@ -190,20 +189,17 @@ export class RegisterComponent implements OnInit {
   /**
    * Envía email de verificación
    */
-  private sendEmailVerification(authResp: any, formData: any): void {
+  private sendEmailVerification(formData: any): void {
     this.usersService.sendBrandedEmailVerification(formData.email, formData.nombre).subscribe(
       (resp: any) => {
         if (resp.success) {
-          this.registerUserInDatabases(authResp, formData);
+          console.log('✅ Email de verificación enviado');
         } else {
-          this.isLoading = false;
-          Sweetalert.fnc('error', 'Error al enviar el correo de verificacion', 'Cerrar');
+          console.error('⚠️ No se pudo enviar verificación (no crítico, el usuario ya está registrado)');
         }
       },
       error => {
-        this.isLoading = false;
-        console.error('Error de verificacion de email:', error);
-        Sweetalert.fnc('error', 'Error al enviar el correo de verificacion', 'Cerrar');
+        console.error('⚠️ Error al enviar verificación (no crítico, el usuario ya está registrado):', error);
       }
     );
   }
@@ -270,6 +266,9 @@ export class RegisterComponent implements OnInit {
             (rolesResp: any) => console.log('✅ Roles creados:', rolesResp),
             (rolesErr: any) => console.error('⚠️ Error al crear roles:', rolesErr)
           );
+
+          // Envío de verificación: best-effort, no bloquea el registro ya completado
+          this.sendEmailVerification(formData);
         
         Sweetalert.fnc('success', 'Cuenta creada exitosamente. Por favor confirma tu correo para acceder (revisa spam)', 'Cerrar');
         

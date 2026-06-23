@@ -6,6 +6,7 @@ import { PasswordResetDialogComponent } from '../password-reset-dialog/password-
 import { HttpClient } from '@angular/common/http';
 import { GetUserData } from '../../config';
 import { Sweetalert } from '../../functions';
+import { switchMap } from 'rxjs/operators';
 
 import { UsersModel } from '../../models/users.model';
 
@@ -188,8 +189,8 @@ private checkUserConfirmation(token: string, authResp: any): void {
         console.log("✅ Datos de usuario obtenidos:", userData);
 
         if (!userData || Object.keys(userData).length === 0) {
-          this.isLoading = false;
-          Sweetalert.fnc("error", "Usuario no encontrado en la base de datos", null);
+          console.warn("⚠️ Usuario existe en Auth pero no en RTDB. Verificando si se puede reparar...");
+          this.repararUsuarioHuerfano(token, authResp);
           return;
         }
 
@@ -240,6 +241,74 @@ private checkUserConfirmation(token: string, authResp: any): void {
       }
     );
   }
+
+/**
+ * Repara un usuario que existe en Firebase Auth pero no tiene registro en RTDB/MySQL.
+ * Solo repara si el email está verificado en Auth; si no, pide confirmar correo.
+ */
+private repararUsuarioHuerfano(token: string, authResp: any): void {
+  this.http.post(GetUserData.url, { idToken: token }).subscribe(
+    (lookupResp: any) => {
+      const emailVerified = lookupResp?.users?.[0]?.emailVerified;
+      console.log("🔍 Firebase Auth emailVerified (reparación):", emailVerified);
+
+      if (!emailVerified) {
+        this.isLoading = false;
+        this.mostrarReenviarVerificacion = true;
+        Sweetalert.fnc("error", "Necesita Confirmar su Correo", null);
+        return;
+      }
+
+      console.log("✅ Email verificado, reparando registro en RTDB + MySQL...");
+
+      const nombreTemporal = (authResp.email || '').split('@')[0] || 'Usuario';
+
+      const firebaseUserData: any = {
+        nombre: nombreTemporal,
+        email: authResp.email,
+        rfc: 'XAXX010101000',
+        telefono: '',
+        plan: 'starter',
+        suscripcionActiva: false,
+        cicloFacturacion: 'anual',
+        Confirm: true
+      };
+
+      this.usersService.registerDatabase(firebaseUserData, token).pipe(
+        switchMap((firebaseResp: any) => {
+          const mysqlUserData: UsersModel = {
+            nombre: nombreTemporal,
+            email: authResp.email,
+            firebaseUid: authResp.localId,
+            realtimeDbKey: firebaseResp.name,
+            rfc: 'XAXX010101000',
+            tipo_persona: 'fisica',
+            telefono: '',
+            fiscalReg: '',
+            returnSecureToken: true,
+            Confirm: true,
+          };
+          return this.usersService.registerDatabaseMySQL(mysqlUserData);
+        })
+      ).subscribe(
+        () => {
+          console.log("✅ Usuario reparado exitosamente, reintentando confirmación...");
+          this.checkUserConfirmation(token, authResp);
+        },
+        (repairError) => {
+          console.error("❌ Error al reparar usuario huérfano:", repairError);
+          this.isLoading = false;
+          Sweetalert.fnc("error", "Error al recuperar tu cuenta. Contacta a soporte.", null);
+        }
+      );
+    },
+    (lookupError) => {
+      console.error("❌ Error en lookup de reparación:", lookupError);
+      this.isLoading = false;
+      Sweetalert.fnc("error", "Error al verificar tu cuenta", null);
+    }
+  );
+}
 
 /**
  * Manejo de errores de autenticación
