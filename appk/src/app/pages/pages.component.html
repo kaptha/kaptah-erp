@@ -4,7 +4,7 @@
         <app-sidebar></app-sidebar>
       </mat-sidenav>
 <mat-sidenav-content>       
-        <app-header></app-header>  
+        <app-header></app-header><div class="perfil-incompleto-banner" *ngIf="perfilIncompleto"><span class="material-icons">info</span><span>Completa tu perfil fiscal (RFC, telefono) para poder facturar correctamente.</span><button type="button" (click)="irACompletarPerfil()">Completar ahora</button></div>  
         <div class="page-content">
           <div class="container-fluid">
             <router-outlet></router-outlet>
