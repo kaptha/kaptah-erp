@@ -1046,6 +1046,7 @@ button[mat-stroked-button] {
 /* BUTTON */
 .cta-button {
   background: #fff !important;
+  text-decoration: none !important;
   color: #7F3FF0 !important;
   font-weight: 700 !important;
   padding: 15px 32px !important;
