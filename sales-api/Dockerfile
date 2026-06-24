@@ -8,6 +8,7 @@ RUN npx nest build
 FROM node:18-slim
 RUN apt-get update && apt-get install -y \
     libxslt1.1 \
+    xsltproc \
     openssl \
     ca-certificates \
     fonts-liberation \
