@@ -9,6 +9,7 @@ import {
   ParseIntPipe,
   UseGuards,
   Req,
+  Query,
   InternalServerErrorException,
   UnauthorizedException,
   NotFoundException,
@@ -41,12 +42,19 @@ export class ClientsController {
   ) {}
 
   @Post()
-  async create(@Body() createClientDto: CreateClientDto, @Req() req: RequestWithUser) {
+  async create(
+    @Body() createClientDto: CreateClientDto,
+    @Req() req: RequestWithUser,
+    @Query('cuentaUid') cuentaUid?: string,
+  ) {
     console.log('Datos recibidos en el backend:', createClientDto);
-    if (!req.user || !req.user.firebaseUid) {
+    const tokenUid = req.user?.firebaseUid;
+    const ownerUid = cuentaUid || tokenUid;
+    if (!ownerUid) {
       throw new UnauthorizedException('No se pudo obtener el UID de Firebase del usuario');
     }
-    return this.clientsService.create(createClientDto, req.user.firebaseUid);
+    console.log('Creando cliente para ownerUid:', ownerUid);
+    return this.clientsService.create(createClientDto, ownerUid);
   }
 
   // 👇 1. PRIMERO: GET sin parámetros (más específico)
