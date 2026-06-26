@@ -63,13 +63,17 @@ private getActiveCuentaUid(): string | null {
 }
 
   createClient(clientData: Omit<Cliente, 'ID'>): Observable<Cliente> {
-    const headers = this.getHeaders();
-    console.log('Datos enviados al crear cliente:', JSON.stringify(clientData));
-    return this.http.post<Cliente>(`${this.apiUrl}/clients`, clientData, { headers })
-      .pipe(
-        catchError(this.handleError)
-      );
-  }
+      const headers = this.getHeaders();
+      const cuentaUid = this.getActiveCuentaUid();
+      const url = cuentaUid
+        ? `${this.apiUrl}/clients?cuentaUid=${cuentaUid}`
+        : `${this.apiUrl}/clients`;
+      console.log('Datos enviados al crear cliente:', JSON.stringify(clientData), 'cuentaUid:', cuentaUid);
+      return this.http.post<Cliente>(url, clientData, { headers })
+        .pipe(
+          catchError(this.handleError)
+        );
+    }
 
   updateClient(id: number, clientData: Cliente): Observable<Cliente> {
     const headers = this.getHeaders();
