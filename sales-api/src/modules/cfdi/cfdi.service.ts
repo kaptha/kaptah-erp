@@ -28,7 +28,7 @@ import { QrGeneratorService } from './services/qr-generator.service';
 import { PdfGeneratorService } from './services/pdf-generator.service';
 import { CfdiTemplateService } from './services/cfdi-template.service';
 import { QueueClientService } from '../queue-client/queue-client.service';
-
+import { traducirErrorSifei } from './timbrado/sifei-error-map';
 
 @Injectable()
 export class CfdiService {
@@ -516,9 +516,14 @@ async verifyCfdi(
     const resultadoTimbrado = await this.timbradoService.timbrarCfdi(xmlFirmado);
 
     if (!resultadoTimbrado.success) {
-      throw new BadRequestException(
-        `Error de timbrado: ${resultadoTimbrado.error || 'Error desconocido del PAC'}`,
-      );
+      const errorTraducido = traducirErrorSifei(resultadoTimbrado.rawResponse || resultadoTimbrado.error || '');
+      throw new BadRequestException({
+        message: errorTraducido.mensaje,
+        titulo: errorTraducido.titulo,
+        campo: errorTraducido.campo || null,
+        codigo: errorTraducido.codigo || resultadoTimbrado.codigoError,
+        errorOriginal: resultadoTimbrado.error,
+      });
     }
 
     this.logger.log(`✅ CFDI timbrado - UUID: ${resultadoTimbrado.uuid}`);
