@@ -797,32 +797,7 @@ private obtenerNombreUnidad(claveUnidad?: string): string {
             Sweetalert.fnc('error', msg, null);
           }
         }
-          console.error('═══════════════════════════════════════════════');
           
-          // Extraer mensaje de error más detallado
-          let errorMsg = 'Error al crear el CFDI';
-          
-          if (error?.error?.message) {
-            errorMsg = error.error.message;
-          } else if (error?.message) {
-            errorMsg = error.message;
-          } else if (typeof error?.error === 'string') {
-            // Si es XML, mostrar un mensaje más amigable
-            if (error.error.includes('<?xml')) {
-              const messageMatch = error.error.match(/<message>(.*?)<\/message>/);
-              if (messageMatch) {
-                errorMsg = messageMatch[1];
-              } else {
-                errorMsg = 'Error en el timbrado del CFDI. Revisa la consola para más detalles.';
-              }
-            } else {
-              errorMsg = error.error;
-            }
-          }
-          
-          console.error('❌ Mensaje de error final:', errorMsg);
-          Sweetalert.fnc('error', errorMsg, null);
-        }
       });
     } catch (error: any) {
       this.loading = false;
