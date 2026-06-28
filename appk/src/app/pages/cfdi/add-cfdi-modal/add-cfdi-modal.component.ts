@@ -16,7 +16,7 @@ import { Product } from '../../../models/product.model';
 import { Service } from '../../../models/service.model';
 import { Sucursal } from '../../../models/sucursal.model';
 import { Sweetalert } from '../../../functions';
-
+import Swal from 'sweetalert2';
 interface ClienteExtendido extends Cliente {
   Cpostal: string;
   Colonia: string;
@@ -774,42 +774,29 @@ private obtenerNombreUnidad(claveUnidad?: string): string {
           Sweetalert.fnc('success', 'CFDI generado y timbrado correctamente', null);
           this.dialogRef.close(response);
         },
-        error: (error) => {
+        error: (err) => {
           this.loading = false;
-          console.error('═══════════════════════════════════════════════');
-          console.error('❌ ERROR COMPLETO DEL BACKEND:');
-          console.error('═══════════════════════════════════════════════');
-          console.error('Error object:', error);
-          console.error('Status:', error?.status);
-          console.error('Status Text:', error?.statusText);
-          console.error('Error body:', error?.error);
-          console.error('Message:', error?.message);
+          console.error('❌ Error timbrado:', err);
+
+          const errorData = err.error || {};
           
-          if (error?.error) {
-            console.error('Detalles del error:');
-            console.error('- Type:', typeof error.error);
-            console.error('- Content:', error.error);
-            
-            // Si el error es un string XML, intentar parsearlo
-            if (typeof error.error === 'string' && error.error.includes('<?xml')) {
-              console.error('❌ Respuesta XML del PAC (error de timbrado):');
-              console.error(error.error);
-              
-              // Intentar extraer el mensaje de error del XML
-              const errorMatch = error.error.match(/<error>(.*?)<\/error>/);
-              const messageMatch = error.error.match(/<message>(.*?)<\/message>/);
-              const codigoMatch = error.error.match(/<codigo>(.*?)<\/codigo>/);
-              
-              if (errorMatch || messageMatch || codigoMatch) {
-                console.error('═══════════════════════════════════════════════');
-                console.error('📋 ERROR DEL PAC SIFEI:');
-                if (codigoMatch) console.error('Código:', codigoMatch[1]);
-                if (messageMatch) console.error('Mensaje:', messageMatch[1]);
-                if (errorMatch) console.error('Detalle:', errorMatch[1]);
-                console.error('═══════════════════════════════════════════════');
-              }
-            }
+          if (errorData.titulo) {
+            Swal.fire({
+              icon: 'error',
+              title: errorData.titulo,
+              html: `
+                <p style="font-size: 14px; color: #333;">${errorData.message || 'Error desconocido'}</p>
+                ${errorData.campo ? `<p style="font-size: 12px; color: #888; margin-top: 8px;">Campo a revisar: <strong>${errorData.campo}</strong></p>` : ''}
+                ${errorData.codigo ? `<p style="font-size: 11px; color: #aaa; margin-top: 4px;">Código: ${errorData.codigo}</p>` : ''}
+              `,
+              confirmButtonColor: '#8e24aa',
+              confirmButtonText: 'Entendido',
+            });
+          } else {
+            const msg = errorData.message || err.message || 'Error al crear el CFDI';
+            Sweetalert.fnc('error', msg, null);
           }
+        }
           console.error('═══════════════════════════════════════════════');
           
           // Extraer mensaje de error más detallado
