@@ -22,6 +22,11 @@ export const SIFEI_ERROR_MAP: Record<string, { titulo: string; mensaje: string; 
     mensaje: 'El RFC del receptor no está registrado en el SAT o no es válido. Verifique los datos del cliente.',
     campo: 'receptor.rfc',
   },
+  'CFDI40145': {
+    titulo: 'Nombre del Receptor Incorrecto',
+    mensaje: 'El nombre del receptor no coincide con el registrado en el SAT. Verifique que sea exactamente igual al de la Constancia de Situación Fiscal del cliente (mayúsculas, acentos y sin abreviaturas).',
+    campo: 'receptor.nombre',
+  },
   'CFDI40149': {
     titulo: 'Nombre del Receptor Incorrecto',
     mensaje: 'El nombre del receptor no coincide con el registrado en el SAT. Verifique que sea exactamente igual al de la Constancia de Situación Fiscal del cliente.',
@@ -54,6 +59,9 @@ export function traducirErrorSifei(codigoOrMessage: string): { titulo: string; m
   }
   if (codigoOrMessage.includes('UsoCFDI')) {
     return { ...SIFEI_ERROR_MAP['CFDI40161'], codigo: 'CFDI40161' };
+  }
+  if (codigoOrMessage.includes('nombre del receptor')) {
+    return { ...SIFEI_ERROR_MAP['CFDI40145'], codigo: 'CFDI40145' };
   }
   if (codigoOrMessage.includes('fecha')) {
     return { ...SIFEI_ERROR_MAP['401'], codigo: '401' };
