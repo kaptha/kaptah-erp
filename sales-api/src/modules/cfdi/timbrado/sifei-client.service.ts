@@ -74,11 +74,27 @@ export class SifeiClientService {
 
       if (response.status !== 200) {
         this.logger.error(`❌ Error HTTP: ${response.status}`);
+        // Intentar extraer error SIFEI del body XML
+        const responseStr = typeof response.data === 'string' ? response.data : '';
+        const codigoMatch = responseStr.match(/<codigo>(.*?)<\/codigo>/);
+        const errorMatch = responseStr.match(/<error>(.*?)<\/error>/);
+        const sifeiCodigo = codigoMatch ? codigoMatch[1] : null;
+        const sifeiError = errorMatch ? errorMatch[1] : null;
+        
+        if (sifeiCodigo || sifeiError) {
+          this.logger.error(`❌ Error SIFEI [${sifeiCodigo}]: ${sifeiError}`);
+          return {
+            success: false,
+            error: sifeiError || `Error HTTP ${response.status}`,
+            codigoError: sifeiCodigo || `HTTP_${response.status}`,
+            rawResponse: responseStr
+          };
+        }
         return {
           success: false,
           error: `Error HTTP ${response.status}`,
           codigoError: `HTTP_${response.status}`,
-          rawResponse: response.data
+          rawResponse: responseStr
         };
       }
 
