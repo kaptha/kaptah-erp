@@ -62,9 +62,11 @@ export class CertVaultClientService {
    * @param firebaseToken Token de Firebase del usuario para autenticación
    * @returns Certificado CSD activo del usuario
    */
-  async getActiveCsd(firebaseToken: string): Promise<CsdCertificate> {
-  try {
-    const url = `${this.certVaultUrl}/api/certificates/csd/active`;
+  async getActiveCsd(firebaseToken: string, cuentaUid?: string): Promise<CsdCertificate> {
+    try {
+      const url = cuentaUid
+        ? `${this.certVaultUrl}/api/certificates/csd/active?cuentaUid=${cuentaUid}`
+        : `${this.certVaultUrl}/api/certificates/csd/active`;
     
     this.logger.debug(`🔍 Llamando a cert-vault: ${url}`);
     this.logger.debug(`🎫 Token: ${firebaseToken.substring(0, 20)}...`); // ⭐ AGREGAR ESTE LOG
@@ -90,11 +92,13 @@ export class CertVaultClientService {
    * @param firebaseToken Token de Firebase del usuario para autenticación
    * @returns Certificado FIEL activo del usuario
    */
-  async getActiveFiel(firebaseToken: string): Promise<FielCertificate> {
+  async getActiveFiel(firebaseToken: string, cuentaUid?: string): Promise<FielCertificate> {
     try {
       this.logger.debug('Obteniendo certificado FIEL activo del cert-vault-service');
       
-      const url = `${this.certVaultUrl}/api/certificates/fiel/active`;
+      const url = cuentaUid
+          ? `${this.certVaultUrl}/api/certificates/fiel/active?cuentaUid=${cuentaUid}`
+          : `${this.certVaultUrl}/api/certificates/fiel/active`;
       
       const response = await firstValueFrom(
         this.httpService.get<FielCertificate>(url, {
@@ -177,10 +181,10 @@ export class CertVaultClientService {
    * @param firebaseToken Token de Firebase del usuario
    * @returns Contraseña de la llave privada
    */
-  async getCsdPassword(firebaseToken: string): Promise<string> {
-    try {
-      // La contraseña viene en el mismo objeto del certificado
-      const csdCert = await this.getActiveCsd(firebaseToken);
+  async getCsdPassword(firebaseToken: string, cuentaUid?: string): Promise<string> {
+      try {
+        // La contraseña viene en el mismo objeto del certificado
+        const csdCert = await this.getActiveCsd(firebaseToken, cuentaUid);
       
       // Buscar en ambos campos posibles (password o passwordKeyfile)
       const password = csdCert.password || csdCert.passwordKeyfile;

@@ -26,12 +26,12 @@ export class SignService {
    * @param firebaseToken Token de Firebase para obtener certificado del usuario
    * @returns Sello digital en Base64
    */
- async sign(originalString: string, firebaseToken: string, password: string): Promise<string> {
+ async sign(originalString: string, firebaseToken: string, password: string, cuentaUid?: string): Promise<string> {
   try {
     this.logger.debug('Iniciando proceso de firma con OpenSSL');
     this.logger.debug(`Longitud cadena original: ${originalString.length} caracteres`);
 
-    const csdCert = await this.certVaultClient.getActiveCsd(firebaseToken);
+    const csdCert = await this.certVaultClient.getActiveCsd(firebaseToken, cuentaUid);
     this.logger.debug(`Certificado obtenido - Número: ${csdCert.certificateNumber}`);
     this.logger.debug('✅ Usando contraseña proporcionada por el usuario');
 
@@ -75,12 +75,12 @@ export class SignService {
    * ⭐ ACTUALIZADO: Obtiene información del certificado CSD del usuario
    * Convierte el número de certificado a formato decimal de 20 dígitos
    */
-  async getCertificateInfo(firebaseToken: string): Promise<{ number: string; base64: string; }> {
+  async getCertificateInfo(firebaseToken: string, cuentaUid?: string): Promise<{ number: string; base64: string; }> {
     try {
       this.logger.debug('Obteniendo información del certificado CSD del usuario');
       
       // Obtener certificado del cert-vault-service
-      const csdCert = await this.certVaultClient.getActiveCsd(firebaseToken);
+      const csdCert = await this.certVaultClient.getActiveCsd(firebaseToken, cuentaUid);
       
       this.logger.debug(`Certificado obtenido de BD: ${csdCert.certificateNumber}`);
       
@@ -186,10 +186,10 @@ export class SignService {
    * @param firebaseToken Token de Firebase para obtener certificado
    * @returns true si el sello es válido
    */
-  async verifySeal(originalString: string, seal: string, firebaseToken: string): Promise<boolean> {
+  async verifySeal(originalString: string, seal: string, firebaseToken: string, cuentaUid?: string): Promise<boolean> {
     try {
       // Obtener certificado público del usuario
-      const csdCert = await this.certVaultClient.getActiveCsd(firebaseToken);
+      const csdCert = await this.certVaultClient.getActiveCsd(firebaseToken, cuentaUid);
       
       // Convertir PEM a objeto de certificado
       const cert = forge.pki.certificateFromPem(csdCert.cerPem);
@@ -226,9 +226,9 @@ export class SignService {
    * @param firebaseToken Token de Firebase
    * @returns true si el certificado es válido
    */
-  async validateCertificate(firebaseToken: string): Promise<boolean> {
+  async validateCertificate(firebaseToken: string, cuentaUid?: string): Promise<boolean> {
     try {
-      const csdCert = await this.certVaultClient.getActiveCsd(firebaseToken);
+      const csdCert = await this.certVaultClient.getActiveCsd(firebaseToken, cuentaUid);
       
       // Verificar que no haya expirado
       const validUntil = new Date(csdCert.validUntil);
@@ -259,10 +259,10 @@ export class SignService {
    * @param firebaseToken Token de Firebase
    * @returns true si el par de llaves es válido
    */
-  async validateKeyPair(firebaseToken: string): Promise<boolean> {
+  async validateKeyPair(firebaseToken: string, cuentaUid?: string): Promise<boolean> {
     try {
-      const csdCert = await this.certVaultClient.getActiveCsd(firebaseToken);
-      const keyPassword = await this.certVaultClient.getCsdPassword(firebaseToken);
+      const csdCert = await this.certVaultClient.getActiveCsd(firebaseToken, cuentaUid);
+      const keyPassword = await this.certVaultClient.getCsdPassword(firebaseToken, cuentaUid);
       
       // Convertir PEM a objetos forge
       const cert = forge.pki.certificateFromPem(csdCert.cerPem);

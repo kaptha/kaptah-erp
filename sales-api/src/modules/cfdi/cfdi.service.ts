@@ -328,10 +328,9 @@ export class CfdiService {
  * @param firebaseToken Token de Firebase del usuario para obtener su certificado CSD
  * @returns XML CFDI firmado con sello digital
  */
-async signCfdi(xmlContent: string, firebaseToken: string, csdPassword: string): Promise<string> {
-  try {
-    this.logger.debug('Iniciando proceso de sellado de CFDI con certificado dinámico');
-    
+async signCfdi(xmlContent: string, firebaseToken: string, csdPassword: string, cuentaUid?: string): Promise<string> {
+    try {
+      this.logger.debug('Iniciando proceso de sellado de CFDI con certificado dinámico');    
     // Validar que el token esté presente
     if (!firebaseToken) {
       throw new Error('Se requiere token de autenticación para firmar el CFDI');
@@ -347,7 +346,7 @@ async signCfdi(xmlContent: string, firebaseToken: string, csdPassword: string): 
     this.logger.debug('CFDI corregido con valores actualizados');
     
     // Paso 1: Obtener información del certificado del usuario
-    const certInfo = await this.signService.getCertificateInfo(firebaseToken);
+    const certInfo = await this.signService.getCertificateInfo(firebaseToken, cuentaUid);
     this.logger.debug(`✅ Certificado obtenido - Número: ${certInfo.number}`);
     
     // Paso 2: Preparar el XML
@@ -374,7 +373,7 @@ async signCfdi(xmlContent: string, firebaseToken: string, csdPassword: string): 
     
     // Paso 7: Firmar la cadena original con el certificado del usuario
     // ⭐ PASAR la contraseña al método sign
-    const signature = await this.signService.sign(originalString, firebaseToken, csdPassword);
+    const signature = await this.signService.sign(originalString, firebaseToken, csdPassword, cuentaUid);
     this.logger.debug(`Sello generado: ${signature.substring(0, 50)}...`);
     
     // Paso 8: Agregar el sello al XML
@@ -397,8 +396,9 @@ async signCfdi(xmlContent: string, firebaseToken: string, csdPassword: string): 
  * @param firebaseToken Token de Firebase del usuario (para verificar con su certificado)
  */
 async verifyCfdi(
-  xmlContent: string, 
-  firebaseToken: string
+  xmlContent: string,
+  firebaseToken: string,
+  cuentaUid?: string
 ): Promise<{
   valid: boolean;
   originalString?: string;
@@ -420,7 +420,7 @@ async verifyCfdi(
     const originalString = await this.originalStringService.generateOriginalString(xmlContent);
     
     // Verificar el sello usando el certificado del usuario
-    const isValid = await this.signService.verifySeal(originalString, currentSeal, firebaseToken);
+    const isValid = await this.signService.verifySeal(originalString, currentSeal, firebaseToken, cuentaUid);
     
     return {
       valid: isValid,
@@ -488,17 +488,18 @@ async verifyCfdi(
 
     // 4. Firmar digitalmente el CFDI
     const xmlFirmado = await this.signCfdi(
-      xmlContent,
-      firebaseToken,
-      createDto.csdPassword,
-    );
+        xmlContent,
+        firebaseToken,
+        createDto.csdPassword,
+        user.uid,
+      );
     this.logger.log('✅ CFDI firmado digitalmente');
 
     // 5. Timbrar directamente con SIFEI PAC
 // Verificación local del sello
     let cadenaOriginalStr = null;
     try {
-      const verification = await this.verifyCfdi(xmlFirmado, firebaseToken);
+      const verification = await this.verifyCfdi(xmlFirmado, firebaseToken, user.uid);
       this.logger.log(`🔍 Verificación local del sello: ${verification.valid ? '✅ VÁLIDO' : '❌ INVÁLIDO'}`);
       if (verification.originalString) {
         this.logger.log('🔍 Cadena original (verificación): ' + verification.originalString);
