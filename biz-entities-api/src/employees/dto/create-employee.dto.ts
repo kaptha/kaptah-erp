@@ -1,6 +1,5 @@
 import { IsString, IsEmail, IsNumber, IsArray, ValidateNested, Min, Matches, IsOptional } from 'class-validator';
-import { Type } from 'class-transformer';
-
+import { Type, Transform } from 'class-transformer';
 export class DeduccionPercepcionDto {
   @IsString()
   tipo: string;
@@ -29,7 +28,10 @@ export class CreateEmployeeDto {
   rfc: string;
 
   @IsString()
-  @Matches(/^[A-Z]{4}[0-9]{6}[HM][A-Z]{5}[0-9A-Z][0-9]$/)
+  @Transform(({ value }) => typeof value === 'string' ? value.toUpperCase().trim() : value)
+  @Matches(/^[A-Z]{4}[0-9]{6}[HM][A-Z]{5}[0-9A-Z][0-9]$/, {
+    message: 'El CURP no tiene un formato válido (18 caracteres, formato oficial SAT/RENAPO)',
+  })
   curp: string;
 
   @IsEmail()
