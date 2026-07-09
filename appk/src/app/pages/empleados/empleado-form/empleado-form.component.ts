@@ -189,8 +189,8 @@ export class EmpleadoFormComponent implements OnInit {
   }
 
   private loadDeduccionesPercepciones() {
-    if (this.data.deducciones) {
-      this.data.deducciones.forEach((deduccion: DeduccionPercepcion) => {
+    if (this.data.empleado?.deducciones) {
+      this.data.empleado.deducciones.forEach((deduccion: DeduccionPercepcion) => {
         const deduccionGroup = this.fb.group({
           tipo: [deduccion.tipo, Validators.required],
           clave: [deduccion.clave, Validators.required],
@@ -203,8 +203,8 @@ export class EmpleadoFormComponent implements OnInit {
       this.deduccionesDataSource.data = this.deduccionesFormArray.controls;
     }
 
-    if (this.data.percepciones) {
-      this.data.percepciones.forEach((percepcion: DeduccionPercepcion) => {
+    if (this.data.empleado?.percepciones) {
+      this.data.empleado.percepciones.forEach((percepcion: DeduccionPercepcion) => {
         const percepcionGroup = this.fb.group({
           tipo: [percepcion.tipo, Validators.required],
           clave: [percepcion.clave, Validators.required],
