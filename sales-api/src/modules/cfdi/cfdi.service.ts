@@ -475,7 +475,7 @@ async verifyCfdi(
     this.logger.log('🚀 Iniciando creación de CFDI de Ingreso...');
 
     // 1. Validar certificado del usuario
-    await this.validateUserCertificate(firebaseToken);
+     await this.validateUserCertificate(firebaseToken, user.uid);
 
     // 2. Validar contraseña del certificado
     if (!createDto.csdPassword) {
@@ -1661,9 +1661,9 @@ async delete(id: string, userId: string): Promise<{ success: boolean; message: s
  * @param firebaseToken Token de Firebase del usuario
  * @returns true si el certificado es válido
  */
-async validateUserCertificate(firebaseToken: string): Promise<boolean> {
-  try {
-    return await this.signService.validateCertificate(firebaseToken);
+async validateUserCertificate(firebaseToken: string, cuentaUid?: string): Promise<boolean> {
+    try {
+      return await this.signService.validateCertificate(firebaseToken, cuentaUid);
   } catch (error) {
     this.logger.error('Error validando certificado del usuario:', error);
     return false;

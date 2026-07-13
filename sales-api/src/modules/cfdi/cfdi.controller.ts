@@ -140,7 +140,7 @@ export class CfdiController {
     @Query('cuentaUid') cuentaUid?: string,
   ) {
     try {
-      const isCertificateValid = await this.cfdiService.validateUserCertificate(firebaseToken);
+      const isCertificateValid = await this.cfdiService.validateUserCertificate(firebaseToken, cuentaUid || user.uid);
       if (!isCertificateValid) {
         throw new HttpException(
           'Su certificado CSD no es valido o ha expirado.',
@@ -168,7 +168,7 @@ export class CfdiController {
         throw new HttpException('Usuario no valido', HttpStatus.UNAUTHORIZED);
       }
       const firebaseToken = this.extractFirebaseToken(req);
-      const isCertificateValid = await this.cfdiService.validateUserCertificate(firebaseToken);
+      const isCertificateValid = await this.cfdiService.validateUserCertificate(firebaseToken, cuentaUid || user.uid);
       if (!isCertificateValid) {
         throw new HttpException(
           'Su certificado CSD no es valido o ha expirado.',
@@ -196,7 +196,7 @@ export class CfdiController {
         throw new HttpException('Usuario no valido', HttpStatus.UNAUTHORIZED);
       }
       const firebaseToken = this.extractFirebaseToken(req);
-      const isCertificateValid = await this.cfdiService.validateUserCertificate(firebaseToken);
+      const isCertificateValid = await this.cfdiService.validateUserCertificate(firebaseToken, cuentaUid || user.uid);
       if (!isCertificateValid) {
         throw new HttpException(
           'Su certificado CSD no es valido o ha expirado.',
@@ -224,7 +224,7 @@ export class CfdiController {
         throw new HttpException('Usuario no valido', HttpStatus.UNAUTHORIZED);
       }
       const firebaseToken = this.extractFirebaseToken(req);
-      const isCertificateValid = await this.cfdiService.validateUserCertificate(firebaseToken);
+      const isCertificateValid = await this.cfdiService.validateUserCertificate(firebaseToken, cuentaUid || user.uid);
       if (!isCertificateValid) {
         throw new HttpException(
           'Su certificado CSD no es valido o ha expirado.',
