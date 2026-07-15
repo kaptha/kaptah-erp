@@ -306,27 +306,6 @@ onTipoConceptoChange(index: number): void {
   });
   this.calcularImporteConcepto(index);
 }
-  onObjetoImpChange(index: number): void {
-    const concepto = this.conceptos.at(index);
-    const objetoImp = concepto.get('objetoImp')?.value;
-
-    if (objetoImp === '01' || objetoImp === '04') {
-      const traslados = concepto.get('impuestos.traslados') as FormArray;
-      const retenciones = concepto.get('impuestos.retenciones') as FormArray;
-
-      traslados?.controls.forEach(t => {
-        t.get('selected')?.setValue(false, { emitEvent: false });
-        t.get('importe')?.setValue(0, { emitEvent: false });
-      });
-      retenciones?.controls.forEach(r => {
-        r.get('selected')?.setValue(false, { emitEvent: false });
-        r.get('importe')?.setValue(0, { emitEvent: false });
-      });
-    }
-
-    this.calcularImporteConcepto(index);
-  }
-
   get conceptos(): FormArray {
     return this.cfdiForm.get('conceptos') as FormArray;
   }
@@ -850,9 +829,8 @@ private obtenerNombreUnidad(claveUnidad?: string): string {
     
     // Transformar conceptos al formato correcto
     const conceptosTransformados = formValue.conceptos.map((concepto: any) => {
-      const esObjetoImpuesto = concepto.objetoImp === '02' || concepto.objetoImp === '03';
       const trasladosSeleccionados = concepto.impuestos?.traslados
-        ?.filter((t: any) => t.selected && esObjetoImpuesto)
+        ?.filter((t: any) => t.selected)
         .map((t: any) => ({
           base: concepto.importe,
           impuesto: t.impuesto,
@@ -862,7 +840,7 @@ private obtenerNombreUnidad(claveUnidad?: string): string {
         })) || [];
       
       const retencionesSeleccionadas = concepto.impuestos?.retenciones
-        ?.filter((r: any) => r.selected && esObjetoImpuesto)
+        ?.filter((r: any) => r.selected)
         .map((r: any) => ({
           base: concepto.importe,
           impuesto: r.impuesto,

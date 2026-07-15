@@ -277,7 +277,7 @@
               
               <mat-form-field appearance="outline">
                 <mat-label>Objeto Impuesto</mat-label>
-                <mat-select formControlName="objetoImp" required (selectionChange)="onObjetoImpChange(i)">
+                <mat-select formControlName="objetoImp" required>
                   <mat-option *ngFor="let objeto of objetosImpuesto" [value]="objeto.clave">
                     {{ objeto.clave }} - {{ objeto.descripcion }}
                   </mat-option>
