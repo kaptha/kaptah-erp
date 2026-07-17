@@ -542,8 +542,8 @@ async verifyCfdi(
       folio: createDto.folio,
       forma_pago: createDto.formaPago,
       metodo_pago: createDto.metodoPago,
-      subtotal: this.extractTotalFromXml(resultadoTimbrado.cfdiTimbrado, 'SubTotal') ?? this.calculateSubtotal(createDto.conceptos),
-      total: this.extractTotalFromXml(resultadoTimbrado.cfdiTimbrado, 'Total') ?? this.calculateTotal(createDto.conceptos),
+      subtotal: this.calculateSubtotal(createDto.conceptos),
+      total: this.calculateTotal(createDto.conceptos),
       moneda: createDto.moneda || 'MXN',
       tipo_cambio: Number(createDto.tipoCambio) || 1,
       createdAt: new Date(),
@@ -576,13 +576,6 @@ async verifyCfdi(
 }
 
 // 👇 MÉTODOS AUXILIARES
-  private extractTotalFromXml(xml: string, attr: 'Total' | 'SubTotal'): number | null {
-    if (!xml) return null;
-    const regex = new RegExp(attr + '="([0-9.]+)"');
-    const match = xml.match(regex);
-    return match ? parseFloat(match[1]) : null;
-  }
-
 private calculateSubtotal(conceptos: any[]): number {
   return conceptos.reduce((sum, concepto) => {
     return sum + (concepto.cantidad * concepto.valorUnitario);
