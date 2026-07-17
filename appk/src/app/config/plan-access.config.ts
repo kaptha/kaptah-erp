@@ -13,6 +13,8 @@ export const PLAN_NAME_MAP: Record<string, PlanType> = {
   'Starter': 'starter',
   'fiscal': 'fiscal',
   'Fiscal': 'fiscal',
+  'pro': 'fiscal',
+  'Pro': 'fiscal',
   'business': 'business',
   'Business': 'business',
   'erp': 'business',

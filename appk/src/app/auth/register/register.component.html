@@ -98,17 +98,17 @@
           <mat-label>Plan</mat-label>
           <mat-select formControlName="plan" required>
             <mat-option value="starter">
-              <mat-icon>rocket_launch</mat-icon> Kaptah Básico
-            </mat-option>
-            <mat-option value="pro">
-              <mat-icon>trending_up</mat-icon> Kaptah Fiscal
-            </mat-option>
-            <mat-option value="business">
-              <mat-icon>business_center</mat-icon> Kaptah ERP
-            </mat-option>
-            <mat-option value="enterprise">
-              <mat-icon>diamond</mat-icon> Kaptah Ilimitado
-            </mat-option>
+  <mat-icon>rocket_launch</mat-icon> Kaptah Starter - $599/año
+</mat-option>
+<mat-option value="fiscal">
+  <mat-icon>trending_up</mat-icon> Kaptah Fiscal - $299/mes
+</mat-option>
+<mat-option value="business">
+  <mat-icon>business_center</mat-icon> Kaptah Business - $599/mes
+</mat-option>
+<mat-option value="enterprise">
+  <mat-icon>diamond</mat-icon> Kaptah Enterprise - $999/mes
+</mat-option>
           </mat-select>
           <mat-icon matPrefix>workspace_premium</mat-icon>
           <mat-error *ngIf="registroForm.get('plan')?.hasError('required') && registroForm.get('plan')?.touched">
