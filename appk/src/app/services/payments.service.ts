@@ -22,7 +22,7 @@ declare global {
 })
 export class PaymentsService {
   private apiUrl = 'https://kaptah-erp-production.up.railway.app/api';
-  private conektaPublicKey = 'key_J2vDv8WDC4cjLAybaHx9cV3';
+  private conektaPublicKey = 'key_TlCURKQtFFrMw43DSq7UOOa';
 
   constructor(private http: HttpClient) {}
 
