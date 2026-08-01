@@ -164,7 +164,7 @@ private async obtenerLogoUsuario(userId: string, token: string, cuentaUid?: stri
 
     // Limpiar sufijo -quote del estilo (frontend manda 'classic-quote', template es 'classic-quote.html')
     estilo = estilo.replace('-quote', '');
-    const templatesPath = path.join(process.cwd(), 'src', 'templates');
+    const templatesPath = [path.join(__dirname, '..', '..', 'templates'), path.join(process.cwd(), 'dist', 'src', 'templates'), path.join(process.cwd(), 'dist', 'templates'), path.join(process.cwd(), 'src', 'templates')].find(p => fs.existsSync(p)) || path.join(process.cwd(), 'src', 'templates');
     const htmlPath = path.join(templatesPath, `${estilo}-quote.html`);
 
     console.log('📄 HTML path:', htmlPath);

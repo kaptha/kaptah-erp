@@ -306,7 +306,7 @@ private async obtenerLogoUsuario(userId: string, token: string, cuentaUid?: stri
       const deliveryNote = await this.findOne(id, userId);
       console.log('✅ Nota de entrega encontrada:', deliveryNote.id);
 
-      const templatesPath = path.join(process.cwd(), 'src', 'templates');
+      const templatesPath = [path.join(__dirname, '..', '..', 'templates'), path.join(process.cwd(), 'dist', 'src', 'templates'), path.join(process.cwd(), 'dist', 'templates'), path.join(process.cwd(), 'src', 'templates')].find(p => fs.existsSync(p)) || path.join(process.cwd(), 'src', 'templates');
       
       const htmlPath = path.join(templatesPath, `remision-${estilo}.html`);
       const templateHtml = fs.readFileSync(htmlPath, 'utf8');

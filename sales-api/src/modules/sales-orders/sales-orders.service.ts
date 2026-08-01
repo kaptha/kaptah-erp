@@ -231,7 +231,7 @@ private async obtenerDatosCliente(
       console.log('✅ Orden encontrada:', order.id);
       console.log('📋 RFC del cliente en la orden:', order.customerRfc); 
       console.log('👤 Nombre del cliente en la orden:', order.customerName);
-      const templatesPath = path.join(process.cwd(), 'src', 'templates');
+      const templatesPath = [path.join(__dirname, '..', '..', 'templates'), path.join(process.cwd(), 'dist', 'src', 'templates'), path.join(process.cwd(), 'dist', 'templates'), path.join(process.cwd(), 'src', 'templates')].find(p => fs.existsSync(p)) || path.join(process.cwd(), 'src', 'templates');
       const htmlPath = path.join(templatesPath, `remision-${estilo}.html`);
 
       console.log('📄 HTML path:', htmlPath);

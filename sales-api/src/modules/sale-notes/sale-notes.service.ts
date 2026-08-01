@@ -221,7 +221,7 @@ private async obtenerLogoUsuario(userId: string, token: string, cuentaUid?: stri
 
     // Limpiar sufijo -delivery del estilo (frontend manda 'classic-delivery', template es 'remision-classic.html')
     estilo = estilo.replace('-delivery', '');
-    const templatesPath = path.join(process.cwd(), 'src', 'templates');
+    const templatesPath = [path.join(__dirname, '..', '..', 'templates'), path.join(process.cwd(), 'dist', 'src', 'templates'), path.join(process.cwd(), 'dist', 'templates'), path.join(process.cwd(), 'src', 'templates')].find(p => fs.existsSync(p)) || path.join(process.cwd(), 'src', 'templates');
     const htmlPath = path.join(templatesPath, `remision-${estilo}.html`);
 
     console.log('📄 HTML path:', htmlPath);
