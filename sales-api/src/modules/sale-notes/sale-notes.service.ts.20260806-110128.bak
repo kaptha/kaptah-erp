@@ -627,29 +627,19 @@ this.logger.log(`📦 Job de stock encolado exitosamente: ${stockJob.id}`);
   async update(id: string, updateSaleNoteDto: UpdateSaleNoteDto, userId: string): Promise<SaleNote> {
     const saleNote = await this.findOne(id, userId);
 
+    // Recalcular total si se actualizan los items
     if (updateSaleNoteDto.items) {
-      const items = updateSaleNoteDto.items.map(item => {
-        const quantity = Number(item.quantity) || 0;
-        const unitPrice = Number(item.unitPrice) || 0;
-        const itemSubtotal = quantity * unitPrice;
-        const itemTaxes = Number(item.taxesTotal) || 0;
-        return {
-          ...item,
-          quantity,
-          unitPrice,
-          subtotal: itemSubtotal,
-          taxesTotal: itemTaxes,
-          total: itemSubtotal + itemTaxes,
-        };
-      });
+      const total = updateSaleNoteDto.items.reduce(
+        (sum, item) => sum + item.quantity * item.unitPrice,
+        0
+      );
 
-      const subtotal = items.reduce((s, i) => s + i.subtotal, 0);
-      const taxesTotal = items.reduce((s, i) => s + i.taxesTotal, 0);
-      const total = subtotal + taxesTotal;
+      const items = updateSaleNoteDto.items.map(item => ({
+        ...item,
+        subtotal: item.quantity * item.unitPrice,
+      }));
 
-      this.logger.log(`Recalculo update ${id}: subtotal=${subtotal} taxes=${taxesTotal} total=${total}`);
-
-      Object.assign(saleNote, { ...updateSaleNoteDto, items, subtotal, taxesTotal, total });
+      Object.assign(saleNote, { ...updateSaleNoteDto, items, total });
     } else {
       Object.assign(saleNote, updateSaleNoteDto);
     }
