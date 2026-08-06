@@ -104,27 +104,28 @@ create(@Body() createSaleNoteDto: CreateSaleNoteDto, @CurrentUser() user: any, @
 
   @Get(':id')
   @ApiOperation({ summary: 'Obtener una nota de venta por ID' })
-  findOne(@Param('id') id: string, @CurrentUser() user: any) {
-    return this.saleNotesService.findOne(id, user.uid);
-  }
+  findOne(@Param('id') id: string, @CurrentUser() user: any, @Query('cuentaUid') cuentaUid?: string) {
+  return this.saleNotesService.findOne(id, cuentaUid || user.uid);
+}
 
   @Put(':id')
   @ApiOperation({ summary: 'Actualizar una nota de venta' })
   @RequirePermission('notas_venta.editar')
-  update(
-    @Param('id') id: string,
-    @Body() updateSaleNoteDto: UpdateSaleNoteDto,
-    @CurrentUser() user: any
-  ) {
-    return this.saleNotesService.update(id, updateSaleNoteDto, user.uid);
-  }
+ update(
+  @Param('id') id: string,
+  @Body() updateSaleNoteDto: UpdateSaleNoteDto,
+  @CurrentUser() user: any,
+  @Query('cuentaUid') cuentaUid?: string
+) {
+  return this.saleNotesService.update(id, updateSaleNoteDto, cuentaUid || user.uid);
+}
 
   @Delete(':id')
   @ApiOperation({ summary: 'Eliminar una nota de venta' })
   @RequirePermission('notas_venta.eliminar')
-  remove(@Param('id') id: string, @CurrentUser() user: any) {
-    return this.saleNotesService.remove(id, user.uid);
-  }
+  remove(@Param('id') id: string, @CurrentUser() user: any, @Query('cuentaUid') cuentaUid?: string) {
+  return this.saleNotesService.remove(id, cuentaUid || user.uid);
+}
 
   @Post(':id/send-email')
   @ApiOperation({ summary: 'Enviar nota de venta por email' })
