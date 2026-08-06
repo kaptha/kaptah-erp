@@ -57,17 +57,23 @@ export class NoteService {
   }
 
   update(id: string, note: Partial<SaleNote>): Observable<SaleNote> {
+    const cuentaUid = localStorage.getItem('activeCuentaUid') || '';
+    const cuentaParam = cuentaUid ? `?cuentaUid=${cuentaUid}` : '';
+    const url = `${this.apiUrl}/${id}${cuentaParam}`;
     return this.getHeaders().pipe(
       switchMap((headers: HttpHeaders) => {
-        return this.http.patch<SaleNote>(`${this.apiUrl}/${id}`, note, { headers });
+        return this.http.put<SaleNote>(url, note, { headers });
       })
     );
   }
 
   delete(id: string): Observable<void> {
+    const cuentaUid = localStorage.getItem('activeCuentaUid') || '';
+    const cuentaParam = cuentaUid ? `?cuentaUid=${cuentaUid}` : '';
+    const url = `${this.apiUrl}/${id}${cuentaParam}`;
     return this.getHeaders().pipe(
       switchMap((headers: HttpHeaders) => {
-        return this.http.delete<void>(`${this.apiUrl}/${id}`, { headers });
+        return this.http.delete<void>(url, { headers });
       })
     );
   }

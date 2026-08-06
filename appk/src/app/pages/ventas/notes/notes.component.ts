@@ -253,25 +253,13 @@ onCustomRangeSearch() {
   editarNota(note: SaleNote) {
     const dialogRef = this.dialog.open(NoteFormModalComponent, {
       width: this.isMobile ? '95%' : '600px',
-      data: note,
+      data: { mode: 'edit', note: note },
       disableClose: false
     });
 
     dialogRef.afterClosed().subscribe(result => {
-      if (result && note.id) {
-        this.loading = true;
-        this.saleNotesService.update(note.id, result).subscribe({
-          next: (response) => {
-            Sweetalert.fnc('success', 'Nota actualizada correctamente', null);
-            this.loadNotes();
-            this.loading = false;
-          },
-          error: (error) => {
-            console.error('Error al actualizar la nota:', error);
-            Sweetalert.fnc('error', 'Error al actualizar la nota: ' + this.getErrorMessage(error), null);
-            this.loading = false;
-          }
-        });
+      if (result && result.saved) {
+        this.loadNotes();
       }
     });
   }

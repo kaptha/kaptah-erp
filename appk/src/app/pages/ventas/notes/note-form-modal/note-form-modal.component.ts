@@ -71,6 +71,8 @@ export class NoteFormModalComponent implements OnInit {
   productsList: any[] = [];
 
   loading: boolean = false;
+  isEditMode: boolean = false;
+  editingNoteId: string | null = null;
   
   
   constructor(
@@ -136,12 +138,13 @@ export class NoteFormModalComponent implements OnInit {
       } 
       // ✅ SEGUNDA CONDICIÓN: Editar nota con estructura nueva
       else if (this.data.note) {
-        console.log('📝 Modo edición con .note');
+        this.isEditMode = true;
+        this.editingNoteId = this.data.note.id;
         this.patchForm(this.data.note);
       }
-      // ✅ TERCERA CONDICIÓN: Editar nota formato legacy
       else if ('id' in this.data && 'customerName' in this.data) {
-        console.log('📝 Modo edición formato legacy');
+        this.isEditMode = true;
+        this.editingNoteId = (this.data as any).id;
         this.patchForm(this.data as any as SaleNote);
       }
       // ❌ NINGUNA CONDICIÓN CUMPLIDA
@@ -969,23 +972,23 @@ console.log('🔍 FORM observaciones control:', this.noteForm.get('observaciones
     return;
   }
 
-  Sweetalert.fnc('loading', 'Guardando...', null);
+  Sweetalert.fnc('loading', this.isEditMode ? 'Actualizando...' : 'Guardando...', null);
   this.loading = true;
 
-  this.noteService.create(noteDto).subscribe({
+  const request$ = this.isEditMode && this.editingNoteId
+    ? this.noteService.update(this.editingNoteId, { ...noteDto, afectaInventario: false } as any)
+    : this.noteService.create(noteDto);
+
+  request$.subscribe({
     next: (response) => {
-      console.log('✅ Nota guardada:', response);
-      Sweetalert.fnc('close', '', null);
-      Sweetalert.fnc('success', 'Nota creada correctamente', null);
-      
+      Sweetalert.fnc('success', this.isEditMode ? 'Nota actualizada correctamente' : 'Nota creada correctamente', null);
       setTimeout(() => {
         this.dialogRef.close({ saved: true, note: response });
       }, 1500);
     },
     error: (error) => {
-      console.error('❌ Error:', error);
-      Sweetalert.fnc('close', '', null);
-      Sweetalert.fnc('error', error.error?.message || 'Error', null);
+      console.error('Error al guardar nota:', error);
+      Sweetalert.fnc('error', error.error?.message || 'Error al guardar la nota', null);
       this.loading = false;
     }
   });
