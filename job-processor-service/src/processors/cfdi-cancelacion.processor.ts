@@ -12,6 +12,7 @@ interface CancelacionJob {
   userId: string;
   empresaId: string;
   certificadoId: string;
+  firebaseToken?: string;
 }
 
 @Processor(QueueName.CFDI_TIMBRADO)
@@ -33,7 +34,7 @@ export class CfdiCancelacionProcessor {
 
   @Process('cancelar-cfdi')
   async cancelarCFDI(job: Job<CancelacionJob>): Promise<any> {
-    const { cfdiId, motivo, uuidSustitucion, userId } = job.data;
+    const { cfdiId, motivo, uuidSustitucion, userId, firebaseToken } = job.data;
     this.logger.log(`🚫 Procesando cancelacion CFDI: ${cfdiId} motivo: ${motivo}`);
 
     try {
@@ -52,7 +53,7 @@ export class CfdiCancelacionProcessor {
 
       // 2. Obtener CSD desde cert-vault-service usando userId como firebaseUid
       this.logger.log('🔐 Obteniendo CSD del cert-vault-service...');
-      const csd = await this.getCsd(userId);
+      const csd = await this.getCsd(firebaseToken || userId);
       await job.progress(40);
 
       // 3. Generar PFX en memoria
@@ -288,3 +289,4 @@ export class CfdiCancelacionProcessor {
     }
   }
 }
+
