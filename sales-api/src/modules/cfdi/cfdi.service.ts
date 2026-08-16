@@ -1120,8 +1120,9 @@ private generateComplementoPagos(data: any): string {
       uuidSustitucion,
       userId,
       empresaId: userId,
-      certificadoId: 'default'
-    });
+      certificadoId: 'default',
+      firebaseToken
+   });
 
     return {
       success: true,
@@ -1816,5 +1817,6 @@ async sendCfdiByEmail(
   }
 }
 }
+
 
 

@@ -228,6 +228,7 @@ async sendDeliveryNoteEmail(data: {
     userId: string;
     empresaId: string;
     certificadoId: string;
+    firebaseToken?: string;
   }) {
     return await this.timbradoQueue.add('cancelar-cfdi', data, {
       priority: 2,
