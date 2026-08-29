@@ -8,7 +8,6 @@ import { catchError, finalize, map, tap} from 'rxjs/operators';
 import { of, Observable, firstValueFrom } from 'rxjs';
 import * as XLSX from 'xlsx';
 import { HttpClient } from '@angular/common/http';
-import Swal from 'sweetalert2';
 import { ModalCotComponent } from './modal-cot/modal-cot.component';
 import { CotizacionesService, Cotizacion } from '../../services/cotizaciones.service';
 import { ApibizService } from '../../services/apibiz.service';
@@ -128,15 +127,11 @@ export class CotizacionesComponent implements OnInit, AfterViewInit {
           next: (cotizacionCreada) => {
             console.log('Cotización creada exitosamente:', cotizacionCreada);
             this.cargarCotizaciones(); // Recargar la lista
-            this.snackBar.open('Cotización creada exitosamente', 'Cerrar', {
-              duration: 3000
-            });
+            Sweetalert.fnc('success', 'Cotización creada exitosamente', null);
           },
           error: (error) => {
             console.error('Error al crear la cotización:', error);
-            this.snackBar.open('Error al crear la cotización: ' + (error.message || 'Error desconocido'), 'Cerrar', {
-              duration: 5000
-            });
+            Sweetalert.fnc('error', 'Error al crear la cotización: ' + (error.message || 'Error desconocido'), null);
           }
         });
       }
@@ -145,9 +140,7 @@ export class CotizacionesComponent implements OnInit, AfterViewInit {
 
   editarCotizacion(element: Cotizacion) {
     if (!element.id) {
-      this.snackBar.open('ID de cotización no válido', 'Cerrar', {
-        duration: 3000
-      });
+      Sweetalert.fnc('error', 'ID de cotización no válido', null);
       return;
     }
     
@@ -164,39 +157,38 @@ export class CotizacionesComponent implements OnInit, AfterViewInit {
         dialogRef.afterClosed().subscribe(result => {
           if (result) {
             this.cargarCotizaciones();
-            this.snackBar.open('Cotización actualizada exitosamente', 'Cerrar', {
-              duration: 3000
-            });
+            Sweetalert.fnc('success', 'Cotización actualizada exitosamente', null);
           }
         });
       },
       error: (error) => {
-        this.snackBar.open('Error al cargar los detalles de la cotización', 'Cerrar', {
-          duration: 3000
-        });
+        Sweetalert.fnc('error', 'Error al cargar los detalles de la cotización', null);
         console.error('Error:', error);
       }
     });
   }
 
-  eliminarCotizacion(id: number) {
-    if (confirm('¿Está seguro de eliminar esta cotización?')) {
-      this.cotizacionesService.deleteCotizacion(id)
-        .subscribe({
-          next: () => {
-            this.snackBar.open('Cotización eliminada exitosamente', 'Cerrar', {
-              duration: 3000
-            });
-            this.cargarCotizaciones();
-          },
-          error: (error) => {
-            this.snackBar.open('Error al eliminar la cotización', 'Cerrar', {
-              duration: 3000
-            });
-            console.error('Error:', error);
-          }
-        });
-    }
+  async eliminarCotizacion(id: number) {
+    const confirmed = await Sweetalert.confirmDelete(
+      '¿Eliminar cotización?',
+      'Esta acción no se puede deshacer'
+    );
+
+    if (!confirmed) return;
+
+    this.isLoading = true;
+    this.cotizacionesService.deleteCotizacion(id).subscribe({
+      next: () => {
+        Sweetalert.fnc('success', 'Cotización eliminada correctamente', null);
+        this.cargarCotizaciones();
+        this.isLoading = false;
+      },
+      error: (error) => {
+        console.error('Error al eliminar la cotización:', error);
+        Sweetalert.fnc('error', 'Error al eliminar la cotización: ' + this.getErrorMessage(error), null);
+        this.isLoading = false;
+      }
+    });
   }
 
   /**
@@ -523,9 +515,7 @@ private procesarItemEncontrado(item: any, cotizacionCompleta: Cotizacion): void 
  */
 verDetalles(cotizacion: Cotizacion) {
   if (!cotizacion.id) {
-    this.snackBar.open('ID de cotización no válido', 'Cerrar', {
-      duration: 3000
-    });
+    Sweetalert.fnc('error', 'ID de cotización no válido', null);
     return;
   }
   
@@ -735,9 +725,7 @@ private async generarVistaPrevia(cotizacionCompleta: Cotizacion) {
    */
   async descargarPDF(cotizacion: Cotizacion) {
   if (!cotizacion.id) {
-    this.snackBar.open('ID de cotización no válido', 'Cerrar', {
-      duration: 3000
-    });
+    Sweetalert.fnc('error', 'ID de cotización no válido', null);
     return;
   }
   
@@ -1089,31 +1077,17 @@ enviarPorEmail(cotizacion: any): void {
 
   dialogRef.afterClosed().subscribe(result => {
     if (result) {
-      const loadingSnack = this.snackBar.open('Enviando cotización...', '', {
-        duration: 0
-      });
+      Sweetalert.fnc('loading', 'Enviando cotización...', null);
 
       this.cotizacionesService.sendQuotationByEmail(cotizacion.id, result).subscribe({
         next: (response) => {
-          loadingSnack.dismiss();
-          
-          Swal.fire({
-            icon: 'success',
-            title: '¡Email Enviado!',
-            text: response.message || 'La cotización se envió exitosamente',
-            confirmButtonColor: '#7F3FF0',
-          });
+          Sweetalert.fnc('close', '', null);
+          Sweetalert.fnc('success', response.message || 'La cotización se envió exitosamente', null);
         },
         error: (error) => {
-          loadingSnack.dismiss();
+          Sweetalert.fnc('close', '', null);
           console.error('Error enviando email:', error);
-          
-          Swal.fire({
-            icon: 'error',
-            title: 'Error al Enviar',
-            text: error.error?.message || 'No se pudo enviar el email',
-            confirmButtonColor: '#7F3FF0',
-          });
+          Sweetalert.fnc('error', error.error?.message || 'No se pudo enviar el email', null);
         }
       });
     }
