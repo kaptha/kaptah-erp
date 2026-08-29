@@ -57,3 +57,5 @@ ai-fiscal-service/
 *.key
 *.p12
 *.pfx
+
+*.bak
