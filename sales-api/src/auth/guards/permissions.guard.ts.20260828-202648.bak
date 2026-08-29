@@ -32,11 +32,6 @@ export class PermissionsGuard implements CanActivate {
     }
 
     try {
-      if (user.uid === cuentaUid) {
-        this.logger.debug('Usuario ' + user.uid + ' es propietario de la cuenta, acceso total');
-        return true;
-      }
-
       const url = this.bizEntitiesApiUrl + '/api/roles/permissions/' + user.uid + '?cuentaUid=' + cuentaUid;
       const response = await fetch(url, {
         headers: {
