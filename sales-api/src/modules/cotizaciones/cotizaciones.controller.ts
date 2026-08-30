@@ -14,8 +14,7 @@ import {
   UseGuards,
   Res,
   Req,
-  Headers
-} from '@nestjs/common';
+  Headers, UnauthorizedException } from '@nestjs/common';
 import { PermissionsGuard } from '../../auth/guards/permissions.guard';
 import { RequirePermission } from '../../auth/decorators/require-permission.decorator';
 import type { Response, Request } from 'express';
@@ -49,11 +48,22 @@ export class CotizacionesController {
   ) {
     this.logger.log(`📬 POST /cotizaciones - Crear nueva cotización`);
     
-    this.logger.debug(`DTO recibido: ${JSON.stringify(createCotizacionDto)}`);
-    this.logger.debug(`usuario_id en DTO: ${createCotizacionDto.usuario_id}`);
-    
-    this.logger.log(`Usuario ID: ${createCotizacionDto.usuario_id} | Cliente: ${createCotizacionDto.cliente_id} | Sucursal: ${createCotizacionDto.sucursal_id || 'Sin sucursal'}`);
-    
+        this.logger.debug(`DTO recibido: ${JSON.stringify(createCotizacionDto)}`);
+
+    // SEGURIDAD: el usuario_id se deriva SIEMPRE del token autenticado.
+    // Nunca se confia en el valor que manda el cliente.
+    const ownerUid = cuentaUid || user?.uid;
+    if (!ownerUid) {
+      throw new UnauthorizedException('No se pudo identificar la cuenta del usuario');
+    }
+
+    const usuarioCuenta = await this.usuariosService.findByFirebaseUid(ownerUid);
+    createCotizacionDto.usuario_id = usuarioCuenta.ID;
+
+    this.logger.log(
+      `Usuario ID: ${usuarioCuenta.ID} (uid ${ownerUid}) | Cliente: ${createCotizacionDto.cliente_id} | Sucursal: ${createCotizacionDto.sucursal_id || 'Sin sucursal'}`,
+    );
+
     const cotizacion = await this.cotizacionesService.create(createCotizacionDto);
     
     return {
@@ -128,7 +138,14 @@ export class CotizacionesController {
       const usuario = await this.usuariosService.findByFirebaseUid(cuentaUid || user.uid);
       usuarioId = usuario.ID;
     } catch (e) {
-      this.logger.warn('No se encontro usuario por UID, mostrando todas las cotizaciones');
+      this.logger.warn(
+        `No se encontro usuario para uid ${cuentaUid || user.uid}; devolviendo lista vacia`,
+      );
+      return {
+        success: true,
+        data: [],
+        message: '0 cotizaciones',
+      };
     }
 
     const cotizaciones = await this.cotizacionesService.findAll(usuarioId);
