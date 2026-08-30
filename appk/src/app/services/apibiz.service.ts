@@ -229,51 +229,60 @@ private getActiveCuentaUid(): string | null {
   }
   // MÃ©todo para obtener tÃ©rminos y condiciones
 getTerminosCondiciones(): Observable<{terminos: string}> {
-  const idToken = localStorage.getItem('idToken');
-  if (!idToken) {
-    return throwError(() => new Error('No se encontrÃ³ el token de autenticaciÃ³n'));
+  // La cuenta activa manda; si no hay, el uid del usuario logueado.
+  let ownerUid: string = this.getActiveCuentaUid() || '';
+  if (!ownerUid) {
+    try {
+      const stored = JSON.parse(localStorage.getItem('user') || '{}');
+      ownerUid = stored?.uid || stored?.firebaseUid || '';
+    } catch {
+      ownerUid = '';
+    }
   }
-  
-  return this.usersService.getUserByToken(idToken).pipe(
-    switchMap(user => {
-      if (!user || !user.firebaseUid) {
-        throw new Error('No se encontrÃ³ el usuario o firebaseUid');
-      }
-      const headers = this.getHeaders();
-      return this.http.get<{terminos: string}>(
-        `${this.apiUrl}/users/terminos/${user.firebaseUid}`, 
-        { headers }
-      );
-    }),
+  if (!ownerUid) {
+    return throwError(() => new Error('No se pudo identificar la cuenta del usuario'));
+  }
+
+  const headers = this.getHeaders();
+  return this.http.get<{terminos: string}>(
+    `${this.apiUrl}/users/terminos/${ownerUid}`,
+    { headers }
+  ).pipe(
     catchError((error: any) => {
       if (error?.status === 404 || error?.error?.statusCode === 404) {
         return of({ terminos: '' });
       }
-      return throwError(() => new Error(error.error?.message || 'Error desconocido'));
+      return throwError(() => error);
     })
   );
 }
 
 // MÃ©todo para actualizar tÃ©rminos y condiciones
 updateTerminosCondiciones(terminos: string): Observable<any> {
-  const idToken = localStorage.getItem('idToken');
-  if (!idToken) {
-    return throwError(() => new Error('No se encontrÃ³ el token de autenticaciÃ³n'));
+  // La cuenta activa manda; si no hay, el uid del usuario logueado.
+  let ownerUid: string = this.getActiveCuentaUid() || '';
+  if (!ownerUid) {
+    try {
+      const stored = JSON.parse(localStorage.getItem('user') || '{}');
+      ownerUid = stored?.uid || stored?.firebaseUid || '';
+    } catch {
+      ownerUid = '';
+    }
   }
-  
-  return this.usersService.getUserByToken(idToken).pipe(
-    switchMap(user => {
-      if (!user || !user.firebaseUid) {
-        throw new Error('No se encontrÃ³ el usuario o firebaseUid');
-      }
-      const headers = this.getHeaders();
-      return this.http.put(
-        `${this.apiUrl}/users/terminos/${user.firebaseUid}`, 
-        { terminos }, 
-        { headers }
-      );
-    }),
-    catchError(this.handleError)
+  if (!ownerUid) {
+    return throwError(() => new Error('No se pudo identificar la cuenta del usuario'));
+  }
+
+  const headers = this.getHeaders();
+  return this.http.put(
+    `${this.apiUrl}/users/terminos/${ownerUid}`,
+    { terminos },
+    { headers }
+  ).pipe(
+    catchError((error: any) => {
+      const msg = error?.error?.message || error?.message || 'Error al guardar los terminos';
+      return throwError(() => new Error(msg));
+    })
   );
 }
 }
