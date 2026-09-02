@@ -9,8 +9,26 @@ export class CfdiTemplateService {
   private readonly templatesPath: string;
 
   constructor() {
-    this.templatesPath = path.join(__dirname, '..', '..', '..', '..', 'templates', 'cfdi');
-    this.logger.log(`📁 Templates path: ${this.templatesPath}`);
+    // El asset se copia a dist/src/templates (ver outDir en nest-cli.json),
+    // pero el .js compilado vive en dist/src/modules/cfdi/services.
+    // Se prueban varias rutas para que funcione en local y en el contenedor.
+    const candidatos = [
+      path.join(__dirname, '..', '..', '..', 'templates', 'cfdi'),
+      path.join(__dirname, '..', '..', '..', '..', 'templates', 'cfdi'),
+      path.join(process.cwd(), 'dist', 'src', 'templates', 'cfdi'),
+      path.join(process.cwd(), 'src', 'templates', 'cfdi'),
+    ];
+
+    const encontrado = candidatos.find((p) => fs.existsSync(p));
+    this.templatesPath = encontrado || candidatos[0];
+
+    if (encontrado) {
+      this.logger.log(`Templates path: ${this.templatesPath}`);
+    } else {
+      this.logger.error(
+        `No se encontro el directorio de plantillas. Candidatos probados: ${candidatos.join(' | ')}`,
+      );
+    }
   }
 
   /**
