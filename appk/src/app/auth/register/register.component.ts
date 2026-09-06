@@ -216,6 +216,7 @@ export class RegisterComponent implements OnInit {
       rfc: formData.rfc,
       telefono: formData.phone,
       plan: formData.plan,
+      firebaseUid: authResp.localId,
       suscripcionActiva: false,
       cicloFacturacion: 'anual',
       Confirm: false
