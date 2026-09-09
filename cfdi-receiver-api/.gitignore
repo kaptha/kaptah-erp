@@ -54,3 +54,6 @@ pids
 
 # Diagnostic reports (https://nodejs.org/api/report.html)
 report.[0-9]*.[0-9]*.[0-9]*.[0-9]*.json
+
+# Fixtures de prueba del SAT (FIEL publica EKU9003173C9, no son credenciales reales)
+!src/sat-descarga/request-builder/__tests__/_files/*
