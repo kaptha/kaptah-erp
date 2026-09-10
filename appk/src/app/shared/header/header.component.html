@@ -1,8 +1,31 @@
 <mat-toolbar class="header">
   <button mat-icon-button (click)="toggleSidebar()">
     <mat-icon>menu</mat-icon>
-  </button>  
+  </button>
   <span class="spacer"></span>
+
+  <!-- Cambio rapido de cuenta: solo si el usuario tiene acceso a mas de una -->
+  @if (accounts.length > 1) {
+    <button mat-button class="account-switch" [matMenuTriggerFor]="accountMenu" [disabled]="switchingAccount">
+      <mat-icon>business</mat-icon>
+      <span class="account-switch-name">{{ activeCuentaNombre }}</span>
+      <mat-icon>arrow_drop_down</mat-icon>
+    </button>
+    <mat-menu #accountMenu="matMenu" class="account-menu">
+      <div class="account-menu-title">Cambiar de empresa</div>
+      <mat-divider></mat-divider>
+      @for (account of accounts; track account.cuentaFirebaseUid) {
+        <button mat-menu-item (click)="switchAccount(account)" [disabled]="account.cuentaFirebaseUid === activeCuentaUid">
+          <mat-icon>{{ account.cuentaFirebaseUid === activeCuentaUid ? 'check_circle' : 'business' }}</mat-icon>
+          <span class="account-item">
+            <span class="account-item-name">{{ account.nombreCuenta }}</span>
+            <span class="account-item-role">{{ account.rol }}</span>
+          </span>
+        </button>
+      }
+    </mat-menu>
+  }
+
   <button mat-icon-button [matMenuTriggerFor]="settingsMenu">
     <mat-icon>settings</mat-icon>
   </button>
@@ -27,8 +50,8 @@
       {{ getUserInitials() }}
     </div>
   </button>
-  
-  <!-- Menú del usuario -->
+
+  <!-- Menu del usuario -->
   <mat-menu #userMenu="matMenu">
     <div class="user-menu-header">
       <div class="user-avatar-large">
@@ -36,6 +59,9 @@
       </div>
       <div class="user-info">
         <div class="user-full-name">{{ userName || 'Usuario' }}</div>
+        @if (accounts.length > 1) {
+          <div class="user-active-account">{{ activeCuentaNombre }}</div>
+        }
       </div>
     </div>
     <mat-divider></mat-divider>
@@ -49,4 +75,3 @@
     </button>
   </mat-menu>
 </mat-toolbar>
-  
