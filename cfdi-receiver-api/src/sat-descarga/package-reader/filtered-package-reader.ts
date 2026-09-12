@@ -1,5 +1,5 @@
 import { readFile } from 'node:fs/promises';
-import AdmZip from 'adm-zip';
+import AdmZip = require('adm-zip');
 import { FileFilter, NullFileFilter } from './file-filters';
 import { PackageReader } from './package-reader.interface';
 import { OpenZipFileError } from './package-reader.errors';
