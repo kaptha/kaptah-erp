@@ -9,10 +9,14 @@ export class FielCertificate {
     @Column({ name: 'user_id', type: 'varchar', length: 128 })
     userId: string;
 
-    @Column({ name: 'certificate_number', type: 'varchar', length: 100 }) // Aumentado el length
+    /** RFC leído del certificado al cargarlo */
+    @Column({ name: 'rfc', type: 'varchar', length: 13, nullable: true })
+    rfc: string;
+
+    @Column({ name: 'certificate_number', type: 'varchar', length: 100 })
     certificateNumber: string;
 
-    @Column({ name: 'serial_number', type: 'varchar', length: 100 }) // Aumentado el length
+    @Column({ name: 'serial_number', type: 'varchar', length: 100 })
     serialNumber: string;
 
     @Column({ name: 'valid_from' })
@@ -30,8 +34,17 @@ export class FielCertificate {
     @Column({ name: 'key_file', type: 'bytea' })
     keyFile: Buffer;
 
+    /** bcrypt: solo para verificar que el usuario tecleó bien la contraseña */
     @Column({ name: 'password_hash' })
     passwordHash: string;
+
+    /** AES-256-GCM (FielCryptoService). Solo si el usuario autorizó descarga masiva automática. */
+    @Column({ name: 'password_encrypted', type: 'text', nullable: true })
+    passwordEncrypted: string | null;
+
+    /** Consentimiento explícito: la contraseña se usará para la descarga masiva del SAT */
+    @Column({ name: 'descarga_masiva_autorizada', type: 'boolean', default: false })
+    descargaMasivaAutorizada: boolean;
 
     @CreateDateColumn({ name: 'created_at' })
     createdAt: Date;

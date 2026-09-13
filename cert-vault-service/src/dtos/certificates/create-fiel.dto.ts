@@ -1,5 +1,6 @@
-import { IsNotEmpty, IsOptional, IsString, IsDateString } from 'class-validator';
-import { ApiProperty } from '@nestjs/swagger';
+import { IsNotEmpty, IsOptional, IsString, IsBoolean } from 'class-validator';
+import { Transform } from 'class-transformer';
+import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 
 export class CreateFielCertificateDto {
     @ApiProperty({ description: 'ID del usuario' })
@@ -27,7 +28,7 @@ export class CreateFielCertificateDto {
     @IsNotEmpty()
     validUntil: string;
 
-    @ApiProperty({ description: 'Contraseña del certificado' })
+    @ApiProperty({ description: 'Contraseña de la llave privada' })
     @IsString()
     @IsNotEmpty()
     password: string;
@@ -41,6 +42,16 @@ export class CreateFielCertificateDto {
     @IsString()
     @IsNotEmpty()
     issuerSerial: string;
+
+    /**
+     * Consentimiento: "Autorizo que la contraseña de mi e.firma se guarde cifrada para
+     * descargar automáticamente mis CFDI del SAT". En multipart llega como 'true'/'false'.
+     */
+    @ApiPropertyOptional({ description: 'Autoriza guardar la contraseña cifrada para descarga masiva automática' })
+    @IsOptional()
+    @Transform(({ value }) => value === true || value === 'true' || value === '1')
+    @IsBoolean()
+    autorizarDescargaMasiva?: boolean;
 
     // Estos campos se manejarán en el servicio
     cerFile: Buffer;
