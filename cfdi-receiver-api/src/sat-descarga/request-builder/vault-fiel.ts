@@ -51,7 +51,7 @@ export class VaultFiel implements Fiel {
     if (res.status === 403) {
       throw new RequestBuilderError(`La cuenta ${cuentaUid} no autorizó la descarga masiva automática`);
     }
-    if (res.status !== 200 || !res.data?.certificatePem) {
+    if (res.status < 200 || res.status >= 300 || !res.data?.certificatePem) {
       throw new RequestBuilderError(`cert-vault respondió ${res.status} al obtener la e.firma de ${cuentaUid}`);
     }
     return new VaultFiel(cuentaUid, res.data, http, options);
@@ -103,7 +103,7 @@ export class VaultFiel implements Fiel {
       },
       { headers: { 'X-Service-Token': this.options.serviceToken }, timeout: this.options.timeoutMs ?? 15_000, validateStatus: () => true },
     );
-    if (res.status !== 200 || !res.data?.signature) {
+    if (res.status < 200 || res.status >= 300 || !res.data?.signature) {
       throw new RequestBuilderError(`cert-vault respondió ${res.status} al firmar para ${this.cuentaUid}`);
     }
     const signature = Buffer.from(res.data.signature, 'base64');

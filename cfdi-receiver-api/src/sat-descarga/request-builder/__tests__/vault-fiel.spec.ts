@@ -38,7 +38,7 @@ function fakeVault(opts: { token?: string; signCalls?: string[] } = {}): AxiosAd
     }
     const body = JSON.parse(cfg.data as string) as { data: string };
     opts.signCalls?.push(body.data);
-    return ok({ signature: local.sign(Buffer.from(body.data, 'base64')).toString('base64') });
+    return ok({ signature: local.sign(Buffer.from(body.data, 'base64')).toString('base64') }, 201); // Nest responde 201 a POST
   };
 }
 
