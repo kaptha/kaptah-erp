@@ -6,11 +6,10 @@ export class FielUsageLog {
     @PrimaryGeneratedColumn('uuid')
     id: string;
 
-    @Column({ name: 'fiel_id', type: 'uuid' })
+    @Column({ type: 'uuid' })
     fielId: string;
 
-    /** uid de Firebase (no es UUID) */
-    @Column({ name: 'user_id', type: 'varchar', length: 128 })
+    @Column({ type: 'uuid' })
     userId: string;
 
     @Column({ name: 'action_type', length: 50 })

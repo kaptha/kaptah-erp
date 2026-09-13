@@ -1,4 +1,4 @@
-import { Injectable, BadRequestException, NotFoundException, ForbiddenException } from '@nestjs/common';
+import { Injectable, BadRequestException, NotFoundException, ForbiddenException, Logger } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { FielCertificate, FielUsageLog } from '../entities';
@@ -30,6 +30,8 @@ export interface FielSigningMaterial extends FielPublicInfo {
 
 @Injectable()
 export class FielService {
+  private readonly logger = new Logger(FielService.name);
+
   constructor(
     @InjectRepository(FielCertificate)
     private fielRepository: Repository<FielCertificate>,
@@ -128,9 +130,15 @@ export class FielService {
     await this.fielRepository.update(cert.id, { passwordEncrypted: null, descargaMasivaAutorizada: false });
   }
 
-  async logUsage(fielId: string, userId: string, action: string, details: Partial<FielUsageLog> = {}) {
-    const log = this.logRepository.create({ fielId, userId, actionType: action, status: 'success', ...details });
-    return await this.logRepository.save(log);
+  /** Bitácora best-effort: un fallo aquí nunca debe impedir una firma */
+  async logUsage(fielId: string, userId: string, action: string, details: Partial<FielUsageLog> = {}): Promise<FielUsageLog | null> {
+    try {
+      const log = this.logRepository.create({ fielId, userId, actionType: action, status: 'success', ...details });
+      return await this.logRepository.save(log);
+    } catch (error) {
+      this.logger.warn(`No se pudo registrar uso de FIEL (${action}): ${(error as Error).message}`);
+      return null;
+    }
   }
 
   private async findActiveEntity(userId: string): Promise<FielCertificate> {
