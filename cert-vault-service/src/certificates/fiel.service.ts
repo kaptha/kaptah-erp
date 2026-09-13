@@ -72,6 +72,16 @@ export class FielService {
     return this.toPublic(saved);
   }
 
+  /** Cuentas con FIEL activa que autorizaron descarga masiva (para el cron de cfdi-receiver-api) */
+  async listAuthorized(): Promise<Array<{ userId: string; rfc: string }>> {
+    const rows = await this.fielRepository.find({
+      where: { status: 'active', descargaMasivaAutorizada: true },
+      select: ['userId', 'rfc'],
+      order: { userId: 'ASC' },
+    });
+    return rows.map((r) => ({ userId: r.userId, rfc: r.rfc }));
+  }
+
   /** Metadatos de la FIEL activa (sin llave, sin hash, sin contraseña) */
   async findActive(userId: string): Promise<FielPublicInfo> {
     return this.toPublic(await this.findActiveEntity(userId));

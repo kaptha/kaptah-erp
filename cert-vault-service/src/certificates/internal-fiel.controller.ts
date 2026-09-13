@@ -33,6 +33,12 @@ export class SignRequestDto {
 export class InternalFielController {
   constructor(private readonly fielService: FielService) {}
 
+  /** Cuentas con descarga masiva autorizada: [{ userId, rfc }] */
+  @Get()
+  async list() {
+    return await this.fielService.listAuthorized();
+  }
+
   /** Material no secreto: RFC, certificado PEM, serie decimal, emisor */
   @Get(':cuentaUid')
   async material(@Param('cuentaUid') cuentaUid: string) {
