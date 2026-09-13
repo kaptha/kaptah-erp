@@ -1,14 +1,9 @@
-import { Entity, Column, PrimaryGeneratedColumn, Index } from 'typeorm';
+import { Entity, Column, PrimaryGeneratedColumn } from 'typeorm';
 
 @Entity('xmls_recibidos')
-@Index('ux_xmls_recibidos_usuario_uuid', ['usuario_id', 'uuid'], { unique: true, where: 'uuid IS NOT NULL' })
 export class XmlRecibido {
   @PrimaryGeneratedColumn()
   id: number;
-
-  /** Folio fiscal (TimbreFiscalDigital/@UUID) en minúsculas; clave de deduplicación */
-  @Column({ name: 'uuid', type: 'varchar', length: 36, nullable: true })
-  uuid: string | null;
 
   @Column({ name: 'rfc_emisor', type: 'varchar', length: 13, nullable: true })
   rfc_emisor: string;

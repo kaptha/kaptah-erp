@@ -2,7 +2,6 @@ import { Injectable, Logger } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { XmlRecibido } from '../entities/xml-recibido.entity';
-import { obtainUuidFromXmlCfdi } from '../../sat-descarga/package-reader/cfdi-uuid';
 import * as fs from 'fs';
 import * as path from 'path';
 import * as xml2js from 'xml2js';
@@ -192,7 +191,6 @@ export class XmlImportService {
     const xmlRecord = this.xmlRepository.create({
       rfc_emisor: rfcEmisor,      // ✅ Ahora sí se guarda
       rfc_receptor: rfcReceptor,
-      uuid: obtainUuidFromXmlCfdi(contenidoXml) || null,
       fecha_recepcion: new Date(),
       xml_completo: contenidoXml,
       usuario_id: usuarioId,
@@ -279,38 +277,6 @@ async reprocesarRfcsExistentes(): Promise<{ procesados: number; actualizados: nu
   this.logger.log(`Reprocesamiento completado. Actualizados: ${resultado.actualizados}, Errores: ${resultado.errores}`);
   return resultado;
 }
-
-  /**
-   * Completa filas que se importaron solo con RFCs (SIFEI antiguo, o sin uuid):
-   * datos financieros y UUID del timbre. Si se pasa usuarioId, solo esa cuenta.
-   */
-  async completarXmlsIncompletos(usuarioId?: string): Promise<{ procesados: number; actualizados: number; errores: number }> {
-    const resultado = { procesados: 0, actualizados: 0, errores: 0 };
-    const qb = this.xmlRepository
-      .createQueryBuilder('xml')
-      .where('((xml.folio IS NULL AND xml.total IS NULL) OR xml.uuid IS NULL)');
-    if (usuarioId) {
-      qb.andWhere('xml.usuario_id = :usuarioId', { usuarioId });
-    }
-    const pendientes = await qb.getMany();
-    this.logger.log(`Completando ${pendientes.length} XMLs incompletos`);
-
-    for (const xml of pendientes) {
-      resultado.procesados++;
-      try {
-        const datos = await this.extraerDatosCompletosDelXml(xml.xml_completo);
-        const uuid = obtainUuidFromXmlCfdi(xml.xml_completo) || null;
-        await this.xmlRepository.update(xml.id, { ...datos, uuid: xml.uuid ?? uuid });
-        resultado.actualizados++;
-      } catch (error) {
-        resultado.errores++;
-        this.logger.error(`Error completando XML ${xml.id}: ${error.message}`);
-      }
-    }
-
-    this.logger.log(`Completado. Actualizados: ${resultado.actualizados}, Errores: ${resultado.errores}`);
-    return resultado;
-  }
 
   /**
    * Extrae el RFC del receptor del contenido XML
@@ -444,33 +410,26 @@ private async extraerDatosCompletosDelXml(contenidoXml: string): Promise<Partial
       porEstado,
     };
   }
-
-  /**
-   * Procesar contenido XML directamente (SIFEI y descarga masiva SAT).
-   * Extrae todos los datos del comprobante y deduplica por UUID del timbre.
+/**
+   * Procesar contenido XML directamente (usado por sincronizacion automatica con SIFEI)
    */
   async procesarXmlDesdeContenido(contenidoXml: string, usuarioId: string): Promise<{ success: boolean; message: string }> {
     try {
-      const uuid = obtainUuidFromXmlCfdi(contenidoXml) || null;
-      const datos = await this.extraerDatosCompletosDelXml(contenidoXml);
+      const { rfcEmisor, rfcReceptor } = await this.extraerRfcsDelXml(contenidoXml);
 
-      // Deduplicación: por UUID cuando hay timbre; por contenido si no lo hubiera
-      const existe = uuid
-        ? await this.xmlRepository.findOne({ where: { usuario_id: usuarioId, uuid } })
-        : await this.xmlRepository.findOne({ where: { usuario_id: usuarioId, xml_completo: contenidoXml } });
+      // Verificar si ya existe por RFC emisor + contenido
+      const existe = await this.xmlRepository.findOne({
+        where: { rfc_emisor: rfcEmisor, rfc_receptor: rfcReceptor, xml_completo: contenidoXml },
+      });
 
       if (existe) {
-        // Aprovecha para completar filas viejas que quedaron sin datos
-        if (!existe.folio && !existe.total) {
-          await this.xmlRepository.update(existe.id, { ...datos, uuid: existe.uuid ?? uuid });
-        }
-        this.logger.debug(`XML duplicado, omitiendo: ${uuid ?? datos.rfc_emisor}`);
+        this.logger.debug(`XML duplicado, omitiendo: ${rfcEmisor} -> ${rfcReceptor}`);
         return { success: false, message: 'XML duplicado' };
       }
 
       const xmlRecord = this.xmlRepository.create({
-        ...datos,
-        uuid,
+        rfc_emisor: rfcEmisor,
+        rfc_receptor: rfcReceptor,
         fecha_recepcion: new Date(),
         xml_completo: contenidoXml,
         usuario_id: usuarioId,
@@ -478,10 +437,10 @@ private async extraerDatosCompletosDelXml(contenidoXml: string): Promise<Partial
       });
       await this.xmlRepository.save(xmlRecord);
 
-      this.logger.log(`XML importado: ${uuid ?? '(sin uuid)'} ${datos.rfc_emisor} -> ${datos.rfc_receptor}`);
+      this.logger.log(`XML importado via SIFEI: ${rfcEmisor} -> ${rfcReceptor}`);
       return { success: true, message: 'XML importado correctamente' };
     } catch (error) {
-      this.logger.error(`Error procesando XML: ${error.message}`);
+      this.logger.error(`Error procesando XML desde SIFEI: ${error.message}`);
       return { success: false, message: error.message };
     }
   }
