@@ -7,7 +7,7 @@ import { SatDescargaService } from './sat-descarga.service';
 /**
  * Crons del módulo. Se activan solo con SAT_DESCARGA_CRON_ENABLED=true.
  *
- *  - Diario 03:15 UTC: presenta solicitudes de AYER (recibidos y emitidos, CFDI) por cuenta.
+ *  - Diario 09:15 UTC (03:15 hora México): presenta solicitudes de AYER (recibidos y emitidos, CFDI) por cuenta.
  *  - Cada 30 min: verifica las ENVIADAS; descarga e importa las LISTAS.
  *
  * Nada aquí es petición-respuesta: el SAT tarda horas o días.
@@ -27,7 +27,7 @@ export class SatDescargaSyncService implements OnModuleInit {
     this.logger.log(`SatDescargaSyncService: crons ${this.config.cronEnabled ? 'ACTIVOS' : 'desactivados (SAT_DESCARGA_CRON_ENABLED != true)'}`);
   }
 
-  @Cron('15 3 * * *')
+  @Cron('15 9 * * *')
   async solicitarDiario(): Promise<void> {
     if (!this.config.cronEnabled) return;
     const ayer = new Date(Date.now() - 24 * 60 * 60 * 1000);
