@@ -25,6 +25,7 @@ import { CFDIModule } from './cfdi/cfdi.module';
 import { PagesComponent } from './pages.component';
 import { IngresosComponent } from './ingresos/ingresos.component';
 import { EgresosComponent } from './egresos/egresos.component';
+import { SatDescargaComponent } from './sat-descarga/sat-descarga.component';
 
 // Intenta importar ngx-print si está disponible
 // Si sigue dando error, puedes comentar esta línea
@@ -42,6 +43,7 @@ import { PdfViewerModule } from 'ng2-pdf-viewer';
     PagesComponent,
     IngresosComponent,
     EgresosComponent,
+    SatDescargaComponent,
     // Todos los demás componentes están ya modularizados
   ],
   exports: [

@@ -176,10 +176,14 @@
           <mat-icon>article</mat-icon>
           <span>CFDI</span>
         </a>
+        <a mat-list-item *ngIf="hasAccess('descarga_cfdi')" [routerLink]="['/dashboard/sat-descarga']" routerLinkActive="active-link">
+          <mat-icon>cloud_download</mat-icon>
+          <span>Descarga del SAT</span>
+        </a>
         <a mat-list-item *ngIf="hasAccess('descarga_cfdi')" [routerLink]="['/dashboard/invoice-design-selector']" routerLinkActive="active-link">
-  <mat-icon>palette</mat-icon>
-  <span>Diseño facturas</span>
-</a>
+          <mat-icon>palette</mat-icon>
+          <span>Dise&#241;o facturas</span>
+        </a>
       </mat-nav-list>
     </mat-expansion-panel>
 

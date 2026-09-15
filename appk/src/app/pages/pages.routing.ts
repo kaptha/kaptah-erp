@@ -22,6 +22,7 @@ import { DeliveryComponent } from './ventas/delivery/delivery.component';
 import { NotesComponent } from './ventas/notes/notes.component';
 import { InvoiceDesignSelectorComponent } from './invoice-design-selector/invoice-design-selector.component';
 import { CFDIComponent } from './cfdi/cfdi.component';
+import { SatDescargaComponent } from './sat-descarga/sat-descarga.component';
 
 const routes: Routes = [
     {
@@ -47,6 +48,9 @@ const routes: Routes = [
             { path: 'empleados', component: EmpleadosComponent, canActivate: [PlanAccessGuard, PermissionGuard], data: { module: 'empleados' } },
             { path: 'cfdi', component: CFDIComponent, canActivate: [PlanAccessGuard, PermissionGuard], data: { module: 'cfdi' } },
             { path: 'invoice-design-selector', component: InvoiceDesignSelectorComponent, canActivate: [PlanAccessGuard, PermissionGuard], data: { module: 'descarga_cfdi' } },
+            // Descarga masiva directa del SAT. Usa el mismo permiso que la descarga de CFDI;
+            // si el guard bloquea al piloto, quita canActivate/data temporalmente.
+            { path: 'sat-descarga', component: SatDescargaComponent, canActivate: [PlanAccessGuard, PermissionGuard], data: { module: 'descarga_cfdi' } },
             {
                 path: 'compras/purchase-orders',
                 loadChildren: () => import('./compras/purchase-orders/purchase-orders.module')
