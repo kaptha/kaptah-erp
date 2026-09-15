@@ -3,6 +3,7 @@ import { BadRequestException, ConflictException, Injectable, Logger, NotFoundExc
 import { InjectRepository } from '@nestjs/typeorm';
 import { In, Repository } from 'typeorm';
 import { XmlImportService } from '../../xml/services/xml-import.service';
+import { XmlFinancieroService } from '../../xml/services/xml-financiero.service';
 import { ServiceConsumer } from '../internal/service-consumer';
 import { CfdiPackageReader } from '../package-reader/cfdi-package-reader';
 import { AsyncRequestBuilder } from '../request-builder/signing-request-builder';
@@ -65,6 +66,7 @@ export class SatDescargaService {
     private readonly http: HttpService,
     private readonly config: SatDescargaConfig,
     private readonly xmlImport: XmlImportService,
+    private readonly xmlFinanciero: XmlFinancieroService,
   ) {
     const log = (prefix: string) => (r: { statusCode?: number; uri?: string; body: string }) =>
       this.logger.debug(`${prefix} ${r.uri ?? `HTTP ${r.statusCode}`} (${r.body.length} bytes)`);
@@ -215,7 +217,23 @@ export class SatDescargaService {
     const todos = solicitud.paquetes.every((p) => p.descargado);
     solicitud.estado = todos ? 'IMPORTADA' : 'DESCARGANDO';
     if (todos) solicitud.error = null;
-    return this.repo.save(solicitud);
+    const saved = await this.repo.save(solicitud);
+
+    // Segundo paso del pipeline: xmls_recibidos → xmls_financieros (lo que lee la app)
+    if (solicitud.tipoSolicitud === 'CFDI' && solicitud.paquetes.some((p) => (p.cfdisImportados ?? 0) > 0)) {
+      await this.procesarFinancieros(solicitud.cuentaUid);
+    }
+    return saved;
+  }
+
+  /** Extrae datos financieros de los XML recién importados de la cuenta; no bloquea la solicitud si falla */
+  private async procesarFinancieros(cuentaUid: string): Promise<void> {
+    try {
+      const r = await this.xmlFinanciero.procesarTodosLosXmls(cuentaUid);
+      this.logger.log(`xmls_financieros cuenta ${cuentaUid}: ${r.exitosos} procesados, ${r.yaExistentes} existentes, ${r.errores} errores`);
+    } catch (error) {
+      this.logger.error(`Fallo al procesar datos financieros de ${cuentaUid}: ${(error as Error).message}`);
+    }
   }
 
   private async importarCfdis(zip: Buffer, cuentaUid: string): Promise<{ total: number; importados: number; duplicados: number }> {
