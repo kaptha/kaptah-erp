@@ -2,6 +2,7 @@ import {
   Controller, 
   Post, 
   Get, 
+  Delete,
   UseGuards, 
   UploadedFiles,
   UseInterceptors,
@@ -10,7 +11,8 @@ import {
   Request,
   BadRequestException,
   ParseFilePipeBuilder,
-  HttpStatus
+  HttpStatus,
+  HttpCode
 } from '@nestjs/common';
 import { FileFieldsInterceptor } from '@nestjs/platform-express';
 import { FirebaseAuthGuard } from '../auth/guards/firebase-auth.guard';
@@ -110,11 +112,23 @@ async uploadCsd(
 }
 
   @Get('fiel/active')
-  @ApiOperation({ summary: 'Get active FIEL certificate' })
+  @ApiOperation({ summary: 'Get active FIEL certificate (metadata only)' })
   @ApiResponse({ status: 200, description: 'Returns the active FIEL certificate' })
   @ApiResponse({ status: 404, description: 'No active FIEL certificate found' })
   async getActiveFiel(@CurrentUser() user: FirebaseUser, @Query('cuentaUid') cuentaUid?: string) {
     return await this.fielService.findActive(cuentaUid || user.id);
+  }
+
+  /**
+   * Revoca el consentimiento de descarga masiva: borra la contraseña cifrada.
+   * La FIEL sigue activa, pero Kaptah ya no puede firmar solicitudes al SAT.
+   */
+  @Delete('fiel/descarga-masiva')
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({ summary: 'Revoke automatic SAT download consent for the active FIEL' })
+  async revokeDescargaMasiva(@CurrentUser() user: FirebaseUser, @Query('cuentaUid') cuentaUid?: string) {
+    await this.fielService.revokeDescargaMasiva(cuentaUid || user.id);
+    return { descargaMasivaAutorizada: false };
   }
 
   @Get('csd/active')
