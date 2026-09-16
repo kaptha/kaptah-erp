@@ -21,6 +21,7 @@ import { SucursalModalComponent } from './sucursal-modal/sucursal-modal.componen
 import { ImpuestoModalComponent } from './impuesto-modal/impuesto-modal.component';
 import { CsdUploadModalComponent } from './csd-upload-modal/csd-upload-modal.component';
 import { FielUploadModalComponent } from './fiel-upload-modal/fiel-upload-modal.component';
+import { CambiarPlanModalComponent } from './cambiar-plan-modal/cambiar-plan-modal.component';
 import { UsuariosRolesComponent } from './usuarios-roles/usuarios-roles.component';
 import { RoleDialogComponent } from './usuarios-roles/role-dialog/role-dialog.component';
 import { SubUserDialogComponent } from './usuarios-roles/sub-user-dialog/sub-user-dialog.component';
@@ -38,7 +39,8 @@ import { provideHttpClient, withInterceptorsFromDi } from '@angular/common/http'
         FielUploadModalComponent,
         UsuariosRolesComponent,
         RoleDialogComponent,
-        SubUserDialogComponent
+        SubUserDialogComponent,
+        CambiarPlanModalComponent
     ],
     exports: [
         PerfilComponent,

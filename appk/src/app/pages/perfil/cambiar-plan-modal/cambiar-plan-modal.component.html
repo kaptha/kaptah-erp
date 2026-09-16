@@ -1,0 +1,57 @@
+<h2 mat-dialog-title>Cambiar plan</h2>
+
+<mat-dialog-content>
+  <div class="ciclo-toggle">
+    <span [class.active]="ciclo === 'mensual'">Mensual</span>
+    <mat-slide-toggle
+      [checked]="ciclo === 'anual'"
+      (change)="ciclo = ciclo === 'mensual' ? 'anual' : 'mensual'"
+      color="primary">
+    </mat-slide-toggle>
+    <span [class.active]="ciclo === 'anual'">Anual</span>
+  </div>
+
+  <div class="planes-grid">
+    <div class="plan-option"
+      *ngFor="let plan of planes"
+      [class.plan-actual]="esPlanActual(plan)"
+      [class.plan-selected]="planSeleccionado === plan.key && !esPlanActual(plan)"
+      (click)="seleccionarPlan(plan)">
+
+      <div class="plan-option-header">
+        <h3>{{ plan.nombre }}</h3>
+        <span class="badge-actual" *ngIf="esPlanActual(plan)">Plan actual</span>
+      </div>
+
+      <div class="plan-option-price">
+        <span class="price">{{ getPrecio(plan) | currency:'MXN':'symbol-narrow':'1.0-0' }}</span>
+        <span class="period">{{ getPeriodo(plan) }}</span>
+      </div>
+
+      <div class="plan-option-ahorro" *ngIf="ciclo === 'anual' && plan.ahorro > 0">
+        Ahorras {{ plan.ahorro | currency:'MXN':'symbol-narrow':'1.0-0' }}
+      </div>
+
+      <div class="plan-option-solo-anual" *ngIf="plan.soloAnual">
+        Pago unico anual
+      </div>
+
+      <ul class="plan-features">
+        <li *ngFor="let feature of plan.features">
+          <mat-icon>check</mat-icon> {{ feature }}
+        </li>
+      </ul>
+
+      <button mat-raised-button
+        [color]="esPlanActual(plan) ? '' : 'primary'"
+        [disabled]="esPlanActual(plan)"
+        class="btn-seleccionar">
+        {{ esPlanActual(plan) ? 'Plan actual' : 'Seleccionar' }}
+      </button>
+    </div>
+  </div>
+</mat-dialog-content>
+
+<mat-dialog-actions align="end">
+  <button mat-stroked-button (click)="cancelar()">Cancelar</button>
+</mat-dialog-actions>

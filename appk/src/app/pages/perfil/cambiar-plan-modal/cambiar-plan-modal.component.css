@@ -1,0 +1,126 @@
+.ciclo-toggle {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  margin-bottom: 24px;
+  font-size: 14px;
+  color: #666;
+}
+
+.ciclo-toggle .active {
+  color: #7B1FA2;
+  font-weight: 600;
+}
+
+.planes-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 16px;
+}
+
+.plan-option {
+  border: 2px solid #e0e0e0;
+  border-radius: 12px;
+  padding: 20px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: flex;
+  flex-direction: column;
+}
+
+.plan-option:hover {
+  border-color: #7B1FA2;
+  box-shadow: 0 4px 12px rgba(123, 31, 162, 0.15);
+}
+
+.plan-option.plan-actual {
+  border-color: #7B1FA2;
+  background: #f3e5f5;
+  cursor: default;
+}
+
+.plan-option-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 12px;
+}
+
+.plan-option-header h3 {
+  margin: 0;
+  font-size: 16px;
+  font-weight: 600;
+  color: #333;
+}
+
+.badge-actual {
+  background: #7B1FA2;
+  color: white;
+  padding: 2px 8px;
+  border-radius: 12px;
+  font-size: 11px;
+  font-weight: 500;
+}
+
+.plan-option-price {
+  margin-bottom: 4px;
+}
+
+.plan-option-price .price {
+  font-size: 28px;
+  font-weight: 700;
+  color: #333;
+}
+
+.plan-option-price .period {
+  font-size: 14px;
+  color: #666;
+}
+
+.plan-option-ahorro {
+  color: #4CAF50;
+  font-size: 12px;
+  font-weight: 500;
+  margin-bottom: 12px;
+}
+
+.plan-option-solo-anual {
+  color: #666;
+  font-size: 12px;
+  margin-bottom: 12px;
+}
+
+.plan-features {
+  list-style: none;
+  padding: 0;
+  margin: 0 0 16px 0;
+  flex-grow: 1;
+}
+
+.plan-features li {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 13px;
+  color: #555;
+  margin-bottom: 6px;
+}
+
+.plan-features li mat-icon {
+  font-size: 16px;
+  width: 16px;
+  height: 16px;
+  color: #7B1FA2;
+}
+
+.btn-seleccionar {
+  width: 100%;
+  margin-top: auto;
+}
+
+@media (max-width: 600px) {
+  .planes-grid {
+    grid-template-columns: 1fr;
+  }
+}

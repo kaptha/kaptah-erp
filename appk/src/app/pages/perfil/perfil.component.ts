@@ -10,6 +10,7 @@ import { ApibizService } from '../../services/apibiz.service';
 import { SucursalModalComponent } from './sucursal-modal/sucursal-modal.component';
 import { ImpuestoModalComponent } from './impuesto-modal/impuesto-modal.component';
 import { CsdUploadModalComponent } from './csd-upload-modal/csd-upload-modal.component';
+import { CambiarPlanModalComponent } from './cambiar-plan-modal/cambiar-plan-modal.component';
 import { FielUploadModalComponent } from './fiel-upload-modal/fiel-upload-modal.component';
 import { ImpuestosService } from '../../services/impuestos.service';
 import { SucursalesService } from '../../services/sucursales.service';
@@ -1002,11 +1003,24 @@ get terminosModificados(): boolean {
    * Abre el modal para cambiar de plan
    */
   cambiarPlan(): void {
-    Swal.fire({
-      icon: 'info',
-      title: 'Cambiar plan',
-      text: 'La opción de cambiar de plan estará disponible pronto.',
-      confirmButtonColor: '#8e24aa'
+    const dialogRef = this.dialog.open(CambiarPlanModalComponent, {
+      width: '800px',
+      maxWidth: '95vw',
+      maxHeight: '90vh',
+      panelClass: 'custom-dialog-container',
+      data: {
+        planActual: this.planActual,
+        cicloActual: this.cicloFacturacion
+      }
+    });
+
+    dialogRef.afterClosed().subscribe(result => {
+      if (result) {
+        this.planActual = result.plan;
+        this.cicloFacturacion = result.cicloFacturacion;
+        this.actualizarInfoPlan();
+        this.iniciarPago();
+      }
     });
   }
 }
