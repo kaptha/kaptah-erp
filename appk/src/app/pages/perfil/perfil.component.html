@@ -388,6 +388,25 @@
               <p *ngIf="!fielExpiryDate" class="text-muted">
                 No hay certificado FIEL activo
               </p>
+
+              <!-- Estado de la descarga automática del SAT -->
+              <div class="fiel-descarga" *ngIf="fielDescargaAutorizada !== null">
+                <ng-container *ngIf="fielDescargaAutorizada; else sinAutorizacion">
+                  <div class="fiel-descarga-row">
+                    <mat-icon class="ok">cloud_done</mat-icon>
+                    <span>Descarga automática del SAT <strong>activa</strong><span *ngIf="fielRfc"> para {{ fielRfc }}</span>.</span>
+                  </div>
+                  <button mat-stroked-button color="warn" class="btn-revocar" (click)="revocarDescargaMasiva()" *ngIf="canEditConfig">
+                    <mat-icon>cloud_off</mat-icon> Desactivar
+                  </button>
+                </ng-container>
+                <ng-template #sinAutorizacion>
+                  <div class="fiel-descarga-row">
+                    <mat-icon class="off">cloud_off</mat-icon>
+                    <span>Descarga automática del SAT <strong>desactivada</strong>. Vuelve a cargar tu e.firma y marca la autorización para activarla.</span>
+                  </div>
+                </ng-template>
+              </div>
             </div>
           </div>
         </section>

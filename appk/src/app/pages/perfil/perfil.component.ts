@@ -71,6 +71,10 @@ export class PerfilComponent implements OnInit {
   // FIEL y CSD fecha
   fielExpiryDate: string = '';
   csdExpiryDate: string = '';
+
+  // Descarga masiva del SAT con la FIEL (null = no hay FIEL activa)
+  fielDescargaAutorizada: boolean | null = null;
+  fielRfc: string = '';
   
   // Sucursales
   displayedColumnsSucursales: string[] = ['alias', 'telefono', 'direccion', 'codigoPostal', 'colonia', 'acciones'];
@@ -453,10 +457,44 @@ export class PerfilComponent implements OnInit {
         if (data?.validUntil) {
           this.fielExpiryDate = new Date(data.validUntil).toLocaleDateString();
         }
+        this.fielDescargaAutorizada = data?.descargaMasivaAutorizada ?? false;
+        this.fielRfc = data?.rfc || '';
       },
       error: (error) => {
-        console.error('Error al cargar datos de FIEL:', error);
+        // 404 = todavía no hay FIEL; no es un error para el usuario
+        if (error?.status !== 404) {
+          console.error('Error al cargar datos de FIEL:', error);
+        }
+        this.fielDescargaAutorizada = null;
+        this.fielRfc = '';
       }
+    });
+  }
+
+  /**
+   * Revoca la autorización de descarga masiva del SAT (borra la contraseña cifrada en cert-vault)
+   */
+  revocarDescargaMasiva(): void {
+    Swal.fire({
+      icon: 'warning',
+      title: '¿Desactivar la descarga automática?',
+      text: 'Kaptah dejará de traer tus CFDI del SAT. Para reactivarla tendrás que volver a subir tu e.firma.',
+      showCancelButton: true,
+      confirmButtonText: 'Sí, desactivar',
+      cancelButtonText: 'Cancelar',
+      confirmButtonColor: '#8e24aa'
+    }).then((r) => {
+      if (!r.isConfirmed) return;
+      this.fielService.revokeDescargaMasiva().subscribe({
+        next: () => {
+          this.fielDescargaAutorizada = false;
+          this.showSnackBar('Descarga automática desactivada', 'Cerrar');
+        },
+        error: (error) => {
+          console.error('Error al revocar descarga masiva:', error);
+          this.showSnackBar(error.error?.message || 'No se pudo desactivar la descarga automática', 'Cerrar');
+        }
+      });
     });
   }
   
@@ -972,9 +1010,3 @@ get terminosModificados(): boolean {
     });
   }
 }
-
-
-
-
-
-
