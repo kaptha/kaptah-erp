@@ -2,7 +2,7 @@
   <div class="custom-modal-header">
     <h2>{{ modalTitle }}</h2>
   </div>
-  
+
   <div class="custom-modal-content">
     <form [formGroup]="form">
       <!-- Sección de archivos -->
@@ -17,7 +17,7 @@
             <span class="custom-file-name">{{ keyFileName || 'Ningún archivo seleccionado' }}</span>
           </div>
         </div>
-        
+
         <div class="custom-file-group">
           <label>Archivo CER</label>
           <div class="custom-file-input">
@@ -29,38 +29,57 @@
           </div>
         </div>
       </div>
-      
+
       <!-- Sección de campos de formulario -->
       <div class="custom-form-section">
         <div class="custom-form-group">
-          <label>Contraseña</label>
-          <input type="password" formControlName="password" class="custom-input" placeholder="Ingrese su contraseña">
+          <label>Contraseña de la llave privada</label>
+          <input type="password" formControlName="password" class="custom-input" placeholder="Ingrese su contraseña" autocomplete="off">
         </div>
-        
+
         <div class="custom-form-group">
           <label>Número de Certificado</label>
           <input type="text" formControlName="certificateNumber" class="custom-input" readonly>
         </div>
-        
+
         <div class="custom-form-group">
           <label>Número de Serie</label>
           <input type="text" formControlName="serialNumber" class="custom-input" readonly>
         </div>
-        
+
         <div class="custom-form-group">
           <label>Serial del Emisor</label>
           <input type="text" formControlName="issuerSerial" class="custom-input" readonly>
         </div>
       </div>
+
+      <!-- Consentimiento para descarga masiva automática -->
+      <div class="consent-box">
+        <label class="consent-label">
+          <input type="checkbox" formControlName="autorizarDescargaMasiva" class="consent-checkbox">
+          <span>
+            Autorizo que Kaptah guarde la contraseña de mi e.firma de forma cifrada para
+            descargar automáticamente mis CFDI del SAT todos los días.
+          </span>
+        </label>
+        <p class="consent-help">
+          Tu llave privada y la contraseña se guardan cifradas y nunca salen del servidor de certificados.
+          Solo se usan para consultar y descargar tus comprobantes; no permiten emitir ni cancelar facturas.
+          Puedes revocar esta autorización más adelante desde Mi Perfil.
+        </p>
+        <p class="consent-help consent-warning" *ngIf="form.value.autorizarDescargaMasiva === false">
+          Sin esta autorización, Kaptah no podrá traer tus CFDI del SAT.
+        </p>
+      </div>
     </form>
   </div>
-  
+
   <div class="custom-modal-footer">
     <button class="btn-danger" (click)="onCancel()">
       Cancelar
     </button>
-    <button 
-      class="btn-primary" 
+    <button
+      class="btn-primary"
       (click)="onSave()"
       [disabled]="!form.valid || !keyFile || !cerFile || isLoading">
       {{ isLoading ? 'Guardando...' : 'Guardar' }}

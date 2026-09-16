@@ -4,15 +4,18 @@ import { Observable, throwError } from 'rxjs';
 import { switchMap } from 'rxjs/operators';
 import { RefreshToken } from '../config';
 
-interface FielResponse {
+/** Metadatos que devuelve cert-vault (nunca incluye llave ni contraseña) */
+export interface FielResponse {
   id: string;
   userId: string;
+  rfc: string;
   certificateNumber: string;
   serialNumber: string;
   validFrom: string;
   validUntil: string;
-  issuerName: string;
-  issuerSerial: string;
+  status: string;
+  descargaMasivaAutorizada: boolean;
+  lastUsedAt: string | null;
 }
 
 @Injectable({
@@ -40,18 +43,23 @@ export class FielService {
     );
   }
 
+  private cuentaUid(): string {
+    return localStorage.getItem('activeCuentaUid') || '';
+  }
+
   getActiveFiel(): Observable<FielResponse> {
     return this.getFreshToken().pipe(
       switchMap(token => {
-        const headers = new HttpHeaders({
-          'Authorization': `Bearer ${token}`
-        });
-        const cuentaUid = localStorage.getItem('activeCuentaUid') || '';
-        return this.http.get<FielResponse>(`${this.apiUrl}/certificates/fiel/active?cuentaUid=${cuentaUid}`, { headers });
+        const headers = new HttpHeaders({ 'Authorization': `Bearer ${token}` });
+        return this.http.get<FielResponse>(`${this.apiUrl}/certificates/fiel/active?cuentaUid=${this.cuentaUid()}`, { headers });
       })
     );
   }
 
+  /**
+   * @param autorizarDescargaMasiva consentimiento explícito: cert-vault guarda la contraseña
+   *        cifrada para descargar CFDI del SAT sin intervención del usuario
+   */
   uploadFiel(
     cerFile: File,
     keyFile: File,
@@ -61,8 +69,9 @@ export class FielService {
     validFrom: string,
     validUntil: string,
     issuerName: string,
-    issuerSerial: string
-  ): Observable<any> {
+    issuerSerial: string,
+    autorizarDescargaMasiva: boolean = false
+  ): Observable<FielResponse> {
     return this.getFreshToken().pipe(
       switchMap(token => {
         const formData = new FormData();
@@ -75,13 +84,23 @@ export class FielService {
         formData.append('validUntil', validUntil.replace('T', ' ').split('.')[0]);
         formData.append('issuerName', issuerName);
         formData.append('issuerSerial', issuerSerial);
+        formData.append('autorizarDescargaMasiva', autorizarDescargaMasiva ? 'true' : 'false');
 
-        const headers = new HttpHeaders({
-          'Authorization': `Bearer ${token}`
-        });
+        const headers = new HttpHeaders({ 'Authorization': `Bearer ${token}` });
+        return this.http.post<FielResponse>(`${this.apiUrl}/certificates/fiel?cuentaUid=${this.cuentaUid()}`, formData, { headers });
+      })
+    );
+  }
 
-        const cuentaUid = localStorage.getItem('activeCuentaUid') || '';
-        return this.http.post(`${this.apiUrl}/certificates/fiel?cuentaUid=${cuentaUid}`, formData, { headers });
+  /** Revoca el consentimiento de descarga masiva (borra la contraseña cifrada en cert-vault) */
+  revokeDescargaMasiva(): Observable<{ descargaMasivaAutorizada: boolean }> {
+    return this.getFreshToken().pipe(
+      switchMap(token => {
+        const headers = new HttpHeaders({ 'Authorization': `Bearer ${token}` });
+        return this.http.delete<{ descargaMasivaAutorizada: boolean }>(
+          `${this.apiUrl}/certificates/fiel/descarga-masiva?cuentaUid=${this.cuentaUid()}`,
+          { headers }
+        );
       })
     );
   }
