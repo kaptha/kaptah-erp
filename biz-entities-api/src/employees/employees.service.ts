@@ -24,7 +24,7 @@ export class EmployeesService {
       throw new NotFoundException('Usuario no encontrado');
     }
 
-    await this.validateUniqueFields(createEmployeeDto);
+        await this.validateUniqueFields(createEmployeeDto, user.ID);
     this.validateDeduccionesPercepciones(createEmployeeDto);
 
     const newEmployee = this.employeesRepository.create({
@@ -36,10 +36,11 @@ export class EmployeesService {
     return await this.employeesRepository.save(newEmployee);
 }
 
-  private async validateUniqueFields(dto: CreateEmployeeDto | UpdateEmployeeDto, excludeId?: number) {
+    private async validateUniqueFields(dto: CreateEmployeeDto | UpdateEmployeeDto, userId: number, excludeId?: number) {
     if (!dto.rfc && !dto.curp) return;
 
-    const where = excludeId ? { id: Not(excludeId) } : {};
+        const where: any = { userId };
+    if (excludeId) { where.id = Not(excludeId); }
 
     if (dto.rfc) {
       const rfcExists = await this.employeesRepository.findOne({
@@ -115,7 +116,7 @@ export class EmployeesService {
       throw new NotFoundException(`Empleado con ID ${id} no encontrado`);
     }
 
-    await this.validateUniqueFields(updateEmployeeDto, id);
+        await this.validateUniqueFields(updateEmployeeDto, employee.userId, id);
 
     // Convertir la fecha a string antes de validar
     const employeeDataToValidate = {

@@ -47,7 +47,48 @@ export class Employee {
 
   @Column({ type: 'json', nullable: true, name: 'percepciones' })
   percepciones: any[];
+  
+    @Column({ name: 'codigo_postal', length: 5, nullable: true })
+  codigoPostal: string;
 
+  @Column({ name: 'regimen_fiscal', length: 3, default: '605' })
+  regimenFiscal: string;
+
+  @Column({ name: 'num_empleado', length: 15, nullable: true })
+  numEmpleado: string;
+
+  @Column({ name: 'Nss', length: 11, nullable: true })
+  numSeguridadSocial: string;
+
+  @Column({ name: 'tipo_contrato', length: 2, default: '01' })
+  tipoContrato: string;
+
+  @Column({ name: 'tipo_regimen', length: 2, default: '02' })
+  tipoRegimen: string;
+
+  @Column({ name: 'tipo_jornada', length: 2, nullable: true })
+  tipoJornada: string;
+
+  @Column({ name: 'riesgo_puesto', length: 1, nullable: true })
+  riesgoPuesto: string;
+
+  @Column({ name: 'periodicidad_pago', length: 2, default: '04' })
+  periodicidadPago: string;
+
+  @Column({ name: 'banco', length: 3, nullable: true })
+  banco: string;
+
+  @Column({ name: 'cuenta_bancaria', length: 18, nullable: true })
+  cuentaBancaria: string;
+
+  @Column({ name: 'salario_base_cot_apor', type: 'decimal', precision: 12, scale: 2, nullable: true })
+  salarioBaseCotApor: number;
+
+  @Column({ name: 'salario_diario_integrado', type: 'decimal', precision: 12, scale: 2, nullable: true })
+  salarioDiarioIntegrado: number;
+
+  @Column({ name: 'clave_ent_fed', length: 3, default: 'GUA' })
+  claveEntFed: string;
   @Column()
   userId: number;
 

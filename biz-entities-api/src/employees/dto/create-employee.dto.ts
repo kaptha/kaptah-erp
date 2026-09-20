@@ -53,7 +53,67 @@ export class CreateEmployeeDto {
   @IsNumber()
   @Type(() => Number)
   salarioBase: number;
+  
+    @IsString()
+  @IsOptional()
+  @Matches(/^[0-9]{5}$/, { message: 'El codigo postal debe ser de 5 digitos' })
+  codigoPostal?: string;
 
+  @IsString()
+  @IsOptional()
+  regimenFiscal?: string;
+
+  @IsString()
+  @IsOptional()
+  numEmpleado?: string;
+
+  @IsString()
+  @IsOptional()
+  @Matches(/^[0-9]{11}$/, { message: 'El NSS debe ser de 11 digitos' })
+  numSeguridadSocial?: string;
+
+  @IsString()
+  @IsOptional()
+  tipoContrato?: string;
+
+  @IsString()
+  @IsOptional()
+  tipoRegimen?: string;
+
+  @IsString()
+  @IsOptional()
+  tipoJornada?: string;
+
+  @IsString()
+  @IsOptional()
+  riesgoPuesto?: string;
+
+  @IsString()
+  @IsOptional()
+  periodicidadPago?: string;
+
+  @IsString()
+  @IsOptional()
+  banco?: string;
+
+  @IsString()
+  @IsOptional()
+  @Matches(/^[0-9]{18}$/, { message: 'La CLABE debe ser de 18 digitos' })
+  cuentaBancaria?: string;
+
+  @IsNumber()
+  @Type(() => Number)
+  @IsOptional()
+  salarioBaseCotApor?: number;
+
+  @IsNumber()
+  @Type(() => Number)
+  @IsOptional()
+  salarioDiarioIntegrado?: number;
+
+  @IsString()
+  @IsOptional()
+  claveEntFed?: string;
   @IsArray()
   @ValidateNested({ each: true })
   @Type(() => DeduccionPercepcionDto)
