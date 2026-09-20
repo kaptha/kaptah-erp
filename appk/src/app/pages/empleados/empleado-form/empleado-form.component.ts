@@ -1,12 +1,11 @@
-import { Component, OnInit, Inject } from '@angular/core';
+﻿import { Component, OnInit, Inject } from '@angular/core';
 import { FormBuilder, FormGroup, FormArray, Validators } from '@angular/forms';
 import { MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { MatTableDataSource } from '@angular/material/table';
 import { DeduccionPercepcion } from '../../../models/nomina.model';
 import { Empleado } from '../../../models/empleado.model';
-import { CatalogosFiscalesService, TipoPercepcion, TipoDeduccion } from '../../../services/catalogos-fiscales.service';
-
+import { CatalogosFiscalesService, TipoPercepcion, TipoDeduccion, TipoContrato, TipoJornada, TipoRegimen, PeriodicidadPago, Banco, RiesgoPuesto } from '../../../services/catalogos-fiscales.service';
 @Component({
     selector: 'app-empleado-form',
     templateUrl: './empleado-form.component.html',
@@ -48,6 +47,12 @@ export class EmpleadoFormComponent implements OnInit {
   // Catálogos del SAT
   catalogoPercepciones: TipoPercepcion[] = [];
   catalogoDeducciones: TipoDeduccion[] = [];
+  catalogoContratos: TipoContrato[] = [];
+  catalogoJornadas: TipoJornada[] = [];
+  catalogoRegimenes: TipoRegimen[] = [];
+  catalogoPeriodicidades: PeriodicidadPago[] = [];
+  catalogoBancos: Banco[] = [];
+  catalogoRiesgos: RiesgoPuesto[] = [];
   isLoadingCatalogos: boolean = false;
 
   constructor(
@@ -103,6 +108,35 @@ export class EmpleadoFormComponent implements OnInit {
         this.isLoadingCatalogos = false;
       }
     });
+    this.catalogosService.getTiposContratoVigentes().subscribe({
+      next: (data) => { this.catalogoContratos = data; },
+      error: (error) => { console.error('Error al cargar tipos de contrato:', error); }
+    });
+
+    this.catalogosService.getTiposJornadaVigentes().subscribe({
+      next: (data) => { this.catalogoJornadas = data; },
+      error: (error) => { console.error('Error al cargar tipos de jornada:', error); }
+    });
+
+    this.catalogosService.getTiposRegimenVigentes().subscribe({
+      next: (data) => { this.catalogoRegimenes = data; },
+      error: (error) => { console.error('Error al cargar tipos de regimen:', error); }
+    });
+
+    this.catalogosService.getPeriodicidadesPagoVigentes().subscribe({
+      next: (data) => { this.catalogoPeriodicidades = data; },
+      error: (error) => { console.error('Error al cargar periodicidades de pago:', error); }
+    });
+
+    this.catalogosService.getBancosVigentes().subscribe({
+      next: (data) => { this.catalogoBancos = data; },
+      error: (error) => { console.error('Error al cargar bancos:', error); }
+    });
+
+    this.catalogosService.getRiesgosPuestoVigentes().subscribe({
+      next: (data) => { this.catalogoRiesgos = data; },
+      error: (error) => { console.error('Error al cargar riesgos de puesto:', error); }
+    });
   }
 
   private initForm() {
@@ -110,13 +144,27 @@ export class EmpleadoFormComponent implements OnInit {
       id: [null],
       nombre: ['', [Validators.required, Validators.minLength(2)]],
       rfc: ['', [Validators.required, Validators.minLength(13), Validators.maxLength(13)]],
-      curp: ['', [Validators.required, Validators.minLength(18), Validators.maxLength(18)]],
+      curp: ['', [Validators.required, Validators.pattern(/^[A-Z]{4}[0-9]{6}[HM][A-Z]{5}[0-9A-Z][0-9]$/)]],
       email: ['', [Validators.required, Validators.email]],
       telefono: ['', [Validators.required, Validators.pattern(/^[0-9]+$/)]],
       fechaInicio: ['', Validators.required],
       puesto: ['', Validators.required],
       departamento: [''],
       salarioBase: ['', [Validators.required, Validators.min(0)]],
+      codigoPostal: ['', [Validators.pattern(/^[0-9]{5}$/)]],
+      regimenFiscal: ['605'],
+      numEmpleado: [''],
+      numSeguridadSocial: ['', [Validators.pattern(/^[0-9]{11}$/)]],
+      tipoContrato: ['01'],
+      tipoRegimen: ['02'],
+      tipoJornada: [''],
+      riesgoPuesto: [''],
+      periodicidadPago: ['04'],
+      banco: [''],
+      cuentaBancaria: ['', [Validators.pattern(/^[0-9]{18}$/)]],
+      salarioBaseCotApor: [null, [Validators.min(0)]],
+      salarioDiarioIntegrado: [null, [Validators.min(0)]],
+      claveEntFed: ['GUA'],
       deducciones: this.fb.array([]),
       percepciones: this.fb.array([])
     });

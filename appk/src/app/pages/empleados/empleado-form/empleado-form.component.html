@@ -64,6 +64,120 @@
       </div>
       </mat-tab>
 
+      <mat-tab label="Datos de Nómina">
+
+        <mat-form-field appearance="fill">
+          <mat-label>Número de empleado</mat-label>
+          <input matInput formControlName="numEmpleado">
+        </mat-form-field>
+
+        <mat-form-field appearance="fill">
+          <mat-label>NSS (IMSS)</mat-label>
+          <input matInput formControlName="numSeguridadSocial" maxlength="11">
+          <mat-hint>11 dígitos</mat-hint>
+        </mat-form-field>
+
+        <mat-form-field appearance="fill">
+          <mat-label>Código postal</mat-label>
+          <input matInput formControlName="codigoPostal" maxlength="5">
+        </mat-form-field>
+
+        <mat-form-field appearance="fill">
+          <mat-label>Régimen fiscal</mat-label>
+          <mat-select formControlName="regimenFiscal">
+            <mat-option value="605">605 - Sueldos y salarios</mat-option>
+            <mat-option value="606">606 - Arrendamiento</mat-option>
+            <mat-option value="612">612 - Actividades empresariales y profesionales</mat-option>
+            <mat-option value="616">616 - Sin obligaciones fiscales</mat-option>
+            <mat-option value="626">626 - Régimen Simplificado de Confianza</mat-option>
+          </mat-select>
+        </mat-form-field>
+
+        <mat-form-field appearance="fill">
+          <mat-label>Tipo de contrato</mat-label>
+          <mat-select formControlName="tipoContrato">
+            <mat-option *ngFor="let c of catalogoContratos" [value]="c.c_TipoContrato">
+              {{ c.c_TipoContrato }} - {{ c.descripcion }}
+            </mat-option>
+          </mat-select>
+        </mat-form-field>
+
+        <mat-form-field appearance="fill">
+          <mat-label>Tipo de régimen</mat-label>
+          <mat-select formControlName="tipoRegimen">
+            <mat-option *ngFor="let r of catalogoRegimenes" [value]="r.c_TipoRegimen">
+              {{ r.c_TipoRegimen }} - {{ r.descripcion }}
+            </mat-option>
+          </mat-select>
+        </mat-form-field>
+
+        <mat-form-field appearance="fill">
+          <mat-label>Tipo de jornada</mat-label>
+          <mat-select formControlName="tipoJornada">
+            <mat-option *ngFor="let j of catalogoJornadas" [value]="j.c_TipoJornada">
+              {{ j.c_TipoJornada }} - {{ j.descripcion }}
+            </mat-option>
+          </mat-select>
+        </mat-form-field>
+
+        <mat-form-field appearance="fill">
+          <mat-label>Riesgo de puesto</mat-label>
+          <mat-select formControlName="riesgoPuesto">
+            <mat-option *ngFor="let p of catalogoRiesgos" [value]="p.c_RiesgoPuesto">
+              {{ p.c_RiesgoPuesto }} - {{ p.descripcion }}
+            </mat-option>
+          </mat-select>
+        </mat-form-field>
+
+        <mat-form-field appearance="fill">
+          <mat-label>Periodicidad de pago</mat-label>
+          <mat-select formControlName="periodicidadPago">
+            <mat-option *ngFor="let pp of catalogoPeriodicidades" [value]="pp.c_PeriodicidadPago">
+              {{ pp.c_PeriodicidadPago }} - {{ pp.descripcion }}
+            </mat-option>
+          </mat-select>
+        </mat-form-field>
+
+        <mat-form-field appearance="fill">
+          <mat-label>Entidad federativa</mat-label>
+          <mat-select formControlName="claveEntFed">
+            <mat-option value="GUA">Guanajuato</mat-option>
+            <mat-option value="JAL">Jalisco</mat-option>
+            <mat-option value="CMX">Ciudad de México</mat-option>
+            <mat-option value="MEX">Estado de México</mat-option>
+            <mat-option value="QUE">Querétaro</mat-option>
+            <mat-option value="MIC">Michoacán</mat-option>
+            <mat-option value="AGU">Aguascalientes</mat-option>
+            <mat-option value="SLP">San Luis Potosí</mat-option>
+          </mat-select>
+        </mat-form-field>
+
+        <mat-form-field appearance="fill">
+          <mat-label>Banco</mat-label>
+          <mat-select formControlName="banco">
+            <mat-option *ngFor="let b of catalogoBancos" [value]="b.c_Banco">
+              {{ b.c_Banco }} - {{ b.nombre_corto }}
+            </mat-option>
+          </mat-select>
+        </mat-form-field>
+
+        <mat-form-field appearance="fill">
+          <mat-label>CLABE</mat-label>
+          <input matInput formControlName="cuentaBancaria" maxlength="18">
+          <mat-hint>18 dígitos</mat-hint>
+        </mat-form-field>
+
+        <mat-form-field appearance="fill">
+          <mat-label>Salario base de cotización</mat-label>
+          <input matInput formControlName="salarioBaseCotApor" type="number">
+        </mat-form-field>
+
+        <mat-form-field appearance="fill">
+          <mat-label>Salario diario integrado</mat-label>
+          <input matInput formControlName="salarioDiarioIntegrado" type="number">
+        </mat-form-field>
+
+      </mat-tab>
     <!-- Tab de Deducciones -->
 <mat-tab label="Deducciones">
   <div class="tab-content" formArrayName="deducciones">
