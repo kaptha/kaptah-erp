@@ -1,4 +1,4 @@
-import { Component, Inject, OnInit, OnDestroy } from '@angular/core';
+﻿import { Component, Inject, OnInit, OnDestroy } from '@angular/core';
 import { FormBuilder, FormGroup, FormArray, FormControl, Validators, AbstractControl } from '@angular/forms';
 import { MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
 import { CFDIService } from '../../../services/cfdi.service';
@@ -472,7 +472,7 @@ export class AddCfdiNominaModalComponent implements OnInit, OnDestroy {
   
   const filterValue = value.toLowerCase();
   return this.empleados.filter(emp => {
-    const nombreCompleto = `${emp.nombre} ${emp.apellidoPaterno} ${emp.apellidoMaterno}`.toLowerCase();
+    const nombreCompleto = this.normalizarNombre(emp.nombre).toLowerCase();
     return nombreCompleto.includes(filterValue);
   });
 }
@@ -685,12 +685,12 @@ export class AddCfdiNominaModalComponent implements OnInit, OnDestroy {
         numeroEmpleado: this.selectedEmpleado.numeroEmpleado || '',
         rfc: this.selectedEmpleado.rfc || '',
         curp: this.selectedEmpleado.curp || '',
-        nombre: `${this.selectedEmpleado.nombre} ${this.selectedEmpleado.apellidoPaterno} ${this.selectedEmpleado.apellidoMaterno}`,
+        nombre: this.normalizarNombre(this.selectedEmpleado.nombre),
         departamento: this.selectedEmpleado.departamento || '',
         puesto: this.selectedEmpleado.puesto || '',
         numSeguridadSocial: this.selectedEmpleado.nss || '',
-        fechaInicioRelacionLaboral: this.selectedEmpleado.fechaInicioRelacionLaboral || null,
-        antiguedad: this.selectedEmpleado.antiguedad || '',
+        fechaInicioRelacionLaboral: this.aFechaLocal(this.selectedEmpleado.fechaInicio),
+        antiguedad: this.calcularAntiguedad(this.selectedEmpleado.fechaInicio, this.nominaForm.get('fechaFinalPago')?.value),
         banco: this.selectedEmpleado.banco || '',
         clabe: this.selectedEmpleado.clabe || '',
         tipoContrato: this.selectedEmpleado.tipoContrato || '',
@@ -711,6 +711,32 @@ export class AddCfdiNominaModalComponent implements OnInit, OnDestroy {
     this.selectedEmpleado = null;
   }
 }
+
+  // Convierte un valor de fecha (Date o string) a Date local, sin corrimiento de zona.
+  private aFechaLocal(valor: any): Date | null {
+    if (!valor) { return null; }
+    const partes = String(valor).substring(0, 10).split('-');
+    if (partes.length === 3) {
+      return new Date(Number(partes[0]), Number(partes[1]) - 1, Number(partes[2]));
+    }
+    const d = new Date(valor);
+    return isNaN(d.getTime()) ? null : d;
+  }
+
+  // Antiguedad en semanas, formato ISO 8601 (P##W) que exige el SAT en nomina 1.2.
+  private calcularAntiguedad(fechaInicio: any, fechaFinalPago?: any): string {
+    const inicio = this.aFechaLocal(fechaInicio);
+    if (!inicio) { return ''; }
+    const fin = this.aFechaLocal(fechaFinalPago) || new Date();
+    if (fin < inicio) { return ''; }
+    const dias = Math.round((fin.getTime() - inicio.getTime()) / 86400000) + 1;
+    return 'P' + Math.floor(dias / 7) + 'W';
+  }
+
+  // El nombre del receptor debe ir limpio: colapsa espacios repetidos y recorta.
+  private normalizarNombre(nombre: any): string {
+    return String(nombre || '').replace(/\s+/g, ' ').trim();
+  }
 
 // 🆕 Método para cargar percepciones
  cargarPercepcionesEmpleado(percepciones: any): void {
