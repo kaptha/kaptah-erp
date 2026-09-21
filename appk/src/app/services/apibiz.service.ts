@@ -33,6 +33,27 @@ private getActiveCuentaUid(): string | null {
       'Content-Type': 'application/json'
     });
   }
+  // Perfil fiscal de la cuenta activa (cuenta padre si es subusuario)
+  getPerfilCuenta(): Observable<any> {
+    const idToken = localStorage.getItem('idToken');
+    if (!idToken) {
+      return throwError(() => new Error('No se encontró el token de autenticación'));
+    }
+    const headers = this.getHeaders();
+    const cuentaUid = this.getActiveCuentaUid();
+    if (cuentaUid) {
+      return this.http.get<any>(`${this.apiUrl}/users/firebase/${cuentaUid}`, { headers }).pipe(
+        catchError(this.handleError)
+      );
+    }
+    return this.usersService.getUserByToken(idToken).pipe(
+      switchMap(user => {
+        if (!user) { throw new Error('No se encontró el usuario'); }
+        return this.http.get<any>(`${this.apiUrl}/users/firebase/${user.id}`, { headers });
+      }),
+      catchError(this.handleError)
+    );
+  }
 
   getClients(): Observable<Cliente[]> {
   const idToken = localStorage.getItem('idToken');

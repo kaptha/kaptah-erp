@@ -1,4 +1,4 @@
-import { Component, OnInit, ViewEncapsulation, ChangeDetectorRef } from '@angular/core';
+﻿import { Component, OnInit, ViewEncapsulation, ChangeDetectorRef } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
 import { MatDialog } from '@angular/material/dialog';
@@ -173,7 +173,9 @@ export class PerfilComponent implements OnInit {
       codigoPostal: [''],
       colonia: [''],
       tipoPersona: ['fisica', Validators.required],
-      fiscalReg: ['', Validators.required]
+      fiscalReg: ['', Validators.required],
+      curp: ['', [Validators.pattern(/^[A-Z]{4}[0-9]{6}[HM][A-Z]{5}[0-9A-Z][0-9]$/)]],
+      registroPatronal: ['', [Validators.maxLength(20)]]
     });
 
     // Cargar regímenes fiscales iniciales (Persona Física por defecto)
@@ -219,7 +221,9 @@ export class PerfilComponent implements OnInit {
               codigoPostal: user.codigoPostal || '',
               colonia: user.colonia || '',
               tipoPersona: tipoPersonaDeterminado,
-              fiscalReg: user.fiscalReg || ''
+              fiscalReg: user.fiscalReg || '',
+              curp: user.curp || '',
+              registroPatronal: user.registroPatronal || ''
             });
             this.email = user.email || '';
 
@@ -532,6 +536,8 @@ export class PerfilComponent implements OnInit {
         phone: this.perfilForm.get('phone')?.value,
         rfc: this.perfilForm.get('rfc')?.value.toUpperCase(),
         fiscalReg: this.perfilForm.get('fiscalReg')?.value,
+        curp: (this.perfilForm.get('curp')?.value || '').toUpperCase(),
+        registroPatronal: (this.perfilForm.get('registroPatronal')?.value || '').toUpperCase(),
         tipoPersona: tipoPersonaValue,
         email: this.email
       };

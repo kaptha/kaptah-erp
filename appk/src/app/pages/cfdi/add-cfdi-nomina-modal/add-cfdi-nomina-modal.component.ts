@@ -27,7 +27,7 @@ export class AddCfdiNominaModalComponent implements OnInit, OnDestroy {
   activePartidaTab = 'Percepciones'; // 'Percepciones', 'Deducciones', 'OtrosPagos'
   loading = false;
   isEditing = false;
-  
+  perfilEmisor: any = null;
   // Filtros y observables
   empleadoFilterCtrl = new FormControl('');
   filteredEmpleados!: Observable<any[]>;
@@ -283,7 +283,7 @@ export class AddCfdiNominaModalComponent implements OnInit, OnDestroy {
   ];
   
   private destroy$ = new Subject<void>();
-
+  
   constructor(
     private fb: FormBuilder,
     public dialogRef: MatDialogRef<AddCfdiNominaModalComponent>,
@@ -363,6 +363,16 @@ export class AddCfdiNominaModalComponent implements OnInit, OnDestroy {
   }
 
   ngOnInit(): void {
+      this.apibizService.getPerfilCuenta().subscribe({
+      next: (resp) => {
+        this.perfilEmisor = resp?.data || resp;
+        console.log('Perfil emisor para nomina:', this.perfilEmisor);
+        if (this.perfilEmisor?.registroPatronal) {
+          this.cfdiForm.patchValue({ registroPatronal: this.perfilEmisor.registroPatronal });
+        }
+      },
+      error: (err) => console.error('Error al cargar perfil del emisor:', err)
+    });
   this.initializeForms();
   
   this.nominaForm = this.fb.group({
@@ -682,23 +692,23 @@ export class AddCfdiNominaModalComponent implements OnInit, OnDestroy {
     // Prellenar el formulario con los datos del empleado
     if (this.selectedEmpleado) {
       this.nominaForm.get('empleado')?.patchValue({
-        numeroEmpleado: this.selectedEmpleado.numeroEmpleado || '',
+        numeroEmpleado: this.selectedEmpleado.numEmpleado || '',
         rfc: this.selectedEmpleado.rfc || '',
         curp: this.selectedEmpleado.curp || '',
         nombre: this.normalizarNombre(this.selectedEmpleado.nombre),
         departamento: this.selectedEmpleado.departamento || '',
         puesto: this.selectedEmpleado.puesto || '',
-        numSeguridadSocial: this.selectedEmpleado.nss || '',
+        numSeguridadSocial: this.selectedEmpleado.numSeguridadSocial || '',
         fechaInicioRelacionLaboral: this.aFechaLocal(this.selectedEmpleado.fechaInicio),
         antiguedad: this.calcularAntiguedad(this.selectedEmpleado.fechaInicio, this.nominaForm.get('fechaFinalPago')?.value),
         banco: this.selectedEmpleado.banco || '',
-        clabe: this.selectedEmpleado.clabe || '',
+        clabe: this.selectedEmpleado.cuentaBancaria || '',
         tipoContrato: this.selectedEmpleado.tipoContrato || '',
         tipoJornada: this.selectedEmpleado.tipoJornada || '',
-        regimenContratacion: this.selectedEmpleado.regimenContratacion || '',
+        regimenContratacion: this.selectedEmpleado.tipoRegimen || '',
         riesgoPuesto: this.selectedEmpleado.riesgoPuesto || '',
-        salarioBaseCotizacion: this.selectedEmpleado.salarioBaseCotizacion || 0,
-        salarioDiarioIntegrado: this.selectedEmpleado.salarioDiarioIntegrado || 0
+        salarioBaseCotizacion: Number(this.selectedEmpleado.salarioBaseCotApor || 0),
+        salarioDiarioIntegrado: Number(this.selectedEmpleado.salarioDiarioIntegrado || 0)
       });
       
       // 🆕 Cargar percepciones del empleado
@@ -1157,19 +1167,19 @@ private generarJsonCfdiNomina(): any {
       lugarExpedicion: generalData.sucursal ? this.selectedSucursal?.codigoPostal : '37160',
     },
 
-    // ========== EMISOR ==========
+    // ========== EMISOR (del perfil de la cuenta) ==========
     emisor: {
-      rfc: 'DIVM801101RJ9',
-      nombre: 'MARIO DIAZ VALENCIA',
-      regimenFiscal: '612'
+      rfc: this.perfilEmisor?.rfc || '',
+      nombre: this.perfilEmisor?.nombre || '',
+      regimenFiscal: this.perfilEmisor?.fiscalReg || ''
     },
 
     // ========== RECEPTOR (Empleado) ==========
     receptor: {
       rfc: empleadoData.rfc,
       nombre: empleadoData.nombre,
-      domicilioFiscalReceptor: '37440',
-      regimenFiscalReceptor: '605',
+      domicilioFiscalReceptor: this.selectedEmpleado?.codigoPostal || '',
+      regimenFiscalReceptor: this.selectedEmpleado?.regimenFiscal || '605',
       usoCFDI: 'CN01'
     },
 
@@ -1197,16 +1207,14 @@ private generarJsonCfdiNomina(): any {
       numDiasPagados: generalData.diasPagados.toString(),
       totalPercepciones: totalPercepciones.toFixed(2),
       totalDeducciones: totalDeducciones.toFixed(2),
-      totalOtrosPagos: totalOtrosPagos.toFixed(2),
+      totalOtrosPagos: this.otrosPagos.length > 0 ? totalOtrosPagos.toFixed(2) : null,
 
-      // Emisor Nómina
-      emisorNomina: {
-        curp: 'DIVM801101HJCZLR05',
-        registroPatronal: generalData.registroPatronal
+      emisor: {
+        curp: this.perfilEmisor?.tipo_persona === 'fisica' ? (this.perfilEmisor?.curp || '') : '',
+        registroPatronal: generalData.registroPatronal || this.perfilEmisor?.registroPatronal || ''
       },
 
-      // Receptor Nómina (Empleado)
-      receptorNomina: {
+      receptor: {
         curp: empleadoData.curp,
         numSeguridadSocial: empleadoData.numSeguridadSocial,
         fechaInicioRelLaboral: empleadoData.fechaInicioRelacionLaboral ? this.formatFechaISO(empleadoData.fechaInicioRelacionLaboral) : null,
@@ -1218,48 +1226,35 @@ private generarJsonCfdiNomina(): any {
         departamento: empleadoData.departamento,
         puesto: empleadoData.puesto,
         riesgoPuesto: empleadoData.riesgoPuesto,
-        periodicidadPago: '04',
-        salarioBaseCotApor: empleadoData.salarioBaseCotizacion ? empleadoData.salarioBaseCotizacion.toFixed(2) : '0.00',
-        salarioDiarioIntegrado: empleadoData.salarioDiarioIntegrado ? empleadoData.salarioDiarioIntegrado.toFixed(2) : '0.00',
-        claveEntFed: 'GUA',
+        periodicidadPago: this.selectedEmpleado?.periodicidadPago || '04',
+        salarioBaseCotApor: Number(empleadoData.salarioBaseCotizacion || 0).toFixed(2),
+        salarioDiarioIntegrado: Number(empleadoData.salarioDiarioIntegrado || 0).toFixed(2),
+        claveEntFed: this.selectedEmpleado?.claveEntFed || '',
         banco: empleadoData.banco,
         cuentaBancaria: empleadoData.clabe
       },
 
-      // Percepciones
-      percepciones: {
-        totalSueldos: totalPercepciones.toFixed(2),
-        totalGravado: totalPercepcionesGravado.toFixed(2),
-        totalExento: totalPercepcionesExento.toFixed(2),
-        percepciones: this.percepciones.controls.map(control => ({
-          tipoPercepcion: control.get('tipo')?.value,
-          clave: control.get('clave')?.value,
-          concepto: control.get('concepto')?.value,
-          importeGravado: parseFloat(control.get('importeGravado')?.value || 0).toFixed(2),
-          importeExento: parseFloat(control.get('importeExento')?.value || 0).toFixed(2)
-        }))
-      },
+      percepciones: this.percepciones.controls.map(control => ({
+        tipoPercepcion: control.get('tipo')?.value,
+        clave: control.get('clave')?.value,
+        concepto: control.get('concepto')?.value,
+        importeGravado: parseFloat(control.get('importeGravado')?.value || 0).toFixed(2),
+        importeExento: parseFloat(control.get('importeExento')?.value || 0).toFixed(2)
+      })),
 
-      // Deducciones
-      deducciones: this.deducciones.length > 0 ? {
-        totalOtrasDeducciones: totalDeducciones.toFixed(2),
-        deducciones: this.deducciones.controls.map(control => ({
-          tipoDeduccion: control.get('tipo')?.value,
-          clave: control.get('clave')?.value,
-          concepto: control.get('concepto')?.value,
-          importe: (parseFloat(control.get('importeGravado')?.value || 0) + parseFloat(control.get('importeExento')?.value || 0)).toFixed(2)
-        }))
-      } : null,
+      deducciones: this.deducciones.controls.map(control => ({
+        tipoDeduccion: control.get('tipo')?.value,
+        clave: control.get('clave')?.value,
+        concepto: control.get('concepto')?.value,
+        importe: (parseFloat(control.get('importeGravado')?.value || 0) + parseFloat(control.get('importeExento')?.value || 0)).toFixed(2)
+      })),
 
-      // Otros Pagos
-      otrosPagos: this.otrosPagos.length > 0 ? {
-        otrosPagos: this.otrosPagos.controls.map(control => ({
-          tipoOtroPago: control.get('tipo')?.value,
-          clave: control.get('clave')?.value,
-          concepto: control.get('concepto')?.value,
-          importe: parseFloat(control.get('importe')?.value || 0).toFixed(2)
-        }))
-      } : null
+      otrosPagos: this.otrosPagos.controls.map(control => ({
+        tipoOtroPago: control.get('tipo')?.value,
+        clave: control.get('clave')?.value,
+        concepto: control.get('concepto')?.value,
+        importe: parseFloat(control.get('importe')?.value || 0).toFixed(2)
+      }))
     },
 
     // ========== CERTIFICADO ==========
