@@ -85,7 +85,7 @@ export class UsersService {
   async updateUser(updateUserDto: UpdateUserDto): Promise<{ success: boolean; message: string; data?: any }> {
     console.log('Attempting to update user:', updateUserDto);
     
-    const { firebaseUid, nombre, nombreComercial, phone, rfc, tipoPersona, fiscalReg, email } = updateUserDto;
+        const { firebaseUid, nombre, nombreComercial, phone, rfc, tipoPersona, fiscalReg, email, curp, registroPatronal } = updateUserDto;
 
     try {
       // 1. Buscar usuario en MySQL por firebaseUid
@@ -102,6 +102,8 @@ export class UsersService {
       userMySQL.tipo_persona = (tipoPersona || 'fisica') as 'fisica' | 'moral';
       userMySQL.rfc = rfc.toUpperCase();
       userMySQL.fiscalReg = fiscalReg;
+      if (curp !== undefined) { userMySQL.curp = curp ? curp.toUpperCase().trim() : null; }
+      if (registroPatronal !== undefined) { userMySQL.registroPatronal = registroPatronal ? registroPatronal.toUpperCase().trim() : null; }
       userMySQL.email = email;
 
       const updatedUserMySQL = await this.usersRepository.save(userMySQL);

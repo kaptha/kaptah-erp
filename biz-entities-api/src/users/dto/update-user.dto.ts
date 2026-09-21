@@ -27,7 +27,16 @@ export class UpdateUserDto {
   @IsString()
   @Length(1, 10)
   fiscalReg: string;
- 
+  
+    @IsOptional()
+  @IsString()
+  @Matches(/^([A-Z]{4}[0-9]{6}[HM][A-Z]{5}[0-9A-Z][0-9])?$/, { message: 'El CURP no tiene un formato valido' })
+  curp?: string;
+
+  @IsOptional()
+  @IsString()
+  @Length(0, 20)
+  registroPatronal?: string;
   @IsEmail()
   email: string;
 }

@@ -33,6 +33,12 @@ export class User {
 
   @Column({ nullable: true, length: 10 })
   fiscalReg: string;
+
+    @Column({ nullable: true, length: 18 })
+  curp: string;
+
+  @Column({ name: 'registro_patronal', nullable: true, length: 20 })
+  registroPatronal: string;
  
   @Column({ type: 'timestamp', default: () => 'CURRENT_TIMESTAMP' })
   Fecha_Registro: Date;

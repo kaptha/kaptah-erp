@@ -791,15 +791,19 @@ private generateComplementoNomina(data: any): string {
   
   complementoXml += '>';
   
-  // Emisor
-  if (nomina.emisor) {
+    // Emisor
+  const emisorNom = nomina.emisor || {};
+  if (emisorNom.curp || emisorNom.registroPatronal || emisorNom.rfcPatronOrigen) {
     complementoXml += `
   <nomina12:Emisor`;
-    if (nomina.emisor.registroPatronal) {
-      complementoXml += ` RegistroPatronal="${nomina.emisor.registroPatronal}"`;
+    if (emisorNom.curp) {
+      complementoXml += ` Curp="${emisorNom.curp}"`;
     }
-    if (nomina.emisor.rfcPatronOrigen) {
-      complementoXml += ` RfcPatronOrigen="${nomina.emisor.rfcPatronOrigen}"`;
+    if (emisorNom.registroPatronal) {
+      complementoXml += ` RegistroPatronal="${emisorNom.registroPatronal}"`;
+    }
+    if (emisorNom.rfcPatronOrigen) {
+      complementoXml += ` RfcPatronOrigen="${emisorNom.rfcPatronOrigen}"`;
     }
     complementoXml += ' />';
   }
