@@ -212,6 +212,19 @@ export class EmpleadoFormComponent implements OnInit {
     this.percepcionesDataSource.data = this.percepcionesFormArray.controls;
   }
 
+  // Clave SAT de 3 digitos para el tipo; compatibilidad con registros que guardaron "Percepcion"/"Deduccion".
+  private tipoSat(p: any): string {
+    const t = String(p?.tipo ?? '').trim();
+    const c = String(p?.clave ?? '').trim();
+    const base = /^[0-9]{1,3}$/.test(t) ? t : c;
+    return /^[0-9]{1,3}$/.test(base) ? base.padStart(3, '0') : base;
+  }
+
+  // Clave con ceros a la izquierda para que coincida con el catalogo corregido.
+  private claveSat(p: any): string {
+    const c = String(p?.clave ?? '').trim();
+    return /^[0-9]{1,3}$/.test(c) ? c.padStart(3, '0') : c;
+  }
   // Método para autocompletar el concepto cuando se selecciona una clave de deducción
   onDeduccionClaveChange(index: number, clave: string) {
     const deduccion = this.catalogoDeducciones.find(d => d.c_TipoDeduccion === clave);
@@ -219,7 +232,7 @@ export class EmpleadoFormComponent implements OnInit {
       const deduccionControl = this.deduccionesFormArray.at(index);
       deduccionControl.patchValue({
         concepto: deduccion.descripcion,
-        tipo: 'Deducción'
+        tipo: String(clave).padStart(3, '0')
       });
     }
   }
@@ -231,7 +244,7 @@ export class EmpleadoFormComponent implements OnInit {
       const percepcionControl = this.percepcionesFormArray.at(index);
       percepcionControl.patchValue({
         concepto: percepcion.descripcion,
-        tipo: 'Percepción'
+        tipo: String(clave).padStart(3, '0')
       });
     }
   }
@@ -240,8 +253,8 @@ export class EmpleadoFormComponent implements OnInit {
     if (this.data.empleado?.deducciones) {
       this.data.empleado.deducciones.forEach((deduccion: DeduccionPercepcion) => {
         const deduccionGroup = this.fb.group({
-          tipo: [deduccion.tipo, Validators.required],
-          clave: [deduccion.clave, Validators.required],
+          tipo: [this.tipoSat(deduccion), Validators.required],
+          clave: [this.claveSat(deduccion), Validators.required],
           concepto: [deduccion.concepto, Validators.required],
           importeGravado: [deduccion.importeGravado, [Validators.required, Validators.min(0)]],
           importeExento: [deduccion.importeExento, [Validators.required, Validators.min(0)]]
@@ -254,8 +267,8 @@ export class EmpleadoFormComponent implements OnInit {
     if (this.data.empleado?.percepciones) {
       this.data.empleado.percepciones.forEach((percepcion: DeduccionPercepcion) => {
         const percepcionGroup = this.fb.group({
-          tipo: [percepcion.tipo, Validators.required],
-          clave: [percepcion.clave, Validators.required],
+          tipo: [this.tipoSat(percepcion), Validators.required],
+          clave: [this.claveSat(percepcion), Validators.required],
           concepto: [percepcion.concepto, Validators.required],
           importeGravado: [percepcion.importeGravado, [Validators.required, Validators.min(0)]],
           importeExento: [percepcion.importeExento, [Validators.required, Validators.min(0)]]

@@ -771,8 +771,8 @@ export class AddCfdiNominaModalComponent implements OnInit, OnDestroy {
   // Agregar cada percepción al FormArray
   percepcionesArray.forEach((percepcion: any) => {
     const percepcionGroup = this.fb.group({
-      tipo: [percepcion.tipo || '', Validators.required],
-      clave: [percepcion.clave || '', Validators.required],
+      tipo: [this.normalizarTipoSat(percepcion), Validators.required],
+      clave: [this.normalizarClaveInterna(percepcion), Validators.required],
       concepto: [percepcion.concepto || '', Validators.required],
       importeGravado: [percepcion.importeGravado || 0, Validators.required],
       importeExento: [percepcion.importeExento || 0, Validators.required]
@@ -810,8 +810,8 @@ export class AddCfdiNominaModalComponent implements OnInit, OnDestroy {
   // Agregar cada deducción al FormArray
   deduccionesArray.forEach((deduccion: any) => {
     const deduccionGroup = this.fb.group({
-      tipo: [deduccion.tipo || deduccion.clave || '', Validators.required],
-      clave: [deduccion.clave || '', Validators.required],
+      tipo: [this.normalizarTipoSat(deduccion), Validators.required],
+      clave: [this.normalizarClaveInterna(deduccion), Validators.required],
       concepto: [deduccion.concepto || '', Validators.required],
       importeGravado: [deduccion.importeGravado || 0, Validators.required],
       importeExento: [deduccion.importeExento || 0, Validators.required]
@@ -825,6 +825,22 @@ export class AddCfdiNominaModalComponent implements OnInit, OnDestroy {
   
   console.log('✅ Deducciones cargadas:', deduccionesArray.length);
 }
+
+  // Clave SAT (TipoPercepcion / TipoDeduccion), siempre de 3 digitos.
+  // Compatibilidad: registros viejos guardan "Percepcion"/"Deduccion" en tipo y la clave SAT sin ceros en clave.
+  private normalizarTipoSat(p: any): string {
+    const t = String(p?.tipo ?? '').trim();
+    const c = String(p?.clave ?? '').trim();
+    if (/^[0-9]{1,3}$/.test(t)) { return t.padStart(3, '0'); }
+    if (/^[0-9]{1,3}$/.test(c)) { return c.padStart(3, '0'); }
+    return '';
+  }
+
+  // Clave interna del patron: de 3 a 15 caracteres; si la guardada no es valida se usa la clave SAT.
+  private normalizarClaveInterna(p: any): string {
+    const c = String(p?.clave ?? '').trim();
+    return (c.length >= 3 && c.length <= 15) ? c : this.normalizarTipoSat(p);
+  }
   
   // Getters para acceder a los FormArrays
   get percepciones(): FormArray {
