@@ -1,8 +1,8 @@
-import { Entity, PrimaryColumn, Column } from 'typeorm';
+﻿import { Entity, PrimaryColumn, Column } from 'typeorm';
 
 @Entity('cat_tipo_regimen')
 export class TipoRegimen {
-  @PrimaryColumn({ type: 'varchar', length: 2 })
+  @PrimaryColumn({ type: 'varchar', length: 2, name: 'c_tiporegimen' })
   c_TipoRegimen: string;
 
   @Column({ type: 'varchar', length: 255 })

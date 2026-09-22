@@ -1,8 +1,8 @@
-import { Entity, PrimaryColumn, Column } from 'typeorm';
+﻿import { Entity, PrimaryColumn, Column } from 'typeorm';
 
 @Entity('cat_tipo_jornada')
 export class TipoJornada {
-  @PrimaryColumn({ type: 'varchar', length: 2 })
+  @PrimaryColumn({ type: 'varchar', length: 2, name: 'c_tipojornada' })
   c_TipoJornada: string;
 
   @Column({ type: 'varchar', length: 255 })
