@@ -177,6 +177,24 @@ export class PerfilComponent implements OnInit {
       curp: ['', [Validators.pattern(/^[A-Z]{4}[0-9]{6}[HM][A-Z]{5}[0-9A-Z][0-9]$/)]],
       registroPatronal: ['', [Validators.maxLength(20)]]
     });
+        // El input se ve en mayusculas por CSS, pero el valor real no lo es: normalizarlo aqui.
+    this.perfilForm.get('curp')?.valueChanges.subscribe((v: any) => {
+      if (typeof v === 'string') {
+        const limpio = v.toUpperCase().replace(/\s+/g, '');
+        if (limpio !== v) {
+          this.perfilForm.get('curp')?.setValue(limpio, { emitEvent: false });
+        }
+      }
+    });
+
+    this.perfilForm.get('registroPatronal')?.valueChanges.subscribe((v: any) => {
+      if (typeof v === 'string') {
+        const limpio = v.toUpperCase().replace(/\s+/g, '');
+        if (limpio !== v) {
+          this.perfilForm.get('registroPatronal')?.setValue(limpio, { emitEvent: false });
+        }
+      }
+    });
 
     // Cargar regímenes fiscales iniciales (Persona Física por defecto)
     this.regimenesFiscalesFiltrados = this.regimenFiscalService.getRegimenesPorTipo('fisica');
