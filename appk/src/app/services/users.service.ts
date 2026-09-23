@@ -1,4 +1,4 @@
-import { Injectable } from '@angular/core';
+﻿import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { map, switchMap, tap } from 'rxjs/operators';
@@ -218,6 +218,8 @@ export class UsersService {
       tipoPersona: userData.tipoPersona || 'fisica',
       fiscalReg: userData.fiscalReg,
       email: userData.email,
+      curp: userData.curp || '',
+      registroPatronal: userData.registroPatronal || '',
       firebaseUid: firebaseUid
     };
 
