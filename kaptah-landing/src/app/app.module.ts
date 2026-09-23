@@ -16,9 +16,19 @@ import { AppRoutingModule } from './app-routing.module';
 import { AppComponent } from './app.component';
 import { LandingComponent } from './landing/landing.component';
 import { NavbarComponent } from './shared/navbar/navbar.component';
+import { AvisoPrivacidadComponent } from './legal/aviso-privacidad.component';
+import { TerminosComponent } from './legal/terminos.component';
+import { DevolucionesComponent } from './legal/devoluciones.component';
 
 @NgModule({
-  declarations: [AppComponent, LandingComponent, NavbarComponent],
+  declarations: [
+    AppComponent,
+    LandingComponent,
+    NavbarComponent,
+    AvisoPrivacidadComponent,
+    TerminosComponent,
+    DevolucionesComponent
+  ],
   imports: [
     BrowserModule,
     AppRoutingModule,
@@ -36,4 +46,3 @@ import { NavbarComponent } from './shared/navbar/navbar.component';
   bootstrap: [AppComponent],
 })
 export class AppModule {}
-
