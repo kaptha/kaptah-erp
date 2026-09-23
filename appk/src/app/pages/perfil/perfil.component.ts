@@ -4,7 +4,7 @@ import { Router } from '@angular/router';
 import { MatDialog } from '@angular/material/dialog';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { of } from 'rxjs';
-import { switchMap } from 'rxjs/operators';
+import { switchMap, map } from 'rxjs/operators';
 import { UsersService } from 'src/app/services/users.service';
 import { ApibizService } from '../../services/apibiz.service';
 import { SucursalModalComponent } from './sucursal-modal/sucursal-modal.component';
@@ -220,9 +220,12 @@ export class PerfilComponent implements OnInit {
       this.usersService.getUserFromMySQL(firebaseUid).pipe(
         switchMap((mysqlUser: any) => {
           if (mysqlUser?.realtimeDbKey) {
-            return this.usersService.getUserFromRTDB(mysqlUser.realtimeDbKey);
+            // MySQL es la fuente de verdad para los datos fiscales (curp, registro patronal).
+            return this.usersService.getUserFromRTDB(mysqlUser.realtimeDbKey).pipe(
+              map((rtdbUser: any) => ({ ...(rtdbUser || {}), ...mysqlUser }))
+            );
           }
-          return of(null);
+          return of(mysqlUser || null);
         })
       ).subscribe(
         (user: any) => {
