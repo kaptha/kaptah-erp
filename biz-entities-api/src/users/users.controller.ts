@@ -1,4 +1,4 @@
-import { Controller, Get, Param, Logger, Post, Put, Body, HttpException, HttpStatus } from '@nestjs/common';
+﻿import { Controller, Get, Param, Logger, Post, Put, Body, HttpException, HttpStatus } from '@nestjs/common';
 import { UsersService } from './users.service';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
@@ -50,6 +50,8 @@ export class UsersController {
         rfc: user.rfc,
         tipo_persona: user.tipo_persona,
         fiscalReg: user.fiscalReg,
+        curp: user.curp,
+        registroPatronal: user.registroPatronal,
         realtimeDbKey: user.realtimeDbKey
       };
     } catch (error) {
