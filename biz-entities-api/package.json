@@ -38,6 +38,7 @@
     "reflect-metadata": "^0.2.0",
     "resend": "^6.9.4",
     "rxjs": "^7.8.1",
+    "stripe": "^22.6.2",
     "typeorm": "^0.3.20"
   },
   "devDependencies": {

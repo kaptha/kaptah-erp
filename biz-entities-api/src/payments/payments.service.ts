@@ -1,6 +1,6 @@
 import { Injectable, Logger, BadRequestException } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import axios from 'axios';
+import Stripe from 'stripe';
 import * as admin from 'firebase-admin';
 
 interface PlanConfig {
@@ -12,37 +12,22 @@ interface PlanConfig {
 @Injectable()
 export class PaymentsService {
   private readonly logger = new Logger(PaymentsService.name);
-  private readonly apiKey: string;
-  private readonly apiUrl = 'https://api.conekta.io';
+  private readonly stripe: Stripe;
 
   private readonly planes: Record<string, PlanConfig> = {
-    basico: {
-      name: 'Kaptah Basico',
-      mensual: 0,
-      anual: 59900,
-    },
-    fiscal: {
-      name: 'Kaptah Fiscal',
-      mensual: 29900,
-      anual: 299000,
-    },
-    erp: {
-      name: 'Kaptah ERP',
-      mensual: 59900,
-      anual: 599000,
-    },
-    ilimitado: {
-      name: 'Kaptah Ilimitado',
-      mensual: 99900,
-      anual: 999000,
-    },
+    basico: { name: 'Kaptah Basico', mensual: 0, anual: 59900 },
+    fiscal: { name: 'Kaptah Fiscal', mensual: 29900, anual: 299000 },
+    erp: { name: 'Kaptah ERP', mensual: 59900, anual: 599000 },
+    ilimitado: { name: 'Kaptah Ilimitado', mensual: 99900, anual: 999000 },
   };
 
   constructor(private readonly configService: ConfigService) {
-    this.apiKey = this.configService.get<string>('CONEKTA_PRIVATE_KEY');
+    this.stripe = new Stripe(this.configService.get<string>('STRIPE_SECRET_KEY'), {
+      apiVersion: '2026-08-26.dahlia',
+    });
   }
 
-  async createCheckoutOrder(
+  async createCheckoutSession(
     plan: string,
     ciclo: string,
     customerName: string,
@@ -67,86 +52,86 @@ export class PaymentsService {
     const cicloLabel = ciclo === 'anual' ? 'Anual' : 'Mensual';
     const itemName = `${planConfig.name} - ${cicloLabel}`;
 
-    const body = {
-      currency: 'MXN',
-      customer_info: {
-        name: customerName,
-        email: customerEmail,
-        phone: customerPhone,
-      },
-      line_items: [
-        {
-          name: itemName,
-          unit_price: unitPrice,
-          quantity: 1,
-        },
-      ],
-      checkout: {
-        type: 'Integration',
-        allowed_payment_methods: ['card', 'cash', 'bank_transfer'],
-        name: itemName,
-      },
-      metadata: {
-        firebaseUid,
-        plan,
-        cicloFacturacion: ciclo,
-      },
-    };
-
     try {
-      this.logger.log(`Creando orden Conekta: ${itemName} para ${customerEmail}`);
+      this.logger.log(`Creando sesion Stripe: ${itemName} para ${customerEmail}`);
 
-      const res = await axios.post(`${this.apiUrl}/orders`, body, {
-        headers: {
-          Accept: 'application/vnd.conekta-v2.2.0+json',
-          'Accept-Language': 'es',
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${this.apiKey}`,
+      const session = await this.stripe.checkout.sessions.create({
+        payment_method_types: ['card'],
+        mode: 'payment',
+        locale: 'es',
+        customer_email: customerEmail,
+        line_items: [
+          {
+            price_data: {
+              currency: 'mxn',
+              product_data: {
+                name: itemName,
+                description: `Suscripcion ${planConfig.name} - Ciclo ${cicloLabel}`,
+              },
+              unit_amount: unitPrice,
+            },
+            quantity: 1,
+          },
+        ],
+        metadata: {
+          firebaseUid,
+          plan,
+          cicloFacturacion: ciclo,
+          customerName,
+          customerPhone,
         },
+        success_url: 'https://app.kaptah.mx/dashboard/perfil?payment=success',
+        cancel_url: 'https://app.kaptah.mx/dashboard/perfil?payment=cancelled',
       });
 
-      this.logger.log(`Orden creada exitosamente: ${res.data.id}`);
+      this.logger.log(`Sesion creada: ${session.id}`);
 
       return {
-        checkoutRequestId: res.data.checkout.id,
-        orderId: res.data.id,
-        amount: unitPrice,
+        sessionId: session.id,
+        url: session.url,
         plan,
         cicloFacturacion: ciclo,
       };
     } catch (error) {
-      this.logger.error('Error al crear orden en Conekta:', error.response?.data || error.message);
-      throw new BadRequestException(
-        error.response?.data?.details?.[0]?.message || 'Error al crear la orden de pago',
-      );
+      this.logger.error('Error al crear sesion Stripe:', error.message);
+      throw new BadRequestException(error.message || 'Error al crear la sesion de pago');
     }
   }
 
-  async handleWebhook(event: any) {
-    this.logger.log(`Webhook recibido: ${event.type}`);
+  async handleWebhook(payload: Buffer, signature: string) {
+    const webhookSecret = this.configService.get<string>('STRIPE_WEBHOOK_SECRET');
 
-    if (event.type === 'order.paid') {
-      const order = event.data.object;
-      const metadata = order.metadata;
+    let event: Stripe.Event;
 
-      if (!metadata?.firebaseUid || !metadata?.plan) {
-        this.logger.warn('Webhook order.paid sin metadata valida');
-        return { received: true, processed: false };
-      }
-
-      await this.activateSubscription(
-        metadata.firebaseUid,
-        metadata.plan,
-        metadata.cicloFacturacion,
-        order.id,
-      );
-
-      return { received: true, processed: true };
+    try {
+      event = this.stripe.webhooks.constructEvent(payload, signature, webhookSecret);
+    } catch (err) {
+      this.logger.error(`Webhook signature verification failed: ${err.message}`);
+      throw new BadRequestException(`Webhook Error: ${err.message}`);
     }
 
-    if (event.type === 'order.expired') {
-      this.logger.warn(`Orden expirada: ${event.data.object.id}`);
-      return { received: true, processed: false };
+    this.logger.log(`Webhook recibido: ${event.type}`);
+
+    if (event.type === 'checkout.session.completed') {
+      const session = event.data.object as Stripe.Checkout.Session;
+
+      if (session.payment_status === 'paid') {
+        const metadata = session.metadata;
+
+        if (!metadata?.firebaseUid || !metadata?.plan) {
+          this.logger.warn('Webhook sin metadata valida');
+          return { received: true, processed: false };
+        }
+
+        await this.activateSubscription(
+          metadata.firebaseUid,
+          metadata.plan,
+          metadata.cicloFacturacion,
+          session.id,
+        );
+
+        return { received: true, processed: true };
+      }
     }
 
     return { received: true };
@@ -156,7 +141,7 @@ export class PaymentsService {
     firebaseUid: string,
     plan: string,
     cicloFacturacion: string,
-    conektaOrderId: string,
+    stripeSessionId: string,
   ) {
     try {
       const db = admin.database();
@@ -177,7 +162,7 @@ export class PaymentsService {
         cicloFacturacion,
         enPeriodoPrueba: false,
         fechaPago: now,
-        conektaOrderId,
+        stripeSessionId,
         fechaVencimiento: this.calcularVencimiento(cicloFacturacion),
       });
 

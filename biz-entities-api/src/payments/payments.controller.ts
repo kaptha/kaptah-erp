@@ -1,8 +1,9 @@
-import { Controller, Post, Body, Req, Headers, Logger, UseGuards } from '@nestjs/common';
+import { Controller, Post, Body, Req, Headers, Logger, UseGuards, RawBodyRequest } from '@nestjs/common';
 import { PaymentsService } from './payments.service';
 import { CreateCheckoutDto } from './dto/create-checkout.dto';
 import { Public } from '../decorators/public.decorator';
 import { FirebaseAuthGuard } from '../guards/firebase-auth.guard';
+import { Request } from 'express';
 
 @Controller('payments')
 @UseGuards(FirebaseAuthGuard)
@@ -19,7 +20,7 @@ export class PaymentsController {
     const user = req.user;
     this.logger.log(`Checkout solicitado por: ${user.email}`);
 
-    return this.paymentsService.createCheckoutOrder(
+    return this.paymentsService.createCheckoutSession(
       dto.plan,
       dto.cicloFacturacion,
       dto.customerName,
@@ -32,10 +33,10 @@ export class PaymentsController {
   @Public()
   @Post('webhook')
   async handleWebhook(
-    @Req() req: any,
-    @Headers('x-conekta-signature') signature: string,
+    @Req() req: RawBodyRequest<Request>,
+    @Headers('stripe-signature') signature: string,
   ) {
-    this.logger.log('Webhook Conekta recibido');
-    return this.paymentsService.handleWebhook(req.body);
+    this.logger.log('Webhook Stripe recibido');
+    return this.paymentsService.handleWebhook(req.rawBody, signature);
   }
 }
