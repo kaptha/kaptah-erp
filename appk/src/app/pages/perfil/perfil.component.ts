@@ -1,4 +1,4 @@
-﻿import { Component, OnInit, ViewEncapsulation, ChangeDetectorRef } from '@angular/core';
+import { Component, OnInit, ViewEncapsulation, ChangeDetectorRef } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
 import { MatDialog } from '@angular/material/dialog';
@@ -22,6 +22,7 @@ import { Sucursal } from '../../models/sucursal.model';
 import { HttpEventType } from '@angular/common/http';
 import Swal from 'sweetalert2';
 import { PaymentsService } from 'src/app/services/payments.service';
+import { ActivatedRoute } from '@angular/router';
 
 interface PlanInfo {
   nombre: string;
@@ -154,6 +155,27 @@ export class PerfilComponent implements OnInit {
     this.loadLogoData();
     this.cargarTerminosCondiciones();
     this.loadPlanData();
+        // Detectar retorno de Stripe
+    const urlParams = new URLSearchParams(window.location.search);
+    const paymentStatus = urlParams.get('payment');
+    if (paymentStatus === 'success') {
+      Swal.fire({
+        icon: 'success',
+        title: 'Pago exitoso',
+        text: 'Tu plan ha sido activado correctamente.',
+        confirmButtonColor: '#8e24aa'
+      });
+      // Limpiar URL
+      window.history.replaceState({}, '', window.location.pathname);
+    } else if (paymentStatus === 'cancelled') {
+      Swal.fire({
+        icon: 'info',
+        title: 'Pago cancelado',
+        text: 'El proceso de pago fue cancelado.',
+        confirmButtonColor: '#8e24aa'
+      });
+      window.history.replaceState({}, '', window.location.pathname);
+    }
   }
   /**
    * Navega al componente de selección de plantillas de facturas
@@ -945,7 +967,7 @@ get terminosModificados(): boolean {
   /**
    * Inicia el proceso de pago con Conekta
    */
-  iniciarPago(): void {
+    iniciarPago(): void {
     if (this.suscripcionActiva) return;
 
     const firebaseUid = localStorage.getItem('activeCuentaUid');
@@ -954,7 +976,6 @@ get terminosModificados(): boolean {
       return;
     }
 
-    // Mapear plan interno a key del backend
     const planMap: { [key: string]: string } = {
       starter: 'basico',
       pro: 'fiscal',
@@ -969,7 +990,6 @@ get terminosModificados(): boolean {
     }
 
     this.checkoutLoading = true;
-    this.mostrarCheckout = false;
 
     const checkoutData = {
       plan: planKey,
@@ -983,35 +1003,8 @@ get terminosModificados(): boolean {
     this.paymentsService.createCheckout(checkoutData).subscribe({
       next: (response) => {
         this.checkoutLoading = false;
-        this.mostrarCheckout = true;
-        this.cdr.detectChanges();
-
-        setTimeout(() => {
-          this.paymentsService.initConektaCheckout(
-            response.checkoutRequestId,
-            '#conekta-checkout-container',
-            (order) => {
-              this.mostrarCheckout = false;
-              this.suscripcionActiva = true;
-              this.enPeriodoPrueba = false;
-              this.cdr.detectChanges();
-              Swal.fire({
-                icon: 'success',
-                title: 'Pago exitoso',
-                text: 'Tu plan ha sido activado correctamente.',
-                confirmButtonColor: '#8e24aa'
-              });
-            },
-            (error) => {
-              Swal.fire({
-                icon: 'error',
-                title: 'Error en el pago',
-                text: 'Hubo un problema al procesar tu pago. Intenta de nuevo.',
-                confirmButtonColor: '#8e24aa'
-              });
-            }
-          );
-        }, 500);
+        // Redirigir a Stripe Checkout
+        window.location.href = response.url;
       },
       error: (error) => {
         this.checkoutLoading = false;
