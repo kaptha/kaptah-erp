@@ -7,6 +7,7 @@ import { CsdService } from './csd.service';
 import { FielCryptoService } from './fiel-crypto.service';
 import { CertificatesController } from './certificates.controller';
 import { InternalFielController } from './internal-fiel.controller';
+import { InternalCsdController } from './internal-csd.controller';
 import { FirebaseAdminConfig } from '../auth/firebase-admin.config';
 import { AuthModule } from '../auth/auth.module';
 import { ServiceTokenGuard } from '../auth/guards/service-token.guard';
@@ -23,7 +24,7 @@ import { ServiceTokenGuard } from '../auth/guards/service-token.guard';
     AuthModule
   ],
   providers: [FielService, CsdService, FirebaseAdminConfig, FielCryptoService, ServiceTokenGuard],
-  controllers: [CertificatesController, InternalFielController],
+  controllers: [CertificatesController, InternalFielController, InternalCsdController],
   exports: [FielService, CsdService],
 })
 export class CertificatesModule {}
