@@ -54,10 +54,10 @@ export class Cfdi {
   @Column({ type: 'text', nullable: true, name: 'qrImage' })
   qrImage: string;
 
-  @Column({ type: 'int', nullable: true })
+  @Column({ type: 'decimal', precision: 12, scale: 2, nullable: true })
   total: number;
 
-  @Column({ type: 'int', nullable: true })
+  @Column({ type: 'decimal', precision: 12, scale: 2, nullable: true })
   subtotal: number;
 
   @Column({ type: 'timestamp', nullable: true })

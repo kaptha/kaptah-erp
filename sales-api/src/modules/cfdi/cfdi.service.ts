@@ -578,7 +578,7 @@ async verifyCfdi(
 // 👇 MÉTODOS AUXILIARES
   private extractTotalFromXml(xml: string, attr: 'Total' | 'SubTotal'): number | null {
     if (!xml) return null;
-    const regex = new RegExp(attr + '="([0-9.]+)"');
+    const regex = new RegExp('(?:^|\\s)' + attr + '="([0-9.]+)"');
     const match = xml.match(regex);
     return match ? parseFloat(match[1]) : null;
   }
