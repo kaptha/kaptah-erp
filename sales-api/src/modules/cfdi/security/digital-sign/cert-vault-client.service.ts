@@ -63,30 +63,57 @@ export class CertVaultClientService {
    * @returns Certificado CSD activo del usuario
    */
   async getActiveCsd(firebaseToken: string, cuentaUid?: string): Promise<CsdCertificate> {
-    try {
-      const url = cuentaUid
+    const serviceToken = this.configService.get<string>('VAULT_SERVICE_TOKEN');
+    const useInternal = !!(cuentaUid && serviceToken);
+
+    const url = useInternal
+      ? `${this.certVaultUrl}/api/internal/csd/${encodeURIComponent(cuentaUid)}/active`
+      : cuentaUid
         ? `${this.certVaultUrl}/api/certificates/csd/active?cuentaUid=${cuentaUid}`
         : `${this.certVaultUrl}/api/certificates/csd/active`;
-    
-    this.logger.debug(`🔍 Llamando a cert-vault: ${url}`);
-    this.logger.debug(`🎫 Token: ${firebaseToken.substring(0, 20)}...`); // ⭐ AGREGAR ESTE LOG
-    
-    const response = await firstValueFrom(
-      this.httpService.get<CsdCertificate>(url, {
-        headers: {
-          'Authorization': `Bearer ${firebaseToken}`,  // ⭐ Verificar que esto esté correcto
-        },
-      })
-    );
 
-    this.logger.debug('✅ Certificado CSD obtenido exitosamente');
-    return response.data;
-  } catch (error) {
-    this.logger.error('❌ Error obteniendo certificado CSD:', error);
-    // ... resto del código
+    const headers: Record<string, string> = useInternal
+      ? { 'X-Service-Token': serviceToken }
+      : { 'Authorization': `Bearer ${firebaseToken}` };
+
+    this.logger.debug(`Llamando a cert-vault (${useInternal ? 'internal' : 'bearer'}): ${url}`);
+
+    try {
+      const response = await firstValueFrom(
+        this.httpService.get<CsdCertificate>(url, { headers, timeout: 15000 })
+      );
+
+      if (!response.data) {
+        throw new HttpException(
+          'No se encontro un certificado CSD activo para esta cuenta.',
+          HttpStatus.NOT_FOUND
+        );
+      }
+
+      this.logger.debug(`Certificado CSD obtenido - Numero: ${response.data.certificateNumber}`);
+      return response.data;
+    } catch (error) {
+      if (error instanceof HttpException) {
+        throw error;
+      }
+
+      const status = error.response?.status;
+      this.logger.error(`Error obteniendo certificado CSD (status ${status ?? 'n/a'}): ${error.message}`);
+
+      if (status === 404) {
+        throw new HttpException(
+          'No se encontro un certificado CSD activo para esta cuenta. Por favor, suba un certificado valido.',
+          HttpStatus.NOT_FOUND
+        );
+      }
+
+      // Nunca propagar 401/403 de cert-vault al frontend: el interceptor lo trataria como sesion expirada
+      throw new HttpException(
+        'No fue posible obtener el certificado CSD desde el servicio de certificados.',
+        HttpStatus.BAD_GATEWAY
+      );
+    }
   }
-}
-
   /**
    * Obtiene el certificado FIEL activo de un usuario
    * @param firebaseToken Token de Firebase del usuario para autenticación
@@ -145,7 +172,7 @@ export class CertVaultClientService {
       if (error.response?.status === 401) {
         throw new HttpException(
           'No autorizado para acceder al cert-vault-service',
-          HttpStatus.UNAUTHORIZED
+          HttpStatus.BAD_GATEWAY
         );
       }
 
