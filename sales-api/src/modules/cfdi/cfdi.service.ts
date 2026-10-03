@@ -641,49 +641,107 @@ private calculateTotal(conceptos: any[]): number {
   }
 
   /**
-   * Crear CFDI de Nómina (modificado para usar colas)
+   * Crear CFDI de Nomina (timbrado sincrono, mismo flujo que Ingreso)
    */
   async createNominaCfdi(createDto: any, user: any, firebaseToken: string) {
-    this.logger.log(`Creando CFDI de nómina para usuario: ${user.uid}`);
+    this.logger.log(`Creando CFDI de nomina para cuenta: ${user.uid}`);
 
     try {
+      // 1. Contrasena del CSD (el certificado ya se valido en el controller)
+      const csdPassword = createDto.csdPassword || createDto.certificado?.password || createDto.password;
+      if (!csdPassword) {
+        throw new BadRequestException('La contrasena del certificado es requerida');
+      }
+
+      // 2. Generar XML de nomina
+      const xmlContent = this.generateNominaXml(createDto, user);
+      this.logger.log('XML de nomina generado');
+
+      // 3. Firmar con el CSD de la cuenta
+      const xmlFirmado = await this.signCfdi(
+        xmlContent,
+        firebaseToken,
+        csdPassword,
+        user.uid,
+      );
+      this.logger.log('CFDI de nomina firmado');
+
+      // 4. Verificacion local del sello (solo para obtener cadena original / debug)
+      let cadenaOriginalStr = null;
+      try {
+        const verification = await this.verifyCfdi(xmlFirmado, firebaseToken, user.uid);
+        this.logger.log(`Verificacion local del sello (nomina): ${verification.valid ? 'VALIDO' : 'INVALIDO'}`);
+        if (verification.originalString) {
+          cadenaOriginalStr = verification.originalString;
+        }
+        if (verification.error) {
+          this.logger.warn('Error verificacion (nomina): ' + verification.error);
+        }
+      } catch (e) {
+        this.logger.warn('No se pudo verificar localmente (nomina): ' + e.message);
+      }
+
+      // 5. Timbrar con SIFEI
+      this.logger.log('XML_NOMINA_PARA_PAC: ' + xmlFirmado);
+      const resultadoTimbrado = await this.timbradoService.timbrarCfdi(xmlFirmado);
+
+      if (!resultadoTimbrado.success) {
+        const errorTraducido = traducirErrorSifei(resultadoTimbrado.rawResponse || resultadoTimbrado.error || '');
+        throw new BadRequestException({
+          message: errorTraducido.mensaje,
+          titulo: errorTraducido.titulo,
+          campo: errorTraducido.campo || null,
+          codigo: errorTraducido.codigo || resultadoTimbrado.codigoError,
+          errorOriginal: resultadoTimbrado.error,
+        });
+      }
+
+      this.logger.log(`CFDI de nomina timbrado - UUID: ${resultadoTimbrado.uuid}`);
+
+      // 6. Guardar en BD solo ya timbrado
+      const xmlTimbrado = resultadoTimbrado.cfdiTimbrado;
       const cfdi = this.cfdiRepository.create({
         user_id: user.uid,
         tipo_cfdi: 'nomina',
-        status: 'borrador',
-        // ... mapear campos
-        createdAt: new Date()
+        status: 'vigente',
+        emisor_rfc: createDto.emisor?.rfc,
+        emisor_nombre: createDto.emisor?.nombre,
+        receptor_rfc: createDto.receptor?.rfc,
+        receptor_nombre: createDto.receptor?.nombre,
+        serie: createDto.serie,
+        folio: createDto.folio,
+        forma_pago: null,
+        metodo_pago: 'PUE',
+        subtotal: this.extractTotalFromXml(xmlTimbrado, 'SubTotal') ?? 0,
+        total: this.extractTotalFromXml(xmlTimbrado, 'Total') ?? 0,
+        moneda: 'MXN',
+        tipo_cambio: 1,
+        createdAt: new Date(),
+        xml: xmlTimbrado,
+        uuid: resultadoTimbrado.uuid,
+        selloCFD: xmlFirmado.match(/Sello="([^"]+)"/)?.[1] || null,
+        selloSAT: resultadoTimbrado.selloSAT || null,
+        noCertificadoSAT: resultadoTimbrado.noCertificadoSAT || null,
+        cadenaOriginal: cadenaOriginalStr,
+        fechaTimbrado: resultadoTimbrado.fechaTimbrado ? new Date(resultadoTimbrado.fechaTimbrado) : null,
       });
 
       const savedCfdi = await this.cfdiRepository.save(cfdi);
-
-      const xmlSinTimbrar = this.generateNominaXml(createDto, user);
-
-      await this.queueClient.timbrarCFDI({
-        cfdiId: savedCfdi.id,
-        xmlSinTimbrar,
-        userId: user.uid,
-        empresaId: user.uid,
-        certificadoId: 'default'
-      });
-
-      await this.cfdiRepository.update(savedCfdi.id, {
-        status: 'timbrando'
-      });
+      this.logger.log(`CFDI de nomina guardado con ID: ${savedCfdi.id}`);
 
       return {
         success: true,
+        message: 'CFDI de nomina timbrado exitosamente',
         cfdiId: savedCfdi.id,
-        status: 'timbrando',
-        message: 'CFDI de nómina en proceso de timbrado.'
+        uuid: resultadoTimbrado.uuid,
+        fechaTimbrado: resultadoTimbrado.fechaTimbrado,
+        status: 'vigente',
       };
-
     } catch (error) {
-      this.logger.error(`Error creando CFDI de nómina: ${error.message}`, error.stack);
+      this.logger.error(`Error creando CFDI de nomina: ${error.message}`);
       throw error;
     }
   }
-
   /**
    * Crear CFDI de Complemento de Pago (modificado para usar colas)
    */
