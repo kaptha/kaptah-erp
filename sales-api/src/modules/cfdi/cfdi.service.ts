@@ -879,15 +879,15 @@ private generateComplementoNomina(data: any): string {
     complementoXml += ` 
     FechaInicioRelLaboral="${nomina.receptor.fechaInicioRelLaboral || ''}" 
     Antigüedad="${nomina.receptor.antiguedad || ''}" 
-    TipoContrato="${nomina.receptor.tipoContrato || '01'}" 
+    TipoContrato="${String(nomina.receptor.tipoContrato || '01').padStart(2, '0')}" 
     Sindicalizado="${nomina.receptor.sindicalizado || 'No'}" 
-    TipoJornada="${nomina.receptor.tipoJornada || '01'}" 
-    TipoRegimen="${nomina.receptor.tipoRegimen || '02'}" 
+    TipoJornada="${String(nomina.receptor.tipoJornada || '01').padStart(2, '0')}" 
+    TipoRegimen="${String(nomina.receptor.tipoRegimen || '02').padStart(2, '0')}" 
     NumEmpleado="${nomina.receptor.numEmpleado || ''}" 
     Departamento="${nomina.receptor.departamento || ''}" 
     Puesto="${nomina.receptor.puesto || ''}" 
     RiesgoPuesto="${nomina.receptor.riesgoPuesto || '1'}" 
-    PeriodicidadPago="${nomina.receptor.periodicidadPago || '04'}"`;
+    PeriodicidadPago="${String(nomina.receptor.periodicidadPago || '04').padStart(2, '0')}"`;
     
     if (nomina.receptor.banco) {
       complementoXml += ` Banco="${nomina.receptor.banco}"`;
@@ -912,7 +912,7 @@ private generateComplementoNomina(data: any): string {
     
     for (const percepcion of nomina.percepciones) {
       complementoXml += `
-    <nomina12:Percepcion TipoPercepcion="${percepcion.tipoPercepcion}" Clave="${percepcion.clave}" Concepto="${percepcion.concepto}" ImporteGravado="${parseFloat(percepcion.importeGravado || 0).toFixed(2)}" ImporteExento="${parseFloat(percepcion.importeExento || 0).toFixed(2)}" />`;
+    <nomina12:Percepcion TipoPercepcion="${String(percepcion.tipoPercepcion).padStart(3, '0')}" Clave="${percepcion.clave}" Concepto="${percepcion.concepto}" ImporteGravado="${parseFloat(percepcion.importeGravado || 0).toFixed(2)}" ImporteExento="${parseFloat(percepcion.importeExento || 0).toFixed(2)}" />`;
     }
     
     complementoXml += `
@@ -943,7 +943,7 @@ private generateComplementoNomina(data: any): string {
     
     for (const deduccion of nomina.deducciones) {
       complementoXml += `
-    <nomina12:Deduccion TipoDeduccion="${deduccion.tipoDeduccion}" Clave="${deduccion.clave}" Concepto="${deduccion.concepto}" Importe="${parseFloat(deduccion.importe || 0).toFixed(2)}" />`;
+    <nomina12:Deduccion TipoDeduccion="${String(deduccion.tipoDeduccion).padStart(3, '0')}" Clave="${deduccion.clave}" Concepto="${deduccion.concepto}" Importe="${parseFloat(deduccion.importe || 0).toFixed(2)}" />`;
     }
     
     complementoXml += `
@@ -957,7 +957,7 @@ private generateComplementoNomina(data: any): string {
     
     for (const otroPago of nomina.otrosPagos) {
       complementoXml += `
-    <nomina12:OtroPago TipoOtroPago="${otroPago.tipoOtroPago}" Clave="${otroPago.clave}" Concepto="${otroPago.concepto}" Importe="${parseFloat(otroPago.importe || 0).toFixed(2)}" />`;
+    <nomina12:OtroPago TipoOtroPago="${String(otroPago.tipoOtroPago).padStart(3, '0')}" Clave="${otroPago.clave}" Concepto="${otroPago.concepto}" Importe="${parseFloat(otroPago.importe || 0).toFixed(2)}" />`;
     }
     
     complementoXml += `
