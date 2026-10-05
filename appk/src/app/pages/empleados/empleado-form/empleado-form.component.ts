@@ -1,4 +1,4 @@
-﻿import { Component, OnInit, Inject } from '@angular/core';
+import { Component, OnInit, Inject } from '@angular/core';
 import { FormBuilder, FormGroup, FormArray, Validators } from '@angular/forms';
 import { MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
 import { MatSnackBar } from '@angular/material/snack-bar';
@@ -151,7 +151,7 @@ export class EmpleadoFormComponent implements OnInit {
       puesto: ['', Validators.required],
       departamento: [''],
       salarioBase: ['', [Validators.required, Validators.min(0)]],
-      codigoPostal: ['', [Validators.pattern(/^[0-9]{5}$/)]],
+      codigoPostal: ['', [Validators.required, Validators.pattern(/^[0-9]{5}$/)]],
       regimenFiscal: ['605'],
       numEmpleado: [''],
       numSeguridadSocial: ['', [Validators.pattern(/^[0-9]{11}$/)]],

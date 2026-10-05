@@ -1,4 +1,4 @@
-﻿import { Component, Inject, OnInit, OnDestroy } from '@angular/core';
+import { Component, Inject, OnInit, OnDestroy } from '@angular/core';
 import { FormBuilder, FormGroup, FormArray, FormControl, Validators, AbstractControl } from '@angular/forms';
 import { MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
 import { CFDIService } from '../../../services/cfdi.service';
@@ -1118,6 +1118,15 @@ calcularTotales(): void {
     return;
   }
 
+  // Validar datos fiscales del empleado requeridos por CFDI 4.0 antes de enviar
+  const emp: any = this.selectedEmpleado;
+  const faltantes: string[] = [];
+  if (!emp?.rfc) { faltantes.push('RFC'); }
+  if (!/^[0-9]{5}$/.test(emp?.codigoPostal || '')) { faltantes.push('codigo postal fiscal'); }
+  if (faltantes.length > 0) {
+    Sweetalert.fnc('error', `El empleado no tiene capturado: ${faltantes.join(', ')}. Actualiza sus datos en el catalogo de empleados.`, null);
+    return;
+  }
   this.loading = true;
 
   // Generar el JSON para el CFDI de Nómina
@@ -1127,7 +1136,6 @@ calcularTotales(): void {
   console.log('📄 JSON Stringified:', JSON.stringify(cfdiNominaData, null, 2));
 
   // Mostrar éxito y cerrar
-  Sweetalert.fnc('success', 'JSON generado correctamente. Revisa la consola.', null);
   this.loading = false;
   this.dialogRef.close(cfdiNominaData); // Devolver el JSON al componente padre
 }
