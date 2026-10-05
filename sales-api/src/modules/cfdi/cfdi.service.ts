@@ -827,6 +827,25 @@ private generateNominaXml(data: any, user: any): string {
   return xmlTemplate;
 }
 
+  /**
+   * Antiguedad para nomina12 (regla NOM54): semanas completas entre
+   * FechaInicioRelLaboral y FechaFinalPago, contando ambos dias.
+   * Menos de una semana se expresa en dias (PnD).
+   */
+  private calcularAntiguedadNomina(inicio: string, fin: string, fallback?: string): string {
+    const parse = (s: string) => {
+      const m = /^(\d{4})-(\d{2})-(\d{2})/.exec(String(s || ''));
+      return m ? Date.UTC(+m[1], +m[2] - 1, +m[3]) : NaN;
+    };
+    const a = parse(inicio);
+    const b = parse(fin);
+    if (isNaN(a) || isNaN(b) || b < a) {
+      return fallback || 'P1D';
+    }
+    const dias = Math.round((b - a) / 86400000) + 1;
+    const semanas = Math.floor(dias / 7);
+    return semanas >= 1 ? `P${semanas}W` : `P${dias}D`;
+  }
 /**
  * Genera el complemento de nómina versión 1.2
  */
@@ -878,7 +897,7 @@ private generateComplementoNomina(data: any): string {
     
     complementoXml += ` 
     FechaInicioRelLaboral="${nomina.receptor.fechaInicioRelLaboral || ''}" 
-    Antigüedad="${nomina.receptor.antiguedad || ''}" 
+    Antigüedad="${this.calcularAntiguedadNomina(nomina.receptor.fechaInicioRelLaboral, nomina.fechaFinalPago, nomina.receptor.antiguedad)}" 
     TipoContrato="${String(nomina.receptor.tipoContrato || '01').padStart(2, '0')}" 
     Sindicalizado="${nomina.receptor.sindicalizado || 'No'}" 
     TipoJornada="${String(nomina.receptor.tipoJornada || '01').padStart(2, '0')}" 
