@@ -803,11 +803,11 @@ private generateNominaXml(data: any, user: any): string {
                 xsi:schemaLocation="http://www.sat.gob.mx/cfd/4 http://www.sat.gob.mx/sitio_internet/cfd/4/cfdv40.xsd
                 http://www.sat.gob.mx/nomina12 http://www.sat.gob.mx/sitio_internet/cfd/nomina/nomina12.xsd"
                 Version="4.0" 
-                Serie="${data.serie || ''}" 
-                Folio="${data.folio || ''}" 
+                ${data.serie ? `Serie="${data.serie}"` : ''} 
+                ${data.folio ? `Folio="${data.folio}"` : ''} 
                 Fecha="${fecha}" 
                 SubTotal="${subtotal.toFixed(2)}" 
-                Descuento="${descuento.toFixed(2)}"
+                ${descuento > 0 ? `Descuento="${descuento.toFixed(2)}"` : ''}
                 Moneda="MXN" 
                 Total="${total.toFixed(2)}" 
                 TipoDeComprobante="N" 
@@ -817,7 +817,7 @@ private generateNominaXml(data: any, user: any): string {
 <cfdi:Emisor Rfc="${data.emisor?.rfc || ''}" Nombre="${data.emisor?.nombre || ''}" RegimenFiscal="${data.emisor?.regimenFiscal || ''}"/>
 <cfdi:Receptor Rfc="${data.receptor?.rfc || ''}" Nombre="${data.receptor?.nombre || ''}" DomicilioFiscalReceptor="${data.receptor?.domicilioFiscalReceptor || ''}" RegimenFiscalReceptor="${data.receptor?.regimenFiscalReceptor || ''}" UsoCFDI="CN01"/>
 <cfdi:Conceptos>
-  <cfdi:Concepto ClaveProdServ="84111505" Cantidad="1" ClaveUnidad="ACT" Descripcion="Pago de nómina" ValorUnitario="${subtotal.toFixed(2)}" Importe="${subtotal.toFixed(2)}" Descuento="${descuento.toFixed(2)}" ObjetoImp="01"/>
+  <cfdi:Concepto ClaveProdServ="84111505" Cantidad="1" ClaveUnidad="ACT" Descripcion="Pago de nómina" ValorUnitario="${subtotal.toFixed(2)}" Importe="${subtotal.toFixed(2)}" ${descuento > 0 ? `Descuento="${descuento.toFixed(2)}"` : ''} ObjetoImp="01"/>
 </cfdi:Conceptos>
 <cfdi:Complemento>
   ${this.generateComplementoNomina(data)}
