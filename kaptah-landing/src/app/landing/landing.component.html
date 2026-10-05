@@ -100,8 +100,8 @@
     <button class="tab-btn" [class.active]="activeTab === 'plataforma'" (click)="switchTab('plataforma')">
       <mat-icon class="tab-icon">dashboard</mat-icon> Plataforma
     </button>
-    <button class="tab-btn" [class.active]="activeTab === 'contabilidad'" (click)="switchTab('contabilidad')">
-      <mat-icon class="tab-icon">calculate</mat-icon> Contabilidad
+    <button class="tab-btn" [class.active]="activeTab === 'Despachos'" (click)="switchTab('Despachos')">
+      <mat-icon class="tab-icon">calculate</mat-icon> Despachos
     </button>
   </div>
 
@@ -192,47 +192,60 @@
     </div>
   </div>
 
-  <!-- TAB: CONTABILIDAD -->
-  <div *ngIf="activeTab === 'contabilidad'" class="fade-animation">
-    <p class="contabilidad-intro">Deja tu contabilidad en manos de expertos. Nos encargamos de tus declaraciones, contabilidad electronica y cumplimiento fiscal.</p>
-    <div class="pricing-cards contabilidad-cards">
+  <!-- TAB: Despachos -->
+    <div *ngIf="activeTab === 'empresa'" class="fade-animation">
+    <p class="despachos-intro">Gestiona la contabilidad de todos tus clientes desde una sola plataforma. Kaptah para despachos contables.</p>
+    <div class="pricing-cards despachos-grid">
 
-      <!-- PERSONA FISICA -->
+      <!-- CONTADOR -->
       <div class="pricing-card">
-        <span class="tag starter">Persona Fisica</span>
+        <span class="tag fiscal">Contador</span>
         <mat-icon class="plan-icon">person</mat-icon>
-        <h3 class="price">$599 MXN</h3>
+        <h3 class="price">$99 MXN</h3>
         <p class="per">por mes</p>
         <ul class="features">
-          <li><span>&#10004;</span> Declaraciones mensuales de impuestos</li>
-          <li><span>&#10004;</span> Declaracion anual</li>
-          <li><span>&#10004;</span> Contabilidad electronica</li>
-          <li><span>&#10004;</span> Calculo y entero de ISR e IVA</li>
-          <li><span>&#10004;</span> Envio de DIOT</li>
-          <li><span>&#10004;</span> Atencion personalizada por WhatsApp</li>
-          <li><span>&#10004;</span> Recordatorios de obligaciones fiscales</li>
-          <li><span>&#10004;</span> Ideal para freelancers y profesionistas</li>
+          <li><span>&#10004;</span> Hasta 10 clientes / RFC</li>
+          <li><span>&#10004;</span> 250 timbres CFDI/mes</li>
+          <li><span>&#10004;</span> Descarga masiva SAT</li>
+          <li><span>&#10004;</span> CxC y CxP</li>
+          <li><span>&#10004;</span> Cotizaciones y remisiones</li>
+          <li><span>&#10004;</span> Acceso para tus clientes</li>
         </ul>
-        <a href="https://app.kaptah.mx/register" class="btn-primary">Solicitar servicio</a>
+        <a href="https://app.kaptah.mx/register" class="btn-primary">Comenzar ahora</a>
       </div>
 
-      <!-- PERSONA MORAL -->
+      <!-- DESPACHO -->
       <div class="pricing-card featured">
-        <span class="tag erp">Persona Moral</span>
-        <mat-icon class="plan-icon">business</mat-icon>
-        <h3 class="price">$1,499 MXN</h3>
+        <span class="tag erp">Despacho</span>
+        <mat-icon class="plan-icon">groups</mat-icon>
+        <h3 class="price">$399 MXN</h3>
         <p class="per">por mes</p>
         <ul class="features">
-          <li><span>&#10004;</span> Todo lo de Persona Fisica</li>
-          <li><span>&#10004;</span> Estados financieros mensuales</li>
-          <li><span>&#10004;</span> Conciliaciones bancarias</li>
-          <li><span>&#10004;</span> Cumplimiento de obligaciones patronales</li>
-          <li><span>&#10004;</span> Atencion a requerimientos del SAT</li>
-          <li><span>&#10004;</span> Asesoria fiscal estrategica</li>
-          <li><span>&#10004;</span> Soporte prioritario</li>
-          <li><span>&#10004;</span> Ideal para PyMEs y empresas en crecimiento</li>
+          <li><span>&#10004;</span> Hasta 25 clientes / RFC</li>
+          <li><span>&#10004;</span> 750 timbres CFDI/mes</li>
+          <li><span>&#10004;</span> Todo lo del plan Contador</li>
+          <li><span>&#10004;</span> Dashboard del despacho</li>
+          <li><span>&#10004;</span> Reportes avanzados</li>
+          <li><span>&#10004;</span> Acceso para tus clientes</li>
         </ul>
-        <a href="https://app.kaptah.mx/register" class="btn-primary big">Solicitar servicio</a>
+        <a href="https://app.kaptah.mx/register" class="btn-primary big">Comenzar ahora</a>
+      </div>
+
+      <!-- FIRMA -->
+      <div class="pricing-card">
+        <span class="tag ilimitado">Firma</span>
+        <mat-icon class="plan-icon">verified</mat-icon>
+        <h3 class="price">$999 MXN</h3>
+        <p class="per">por mes</p>
+        <ul class="features">
+          <li><span>&#10004;</span> Hasta 75 clientes / RFC</li>
+          <li><span>&#10004;</span> 2,500 timbres CFDI/mes</li>
+          <li><span>&#10004;</span> Todo lo del plan Despacho</li>
+          <li><span>&#10004;</span> Reportes consolidados</li>
+          <li><span>&#10004;</span> Soporte prioritario</li>
+          <li><span>&#10004;</span> Funciones avanzadas</li>
+        </ul>
+        <a href="https://app.kaptah.mx/register" class="btn-primary">Comenzar ahora</a>
       </div>
 
     </div>

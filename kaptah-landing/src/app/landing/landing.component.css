@@ -1980,3 +1980,13 @@ button[mat-stroked-button] {
 .faq-accordion {
   max-width: 900px;
 }
+.despachos-grid {
+  grid-template-columns: repeat(3, 1fr) !important;
+  max-width: 1100px !important;
+}
+
+@media (max-width: 900px) {
+  .despachos-grid {
+    grid-template-columns: 1fr !important;
+  }
+}
