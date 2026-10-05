@@ -143,8 +143,8 @@ export class EmpleadoFormComponent implements OnInit {
     this.empleadoForm = this.fb.group({
       id: [null],
       nombre: ['', [Validators.required, Validators.minLength(2)]],
-      rfc: ['', [Validators.required, Validators.minLength(13), Validators.maxLength(13)]],
-      curp: ['', [Validators.required, Validators.pattern(/^[A-Z]{4}[0-9]{6}[HM][A-Z]{5}[0-9A-Z][0-9]$/)]],
+      rfc: ['', [Validators.required, Validators.pattern(/^[A-Z&\u00D1]{4}[0-9]{2}(0[1-9]|1[012])(0[1-9]|[12][0-9]|3[01])[A-Z0-9]{2}[0-9A]$/)]],
+      curp: ['', [Validators.required, Validators.pattern(/^[A-Z][AEIOUX][A-Z]{2}[0-9]{2}(0[1-9]|1[012])(0[1-9]|[12][0-9]|3[01])[MHX]([ABCMTZ]S|[BCJMOT]C|[CNPST]L|[GNQ]T|[GQS]R|C[MH]|[MY]N|[DH]G|NE|VZ|DF|SP)[BCDFGHJ-NP-TV-Z]{3}[0-9A-Z][0-9]$/)]],
       email: ['', [Validators.required, Validators.email]],
       telefono: ['', [Validators.required, Validators.pattern(/^[0-9]+$/)]],
       fechaInicio: ['', Validators.required],
