@@ -5,6 +5,7 @@ import { Entity, Column, PrimaryGeneratedColumn, Index, CreateDateColumn } from 
 @Index(['rfc_emisor', 'fecha'])
 @Index(['rfc_receptor', 'fecha'])
 @Index(['folio_fiscal'])
+@Index('ux_xmls_financieros_usuario_folio', ['usuario_id', 'folio_fiscal'], { unique: true })
 export class XmlFinanciero {
   @PrimaryGeneratedColumn()
   id: number;
@@ -26,7 +27,7 @@ export class XmlFinanciero {
   @Column({ type: 'timestamp' })
   fecha: Date;
 
-  @Column({ unique: true })
+  @Column()
   folio_fiscal: string; // UUID
 
   // Datos financieros
