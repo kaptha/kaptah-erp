@@ -981,10 +981,23 @@ private generateComplementoNomina(data: any): string {
   <nomina12:OtrosPagos>`;
     
     for (const otroPago of nomina.otrosPagos) {
-      complementoXml += `
-    <nomina12:OtroPago TipoOtroPago="${String(otroPago.tipoOtroPago).padStart(3, '0')}" Clave="${otroPago.clave}" Concepto="${otroPago.concepto}" Importe="${parseFloat(otroPago.importe || 0).toFixed(2)}" />`;
+      const tipoOP = String(otroPago.tipoOtroPago).padStart(3, '0');
+      const importeOP = parseFloat(otroPago.importe || 0);
+
+      if (tipoOP === '002') {
+        // Subsidio para el empleo: requiere nodo SubsidioAlEmpleo (regla NOM105)
+        const subsidioCausado = parseFloat(otroPago.subsidioCausado ?? otroPago.importe ?? 0);
+        if (importeOP <= 0 && subsidioCausado <= 0) { continue; }
+        complementoXml += `
+    <nomina12:OtroPago TipoOtroPago="002" Clave="${otroPago.clave}" Concepto="${otroPago.concepto}" Importe="${importeOP.toFixed(2)}">
+      <nomina12:SubsidioAlEmpleo SubsidioCausado="${subsidioCausado.toFixed(2)}" />
+    </nomina12:OtroPago>`;
+      } else {
+        if (importeOP <= 0) { continue; }
+        complementoXml += `
+    <nomina12:OtroPago TipoOtroPago="${tipoOP}" Clave="${otroPago.clave}" Concepto="${otroPago.concepto}" Importe="${importeOP.toFixed(2)}" />`;
+      }
     }
-    
     complementoXml += `
   </nomina12:OtrosPagos>`;
   }
