@@ -850,7 +850,13 @@ private generateNominaXml(data: any, user: any): string {
  * Genera el complemento de nómina versión 1.2
  */
 private generateComplementoNomina(data: any): string {
-  const nomina = data.nomina || {};
+  const nominaRaw = data.nomina || {};
+  // NOM96 y similares: el SAT no acepta percepciones ni deducciones en cero
+  const nomina = {
+    ...nominaRaw,
+    percepciones: (nominaRaw.percepciones || []).filter((p: any) => (parseFloat(p.importeGravado || 0) + parseFloat(p.importeExento || 0)) > 0),
+    deducciones: (nominaRaw.deducciones || []).filter((d: any) => parseFloat(d.importe || 0) > 0),
+  };
   
   let complementoXml = `<nomina12:Nomina Version="1.2" 
     TipoNomina="${nomina.tipoNomina || 'O'}" 
@@ -859,7 +865,7 @@ private generateComplementoNomina(data: any): string {
     FechaFinalPago="${nomina.fechaFinalPago || ''}" 
     NumDiasPagados="${nomina.numDiasPagados || '0'}" 
     TotalPercepciones="${parseFloat(nomina.totalPercepciones || '0').toFixed(2)}" 
-    TotalDeducciones="${parseFloat(nomina.totalDeducciones || '0').toFixed(2)}"`;
+    ${nomina.deducciones.length > 0 ? `TotalDeducciones="${nomina.deducciones.reduce((s: number, d: any) => s + parseFloat(d.importe || 0), 0).toFixed(2)}"` : ''}`;
   
   // Otros pagos es opcional
   if (nomina.totalOtrosPagos) {
