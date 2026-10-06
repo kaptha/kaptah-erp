@@ -165,7 +165,7 @@ export class CfdiApiService {
   private getHeaders(): HttpHeaders {
     const token = localStorage.getItem('access_token') || '';
     return new HttpHeaders({
-      Authorization: `Bearer ${token}`
+      Authorization: `Bearer ${token}`, ...(localStorage.getItem('activeCuentaUid') ? { 'X-Cuenta-Uid': localStorage.getItem('activeCuentaUid') as string } : {})
     });
   }
 
