@@ -13,7 +13,7 @@ export class XmlImportController {
 
   /** El JWT de Kaptah trae { uid, email, rfc }; ?cuentaUid= permite operar otra cuenta */
   private cuentaDe(req: any, cuentaUid?: string): string {
-    return cuentaUid || req.user?.uid;
+    return req.user?.cuentaUid || req.user?.uid;
   }
 
   /**

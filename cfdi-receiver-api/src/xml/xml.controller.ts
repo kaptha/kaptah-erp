@@ -14,7 +14,7 @@ export class XmlController {
 
   @Post('process')
   async processXml(@Body() dto: ProcessXmlDto, @Request() req) {
-    const firebaseUid = req.user.firebaseUid || req.user.sub || 'TEMPORAL_UID';
+    const firebaseUid = req.user.cuentaUid || req.user.uid;
     return this.xmlService.processXml(dto, firebaseUid);
   }
 

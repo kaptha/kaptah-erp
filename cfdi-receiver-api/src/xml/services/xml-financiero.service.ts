@@ -269,7 +269,7 @@ export class XmlFinancieroService {
  * 1. Facturas donde Mario es EMISOR (ventas)
  * 2. Nóminas donde Mario es RECEPTOR (él recibe sueldo del ISSSTE)
  */
-async getCfdisIngreso(rfcUsuario: string, fechaInicio: string, fechaFin: string): Promise<any[]> {
+async getCfdisIngreso(usuarioId: string, rfcUsuario: string, fechaInicio: string, fechaFin: string): Promise<any[]> {
   this.logger.log('====== OBTENIENDO CFDIS DE INGRESO ======');
   this.logger.log(`RFC Usuario: ${rfcUsuario}`);
   this.logger.log(`Período: ${fechaInicio} a ${fechaFin}`);
@@ -293,6 +293,9 @@ async getCfdisIngreso(rfcUsuario: string, fechaInicio: string, fechaFin: string)
       )
     )
     
+    -- Solo datos de la cuenta activa
+    AND usuario_id = $4
+
     -- Período
     AND fecha BETWEEN $2 AND $3
     
@@ -306,7 +309,8 @@ async getCfdisIngreso(rfcUsuario: string, fechaInicio: string, fechaFin: string)
     const result = await this.xmlFinancieroRepository.query(query, [
       rfcUsuario,
       fechaInicio,
-      fechaFin
+      fechaFin,
+      usuarioId
     ]);
 
     this.logger.log(`✅ CFDIs de ingreso encontrados: ${result.length}`);
@@ -343,7 +347,7 @@ async getCfdisIngreso(rfcUsuario: string, fechaInicio: string, fechaFin: string)
  * 1. Facturas donde Mario es RECEPTOR (compras)
  * 2. Nóminas donde Mario es EMISOR (él paga sueldos a Sandra/Angelica)
  */
-async getCfdisEgreso(rfcUsuario: string, fechaInicio: string, fechaFin: string): Promise<any[]> {
+async getCfdisEgreso(usuarioId: string, rfcUsuario: string, fechaInicio: string, fechaFin: string): Promise<any[]> {
   this.logger.log('====== OBTENIENDO CFDIS DE EGRESO ======');
   this.logger.log(`RFC Usuario: ${rfcUsuario}`);
   this.logger.log(`Período: ${fechaInicio} a ${fechaFin}`);
@@ -367,6 +371,9 @@ async getCfdisEgreso(rfcUsuario: string, fechaInicio: string, fechaFin: string):
       )
     )
     
+    -- Solo datos de la cuenta activa
+    AND usuario_id = $4
+
     -- Período
     AND fecha BETWEEN $2 AND $3
     
@@ -380,7 +387,8 @@ async getCfdisEgreso(rfcUsuario: string, fechaInicio: string, fechaFin: string):
     const result = await this.xmlFinancieroRepository.query(query, [
       rfcUsuario,
       fechaInicio,
-      fechaFin
+      fechaFin,
+      usuarioId
     ]);
 
     this.logger.log(`✅ CFDIs de egreso encontrados: ${result.length}`);
@@ -416,6 +424,7 @@ async getCfdisEgreso(rfcUsuario: string, fechaInicio: string, fechaFin: string):
  * Obtiene estadísticas de ingresos
  */
 async getEstadisticasIngresos(
+  usuarioId: string,
   rfcUsuario: string,
   fechaInicio?: string,
   fechaFin?: string
@@ -426,6 +435,7 @@ async getEstadisticasIngresos(
     const query = this.xmlFinancieroRepository
       .createQueryBuilder('cfdi')
       .where('cfdi.rfc_emisor = :rfc', { rfc: rfcUsuario })
+      .andWhere('cfdi.usuario_id = :usuarioId', { usuarioId })
       .andWhere('cfdi.tipo_comprobante = :tipo', { tipo: 'I' });
 
     if (fechaInicio && fechaFin) {
@@ -460,6 +470,7 @@ async getEstadisticasIngresos(
  * Obtiene estadísticas de egresos
  */
 async getEstadisticasEgresos(
+  usuarioId: string,
   rfcUsuario: string,
   fechaInicio?: string,
   fechaFin?: string
@@ -480,7 +491,8 @@ async getEstadisticasEgresos(
           otrosTipos: ['E', 'P'],
           rfc: rfcUsuario 
         }
-      );
+      )
+      .andWhere('cfdi.usuario_id = :usuarioId', { usuarioId });
 
     if (fechaInicio && fechaFin) {
       query.andWhere('cfdi.fecha BETWEEN :fechaInicio AND :fechaFin', {
@@ -526,6 +538,7 @@ async getEstadisticasEgresos(
  * Obtiene análisis completo de ingresos para el usuario
  */
 async getAnalisisCompletoIngresos(
+  usuarioId: string,
   rfcUsuario: string,
   fechaInicio: string,
   fechaFin: string,
@@ -538,7 +551,7 @@ async getAnalisisCompletoIngresos(
 
   try {
     // Obtener todos los CFDIs de ingreso (xmls_financieros + sales-api)
-    const cfdisLocales = await this.getCfdisIngreso(rfcUsuario, fechaInicio, fechaFin);
+    const cfdisLocales = await this.getCfdisIngreso(usuarioId, rfcUsuario, fechaInicio, fechaFin);
 
     let cfdisSales: any[] = [];
     this.logger.log(`[SalesAPI] token presente: ${!!token}, userUid: ${userUid}`);
@@ -585,6 +598,7 @@ async getAnalisisCompletoIngresos(
 
     // 9. CLIENTES INACTIVOS
     const clientesInactivos = await this.obtenerClientesInactivos(
+      usuarioId,
       rfcUsuario,
       fechaFin,
       30 // días sin facturar
@@ -859,6 +873,7 @@ private async calcularRetenciones(cfdis: any[]): Promise<any> {
  * Obtiene clientes que no han facturado en X días
  */
 private async obtenerClientesInactivos(
+  usuarioId: string,
   rfcUsuario: string,
   fechaReferencia: string,
   diasInactividad: number
@@ -875,6 +890,7 @@ private async obtenerClientesInactivos(
       SUM(total) as total_monto
     FROM xmls_financieros
     WHERE rfc_emisor = $1
+      AND usuario_id = $3
       AND tipo_comprobante = 'I'
     GROUP BY rfc_receptor, nombre_receptor
     HAVING MAX(fecha) < $2
@@ -885,7 +901,8 @@ private async obtenerClientesInactivos(
   try {
     const result = await this.xmlFinancieroRepository.query(query, [
       rfcUsuario,
-      fechaLimite.toISOString()
+      fechaLimite.toISOString(),
+      usuarioId
     ]);
 
     return result.map((r: any) => ({
@@ -908,6 +925,7 @@ private async obtenerClientesInactivos(
  * Obtiene análisis completo de egresos para el usuario
  */
 async getAnalisisCompletoEgresos(
+  usuarioId: string,
   rfcUsuario: string,
   fechaInicio: string,
   fechaFin: string
@@ -917,7 +935,7 @@ async getAnalisisCompletoEgresos(
   this.logger.log(`Período: ${fechaInicio} a ${fechaFin}`);
 
   try {
-    const cfdis = await this.getCfdisEgreso(rfcUsuario, fechaInicio, fechaFin);
+    const cfdis = await this.getCfdisEgreso(usuarioId, rfcUsuario, fechaInicio, fechaFin);
 
     // 1. RESUMEN GENERAL
     const resumenGeneral = await this.calcularResumenGeneralEgresos(cfdis);
@@ -962,6 +980,7 @@ async getAnalisisCompletoEgresos(
 
     // 10. PROVEEDORES NUEVOS
     const proveedoresNuevos = await this.obtenerProveedoresNuevos(
+      usuarioId,
       rfcUsuario,
       fechaInicio,
       fechaFin
@@ -1331,6 +1350,7 @@ private async detectarGastosRecurrentes(
  * Obtiene proveedores nuevos del período
  */
 private async obtenerProveedoresNuevos(
+  usuarioId: string,
   rfcUsuario: string,
   fechaInicio: string,
   fechaFin: string
@@ -1344,6 +1364,7 @@ private async obtenerProveedoresNuevos(
       SUM(total) as total_monto
     FROM xmls_financieros
     WHERE rfc_receptor = $1
+      AND usuario_id = $4
       AND tipo_comprobante != 'N'
       AND fecha BETWEEN $2 AND $3
     GROUP BY rfc_emisor, nombre_emisor
@@ -1356,7 +1377,8 @@ private async obtenerProveedoresNuevos(
     const result = await this.xmlFinancieroRepository.query(query, [
       rfcUsuario,
       fechaInicio,
-      fechaFin
+      fechaFin,
+      usuarioId
     ]);
 
     return result.map((r: any) => ({
@@ -1378,6 +1400,7 @@ private async obtenerProveedoresNuevos(
  * ✅ BUSCA POR RFC DEL RECEPTOR (como patrón)
  */
 async buscarCfdisEgresos(
+  usuarioId: string,
   rfcUsuario: string,
   filtros: any
 ): Promise<{ cfdis: any[], total: number }> {
@@ -1396,6 +1419,7 @@ async buscarCfdisEgresos(
     const query = this.xmlFinancieroRepository
       .createQueryBuilder('cfdi')
       .where('cfdi.rfc_receptor = :rfc', { rfc: rfcUsuario })
+      .andWhere('cfdi.usuario_id = :usuarioId', { usuarioId })
       .andWhere('cfdi.tipo_comprobante IN (:...tipos)', { 
         tipos: ['I', 'E', 'P', 'N']  // ✅ Incluir TODOS los tipos donde somos receptores
       });
@@ -1488,6 +1512,7 @@ async buscarCfdisEgresos(
  * ✅ Para INGRESOS (I), el usuario es el EMISOR (quien vende/factura)
  */
 async buscarCfdisIngresos(
+  usuarioId: string,
   rfcUsuario: string,
   filtros: BuscarCfdisIngresosFiltros,
   token: string = '',
@@ -1501,6 +1526,7 @@ async buscarCfdisIngresos(
     const query = this.xmlFinancieroRepository
       .createQueryBuilder('cfdi')
       .where('cfdi.rfc_emisor = :rfc', { rfc: rfcUsuario })
+      .andWhere('cfdi.usuario_id = :usuarioId', { usuarioId })
       .andWhere('cfdi.tipo_comprobante = :tipoBase', { tipoBase: 'I' });
 
     // Búsqueda textual libre
@@ -1654,7 +1680,7 @@ private getTipoDocumentoLabel(tipo: string): string {
 /**
  * Búsqueda avanzada de CFDIs de egresos con múltiples filtros
  */
-async busquedaAvanzadaEgresos(rfcUsuario: string, filtros: any): Promise<any> {
+async busquedaAvanzadaEgresos(usuarioId: string, rfcUsuario: string, filtros: any): Promise<any> {
   this.logger.debug('🔍 Búsqueda avanzada de egresos:', { rfcUsuario, filtros });
 
   try {
@@ -1662,6 +1688,7 @@ async busquedaAvanzadaEgresos(rfcUsuario: string, filtros: any): Promise<any> {
 
     // Regla base: Receptor = Usuario (excepto Nómina)
     qb.where('cfdi.rfc_receptor = :rfcUsuario', { rfcUsuario })
+      .andWhere('cfdi.usuario_id = :usuarioId', { usuarioId })
       .andWhere('cfdi.tipo_comprobante != :tipoNomina', { tipoNomina: 'N' });
 
     // Filtros adicionales
@@ -1722,7 +1749,7 @@ async busquedaAvanzadaEgresos(rfcUsuario: string, filtros: any): Promise<any> {
 /**
  * Búsqueda avanzada de CFDIs de ingresos con múltiples filtros
  */
-async busquedaAvanzadaIngresos(rfcUsuario: string, filtros: any): Promise<any> {
+async busquedaAvanzadaIngresos(usuarioId: string, rfcUsuario: string, filtros: any): Promise<any> {
   this.logger.debug('🔍 Búsqueda avanzada de ingresos:', { rfcUsuario, filtros });
 
   try {
@@ -1730,6 +1757,7 @@ async busquedaAvanzadaIngresos(rfcUsuario: string, filtros: any): Promise<any> {
 
     // Regla base: Emisor = Usuario
     qb.where('cfdi.rfc_emisor = :rfcUsuario', { rfcUsuario })
+      .andWhere('cfdi.usuario_id = :usuarioId', { usuarioId })
       .andWhere('cfdi.tipo_comprobante = :tipoIngreso', { tipoIngreso: 'I' });
 
     // Filtros adicionales (busca en datos del receptor/cliente)
@@ -1797,12 +1825,12 @@ async busquedaAvanzadaIngresos(rfcUsuario: string, filtros: any): Promise<any> {
 /**
  * Obtiene los detalles completos de un CFDI por UUID
  */
-async getDetallesCfdi(uuid: string, token: string = '', userUid: string = ''): Promise<any> {
+async getDetallesCfdi(usuarioId: string, uuid: string, token: string = '', userUid: string = ''): Promise<any> {
   this.logger.debug('🔍 Obteniendo detalles de CFDI:', uuid);
 
   try {
     const cfdi = await this.xmlFinancieroRepository.findOne({
-      where: { folio_fiscal: uuid }
+      where: { folio_fiscal: uuid, usuario_id: usuarioId }
     });
 
     if (cfdi) {
@@ -1837,12 +1865,12 @@ async getDetallesCfdi(uuid: string, token: string = '', userUid: string = ''): P
 /**
  * Obtiene los impuestos de un CFDI
  */
-async getImpuestosCfdi(uuid: string): Promise<any> {
+async getImpuestosCfdi(usuarioId: string, uuid: string): Promise<any> {
   this.logger.debug('🔍 Obteniendo impuestos de CFDI:', uuid);
 
   try {
     const cfdi = await this.xmlFinancieroRepository.findOne({
-      where: { folio_fiscal: uuid }
+      where: { folio_fiscal: uuid, usuario_id: usuarioId }
     });
 
     if (!cfdi) {
@@ -1871,12 +1899,12 @@ async getImpuestosCfdi(uuid: string): Promise<any> {
 /**
  * Obtiene las retenciones de un CFDI
  */
-async getRetencionesCfdi(uuid: string): Promise<any> {
+async getRetencionesCfdi(usuarioId: string, uuid: string): Promise<any> {
   this.logger.debug('🔍 Obteniendo retenciones de CFDI:', uuid);
 
   try {
     const cfdi = await this.xmlFinancieroRepository.findOne({
-      where: { folio_fiscal: uuid }
+      where: { folio_fiscal: uuid, usuario_id: usuarioId }
     });
 
     if (!cfdi) {
@@ -1919,12 +1947,12 @@ async getRetencionesCfdi(uuid: string): Promise<any> {
 /**
  * Obtiene las partidas/conceptos de un CFDI
  */
-async getPartidasCfdi(uuid: string): Promise<any> {
+async getPartidasCfdi(usuarioId: string, uuid: string): Promise<any> {
   this.logger.debug('🔍 Obteniendo partidas de CFDI:', uuid);
 
   try {
     const cfdi = await this.xmlFinancieroRepository.findOne({
-      where: { folio_fiscal: uuid }
+      where: { folio_fiscal: uuid, usuario_id: usuarioId }
     });
 
     if (!cfdi) {
@@ -1947,7 +1975,7 @@ async getPartidasCfdi(uuid: string): Promise<any> {
 /**
  * Obtiene los pagos relacionados de un CFDI (para PPD)
  */
-async getPagosCfdi(uuid: string): Promise<any> {
+async getPagosCfdi(usuarioId: string, uuid: string): Promise<any> {
   this.logger.debug('🔍 Obteniendo pagos de CFDI:', uuid);
 
   try {
@@ -1966,7 +1994,7 @@ async getPagosCfdi(uuid: string): Promise<any> {
 /**
  * Descarga el XML de un CFDI
  */
-async descargarXml(uuid: string): Promise<any> {
+async descargarXml(usuarioId: string, uuid: string): Promise<any> {
   this.logger.debug('=== INICIO descargarXml ===');
   this.logger.debug('UUID recibido:', uuid);
 
@@ -1975,7 +2003,7 @@ async descargarXml(uuid: string): Promise<any> {
     this.logger.debug('🔍 Paso 1: Buscando en xmls_financieros...');
     
     const cfdiFinanciero = await this.xmlFinancieroRepository.findOne({
-      where: { folio_fiscal: uuid }
+      where: { folio_fiscal: uuid, usuario_id: usuarioId }
     });
 
     if (!cfdiFinanciero) {
@@ -2055,7 +2083,7 @@ async descargarXml(uuid: string): Promise<any> {
 /**
  * Genera PDF del CFDI (versión con múltiples estrategias de búsqueda)
  */
-async descargarPdf(uuid: string, estilo: string = 'classic'): Promise<any> {
+async descargarPdf(usuarioId: string, uuid: string, estilo: string = 'classic'): Promise<any> {
   this.logger.debug('=== INICIO descargarPdf ===');
   this.logger.debug('📥 UUID:', uuid);
 
@@ -2064,7 +2092,7 @@ async descargarPdf(uuid: string, estilo: string = 'classic'): Promise<any> {
 
     // Estrategia 1: Búsqueda exacta
     cfdi = await this.xmlFinancieroRepository.findOne({
-      where: { folio_fiscal: uuid }
+      where: { folio_fiscal: uuid, usuario_id: usuarioId }
     });
 
     // Estrategia 2: Case-insensitive
@@ -2072,6 +2100,7 @@ async descargarPdf(uuid: string, estilo: string = 'classic'): Promise<any> {
       cfdi = await this.xmlFinancieroRepository
         .createQueryBuilder('cfdi')
         .where('LOWER(cfdi.folio_fiscal) = LOWER(:uuid)', { uuid })
+        .andWhere('cfdi.usuario_id = :usuarioId', { usuarioId })
         .getOne();
     }
 
@@ -2083,6 +2112,7 @@ async descargarPdf(uuid: string, estilo: string = 'classic'): Promise<any> {
         .where('REPLACE(LOWER(cfdi.folio_fiscal), \'-\', \'\') = :uuidSinGuiones', { 
           uuidSinGuiones: uuidSinGuiones.toLowerCase() 
         })
+        .andWhere('cfdi.usuario_id = :usuarioId', { usuarioId })
         .getOne();
     }
 
@@ -2091,6 +2121,7 @@ async descargarPdf(uuid: string, estilo: string = 'classic'): Promise<any> {
       cfdi = await this.xmlFinancieroRepository
         .createQueryBuilder('cfdi')
         .where('cfdi.folio_fiscal LIKE :uuid', { uuid: `%${uuid}%` })
+        .andWhere('cfdi.usuario_id = :usuarioId', { usuarioId })
         .getOne();
     }
 

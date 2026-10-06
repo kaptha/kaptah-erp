@@ -8,6 +8,7 @@ import { SatDescargaSyncService } from './sat-descarga-sync.service';
 
 interface JwtUser {
   uid: string;
+  cuentaUid?: string;
   email?: string;
   rfc?: string | null;
 }
@@ -46,22 +47,22 @@ export class SatDescargaController {
 
   @Post('solicitudes')
   solicitar(@CurrentUser() user: JwtUser, @Body() dto: SolicitarDto, @Query('cuentaUid') cuentaUid?: string) {
-    return this.service.solicitar({ ...dto, cuentaUid: cuentaUid || user.uid, origen: 'MANUAL' });
+    return this.service.solicitar({ ...dto, cuentaUid: user.cuentaUid || user.uid, origen: 'MANUAL' });
   }
 
   @Get('solicitudes')
   listar(@CurrentUser() user: JwtUser, @Query('cuentaUid') cuentaUid?: string) {
-    return this.service.listar(cuentaUid || user.uid);
+    return this.service.listar(user.cuentaUid || user.uid);
   }
 
   @Get('solicitudes/:id')
   obtener(@CurrentUser() user: JwtUser, @Param('id') id: string, @Query('cuentaUid') cuentaUid?: string) {
-    return this.service.obtener(cuentaUid || user.uid, id);
+    return this.service.obtener(user.cuentaUid || user.uid, id);
   }
 
   @Post('solicitudes/:id/procesar')
   async procesar(@CurrentUser() user: JwtUser, @Param('id') id: string, @Query('cuentaUid') cuentaUid?: string) {
-    const s = await this.service.obtener(cuentaUid || user.uid, id);
+    const s = await this.service.obtener(user.cuentaUid || user.uid, id);
     const v = s.estado === 'ENVIADA' ? await this.service.verificar(s) : s;
     return v.estado === 'LISTA' || v.estado === 'DESCARGANDO' ? this.service.descargarEImportar(v) : v;
   }

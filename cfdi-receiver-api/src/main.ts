@@ -14,7 +14,7 @@ async function bootstrap() {
       /https:\/\/.*\.vercel\.app$/
     ],
     methods: 'GET,HEAD,PUT,PATCH,POST,DELETE,OPTIONS',
-    allowedHeaders: ['Origin', 'X-Requested-With', 'Content-Type', 'Accept', 'Authorization', 'X-Firebase-Token'],
+    allowedHeaders: ['Origin', 'X-Requested-With', 'Content-Type', 'Accept', 'Authorization', 'X-Firebase-Token', 'X-Cuenta-Uid'],
     credentials: true,
     exposedHeaders: ['Content-Disposition']
   });

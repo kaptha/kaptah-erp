@@ -21,12 +21,26 @@ export class XmlFinancieroController {
 
   constructor(private readonly xmlFinancieroService: XmlFinancieroService) {}
 
+  /** Cuenta activa ya validada por JwtStrategy (dueño o sub-usuario con rol). */
+  private cuenta(req: any): string {
+    return req.user?.cuentaUid || req.user?.uid;
+  }
+
+  /**
+   * RFC de la cuenta activa. Se prefiere el que resolvió el backend; el de la URL
+   * solo se usa como respaldo y nunca amplía el alcance, porque todas las
+   * consultas filtran además por la cuenta.
+   */
+  private rfcCuenta(req: any, rfcParam?: string): string {
+    return req.user?.rfc || rfcParam || '';
+  }
+
   /**
    * Procesa todos los XMLs existentes para extraer datos financieros
    */
   @Post('procesar-todos')
   async procesarTodosLosXmls(@Req() req: any) {
-    const usuarioId = req.user?.uid; // 🔹 Cambiado de 'id' a 'uid'
+    const usuarioId = this.cuenta(req);
     
     this.logger.log(`📥 Procesando XMLs para usuario: ${usuarioId}`);
     
@@ -46,7 +60,7 @@ export class XmlFinancieroController {
    */
   @Get('estadisticas')
   async obtenerEstadisticasFinancieras(@Req() req: any) {
-    const usuarioId = req.user?.uid; // 🔹 Cambiado de 'id' a 'uid'
+    const usuarioId = this.cuenta(req);
     
     this.logger.log(`📥 Obteniendo estadísticas para usuario: ${usuarioId}`);
     
@@ -67,7 +81,7 @@ export class XmlFinancieroController {
     @Query('fechaFin') fechaFin: string,
     @Req() req: any,
   ) {
-    const usuarioId = req.user?.uid; // 🔹 Cambiado de 'id' a 'uid'
+    const usuarioId = this.cuenta(req);
     
     if (!fechaInicio || !fechaFin) {
       return {
@@ -99,7 +113,7 @@ export class XmlFinancieroController {
     @Query('fechaFin') fechaFin: string,
     @Req() req: any,
   ) {
-    const usuarioId = req.user?.uid; // 🔹 Cambiado de 'id' a 'uid'
+    const usuarioId = this.cuenta(req);
     
     if (!fechaInicio || !fechaFin) {
       return {
@@ -136,7 +150,7 @@ export class XmlFinancieroController {
     @Query('limite') limite: string = '10',
     @Req() req: any,
   ) {
-    const usuarioId = req.user?.uid; // 🔹 Cambiado de 'id' a 'uid'
+    const usuarioId = this.cuenta(req);
     
     if (!fechaInicio || !fechaFin) {
       return {
@@ -173,7 +187,8 @@ export class XmlFinancieroController {
 
     try {
       const cfdis = await this.xmlFinancieroService.getCfdisIngreso(
-        rfcUsuario,
+        this.cuenta(req),
+        this.rfcCuenta(req, rfcUsuario),
         fechaInicio,
         fechaFin
       );
@@ -203,7 +218,8 @@ export class XmlFinancieroController {
 
     try {
       const cfdis = await this.xmlFinancieroService.getCfdisEgreso(
-        rfcUsuario,
+        this.cuenta(req),
+        this.rfcCuenta(req, rfcUsuario),
         fechaInicio,
         fechaFin
       );
@@ -231,9 +247,10 @@ async getAnalisisCompletoIngresos(
 
   try {
     const token = req.headers?.authorization?.replace('Bearer ', '') || '';
-    const userUid = req.user?.uid || '';
+    const userUid = this.cuenta(req);
     const analisis = await this.xmlFinancieroService.getAnalisisCompletoIngresos(
-      rfcUsuario,
+      this.cuenta(req),
+      this.rfcCuenta(req, rfcUsuario),
       fechaInicio,
       fechaFin,
       token,
@@ -264,7 +281,8 @@ async getAnalisisCompletoEgresos(
 
   try {
     const analisis = await this.xmlFinancieroService.getAnalisisCompletoEgresos(
-      rfcUsuario,
+      this.cuenta(req),
+      this.rfcCuenta(req, rfcUsuario),
       fechaInicio,
       fechaFin
     );
@@ -302,7 +320,7 @@ async buscarCfdisEgresos(
   }
 
   try {
-    return await this.xmlFinancieroService.buscarCfdisEgresos(rfcUsuario, query);
+    return await this.xmlFinancieroService.buscarCfdisEgresos(this.cuenta(req), this.rfcCuenta(req, rfcUsuario), { query });
   } catch (error) {
     this.logger.error('❌ Error en búsqueda rápida de egresos:', error);
     throw error;
@@ -343,7 +361,7 @@ async busquedaAvanzadaEgresos(
     if (montoMin) filtros.montoMin = parseFloat(montoMin);
     if (montoMax) filtros.montoMax = parseFloat(montoMax);
 
-    return await this.xmlFinancieroService.busquedaAvanzadaEgresos(rfcUsuario, filtros);
+    return await this.xmlFinancieroService.busquedaAvanzadaEgresos(this.cuenta(req), this.rfcCuenta(req, rfcUsuario), filtros);
   } catch (error) {
     this.logger.error('❌ Error en búsqueda avanzada de egresos:', error);
     throw error;
@@ -374,7 +392,7 @@ async buscarCfdisIngresos(
   }
 
   try {
-    return await this.xmlFinancieroService.buscarCfdisIngresos(rfcUsuario, { query });
+    return await this.xmlFinancieroService.buscarCfdisIngresos(this.cuenta(req), this.rfcCuenta(req, rfcUsuario), { query });
   } catch (error) {
     this.logger.error('❌ Error en búsqueda rápida de ingresos:', error);
     throw error;
@@ -419,7 +437,7 @@ async busquedaAvanzadaIngresos(
     if (metodoPago) filtros.metodoPago = metodoPago;
     if (formaPago) filtros.formaPago = formaPago;
 
-    return await this.xmlFinancieroService.busquedaAvanzadaIngresos(rfcUsuario, filtros);
+    return await this.xmlFinancieroService.busquedaAvanzadaIngresos(this.cuenta(req), this.rfcCuenta(req, rfcUsuario), filtros);
   } catch (error) {
     this.logger.error('❌ Error en búsqueda avanzada de ingresos:', error);
     throw error;
@@ -444,7 +462,7 @@ async busquedaRapidaEgresos(
   this.logger.debug('Query:', query);
 
   // ✅ Obtener el RFC del usuario autenticado
-  const rfcUsuario = req.user?.rfc;
+  const rfcUsuario = this.rfcCuenta(req);
   
   if (!rfcUsuario) {
     throw new Error('RFC de usuario no encontrado en el token');
@@ -463,7 +481,7 @@ async busquedaRapidaEgresos(
     limit: limit ? Number(limit) : 50
   };
 
-  return this.xmlFinancieroService.buscarCfdisEgresos(rfcUsuario, filtros);
+  return this.xmlFinancieroService.buscarCfdisEgresos(this.cuenta(req), rfcUsuario, filtros);
 }
 
 /**
@@ -486,7 +504,7 @@ async busquedaRapidaIngresos(
 ) {
   this.logger.debug('🔍 Búsqueda rápida de ingresos');
 
-  const rfcUsuario = req.user?.rfc;
+  const rfcUsuario = this.rfcCuenta(req);
 
   if (!rfcUsuario) {
     throw new Error('RFC de usuario no encontrado en el token');
@@ -508,7 +526,7 @@ async busquedaRapidaIngresos(
   });
 
   const token = req.headers?.authorization?.replace('Bearer ', '') || '';
-  const userUid = req.user?.uid || '';
+  const userUid = this.cuenta(req);
   const filtros = {
     query,
     fechaInicio,
@@ -522,7 +540,7 @@ async busquedaRapidaIngresos(
     offset: offset ? Number(offset) : 0,
     limit: limit ? Number(limit) : 50
   };
-  return this.xmlFinancieroService.buscarCfdisIngresos(rfcUsuario, filtros, token, userUid);
+  return this.xmlFinancieroService.buscarCfdisIngresos(this.cuenta(req), rfcUsuario, filtros, token, userUid);
 }
 
 // ====== ENDPOINTS DE DETALLES DE CFDI ======
@@ -537,9 +555,9 @@ async getDetallesCfdi(
 ) {
   this.logger.debug('🔍 Obteniendo detalles de CFDI:', uuid);
   const token = req.headers?.authorization?.replace('Bearer ', '') || '';
-  const userUid = req.user?.uid || '';
+  const userUid = this.cuenta(req);
   try {
-    return await this.xmlFinancieroService.getDetallesCfdi(uuid, token, userUid);
+    return await this.xmlFinancieroService.getDetallesCfdi(this.cuenta(req), uuid, token, userUid);
   } catch (error) {
     this.logger.error('❌ Error obteniendo detalles:', error);
     throw error;
@@ -557,7 +575,7 @@ async getImpuestosCfdi(
   this.logger.debug('🔍 Obteniendo impuestos de CFDI:', uuid);
 
   try {
-    return await this.xmlFinancieroService.getImpuestosCfdi(uuid);
+    return await this.xmlFinancieroService.getImpuestosCfdi(this.cuenta(req), uuid);
   } catch (error) {
     this.logger.error('❌ Error obteniendo impuestos:', error);
     throw error;
@@ -575,7 +593,7 @@ async getRetencionesCfdi(
   this.logger.debug('🔍 Obteniendo retenciones de CFDI:', uuid);
 
   try {
-    return await this.xmlFinancieroService.getRetencionesCfdi(uuid);
+    return await this.xmlFinancieroService.getRetencionesCfdi(this.cuenta(req), uuid);
   } catch (error) {
     this.logger.error('❌ Error obteniendo retenciones:', error);
     throw error;
@@ -593,7 +611,7 @@ async getPartidasCfdi(
   this.logger.debug('🔍 Obteniendo partidas de CFDI:', uuid);
 
   try {
-    return await this.xmlFinancieroService.getPartidasCfdi(uuid);
+    return await this.xmlFinancieroService.getPartidasCfdi(this.cuenta(req), uuid);
   } catch (error) {
     this.logger.error('❌ Error obteniendo partidas:', error);
     throw error;
@@ -611,7 +629,7 @@ async getPagosCfdi(
   this.logger.debug('🔍 Obteniendo pagos de CFDI:', uuid);
 
   try {
-    return await this.xmlFinancieroService.getPagosCfdi(uuid);
+    return await this.xmlFinancieroService.getPagosCfdi(this.cuenta(req), uuid);
   } catch (error) {
     this.logger.error('❌ Error obteniendo pagos:', error);
     throw error;
@@ -624,13 +642,14 @@ async getPagosCfdi(
   @Get('cfdis/:uuid/xml')
   async descargarXml(
     @Param('uuid') uuid: string,
+    @Req() req: any,
     @Res() res: Response
   ) {
     this.logger.debug('📥 Endpoint descargarXml llamado');
     this.logger.debug('📥 UUID recibido:', uuid);
 
     try {
-      const result = await this.xmlFinancieroService.descargarXml(uuid);
+      const result = await this.xmlFinancieroService.descargarXml(this.cuenta(req), uuid);
 
       if (!result.success || !result.xml) {
         this.logger.error('❌ XML no encontrado en resultado');
@@ -666,13 +685,14 @@ async getPagosCfdi(
 async descargarPdf(
   @Param('uuid') uuid: string,
   @Query('style') estilo: string = 'classic',  // Permitir elegir estilo
+  @Req() req: any,
   @Res() res: Response
 ) {
   this.logger.debug('📥 Generando PDF:', uuid);
   this.logger.debug('🎨 Estilo:', estilo);
 
   try {
-    const result = await this.xmlFinancieroService.descargarPdf(uuid, estilo);
+    const result = await this.xmlFinancieroService.descargarPdf(this.cuenta(req), uuid, estilo);
 
     if (!result.success || !result.pdf) {
       return res.status(HttpStatus.NOT_FOUND).json({
