@@ -269,6 +269,28 @@ export class XmlFinancieroService {
  * 1. Facturas donde Mario es EMISOR (ventas)
  * 2. Nóminas donde Mario es RECEPTOR (él recibe sueldo del ISSSTE)
  */
+/**
+ * Las notas de crédito (tipo E) disminuyen el ingreso o el gasto: se devuelven
+ * con importes negativos para que todas las sumas de los análisis las resten.
+ * Solo se usa en los datos de análisis, no en listados ni en el detalle.
+ */
+private aplicarSignoNotasCredito(rows: any[]): void {
+  const campos = [
+    'sub_total', 'descuento', 'total',
+    'total_impuestos_trasladados', 'total_impuestos_retenidos',
+    'iva_trasladado', 'iva_retenido', 'isr_retenido', 'ieps_retenido',
+  ];
+  for (const row of rows || []) {
+    if (row?.tipo_comprobante !== 'E') continue;
+    for (const campo of campos) {
+      const v = parseFloat(row[campo]);
+      if (!isNaN(v) && v !== 0) {
+        row[campo] = typeof row[campo] === 'number' ? -Math.abs(v) : (-Math.abs(v)).toFixed(2);
+      }
+    }
+  }
+}
+
 async getCfdisIngreso(usuarioId: string, rfcUsuario: string, fechaInicio: string, fechaFin: string): Promise<any[]> {
   this.logger.log('====== OBTENIENDO CFDIS DE INGRESO ======');
   this.logger.log(`RFC Usuario: ${rfcUsuario}`);
@@ -281,7 +303,7 @@ async getCfdisIngreso(usuarioId: string, rfcUsuario: string, fechaInicio: string
       -- CASO 1: Usuario es EMISOR de facturas (ventas)
       (
         rfc_emisor = $1
-        AND tipo_comprobante != 'N'
+        AND tipo_comprobante IN ('I', 'E')
       )
       
       OR
@@ -297,7 +319,7 @@ async getCfdisIngreso(usuarioId: string, rfcUsuario: string, fechaInicio: string
     AND usuario_id = $4
 
     -- Período
-    AND fecha BETWEEN $2 AND $3
+    AND fecha >= $2::date AND fecha < $3::date + 1
     
     -- Excluir cancelados
     AND estado_procesamiento != 'CANCELADO'
@@ -312,6 +334,7 @@ async getCfdisIngreso(usuarioId: string, rfcUsuario: string, fechaInicio: string
       fechaFin,
       usuarioId
     ]);
+    this.aplicarSignoNotasCredito(result);
 
     this.logger.log(`✅ CFDIs de ingreso encontrados: ${result.length}`);
     
@@ -359,7 +382,7 @@ async getCfdisEgreso(usuarioId: string, rfcUsuario: string, fechaInicio: string,
       -- CASO 1: Usuario es RECEPTOR de facturas (compras)
       (
         rfc_receptor = $1
-        AND tipo_comprobante IN ('E', 'P')
+        AND tipo_comprobante IN ('I', 'E')
       )
       
       OR
@@ -375,7 +398,7 @@ async getCfdisEgreso(usuarioId: string, rfcUsuario: string, fechaInicio: string,
     AND usuario_id = $4
 
     -- Período
-    AND fecha BETWEEN $2 AND $3
+    AND fecha >= $2::date AND fecha < $3::date + 1
     
     -- Excluir cancelados
     AND estado_procesamiento != 'CANCELADO'
@@ -390,16 +413,19 @@ async getCfdisEgreso(usuarioId: string, rfcUsuario: string, fechaInicio: string,
       fechaFin,
       usuarioId
     ]);
+    this.aplicarSignoNotasCredito(result);
 
     this.logger.log(`✅ CFDIs de egreso encontrados: ${result.length}`);
     
     // Log detallado
-    const compras = result.filter(c => c.tipo_comprobante === 'E');
+    const compras = result.filter(c => c.tipo_comprobante === 'I');
+    const notasCredito = result.filter(c => c.tipo_comprobante === 'E');
     const pagos = result.filter(c => c.tipo_comprobante === 'P');
     const nominasPagadas = result.filter(c => c.tipo_comprobante === 'N');
     
     this.logger.log(`   📊 Distribución:`);
-    this.logger.log(`      - Egresos (E): ${compras.length}`);
+    this.logger.log(`      - Compras (I): ${compras.length}`);
+    this.logger.log(`      - Notas de credito (E, restan): ${notasCredito.length}`);
     this.logger.log(`      - Pagos (P): ${pagos.length}`);
     this.logger.log(`      - Nóminas (N): ${nominasPagadas.length}`);
     
@@ -439,7 +465,7 @@ async getEstadisticasIngresos(
       .andWhere('cfdi.tipo_comprobante = :tipo', { tipo: 'I' });
 
     if (fechaInicio && fechaFin) {
-      query.andWhere('cfdi.fecha BETWEEN :fechaInicio AND :fechaFin', {
+      query.andWhere('cfdi.fecha >= :fechaInicio AND cfdi.fecha < CAST(:fechaFin AS date) + 1', {
         fechaInicio,
         fechaFin
       });
@@ -495,7 +521,7 @@ async getEstadisticasEgresos(
       .andWhere('cfdi.usuario_id = :usuarioId', { usuarioId });
 
     if (fechaInicio && fechaFin) {
-      query.andWhere('cfdi.fecha BETWEEN :fechaInicio AND :fechaFin', {
+      query.andWhere('cfdi.fecha >= :fechaInicio AND cfdi.fecha < CAST(:fechaFin AS date) + 1', {
         fechaInicio,
         fechaFin
       });
@@ -563,8 +589,8 @@ async getAnalisisCompletoIngresos(
           fechaFin,
         });
         // Evitar duplicados
-        const foliosExistentes = new Set(cfdisLocales.map((c: any) => c.folio_fiscal));
-        cfdisSales = cfdisSales.filter(c => !foliosExistentes.has(c.folio_fiscal));
+        const foliosExistentes = new Set(cfdisLocales.map((c: any) => String(c.folio_fiscal || '').toUpperCase()));
+        cfdisSales = cfdisSales.filter(c => !foliosExistentes.has(String(c.folio_fiscal || '').toUpperCase()));
       }
     } catch (e) {
       this.logger.warn('No se pudieron obtener CFDIs de sales-api para analisis:', e.message);
@@ -1366,9 +1392,9 @@ private async obtenerProveedoresNuevos(
     WHERE rfc_receptor = $1
       AND usuario_id = $4
       AND tipo_comprobante != 'N'
-      AND fecha BETWEEN $2 AND $3
+      AND fecha >= $2::date AND fecha < $3::date + 1
     GROUP BY rfc_emisor, nombre_emisor
-    HAVING MIN(fecha) BETWEEN $2 AND $3
+    HAVING MIN(fecha) >= $2::date AND MIN(fecha) < $3::date + 1
     ORDER BY MIN(fecha) DESC
     LIMIT 10
   `;
@@ -1421,7 +1447,7 @@ async buscarCfdisEgresos(
       .where('cfdi.rfc_receptor = :rfc', { rfc: rfcUsuario })
       .andWhere('cfdi.usuario_id = :usuarioId', { usuarioId })
       .andWhere('cfdi.tipo_comprobante IN (:...tipos)', { 
-        tipos: ['I', 'E', 'P', 'N']  // ✅ Incluir TODOS los tipos donde somos receptores
+        tipos: ['I', 'E', 'P']  // La nómina recibida (N) es ingreso del empleado, no egreso
       });
 
     this.logger.debug('✅ Buscando CFDIs donde el usuario es RECEPTOR');
@@ -1452,7 +1478,7 @@ async buscarCfdisEgresos(
         fechaInicio: filtros.fechaInicio, 
         fechaFin: filtros.fechaFin 
       });
-      query.andWhere('cfdi.fecha BETWEEN :fechaInicio AND :fechaFin', {
+      query.andWhere('cfdi.fecha >= :fechaInicio AND cfdi.fecha < CAST(:fechaFin AS date) + 1', {
         fechaInicio: filtros.fechaInicio,
         fechaFin: filtros.fechaFin
       });
@@ -1564,7 +1590,7 @@ async buscarCfdisIngresos(
         fechaFin: filtros.fechaFin
       });
 
-      query.andWhere('cfdi.fecha BETWEEN :fechaInicio AND :fechaFin', {
+      query.andWhere('cfdi.fecha >= :fechaInicio AND cfdi.fecha < CAST(:fechaFin AS date) + 1', {
         fechaInicio: filtros.fechaInicio,
         fechaFin: filtros.fechaFin
       });
@@ -1573,7 +1599,7 @@ async buscarCfdisIngresos(
         fechaInicio: filtros.fechaInicio
       });
     } else if (filtros.fechaFin) {
-      query.andWhere('cfdi.fecha <= :fechaFin', {
+      query.andWhere('cfdi.fecha < CAST(:fechaFin AS date) + 1', {
         fechaFin: filtros.fechaFin
       });
     }
@@ -1717,7 +1743,7 @@ async busquedaAvanzadaEgresos(usuarioId: string, rfcUsuario: string, filtros: an
     }
 
     if (filtros.fechaFin) {
-      qb.andWhere('cfdi.fecha <= :fechaFin', { fechaFin: filtros.fechaFin });
+      qb.andWhere('cfdi.fecha < CAST(:fechaFin AS date) + 1', { fechaFin: filtros.fechaFin });
     }
 
     if (filtros.montoMin !== undefined && filtros.montoMin !== null) {
@@ -1786,7 +1812,7 @@ async busquedaAvanzadaIngresos(usuarioId: string, rfcUsuario: string, filtros: a
     }
 
     if (filtros.fechaFin) {
-      qb.andWhere('cfdi.fecha <= :fechaFin', { fechaFin: filtros.fechaFin });
+      qb.andWhere('cfdi.fecha < CAST(:fechaFin AS date) + 1', { fechaFin: filtros.fechaFin });
     }
 
     if (filtros.montoMin !== undefined && filtros.montoMin !== null) {
