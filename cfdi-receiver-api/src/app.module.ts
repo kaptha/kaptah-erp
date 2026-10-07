@@ -6,7 +6,6 @@ import { DatabaseModule } from './database/database.module';
 import { FirebaseModule } from './firebase/firebase.module';
 import { AuthModule } from './auth/auth.module';
 import { XmlModule } from './xml/xml.module';
-import { DescargaSatModule } from './descarga-sat/descarga-sat.module';
 import { SatDescargaModule } from './sat-descarga/nest/sat-descarga.module';
 import configuration from './config/configuration';
 import { validate } from './config/validation.schema';
@@ -21,13 +20,12 @@ import { XmlRecibido } from './xml/entities/xml-recibido.entity';
       load: [configuration],
       validate,
     }),
-    // Un solo scheduler para toda la app (antes vivía en DescargaSatModule)
+    // Un solo scheduler para toda la app
     ScheduleModule.forRoot(),
     DatabaseModule,
     AuthModule,
     FirebaseModule,
     XmlModule,
-    DescargaSatModule,
     SatDescargaModule,
     TypeOrmModule.forFeature([XmlRecibido]),
   ],
