@@ -21,7 +21,7 @@ export class DescargaSatSyncService implements OnModuleInit {
   /**
    * Cron job - se ejecuta todos los dias a las 2:00 AM UTC
    */
-  @Cron('0 2 * * *')
+  // @Cron('0 2 * * *')  // Desactivado: la descarga masiva ahora es directa con el SAT (src/sat-descarga)
   async sincronizacionDiaria() {
     this.logger.log('=== Iniciando sincronizacion diaria de CFDIs ===');
 
