@@ -1178,3 +1178,34 @@ mat-chip {
     gap: 8px;
   }
 }
+
+/* ===== fechas-movil ===== */
+.filters-row .campo-periodo {
+  width: 260px;
+}
+
+.campo-periodo input {
+  cursor: pointer;
+}
+
+.atajos {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: 8px;
+  margin: -8px 0 24px 0;
+}
+
+@media (max-width: 768px) {
+  .filters-row .campo-periodo {
+    width: 100%;
+  }
+
+  .atajos {
+    margin-top: 0;
+  }
+
+  .atajos button {
+    flex: 1 1 calc(50% - 8px);
+  }
+}

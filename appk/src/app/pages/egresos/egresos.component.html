@@ -8,22 +8,14 @@
     </div>
 
     <div class="filters-row">
-      <mat-form-field appearance="outline">
-        <mat-label>Fecha Inicio</mat-label>
-        <input
-          matInput
-          type="date"
-          [formControl]="fechaInicioControl"
-          (change)="onFechaChange()">
-      </mat-form-field>
-
-      <mat-form-field appearance="outline">
-        <mat-label>Fecha Fin</mat-label>
-        <input
-          matInput
-          type="date"
-          [formControl]="fechaFinControl"
-          (change)="onFechaChange()">
+      <mat-form-field appearance="outline" class="campo-periodo">
+        <mat-label>Periodo</mat-label>
+        <mat-date-range-input [rangePicker]="pickerPeriodo" [max]="fechaMax">
+          <input matStartDate [formControl]="fechaInicioControl" placeholder="Desde" readonly (click)="pickerPeriodo.open()">
+          <input matEndDate [formControl]="fechaFinControl" placeholder="Hasta" readonly (click)="pickerPeriodo.open()" (dateChange)="onFechaChange()">
+        </mat-date-range-input>
+        <mat-datepicker-toggle matIconSuffix [for]="pickerPeriodo"></mat-datepicker-toggle>
+        <mat-date-range-picker #pickerPeriodo [touchUi]="esMovil"></mat-date-range-picker>
       </mat-form-field>
 
       <button mat-raised-button color="primary" (click)="loadAnalisisCompleto()">
@@ -36,6 +28,13 @@
         Exportar Excel
       </button>
     </div>
+  </div>
+
+  <!-- ATAJOS DE PERIODO -->
+  <div class="atajos">
+    <button mat-stroked-button type="button" *ngFor="let a of atajos" (click)="aplicarAtajo(a.clave)">
+      {{ a.etiqueta }}
+    </button>
   </div>
 
   <!-- LOADING -->
@@ -765,19 +764,16 @@
           <mat-icon matPrefix>label</mat-icon>
         </mat-form-field>
 
-        <div class="date-range">
-          <mat-form-field appearance="outline" class="half-width-field">
-            <mat-label>Fecha Inicio</mat-label>
-            <input matInput type="date" [(ngModel)]="searchFilters.fechaInicio">
-            <mat-icon matPrefix>calendar_today</mat-icon>
-          </mat-form-field>
-
-          <mat-form-field appearance="outline" class="half-width-field">
-            <mat-label>Fecha Fin</mat-label>
-            <input matInput type="date" [(ngModel)]="searchFilters.fechaFin">
-            <mat-icon matPrefix>calendar_today</mat-icon>
-          </mat-form-field>
-        </div>
+        <mat-form-field appearance="outline" class="full-width campo-periodo">
+          <mat-label>Rango de fechas</mat-label>
+          <mat-date-range-input [rangePicker]="pickerBusqueda" [max]="fechaMax">
+            <input matStartDate [(ngModel)]="searchFilters.fechaInicio" placeholder="Desde" readonly (click)="pickerBusqueda.open()">
+            <input matEndDate [(ngModel)]="searchFilters.fechaFin" placeholder="Hasta" readonly (click)="pickerBusqueda.open()">
+          </mat-date-range-input>
+          <mat-icon matPrefix>calendar_today</mat-icon>
+          <mat-datepicker-toggle matIconSuffix [for]="pickerBusqueda"></mat-datepicker-toggle>
+          <mat-date-range-picker #pickerBusqueda [touchUi]="esMovil"></mat-date-range-picker>
+        </mat-form-field>
 
         <div class="amount-range">
           <mat-form-field appearance="outline" class="half-width-field">

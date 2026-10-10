@@ -1,8 +1,13 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnDestroy, OnInit } from '@angular/core';
 import { FormControl } from '@angular/forms';
+import { BreakpointObserver, Breakpoints } from '@angular/cdk/layout';
+import { MAT_DATE_LOCALE, provideNativeDateAdapter } from '@angular/material/core';
+import { Subscription } from 'rxjs';
 import { forkJoin, of } from 'rxjs';
 import { catchError, finalize } from 'rxjs/operators';
 import { CfdiApiService } from '../../services/cfdi-api.service';
+
+type AtajoPeriodo = 'mes' | 'mesAnterior' | 'anio' | 'anioAnterior';
 interface AdvancedSearchFiltersPayload {
   rfc?: string;
   nombre?: string;
@@ -138,14 +143,28 @@ interface AnalisisIngresosResponse {
   selector: 'app-ingresos',
   templateUrl: './ingresos.component.html',
   styleUrls: ['./ingresos.component.css'],
-  standalone: false
+  standalone: false,
+  // Calendario de Material en español (es-MX), solo para este componente
+  providers: [provideNativeDateAdapter(), { provide: MAT_DATE_LOCALE, useValue: 'es-MX' }]
 })
-export class IngresosComponent implements OnInit {
+export class IngresosComponent implements OnInit, OnDestroy {
   // =========================================================
   // FORM CONTROLS
   // =========================================================
-  fechaInicioControl = new FormControl('');
-  fechaFinControl = new FormControl('');
+  fechaInicioControl = new FormControl<Date | null>(null);
+  fechaFinControl = new FormControl<Date | null>(null);
+
+  // Calendario: sin fechas futuras; en celular se abre a pantalla completa (touchUi)
+  readonly fechaMax = this.hoy();
+  esMovil = false;
+  private subs = new Subscription();
+
+  atajos: { clave: AtajoPeriodo; etiqueta: string }[] = [
+    { clave: 'mes', etiqueta: 'Este mes' },
+    { clave: 'mesAnterior', etiqueta: 'Mes pasado' },
+    { clave: 'anio', etiqueta: 'Este año' },
+    { clave: 'anioAnterior', etiqueta: 'Año pasado' }
+  ];
 
   // =========================================================
   // UI STATE
@@ -204,8 +223,8 @@ export class IngresosComponent implements OnInit {
     nombre: '',
     uuid: '',
     folio: '',
-    fechaInicio: '',
-    fechaFin: '',
+    fechaInicio: null as Date | null,
+    fechaFin: null as Date | null,
     serie: '',
     montoMin: null as number | null,
     montoMax: null as number | null,
@@ -231,7 +250,7 @@ export class IngresosComponent implements OnInit {
 
   private readonly numberFormatter = new Intl.NumberFormat('es-MX');
 
-  constructor(private cfdiApiService: CfdiApiService) {}
+  constructor(private cfdiApiService: CfdiApiService, private breakpoints: BreakpointObserver) {}
 
   ngOnInit(): void {
     this.initializeComponent();
@@ -244,22 +263,64 @@ export class IngresosComponent implements OnInit {
     const now = new Date();
     const startOfYear = new Date(now.getFullYear(), 0, 1);
 
-    this.fechaInicioControl.setValue(this.toInputDate(startOfYear));
-    this.fechaFinControl.setValue(this.toInputDate(now));
+    this.fechaInicioControl.setValue(startOfYear);
+    this.fechaFinControl.setValue(this.hoy());
+
+    this.subs.add(
+      this.breakpoints
+        .observe([Breakpoints.Handset, Breakpoints.TabletPortrait])
+        .subscribe((r) => (this.esMovil = r.matches))
+    );
 
     this.loadAnalisisCompleto();
   }
 
+  ngOnDestroy(): void {
+    this.subs.unsubscribe();
+  }
+
+  // YYYY-MM-DD en hora local (toISOString convertía a UTC y después de las 18:00 daba el día siguiente)
   private toInputDate(date: Date): string {
-    return date.toISOString().split('T')[0];
+    const m = `${date.getMonth() + 1}`.padStart(2, '0');
+    const d = `${date.getDate()}`.padStart(2, '0');
+    return `${date.getFullYear()}-${m}-${d}`;
+  }
+
+  private hoy(): Date {
+    const d = new Date();
+    return new Date(d.getFullYear(), d.getMonth(), d.getDate());
+  }
+
+  aplicarAtajo(clave: AtajoPeriodo): void {
+    const hoy = this.hoy();
+    let inicio = new Date(hoy.getFullYear(), hoy.getMonth(), 1);
+    let fin = hoy;
+    switch (clave) {
+      case 'mesAnterior':
+        inicio = new Date(hoy.getFullYear(), hoy.getMonth() - 1, 1);
+        fin = new Date(hoy.getFullYear(), hoy.getMonth(), 0);
+        break;
+      case 'anio':
+        inicio = new Date(hoy.getFullYear(), 0, 1);
+        break;
+      case 'anioAnterior':
+        inicio = new Date(hoy.getFullYear() - 1, 0, 1);
+        fin = new Date(hoy.getFullYear() - 1, 11, 31);
+        break;
+    }
+    this.fechaInicioControl.setValue(inicio);
+    this.fechaFinControl.setValue(fin);
+    this.loadAnalisisCompleto();
   }
 
   // =========================================================
   // MAIN LOAD
   // =========================================================
   loadAnalisisCompleto(): void {
-    const fechaInicio = this.fechaInicioControl.value || '';
-    const fechaFin = this.fechaFinControl.value || '';
+    const inicio = this.fechaInicioControl.value;
+    const fin = this.fechaFinControl.value;
+    const fechaInicio = inicio ? this.toInputDate(inicio) : '';
+    const fechaFin = fin ? this.toInputDate(fin) : '';
 
     if (!fechaInicio || !fechaFin) {
       return;
@@ -420,8 +481,8 @@ export class IngresosComponent implements OnInit {
       nombre: '',
       uuid: '',
       folio: '',
-      fechaInicio: '',
-      fechaFin: '',
+      fechaInicio: null,
+      fechaFin: null,
       serie: '',
       montoMin: null,
       montoMax: null,
@@ -518,11 +579,11 @@ export class IngresosComponent implements OnInit {
   }
 
   if (this.searchFilters.fechaInicio) {
-    filtros.fechaInicio = this.searchFilters.fechaInicio;
+    filtros.fechaInicio = this.toInputDate(this.searchFilters.fechaInicio);
   }
 
   if (this.searchFilters.fechaFin) {
-    filtros.fechaFin = this.searchFilters.fechaFin;
+    filtros.fechaFin = this.toInputDate(this.searchFilters.fechaFin);
   }
 
   if (this.searchFilters.montoMin !== null && this.searchFilters.montoMin !== undefined) {
