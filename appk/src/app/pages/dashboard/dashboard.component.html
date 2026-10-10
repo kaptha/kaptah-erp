@@ -7,18 +7,26 @@
       <p class="header-subtitle">Vista ejecutiva de tu situacion financiera</p>
     </div>
     <div class="header-right">
-      <mat-form-field appearance="outline" class="date-field">
-        <mat-label>Inicio</mat-label>
-        <input matInput type="date" [(ngModel)]="fechaInicio" (change)="onFechaChange()">
-      </mat-form-field>
-      <mat-form-field appearance="outline" class="date-field">
-        <mat-label>Fin</mat-label>
-        <input matInput type="date" [(ngModel)]="fechaFin" (change)="onFechaChange()">
+      <mat-form-field appearance="outline" class="date-field campo-periodo">
+        <mat-label>Periodo</mat-label>
+        <mat-date-range-input [rangePicker]="pickerPeriodo" [max]="fechaMax">
+          <input matStartDate [(ngModel)]="rangoInicio" placeholder="Desde" readonly (click)="pickerPeriodo.open()">
+          <input matEndDate [(ngModel)]="rangoFin" placeholder="Hasta" readonly (click)="pickerPeriodo.open()" (dateChange)="onFechaChange()">
+        </mat-date-range-input>
+        <mat-datepicker-toggle matIconSuffix [for]="pickerPeriodo"></mat-datepicker-toggle>
+        <mat-date-range-picker #pickerPeriodo [touchUi]="esMovil"></mat-date-range-picker>
       </mat-form-field>
       <button mat-icon-button (click)="onRefresh()" matTooltip="Actualizar datos">
         <mat-icon>refresh</mat-icon>
       </button>
     </div>
+  </div>
+
+  <!-- ATAJOS DE PERIODO -->
+  <div class="atajos">
+    <button mat-stroked-button type="button" *ngFor="let a of atajos" (click)="aplicarAtajo(a.clave)">
+      {{ a.etiqueta }}
+    </button>
   </div>
 
   <!-- LOADING -->

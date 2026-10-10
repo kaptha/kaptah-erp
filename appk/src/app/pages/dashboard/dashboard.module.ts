@@ -10,6 +10,7 @@ import { NgxChartsModule } from '@swimlane/ngx-charts';
 import { MatCardModule } from '@angular/material/card';
 import { MatIconModule } from '@angular/material/icon';
 import { MatButtonModule } from '@angular/material/button';
+import { MatDatepickerModule } from '@angular/material/datepicker';
 
 // Importa los componentes del dashboard
 import { DashboardComponent } from './dashboard.component';
@@ -28,6 +29,7 @@ import { DashboardComponent } from './dashboard.component';
     MatCardModule,
     MatIconModule,
     MatButtonModule,
+    MatDatepickerModule,
     NgxChartsModule
   ],
   exports: [

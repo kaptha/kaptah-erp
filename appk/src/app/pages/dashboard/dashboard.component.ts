@@ -1,7 +1,11 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnDestroy, OnInit } from '@angular/core';
+import { BreakpointObserver, Breakpoints } from '@angular/cdk/layout';
+import { MAT_DATE_LOCALE, provideNativeDateAdapter } from '@angular/material/core';
 import { Router } from '@angular/router';
 import { CfdiApiService } from '../../services/cfdi-api.service';
-import { firstValueFrom } from 'rxjs';
+import { Subscription, firstValueFrom } from 'rxjs';
+
+type AtajoPeriodo = 'mes' | 'mesAnterior' | 'anio' | 'anioAnterior';
 
 interface KpiCard {
   title: string;
@@ -32,9 +36,11 @@ const CACHE_TTL = 30 * 60 * 1000; // 30 minutos
   selector: 'app-dashboard',
   templateUrl: './dashboard.component.html',
   styleUrls: ['./dashboard.component.css'],
-  standalone: false
+  standalone: false,
+  // Calendario de Material en español (es-MX), solo para este componente
+  providers: [provideNativeDateAdapter(), { provide: MAT_DATE_LOCALE, useValue: 'es-MX' }]
 })
-export class DashboardComponent implements OnInit {
+export class DashboardComponent implements OnInit, OnDestroy {
 
   isLoading = true;
   hasDatos = false;
@@ -49,9 +55,23 @@ export class DashboardComponent implements OnInit {
   // Alertas
   alertas: Alerta[] = [];
 
-  // Periodo
+  // Periodo (strings YYYY-MM-DD: los usan la API y la llave del cache)
   fechaInicio = '';
   fechaFin = '';
+
+  // Periodo para el calendario de rango (Date); se sincroniza con los strings en setPeriodo()
+  rangoInicio: Date | null = null;
+  rangoFin: Date | null = null;
+  readonly fechaMax = this.hoy();
+  esMovil = false;
+  private subs = new Subscription();
+
+  atajos: { clave: AtajoPeriodo; etiqueta: string }[] = [
+    { clave: 'mes', etiqueta: 'Este mes' },
+    { clave: 'mesAnterior', etiqueta: 'Mes pasado' },
+    { clave: 'anio', etiqueta: 'Este año' },
+    { clave: 'anioAnterior', etiqueta: 'Año pasado' }
+  ];
 
   // Datos crudos para cache
   private datosIngresos: any = null;
@@ -59,16 +79,25 @@ export class DashboardComponent implements OnInit {
 
   constructor(
     private cfdiApiService: CfdiApiService,
-    private router: Router
+    private router: Router,
+    private breakpoints: BreakpointObserver
   ) {
-    const now = new Date();
-    const startOfYear = new Date(now.getFullYear(), 0, 1);
-    this.fechaInicio = startOfYear.toISOString().split('T')[0];
-    this.fechaFin = now.toISOString().split('T')[0];
+    const hoy = this.hoy();
+    this.setPeriodo(new Date(hoy.getFullYear(), 0, 1), hoy);
   }
 
   async ngOnInit() {
+    // En celular/tablet vertical el calendario se abre como diálogo a pantalla completa (touchUi)
+    this.subs.add(
+      this.breakpoints
+        .observe([Breakpoints.Handset, Breakpoints.TabletPortrait])
+        .subscribe((r) => (this.esMovil = r.matches))
+    );
     await this.loadDashboard();
+  }
+
+  ngOnDestroy(): void {
+    this.subs.unsubscribe();
   }
 
   /**
@@ -314,7 +343,50 @@ export class DashboardComponent implements OnInit {
   }
 
   async onFechaChange() {
+    // Al elegir un nuevo inicio, el calendario deja el fin en null hasta que se elige
+    if (!this.rangoInicio || !this.rangoFin) return;
+    this.setPeriodo(this.rangoInicio, this.rangoFin);
     await this.loadDashboard(true);
+  }
+
+  async aplicarAtajo(clave: AtajoPeriodo) {
+    const hoy = this.hoy();
+    let inicio = new Date(hoy.getFullYear(), hoy.getMonth(), 1);
+    let fin = hoy;
+    switch (clave) {
+      case 'mesAnterior':
+        inicio = new Date(hoy.getFullYear(), hoy.getMonth() - 1, 1);
+        fin = new Date(hoy.getFullYear(), hoy.getMonth(), 0);
+        break;
+      case 'anio':
+        inicio = new Date(hoy.getFullYear(), 0, 1);
+        break;
+      case 'anioAnterior':
+        inicio = new Date(hoy.getFullYear() - 1, 0, 1);
+        fin = new Date(hoy.getFullYear() - 1, 11, 31);
+        break;
+    }
+    this.setPeriodo(inicio, fin);
+    await this.loadDashboard(true);
+  }
+
+  private setPeriodo(inicio: Date, fin: Date): void {
+    this.rangoInicio = inicio;
+    this.rangoFin = fin;
+    this.fechaInicio = this.toInputDate(inicio);
+    this.fechaFin = this.toInputDate(fin);
+  }
+
+  // YYYY-MM-DD en hora local (toISOString convertía a UTC y después de las 18:00 daba el día siguiente)
+  private toInputDate(date: Date): string {
+    const m = `${date.getMonth() + 1}`.padStart(2, '0');
+    const d = `${date.getDate()}`.padStart(2, '0');
+    return `${date.getFullYear()}-${m}-${d}`;
+  }
+
+  private hoy(): Date {
+    const d = new Date();
+    return new Date(d.getFullYear(), d.getMonth(), d.getDate());
   }
 
   navigateTo(ruta: string | undefined) {

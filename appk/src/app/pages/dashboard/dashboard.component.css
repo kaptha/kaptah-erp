@@ -368,3 +368,37 @@
     font-size: 18px;
   }
 }
+
+
+/* ===== fechas-movil ===== */
+.campo-periodo {
+  width: 250px;
+}
+
+.campo-periodo input {
+  cursor: pointer;
+}
+
+.atajos {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: 8px;
+  margin: -12px 0 24px 0;
+}
+
+@media (max-width: 768px) {
+  .campo-periodo {
+    width: auto;
+    flex: 1;
+    min-width: 0;
+  }
+
+  .atajos {
+    margin-top: 0;
+  }
+
+  .atajos button {
+    flex: 1 1 calc(50% - 8px);
+  }
+}
