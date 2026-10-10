@@ -21,6 +21,12 @@
       <mat-card-subtitle>El SAT acepta hasta seis años atrás y no repite periodos ya solicitados.</mat-card-subtitle>
     </mat-card-header>
     <mat-card-content>
+      <div class="atajos">
+        <button mat-stroked-button type="button" *ngFor="let a of atajos" (click)="aplicarAtajo(a.clave)">
+          {{ a.etiqueta }}
+        </button>
+      </div>
+
       <form [formGroup]="form" class="filters-row" (ngSubmit)="solicitar()">
         <mat-form-field appearance="outline">
           <mat-label>Tipo</mat-label>
@@ -30,14 +36,15 @@
           </mat-select>
         </mat-form-field>
 
-        <mat-form-field appearance="outline">
-          <mat-label>Desde</mat-label>
-          <input matInput type="date" formControlName="fechaInicial">
-        </mat-form-field>
-
-        <mat-form-field appearance="outline">
-          <mat-label>Hasta</mat-label>
-          <input matInput type="date" formControlName="fechaFinal">
+        <mat-form-field appearance="outline" class="campo-periodo">
+          <mat-label>Periodo</mat-label>
+          <mat-date-range-input [rangePicker]="picker" [min]="fechaMin" [max]="fechaMax">
+            <input matStartDate formControlName="fechaInicial" placeholder="Desde" readonly (click)="picker.open()">
+            <input matEndDate formControlName="fechaFinal" placeholder="Hasta" readonly (click)="picker.open()">
+          </mat-date-range-input>
+          <mat-datepicker-toggle matIconSuffix [for]="picker"></mat-datepicker-toggle>
+          <mat-date-range-picker #picker [touchUi]="esMovil"></mat-date-range-picker>
+          <mat-hint>Toca para elegir en el calendario</mat-hint>
         </mat-form-field>
 
         <button mat-raised-button color="primary" type="submit" [disabled]="form.invalid || isSubmitting">

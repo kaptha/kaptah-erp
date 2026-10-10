@@ -1,5 +1,7 @@
 import { Component, OnDestroy, OnInit } from '@angular/core';
 import { FormControl, FormGroup, Validators } from '@angular/forms';
+import { BreakpointObserver, Breakpoints } from '@angular/cdk/layout';
+import { MAT_DATE_LOCALE, provideNativeDateAdapter } from '@angular/material/core';
 import { Subscription, interval } from 'rxjs';
 import { finalize } from 'rxjs/operators';
 import {
@@ -15,11 +17,15 @@ interface EstadoVista {
   enProceso: boolean;
 }
 
+type Atajo = 'mes' | 'mesAnterior' | 'ultimos30' | 'anio';
+
 @Component({
   selector: 'app-sat-descarga',
   templateUrl: './sat-descarga.component.html',
   styleUrls: ['./sat-descarga.component.css'],
-  standalone: false
+  standalone: false,
+  // Calendario de Material en español (es-MX), solo para este componente
+  providers: [provideNativeDateAdapter(), { provide: MAT_DATE_LOCALE, useValue: 'es-MX' }]
 })
 export class SatDescargaComponent implements OnInit, OnDestroy {
   // =========================================================
@@ -27,22 +33,34 @@ export class SatDescargaComponent implements OnInit, OnDestroy {
   // =========================================================
   form = new FormGroup({
     tipo: new FormControl<SatSolicitudTipo>('RECIBIDOS', { nonNullable: true, validators: [Validators.required] }),
-    fechaInicial: new FormControl('', { nonNullable: true, validators: [Validators.required] }),
-    fechaFinal: new FormControl('', { nonNullable: true, validators: [Validators.required] })
+    fechaInicial: new FormControl<Date | null>(null, { validators: [Validators.required] }),
+    fechaFinal: new FormControl<Date | null>(null, { validators: [Validators.required] })
   });
+
+  // El SAT no da fechas futuras y acepta hasta seis años atrás
+  readonly fechaMax = this.hoy();
+  readonly fechaMin = new Date(this.fechaMax.getFullYear() - 6, this.fechaMax.getMonth(), this.fechaMax.getDate());
+
+  atajos: { clave: Atajo; etiqueta: string }[] = [
+    { clave: 'mes', etiqueta: 'Este mes' },
+    { clave: 'mesAnterior', etiqueta: 'Mes pasado' },
+    { clave: 'ultimos30', etiqueta: 'Últimos 30 días' },
+    { clave: 'anio', etiqueta: 'Este año' }
+  ];
 
   // =========================================================
   // UI STATE
   // =========================================================
   isLoading = false;
   isSubmitting = false;
+  esMovil = false;
   procesandoId: string | null = null;
   mensaje: { tipo: 'ok' | 'error'; texto: string } | null = null;
 
   solicitudes: SatSolicitud[] = [];
   columnas = ['periodo', 'tipo', 'estado', 'cfdis', 'actualizado', 'acciones'];
 
-  private refresco?: Subscription;
+  private subs = new Subscription();
 
   private readonly ESTADOS: Record<SatSolicitudEstado, EstadoVista> = {
     ENVIADA: { etiqueta: 'Esperando al SAT', color: 'accent', enProceso: true },
@@ -55,26 +73,35 @@ export class SatDescargaComponent implements OnInit, OnDestroy {
     ERROR: { etiqueta: 'Error', color: 'warn', enProceso: false }
   };
 
-  constructor(private satDescarga: SatDescargaService) {}
+  constructor(private satDescarga: SatDescargaService, private breakpoints: BreakpointObserver) {}
 
   ngOnInit(): void {
-    const hoy = new Date();
-    const inicioMes = new Date(hoy.getFullYear(), hoy.getMonth(), 1);
+    const hoy = this.hoy();
     this.form.patchValue({
-      fechaInicial: this.toInputDate(inicioMes),
-      fechaFinal: this.toInputDate(hoy)
+      fechaInicial: new Date(hoy.getFullYear(), hoy.getMonth(), 1),
+      fechaFinal: hoy
     });
+
+    // En celular/tablet vertical el calendario se abre como diálogo a pantalla completa (touchUi)
+    this.subs.add(
+      this.breakpoints
+        .observe([Breakpoints.Handset, Breakpoints.TabletPortrait])
+        .subscribe((r) => (this.esMovil = r.matches))
+    );
+
     this.cargar();
     // Mientras haya solicitudes en proceso, refresca cada minuto
-    this.refresco = interval(60_000).subscribe(() => {
-      if (this.solicitudes.some((s) => this.vista(s.estado).enProceso)) {
-        this.cargar(true);
-      }
-    });
+    this.subs.add(
+      interval(60_000).subscribe(() => {
+        if (this.solicitudes.some((s) => this.vista(s.estado).enProceso)) {
+          this.cargar(true);
+        }
+      })
+    );
   }
 
   ngOnDestroy(): void {
-    this.refresco?.unsubscribe();
+    this.subs.unsubscribe();
   }
 
   // =========================================================
@@ -91,9 +118,32 @@ export class SatDescargaComponent implements OnInit, OnDestroy {
       });
   }
 
+  aplicarAtajo(clave: Atajo): void {
+    const hoy = this.hoy();
+    let inicio = new Date(hoy.getFullYear(), hoy.getMonth(), 1);
+    let fin = hoy;
+    switch (clave) {
+      case 'mesAnterior':
+        inicio = new Date(hoy.getFullYear(), hoy.getMonth() - 1, 1);
+        fin = new Date(hoy.getFullYear(), hoy.getMonth(), 0);
+        break;
+      case 'ultimos30':
+        inicio = new Date(hoy.getFullYear(), hoy.getMonth(), hoy.getDate() - 29);
+        break;
+      case 'anio':
+        inicio = new Date(hoy.getFullYear(), 0, 1);
+        break;
+    }
+    this.form.patchValue({ fechaInicial: inicio, fechaFinal: fin });
+  }
+
   solicitar(): void {
     if (this.form.invalid || this.isSubmitting) return;
     const { tipo, fechaInicial, fechaFinal } = this.form.getRawValue();
+    if (!fechaInicial || !fechaFinal) {
+      this.notificar('error', 'Elige la fecha inicial y la final del periodo.');
+      return;
+    }
     if (fechaInicial > fechaFinal) {
       this.notificar('error', 'La fecha inicial no puede ser posterior a la final.');
       return;
@@ -101,7 +151,12 @@ export class SatDescargaComponent implements OnInit, OnDestroy {
 
     this.isSubmitting = true;
     this.satDescarga
-      .solicitar({ tipo, tipoSolicitud: 'CFDI', fechaInicial, fechaFinal })
+      .solicitar({
+        tipo,
+        tipoSolicitud: 'CFDI',
+        fechaInicial: this.toInputDate(fechaInicial),
+        fechaFinal: this.toInputDate(fechaFinal)
+      })
       .pipe(finalize(() => (this.isSubmitting = false)))
       .subscribe({
         next: (s) => {
@@ -177,6 +232,11 @@ export class SatDescargaComponent implements OnInit, OnDestroy {
   private notificar(tipo: 'ok' | 'error', texto: string): void {
     this.mensaje = { tipo, texto };
     setTimeout(() => (this.mensaje = null), 8000);
+  }
+
+  private hoy(): Date {
+    const d = new Date();
+    return new Date(d.getFullYear(), d.getMonth(), d.getDate());
   }
 
   private toInputDate(date: Date): string {

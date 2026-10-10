@@ -112,3 +112,39 @@ table {
     width: 100%;
   }
 }
+
+
+/* ===== sat-fechas-movil ===== */
+.atajos {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 16px;
+}
+
+.campo-periodo {
+  min-width: 260px;
+}
+
+.campo-periodo input {
+  cursor: pointer;
+}
+
+@media (max-width: 599px) {
+  .atajos button {
+    flex: 1 1 calc(50% - 8px);
+  }
+
+  .filters-row {
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .filters-row mat-form-field,
+  .filters-row button,
+  .campo-periodo {
+    width: 100%;
+    min-width: 0;
+  }
+}
