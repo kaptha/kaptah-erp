@@ -1209,3 +1209,34 @@ mat-chip {
     flex: 1 1 calc(50% - 8px);
   }
 }
+
+/* ===== kpi-texto-legible ===== */
+/* Los p de las tarjetas KPI heredaban un gris global; se fija su color por tarjeta */
+.kpi-card .kpi-content p {
+  color: #ffffff;
+  opacity: 1;
+  font-weight: 700;
+  text-shadow: 0 1px 2px rgba(15, 23, 42, 0.35);
+}
+
+.kpi-card .kpi-content small {
+  color: #ffffff;
+  opacity: 0.95;
+  font-weight: 500;
+  text-shadow: 0 1px 2px rgba(15, 23, 42, 0.3);
+}
+
+/* Tarjetas de fondo claro: texto oscuro (el blanco no contrasta sobre amarillo / pastel) */
+.kpi-card.warning .kpi-content p,
+.kpi-card.warning .kpi-content small,
+.kpi-card.accent .kpi-content p,
+.kpi-card.accent .kpi-content small {
+  color: #1f2937;
+  text-shadow: none;
+}
+
+.kpi-card.accent .kpi-content small,
+.kpi-card.warning .kpi-content small {
+  color: #374151;
+  opacity: 1;
+}
