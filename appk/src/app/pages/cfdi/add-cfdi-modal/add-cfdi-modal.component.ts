@@ -40,6 +40,21 @@ interface CatalogoSAT {
   descripcion: string;
 }
 
+// =====================================================================
+// c_UsoCFDI (CFDI 4.0): regímenes fiscales del RECEPTOR con los que el SAT
+// acepta cada uso. Si no coinciden, el PAC rechaza el timbrado.
+// =====================================================================
+const REG_GASTOS_INVERSIONES = ['601', '603', '606', '612', '620', '621', '622', '623', '624', '625', '626'];
+const REG_DEDUCCIONES_PERSONALES = ['605', '606', '607', '608', '611', '612', '614', '615', '625'];
+const REG_TODOS = ['601', '603', '605', '606', '607', '608', '610', '611', '612', '614', '615', '616', '620', '621', '622', '623', '624', '625', '626'];
+
+interface UsoCfdi {
+  codigo: string;
+  nombre: string;
+  tipo: 'ambos' | 'fisica';   // D01-D10 solo personas físicas
+  regimenes: string[];
+}
+
 @Component({
     selector: 'app-add-cfdi-modal',
     templateUrl: './add-cfdi-modal.component.html',
@@ -126,32 +141,33 @@ export class AddCfdiModalComponent implements OnInit, OnDestroy {
     { codigo: 'PPD', nombre: ' - Pago en parcialidades o diferido' }
   ];
 
-  usosCfdi = [
-    { codigo: 'G01', nombre: ' - Adquisición de mercancías', tipo: 'ambos' },
-    { codigo: 'G02', nombre: ' - Devoluciones, descuentos o bonificaciones', tipo: 'ambos' },
-    { codigo: 'G03', nombre: ' - Gastos en general', tipo: 'fisica' },
-    { codigo: 'I01', nombre: ' - Construcciones', tipo: 'moral' },
-    { codigo: 'I02', nombre: ' - Mobilario y equipo de oficina por inversiones', tipo: 'moral' },
-    { codigo: 'I03', nombre: ' - Equipo de transporte', tipo: 'moral' },
-    { codigo: 'I04', nombre: ' - Equipo de cómputo y accesorios', tipo: 'moral' },
-    { codigo: 'I05', nombre: ' - Dados, troqueles, moldes, matrices y herramental', tipo: 'moral' },
-    { codigo: 'I06', nombre: ' - Comunicaciones telefónicas', tipo: 'moral' },
-    { codigo: 'I07', nombre: ' - Comunicaciones satelitales', tipo: 'moral' },
-    { codigo: 'I08', nombre: ' - Otra maquinaria y equipo', tipo: 'moral' },
-    { codigo: 'D01', nombre: ' - Honorarios médicos, dentales y gastos hospitalarios', tipo: 'fisica' },
-    { codigo: 'D02', nombre: ' - Gastos médicos por incapacidad o discapacidad', tipo: 'fisica' },
-    { codigo: 'D03', nombre: ' - Gastos funerales', tipo: 'fisica' },
-    { codigo: 'D04', nombre: ' - Donativos', tipo: 'fisica' },
-    { codigo: 'D05', nombre: ' - Intereses reales efectivamente pagados por créditos hipotecarios', tipo: 'fisica' },
-    { codigo: 'D06', nombre: ' - Aportaciones voluntarias al SAR', tipo: 'fisica' },
-    { codigo: 'D07', nombre: ' - Primas por seguros de gastos médicos', tipo: 'fisica' },
-    { codigo: 'D08', nombre: ' - Gastos de transportación escolar obligatoria', tipo: 'fisica' },
-    { codigo: 'D09', nombre: ' - Depósitos en cuentas para el ahorro', tipo: 'fisica' },
-    { codigo: 'D10', nombre: ' - Pagos por servicios educativos (colegiaturas)', tipo: 'fisica' },
-    { codigo: 'P01', nombre: ' - Por definir', tipo: 'ambos' },
-    { codigo: 'CP01', nombre: ' - Pagos', tipo: 'ambos' },
-    { codigo: 'CN01', nombre: ' - Nómina', tipo: 'ambos' },
-    { codigo: 'S01', nombre: ' - Sin efectos fiscales', tipo: 'ambos' }
+  // Usos válidos para CFDI de Ingreso. Fuera de esta lista a propósito:
+  //  - P01 (Por definir): ya no existe en CFDI 4.0 (su reemplazo es S01).
+  //  - CP01 (Pagos): solo va en el complemento de pago (tipo P).
+  //  - CN01 (Nómina): solo va en recibos de nómina (tipo N).
+  usosCfdi: UsoCfdi[] = [
+    { codigo: 'G01', nombre: ' - Adquisición de mercancías', tipo: 'ambos', regimenes: REG_GASTOS_INVERSIONES },
+    { codigo: 'G02', nombre: ' - Devoluciones, descuentos o bonificaciones', tipo: 'ambos', regimenes: REG_GASTOS_INVERSIONES },
+    { codigo: 'G03', nombre: ' - Gastos en general', tipo: 'ambos', regimenes: REG_GASTOS_INVERSIONES },
+    { codigo: 'I01', nombre: ' - Construcciones', tipo: 'ambos', regimenes: REG_GASTOS_INVERSIONES },
+    { codigo: 'I02', nombre: ' - Mobiliario y equipo de oficina por inversiones', tipo: 'ambos', regimenes: REG_GASTOS_INVERSIONES },
+    { codigo: 'I03', nombre: ' - Equipo de transporte', tipo: 'ambos', regimenes: REG_GASTOS_INVERSIONES },
+    { codigo: 'I04', nombre: ' - Equipo de cómputo y accesorios', tipo: 'ambos', regimenes: REG_GASTOS_INVERSIONES },
+    { codigo: 'I05', nombre: ' - Dados, troqueles, moldes, matrices y herramental', tipo: 'ambos', regimenes: REG_GASTOS_INVERSIONES },
+    { codigo: 'I06', nombre: ' - Comunicaciones telefónicas', tipo: 'ambos', regimenes: REG_GASTOS_INVERSIONES },
+    { codigo: 'I07', nombre: ' - Comunicaciones satelitales', tipo: 'ambos', regimenes: REG_GASTOS_INVERSIONES },
+    { codigo: 'I08', nombre: ' - Otra maquinaria y equipo', tipo: 'ambos', regimenes: REG_GASTOS_INVERSIONES },
+    { codigo: 'D01', nombre: ' - Honorarios médicos, dentales y gastos hospitalarios', tipo: 'fisica', regimenes: REG_DEDUCCIONES_PERSONALES },
+    { codigo: 'D02', nombre: ' - Gastos médicos por incapacidad o discapacidad', tipo: 'fisica', regimenes: REG_DEDUCCIONES_PERSONALES },
+    { codigo: 'D03', nombre: ' - Gastos funerales', tipo: 'fisica', regimenes: REG_DEDUCCIONES_PERSONALES },
+    { codigo: 'D04', nombre: ' - Donativos', tipo: 'fisica', regimenes: REG_DEDUCCIONES_PERSONALES },
+    { codigo: 'D05', nombre: ' - Intereses reales efectivamente pagados por créditos hipotecarios', tipo: 'fisica', regimenes: REG_DEDUCCIONES_PERSONALES },
+    { codigo: 'D06', nombre: ' - Aportaciones voluntarias al SAR', tipo: 'fisica', regimenes: REG_DEDUCCIONES_PERSONALES },
+    { codigo: 'D07', nombre: ' - Primas por seguros de gastos médicos', tipo: 'fisica', regimenes: REG_DEDUCCIONES_PERSONALES },
+    { codigo: 'D08', nombre: ' - Gastos de transportación escolar obligatoria', tipo: 'fisica', regimenes: REG_DEDUCCIONES_PERSONALES },
+    { codigo: 'D09', nombre: ' - Depósitos en cuentas para el ahorro', tipo: 'fisica', regimenes: REG_DEDUCCIONES_PERSONALES },
+    { codigo: 'D10', nombre: ' - Pagos por servicios educativos (colegiaturas)', tipo: 'fisica', regimenes: REG_DEDUCCIONES_PERSONALES },
+    { codigo: 'S01', nombre: ' - Sin efectos fiscales', tipo: 'ambos', regimenes: REG_TODOS }
   ];
 
   constructor(
@@ -176,6 +192,7 @@ export class AddCfdiModalComponent implements OnInit, OnDestroy {
     this.loadSucursales();
     this.loadImpuestos();  // ✅ Cargar impuestos del usuario
     this.setupFilters();
+    this.setupUsoCfdiSync();
   }
 
   ngOnDestroy(): void {
@@ -331,21 +348,41 @@ onTipoConceptoChange(index: number): void {
     return this.cfdiForm.get('conceptos') as FormArray;
   }
 
-  // ✅ Getter para filtrar usos de CFDI según el RFC del receptor
-  get usoCfdiDisponibles() {
-    const receptorRfc = this.cfdiForm.get('receptorRfc')?.value;
-    if (!receptorRfc || receptorRfc.length < 12) {
-      return this.usosCfdi.filter(uso => uso.tipo === 'ambos');
-    }
-    
-    // RFC de 12 caracteres = Persona Moral, 13 = Persona Física
-    const esPersonaMoral = receptorRfc.length === 12;
-    
-    if (esPersonaMoral) {
-      return this.usosCfdi.filter(uso => uso.tipo === 'ambos' || uso.tipo === 'moral');
-    } else {
-      return this.usosCfdi.filter(uso => uso.tipo === 'ambos' || uso.tipo === 'fisica');
-    }
+  // ✅ Usos de CFDI que el SAT acepta para el régimen fiscal del receptor
+  get usoCfdiDisponibles(): UsoCfdi[] {
+    return this.usosPermitidos(
+      this.cfdiForm.get('regimenFiscalReceptor')?.value,
+      this.cfdiForm.get('receptorRfc')?.value
+    );
+  }
+
+  // Regla principal: régimen fiscal del receptor (c_UsoCFDI).
+  // Respaldo sin régimen: RFC de 12 caracteres = persona moral (sin D01-D10).
+  private usosPermitidos(regimen: string | null | undefined, rfc: string | null | undefined): UsoCfdi[] {
+    const esMoral = (rfc || '').trim().length === 12;
+    return this.usosCfdi.filter(uso =>
+      (!regimen || uso.regimenes.includes(regimen)) &&
+      !(esMoral && uso.tipo === 'fisica')
+    );
+  }
+
+  // Uso sugerido: G03 si el régimen lo permite; si no, S01 (616, 605, 607, 608, 610...)
+  private usoPorDefecto(regimen: string | null | undefined, rfc: string | null | undefined): string {
+    const permitidos = this.usosPermitidos(regimen, rfc).map(u => u.codigo);
+    return ['G03', 'G01', 'S01'].find(c => permitidos.includes(c)) || 'S01';
+  }
+
+  // Si cambia el régimen del receptor y el uso elegido ya no es válido, se cambia por uno permitido
+  private setupUsoCfdiSync(): void {
+    this.cfdiForm.get('regimenFiscalReceptor')?.valueChanges
+      .pipe(takeUntil(this.destroy$))
+      .subscribe((regimen: string) => {
+        const rfc = this.cfdiForm.get('receptorRfc')?.value;
+        const usoCtrl = this.cfdiForm.get('usoCfdi');
+        if (!this.usosPermitidos(regimen, rfc).some(u => u.codigo === usoCtrl?.value)) {
+          usoCtrl?.setValue(this.usoPorDefecto(regimen, rfc));
+        }
+      });
   }
 
   changeTab(tab: string): void {
@@ -471,13 +508,14 @@ onTipoConceptoChange(index: number): void {
         regimenFiscal: regimenFiscal
       });
       
-      // ✅ Determinar uso CFDI por defecto según el régimen
-      let usoCfdiDefault = 'G01'; // Por defecto: Adquisición de mercancías
-      
-      // Si es persona física (regímenes 605, 606, 612, 621, etc.)
-      if (['605', '606', '612', '621', '626'].includes(regimenFiscal)) {
-        usoCfdiDefault = 'G03'; // Gastos en general (persona física)
+      // RFC genérico (público en general / extranjero): el SAT exige régimen 616
+      const rfcCliente = (cliente.Rfc || '').trim().toUpperCase();
+      if (rfcCliente === 'XAXX010101000' || rfcCliente === 'XEXX010101000') {
+        regimenFiscal = '616';
       }
+
+      // ✅ Uso CFDI por defecto: el primero que el SAT permite para el régimen del receptor
+      const usoCfdiDefault = this.usoPorDefecto(regimenFiscal, rfcCliente);
       
       console.log('✅ Uso CFDI sugerido:', usoCfdiDefault);
       
@@ -927,33 +965,21 @@ private obtenerNombreUnidad(claveUnidad?: string): string {
     return cfdiPayload;
   }
 
-  // ✅ NUEVO: Validar que el uso CFDI sea correcto y compatible con el régimen fiscal
+  // ✅ Valida el uso CFDI contra el régimen fiscal del receptor ANTES de timbrar.
+  // Antes se cambiaba en silencio por G01; ahora se avisa al usuario (el error lo muestra onSubmit).
   private validarUsoCFDI(usoCfdi: string, regimenReceptor: string): string {
-    console.log('🔍 Validando uso CFDI:', { usoCfdi, regimenReceptor });
-    
-    // Lista de códigos válidos de uso CFDI
-    const usosValidos = [
-      'G01', 'G02', 'G03', 'I01', 'I02', 'I03', 'I04', 'I05', 'I06', 'I07', 'I08',
-      'D01', 'D02', 'D03', 'D04', 'D05', 'D06', 'D07', 'D08', 'D09', 'D10',
-      'P01', 'CP01', 'CN01', 'S01'
-    ];
-    
-    // ✅ Si el valor es un régimen fiscal (números de 3 dígitos), es un error
-    if (/^\d{3}$/.test(usoCfdi)) {
-      console.error('❌ ERROR: Se detectó un régimen fiscal en lugar de uso CFDI:', usoCfdi);
-      console.error('❌ El valor debe ser un código como G01, G02, D01, etc.');
-      console.error('❌ Usando valor por defecto: G01');
-      return 'G01';
+    const uso = this.usosCfdi.find(u => u.codigo === usoCfdi);
+    if (!uso) {
+      throw new Error(`El uso de CFDI "${usoCfdi}" no es válido para una factura de ingreso.`);
     }
-    
-    // ✅ Verificar que sea un código válido
-    if (!usosValidos.includes(usoCfdi)) {
-      console.warn('⚠️ Código de uso CFDI no reconocido:', usoCfdi);
-      console.warn('⚠️ Usando valor por defecto: G01');
-      return 'G01';
+    if (!uso.regimenes.includes(regimenReceptor)) {
+      const regimen = this.regimenesFiscales.find(r => r.clave === regimenReceptor);
+      const permitidos = this.usosPermitidos(regimenReceptor, null).map(u => u.codigo).join(', ');
+      throw new Error(
+        `El uso ${usoCfdi} no es compatible con el régimen ${regimenReceptor}${regimen ? regimen.descripcion : ''} del cliente. ` +
+        `Usos permitidos: ${permitidos}.`
+      );
     }
-    
-    console.log('✅ Uso CFDI válido:', usoCfdi);
     return usoCfdi;
   }
 
