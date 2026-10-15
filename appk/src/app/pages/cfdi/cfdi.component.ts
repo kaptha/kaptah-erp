@@ -188,7 +188,7 @@ createCartaPorteCFDI(): void {
   dialogRef.afterClosed().subscribe(result => {
     if (result?.success) {
       // Temporal: el modal aun no timbra; solo regresa el JSON generado
-      console.log('Carta Porte (JSON):', result.data);
+      this.loadCFDIs();
     }
   });
 }

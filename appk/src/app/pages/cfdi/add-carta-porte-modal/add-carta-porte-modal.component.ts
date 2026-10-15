@@ -8,6 +8,8 @@ import { UsersService } from '../../../services/users.service';
 import { ApibizService } from '../../../services/apibiz.service';
 import { SucursalesService } from '../../../services/sucursales.service';
 import { ProductService } from '../../../services/inventory/product.service';
+import { CFDIService } from '../../../services/cfdi.service';
+import Swal from 'sweetalert2';
 import {
   TipoUbicacion,
   TipoComprobanteCP,
@@ -187,6 +189,7 @@ export class AddCartaPorteModalComponent implements OnInit, OnDestroy {
     private apibizService: ApibizService,
     private sucursalesService: SucursalesService,
     private productService: ProductService,
+    private cfdiService: CFDIService,
     @Inject(MAT_DIALOG_DATA) public data: any
   ) {}
 
@@ -255,6 +258,9 @@ export class AddCartaPorteModalComponent implements OnInit, OnDestroy {
       
       // Tipo de transporte (fase 1: solo 01 Autotransporte)
       tipoTransporte: ['01', Validators.required],
+
+      // Contraseña del CSD para sellar (no forma parte del JSON del CFDI)
+      csdPassword: ['', Validators.required],
 
       // FiguraTransporte 3.1: en autotransporte es obligatorio al menos un Operador (01)
       figuras: this.fb.array([]),
@@ -1291,28 +1297,53 @@ export class AddCartaPorteModalComponent implements OnInit, OnDestroy {
   }
 
   onSubmit(): void {
-    if (this.cartaPorteForm.valid) {
-      const json = this.generateJSON();
-      const errores = this.validarJSON(json);
-      if (errores.length > 0) {
-        this.snackBar.open(`Hay ${errores.length} validación(es) pendiente(s). Revisa la lista al final del formulario.`, 'OK', { duration: 5000 });
-        return;
-      }
-
-      this.loading = true;
-
-      // Aquí enviarías el JSON a tu backend
-      // Por ahora solo cerramos el diálogo con el JSON
-      setTimeout(() => {
-        this.loading = false;
-        this.dialogRef.close({ success: true, data: json });
-      }, 1000);
-    } else {
-      this.snackBar.open('Por favor completa todos los campos requeridos', 'OK', {
-        duration: 3000
-      });
+    if (this.cartaPorteForm.invalid) {
+      this.snackBar.open('Por favor completa todos los campos requeridos', 'OK', { duration: 3000 });
       this.markFormGroupTouched(this.cartaPorteForm);
+      return;
     }
+
+    const json = this.generateJSON();
+    const errores = this.validarJSON(json);
+    if (errores.length > 0) {
+      this.snackBar.open(`Hay ${errores.length} validación(es) pendiente(s). Revisa la lista al final del formulario.`, 'OK', { duration: 5000 });
+      return;
+    }
+
+    this.loading = true;
+    const csdPassword = this.cartaPorteForm.get('csdPassword')?.value;
+
+    this.cfdiService.createCartaPorteCfdi({ cfdi: json, csdPassword }).subscribe({
+      next: (response: any) => {
+        this.loading = false;
+        Swal.fire({
+          icon: 'success',
+          title: 'Carta Porte timbrada',
+          html: `<p style="font-size: 14px;">UUID: <strong>${response?.uuid || ''}</strong></p>`,
+          confirmButtonColor: '#8e24aa',
+          confirmButtonText: 'Listo'
+        });
+        this.dialogRef.close({ success: true, data: response });
+      },
+      error: (err: any) => {
+        this.loading = false;
+        const e = err?.error || {};
+        const lista: string[] = Array.isArray(e.errores) ? e.errores : [];
+        if (lista.length > 0) this.erroresValidacion = lista;
+        const mensaje = Array.isArray(e.message) ? e.message.join(' ') : (e.message || err?.message || 'Error al timbrar la Carta Porte');
+        Swal.fire({
+          icon: 'error',
+          title: e.titulo || 'No se pudo timbrar',
+          html: `
+            <p style="font-size: 14px; color: #333;">${mensaje}</p>
+            ${e.campo ? `<p style="font-size: 12px; color: #888; margin-top: 8px;">Campo a revisar: <strong>${e.campo}</strong></p>` : ''}
+            ${e.codigo ? `<p style="font-size: 11px; color: #aaa; margin-top: 4px;">Código: ${e.codigo}</p>` : ''}
+          `,
+          confirmButtonColor: '#8e24aa',
+          confirmButtonText: 'Entendido'
+        });
+      }
+    });
   }
 
   onCancel(): void {

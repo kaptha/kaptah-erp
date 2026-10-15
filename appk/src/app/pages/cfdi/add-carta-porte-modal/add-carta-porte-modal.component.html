@@ -830,6 +830,17 @@
         </div>
       </div>
 
+      <!-- Firma (visible en todas las pestañas) -->
+      <div class="section-title">Firma y timbrado</div>
+      <div class="form-row">
+        <mat-form-field appearance="outline">
+          <mat-label>Contraseña del certificado (CSD)</mat-label>
+          <input matInput type="password" formControlName="csdPassword" autocomplete="off">
+          <mat-hint>Se usa solo para sellar este CFDI; no se guarda</mat-hint>
+          <mat-error>La contraseña es requerida para timbrar</mat-error>
+        </mat-form-field>
+      </div>
+
       <!-- Validaciones de Carta Porte (se llenan con Vista Previa o Crear) -->
       <div *ngIf="erroresValidacion.length > 0"
            style="margin-top: 16px; padding: 12px 16px; border: 1px solid #f5c2c7; background: #fff5f5; border-radius: 8px;">
@@ -850,7 +861,7 @@
     </button>
     <button mat-raised-button class="btn-primary" (click)="onSubmit()" [disabled]="loading || cartaPorteForm.invalid"
             [style.opacity]="(loading || cartaPorteForm.invalid) ? 0.5 : 1">
-      {{ isEditing ? 'Actualizar' : 'Crear Carta Porte' }}
+      {{ loading ? 'Timbrando...' : (isEditing ? 'Actualizar' : 'Timbrar Carta Porte') }}
     </button>
   </mat-dialog-actions>
 </div>

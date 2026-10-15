@@ -85,6 +85,30 @@ export class CFDIService {
   }
 
   /**
+   * Crea un CFDI con Complemento Carta Porte 3.1 (Traslado o Ingreso)
+   * @param payload { cfdi: JSON del modal, csdPassword }
+   */
+  createCartaPorteCfdi(payload: { cfdi: any; csdPassword: string }): Observable<any> {
+    console.log('📤 Enviando CFDI con Carta Porte:', { ...payload, csdPassword: '***' });
+
+    const activeCuentaUid = localStorage.getItem('activeCuentaUid');
+    return this.getHeaders().pipe(
+      switchMap((headers: HttpHeaders) => {
+        let url = `${this.apiUrl}/carta-porte`;
+        if (activeCuentaUid) {
+          url += `?cuentaUid=${activeCuentaUid}`;
+        }
+        return this.http.post(url, payload, { headers });
+      }),
+      tap(response => console.log('✅ Carta Porte timbrada:', response)),
+      catchError(error => {
+        console.error('❌ Error creando CFDI con Carta Porte:', error);
+        return throwError(() => error);
+      })
+    );
+  }
+
+  /**
    * Crea un CFDI de Nómina
    */
   createCFDINomina(cfdiData: any): Observable<any> {
@@ -207,7 +231,13 @@ export class CFDIService {
       'I': 'Ingreso',
       'E': 'Egreso',
       'N': 'Nomina',
-      'P': 'Pago'
+      'P': 'Pago',
+      'T': 'Traslado',
+      'ingreso': 'Ingreso',
+      'egreso': 'Egreso',
+      'nomina': 'Nomina',
+      'pago': 'Pago',
+      'traslado': 'Traslado'
     };
     return tipos[codigo] || 'Ingreso';
   }
@@ -376,6 +406,3 @@ enviarPorEmail(cfdiId: string, clienteEmail: string, customMessage?: string, pdf
     return throwError(() => new Error(errorMessage));
   }
 }
-
-
-
