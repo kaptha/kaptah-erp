@@ -2,6 +2,18 @@ import { Component, OnInit, Inject } from '@angular/core';
 import { FormBuilder, FormGroup, FormArray, Validators, FormControl } from '@angular/forms';
 import { MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
 import { MatSnackBar } from '@angular/material/snack-bar';
+import {
+  TipoUbicacion,
+  UbicacionCP,
+  DomicilioCP,
+  PATRONES_CP,
+  generarIdUbicacion,
+  calcularTotalDistRec,
+  formatearFechaCfdi,
+} from './carta-porte-31.model';
+
+/** RFC sin distinguir mayusculas al capturar; se normaliza al construir el JSON */
+const RFC_INPUT = new RegExp(PATRONES_CP.rfc.source, 'i');
 
 @Component({
     selector: 'app-add-carta-porte-modal',
@@ -102,9 +114,13 @@ export class AddCartaPorteModalComponent implements OnInit {
       })
     });
     
-    // Inicializar con ubicaciones mínimas (origen y destino)
-    this.addUbicacion('01'); // Origen
-    this.addUbicacion('02'); // Destino
+    // Ubicaciones mínimas: un Origen y un Destino (Carta Porte 3.1)
+    this.getUbicaciones().push(this.createUbicacion('Origen'));
+    this.getUbicaciones().push(this.createUbicacion('Destino'));
+    this.renumerarUbicaciones();
+
+    // La distancia total se recalcula con cualquier cambio en ubicaciones
+    this.getUbicaciones().valueChanges.subscribe(() => this.calcularDistanciaTotal());
     
     // Inicializar con una mercancía por defecto
     this.addMercancia();
@@ -126,72 +142,104 @@ export class AddCartaPorteModalComponent implements OnInit {
     return this.cartaPorteForm.get('ubicaciones') as FormArray;
   }
 
-  createUbicacion(tipoEstacion: string = '01'): FormGroup {
-    const isOrigen = tipoEstacion === '01';
-    
+  /** Ubicacion Carta Porte 3.1: TipoUbicacion + IDUbicacion + RFC + fecha/hora + domicilio */
+  createUbicacion(tipo: TipoUbicacion): FormGroup {
+    const esDestino = tipo === 'Destino';
+
     return this.fb.group({
-      tipoEstacion: [tipoEstacion, Validators.required],
-      distanciaRecorrida: [0, [Validators.required, Validators.min(0)]],
-      idOrigen: [isOrigen ? this.generateId('OR') : ''],
-      idDestino: [!isOrigen ? this.generateId('DE') : ''],
-      
-      // Origen (solo para la primera ubicación)
-      origen: this.fb.group({
-        nombreRemitente: [''],
-        numEstacion: [''],
-        nombreEstacion: [''],
-        fechaHoraSalida: ['']
-      }),
-      
-      // Destino
-      destino: this.fb.group({
-        numEstacion: [''],
-        nombreEstacion: [''],
-        fechaHoraProgLlegada: ['']
-      }),
-      
-      // Domicilio
+      tipoUbicacion: [tipo, Validators.required],
+      idUbicacion: [''], // lo asigna renumerarUbicaciones()
+      rfcRemitenteDestinatario: ['', [Validators.required, Validators.pattern(RFC_INPUT)]],
+      nombreRemitenteDestinatario: [''],
+      fechaHoraSalidaLlegada: ['', Validators.required],
+      // Solo los destinos llevan distancia recorrida
+      distanciaRecorrida: [null, esDestino ? [Validators.required, Validators.min(0.01)] : []],
+
+      // En autotransporte el domicilio es obligatorio: Estado, Pais y CP requeridos
       domicilio: this.fb.group({
         calle: [''],
-        colonia: [''],
-        localidad: [''],
-        municipio: [''],
-        estado: [''],
-        pais: ['MEX'],
-        codigoPostal: ['']
+        numeroExterior: [''],
+        numeroInterior: [''],
+        colonia: [''],    // clave c_Colonia
+        localidad: [''],  // clave c_Localidad
+        municipio: [''],  // clave c_Municipio
+        referencia: [''],
+        estado: ['', Validators.required],
+        pais: ['MEX', Validators.required],
+        codigoPostal: ['', [Validators.required, Validators.pattern(PATRONES_CP.codigoPostal)]]
       })
     });
   }
 
-  addUbicacion(tipoEstacion: string = '03'): void {
-    this.getUbicaciones().push(this.createUbicacion(tipoEstacion));
+  esOrigen(index: number): boolean {
+    return this.getUbicaciones().at(index)?.get('tipoUbicacion')?.value === 'Origen';
   }
 
-  addUbicacionIntermedia(): void {
-    const ubicaciones = this.getUbicaciones();
-    const lastIndex = ubicaciones.length - 1;
-    
-    // Insertar antes del último (que es el destino final)
-    ubicaciones.insert(lastIndex, this.createUbicacion('03'));
+  private contarDestinos(): number {
+    return this.getUbicaciones().controls
+      .filter(c => c.get('tipoUbicacion')?.value === 'Destino').length;
+  }
+
+  /** Solo se pueden eliminar destinos, y siempre debe quedar al menos uno */
+  puedeEliminarUbicacion(index: number): boolean {
+    return !this.esOrigen(index) && this.contarDestinos() > 1;
+  }
+
+  /** Cada parada adicional es un Destino más (en 3.1 ya no existe "punto intermedio") */
+  addDestino(): void {
+    this.getUbicaciones().push(this.createUbicacion('Destino'));
+    this.renumerarUbicaciones();
   }
 
   removeUbicacion(index: number): void {
-    // No permitir eliminar origen (0) ni destino final (último)
-    if (index > 0 && index < this.getUbicaciones().length - 1) {
-      this.getUbicaciones().removeAt(index);
-      this.calcularDistanciaTotal();
-    }
+    if (!this.puedeEliminarUbicacion(index)) return;
+    const idEliminado = this.getUbicaciones().at(index).get('idUbicacion')?.value;
+    this.getUbicaciones().removeAt(index);
+    this.renumerarUbicaciones(idEliminado);
   }
 
-  calcularDistanciaTotal(): void {
-    const ubicaciones = this.getUbicaciones();
-    let total = 0;
-    
-    ubicaciones.controls.forEach(ub => {
-      total += parseFloat(ub.get('distanciaRecorrida')?.value || 0);
+  /**
+   * Asigna IDs consecutivos (OR000001, DE000001, DE000002...) y actualiza
+   * las referencias de CantidadTransporta: los IDs renumerados se reasignan
+   * y los que apuntaban a la ubicacion eliminada se limpian.
+   */
+  renumerarUbicaciones(idEliminado?: string): void {
+    let origenes = 0;
+    let destinos = 0;
+    const mapa = new Map<string, string>();
+
+    this.getUbicaciones().controls.forEach(c => {
+      const tipo = c.get('tipoUbicacion')?.value as TipoUbicacion;
+      const anterior: string = c.get('idUbicacion')?.value || '';
+      const nuevo = generarIdUbicacion(tipo, tipo === 'Origen' ? ++origenes : ++destinos);
+      if (anterior && anterior !== nuevo) mapa.set(anterior, nuevo);
+      c.get('idUbicacion')?.setValue(nuevo, { emitEvent: false });
     });
-    
-    this.cartaPorteForm.patchValue({ totalDistRec: total });
+
+    const remap = (id: string): string =>
+      !id ? '' : id === idEliminado ? '' : (mapa.get(id) ?? id);
+
+    this.getMercancias().controls.forEach(m => {
+      (m.get('cantidadTransporta') as FormArray).controls.forEach(ct => {
+        ct.patchValue({
+          idOrigen: remap(ct.get('idOrigen')?.value),
+          idDestino: remap(ct.get('idDestino')?.value)
+        }, { emitEvent: false });
+      });
+    });
+  }
+
+  /** IDs disponibles para los selects de CantidadTransporta */
+  getIdsUbicacion(tipo: TipoUbicacion): string[] {
+    return this.getUbicaciones().controls
+      .filter(c => c.get('tipoUbicacion')?.value === tipo)
+      .map(c => c.get('idUbicacion')?.value as string);
+  }
+
+  /** TotalDistRec = suma de DistanciaRecorrida de los destinos */
+  calcularDistanciaTotal(): void {
+    const total = calcularTotalDistRec(this.buildUbicaciones(this.getUbicaciones().getRawValue()));
+    this.cartaPorteForm.patchValue({ totalDistRec: total }, { emitEvent: false });
   }
 
   // ===== MERCANCÍAS =====
@@ -354,12 +402,6 @@ export class AddCartaPorteModalComponent implements OnInit {
     }
   }
 
-  // ===== UTILIDADES =====
-  generateId(prefix: string): string {
-    const random = Math.floor(Math.random() * 900000) + 100000;
-    return `${prefix}${random}`;
-  }
-
   // ===== GENERACIÓN DE JSON =====
   generateJSON(): any {
     const formValue = this.cartaPorteForm.value;
@@ -444,43 +486,44 @@ export class AddCartaPorteModalComponent implements OnInit {
     return cartaPorte;
   }
 
-  buildUbicaciones(ubicaciones: any[]): any[] {
-    return ubicaciones.map((ub, index) => {
-      const ubicacion: any = {
-        tipoEstacion: ub.tipoEstacion,
-        distanciaRecorrida: ub.distanciaRecorrida
+  /** Convierte el FormArray al formato Ubicacion de Carta Porte 3.1 */
+  buildUbicaciones(ubicaciones: any[]): UbicacionCP[] {
+    return ubicaciones.map(ub => {
+      const d = ub.domicilio || {};
+      const domicilio: DomicilioCP = {
+        Estado: d.estado,
+        Pais: d.pais,
+        CodigoPostal: d.codigoPostal
       };
-      
-      // Origen (solo en primera ubicación)
-      if (index === 0 && ub.tipoEstacion === '01') {
-        ubicacion.origen = {
-          idOrigen: ub.idOrigen,
-          nombreRemitente: ub.origen.nombreRemitente,
-          numEstacion: ub.origen.numEstacion,
-          nombreEstacion: ub.origen.nombreEstacion,
-          fechaHoraSalida: this.formatDateTime(ub.origen.fechaHoraSalida)
-        };
+      const opcionales: [keyof DomicilioCP, string][] = [
+        ['Calle', d.calle],
+        ['NumeroExterior', d.numeroExterior],
+        ['NumeroInterior', d.numeroInterior],
+        ['Colonia', d.colonia],
+        ['Localidad', d.localidad],
+        ['Referencia', d.referencia],
+        ['Municipio', d.municipio]
+      ];
+      opcionales.forEach(([campo, valor]) => {
+        const limpio = (valor ?? '').toString().trim();
+        if (limpio) domicilio[campo] = limpio;
+      });
+
+      const ubicacion: UbicacionCP = {
+        TipoUbicacion: ub.tipoUbicacion,
+        IDUbicacion: ub.idUbicacion,
+        RFCRemitenteDestinatario: (ub.rfcRemitenteDestinatario || '').trim().toUpperCase(),
+        FechaHoraSalidaLlegada: ub.fechaHoraSalidaLlegada ? formatearFechaCfdi(ub.fechaHoraSalidaLlegada) : '',
+        Domicilio: domicilio
+      };
+
+      const nombre = (ub.nombreRemitenteDestinatario || '').trim();
+      if (nombre) ubicacion.NombreRemitenteDestinatario = nombre;
+
+      if (ub.tipoUbicacion === 'Destino') {
+        ubicacion.DistanciaRecorrida = Number(ub.distanciaRecorrida) || 0;
       }
-      
-      // Destino
-      ubicacion.destino = {
-        idDestino: ub.idDestino,
-        numEstacion: ub.destino.numEstacion,
-        nombreEstacion: ub.destino.nombreEstacion,
-        fechaHoraProgLlegada: this.formatDateTime(ub.destino.fechaHoraProgLlegada)
-      };
-      
-      // Domicilio
-      ubicacion.domicilio = {
-        calle: ub.domicilio.calle,
-        colonia: ub.domicilio.colonia,
-        localidad: ub.domicilio.localidad,
-        municipio: ub.domicilio.municipio,
-        estado: ub.domicilio.estado,
-        pais: ub.domicilio.pais,
-        codigoPostal: ub.domicilio.codigoPostal
-      };
-      
+
       return ubicacion;
     });
   }

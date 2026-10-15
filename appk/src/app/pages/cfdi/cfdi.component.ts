@@ -1,3 +1,4 @@
+import { AddCartaPorteModalComponent } from './add-carta-porte-modal/add-carta-porte-modal.component';
 import { Component, OnInit, HostListener } from '@angular/core';
 import { HttpErrorResponse } from '@angular/common/http';
 import { MatDialog } from '@angular/material/dialog';
@@ -174,6 +175,24 @@ export class CFDIComponent implements OnInit {
       }
     });
 }
+/** Abre el modal de CFDI con Complemento Carta Porte 3.1 */
+createCartaPorteCFDI(): void {
+  const dialogRef = this.dialog.open(AddCartaPorteModalComponent, {
+    width: '1100px',
+    maxWidth: '95vw',
+    maxHeight: '90vh',
+    disableClose: true,
+    data: {}
+  });
+
+  dialogRef.afterClosed().subscribe(result => {
+    if (result?.success) {
+      // Temporal: el modal aun no timbra; solo regresa el JSON generado
+      console.log('Carta Porte (JSON):', result.data);
+    }
+  });
+}
+
 createPagoCFDI() {
   console.log('Creando CFDI de Recepción de Pago');
   

@@ -10,10 +10,10 @@
       
       <!-- Pestañas -->
       <div class="tab-container">
-        <button mat-button [class.active-tab]="activeTab === 'General'" (click)="changeTab('General')">General</button>
-        <button mat-button [class.active-tab]="activeTab === 'Ubicaciones'" (click)="changeTab('Ubicaciones')">Ubicaciones</button>
-        <button mat-button [class.active-tab]="activeTab === 'Mercancias'" (click)="changeTab('Mercancias')">Mercancías</button>
-        <button mat-button [class.active-tab]="activeTab === 'Transporte'" (click)="changeTab('Transporte')">Transporte</button>
+        <button type="button" mat-button [class.active-tab]="activeTab === 'General'" (click)="changeTab('General')">General</button>
+        <button type="button" mat-button [class.active-tab]="activeTab === 'Ubicaciones'" (click)="changeTab('Ubicaciones')">Ubicaciones</button>
+        <button type="button" mat-button [class.active-tab]="activeTab === 'Mercancias'" (click)="changeTab('Mercancias')">Mercancías</button>
+        <button type="button" mat-button [class.active-tab]="activeTab === 'Transporte'" (click)="changeTab('Transporte')">Transporte</button>
       </div>
       
       <!-- ===== PESTAÑA GENERAL ===== -->
@@ -132,105 +132,57 @@
         </div>
       </div>
       
-      <!-- ===== PESTAÑA UBICACIONES ===== -->
+      <!-- ===== PESTAÑA UBICACIONES (Carta Porte 3.1) ===== -->
       <div class="tab-content" *ngIf="activeTab === 'Ubicaciones'">
         <div class="section-title">
-          Ubicaciones de Origen y Destino
-          <mat-icon class="info-icon" matTooltip="Registra las ubicaciones por donde pasarán las mercancías">info</mat-icon>
+          Ubicaciones
+          <mat-icon class="info-icon" matTooltip="Un origen y uno o más destinos. Cada parada del recorrido se registra como un destino.">info</mat-icon>
         </div>
-        
+
         <div formArrayName="ubicaciones">
           <div *ngFor="let ubicacion of getUbicaciones().controls; let i=index" [formGroupName]="i" class="ubicacion-container">
             <div class="ubicacion-header">
               <span class="ubicacion-title">
-                <mat-icon>{{ i === 0 ? 'place' : (i === getUbicaciones().length - 1 ? 'flag' : 'location_on') }}</mat-icon>
-                {{ i === 0 ? 'Origen' : (i === getUbicaciones().length - 1 ? 'Destino Final' : 'Punto Intermedio ' + i) }}
+                <mat-icon>{{ esOrigen(i) ? 'place' : 'flag' }}</mat-icon>
+                {{ esOrigen(i) ? 'Origen' : 'Destino' }} &middot; {{ ubicacion.get('idUbicacion')?.value }}
               </span>
-              <button type="button" mat-icon-button color="warn" (click)="removeUbicacion(i)" 
-                      *ngIf="getUbicaciones().length > 2" 
-                      [disabled]="i === 0 || i === getUbicaciones().length - 1"
-                      matTooltip="Eliminar ubicación">
+              <button type="button" mat-icon-button color="warn" (click)="removeUbicacion(i)"
+                      *ngIf="puedeEliminarUbicacion(i)"
+                      matTooltip="Eliminar destino">
                 <mat-icon>delete</mat-icon>
               </button>
             </div>
-            
+
             <div class="form-row">
               <mat-form-field appearance="outline">
-                <mat-label>Tipo de Estación</mat-label>
-                <mat-select formControlName="tipoEstacion" required>
-                  <mat-option value="01">01 - Origen</mat-option>
-                  <mat-option value="02">02 - Destino</mat-option>
-                  <mat-option value="03">03 - Punto Intermedio</mat-option>
-                </mat-select>
+                <mat-label>{{ esOrigen(i) ? 'RFC Remitente' : 'RFC Destinatario' }}</mat-label>
+                <input matInput formControlName="rfcRemitenteDestinatario" maxlength="13">
+                <mat-error *ngIf="ubicacion.get('rfcRemitenteDestinatario')?.hasError('required')">Campo requerido</mat-error>
+                <mat-error *ngIf="ubicacion.get('rfcRemitenteDestinatario')?.hasError('pattern')">RFC inválido</mat-error>
               </mat-form-field>
-              
+
               <mat-form-field appearance="outline">
-                <mat-label>Distancia Recorrida (km)</mat-label>
-                <input matInput formControlName="distanciaRecorrida" type="number" step="0.01" 
-                       (input)="calcularDistanciaTotal()" required>
-              </mat-form-field>
-              
-              <mat-form-field appearance="outline" *ngIf="i === 0">
-                <mat-label>ID Origen</mat-label>
-                <input matInput formControlName="idOrigen" placeholder="OR123456">
-              </mat-form-field>
-              
-              <mat-form-field appearance="outline" *ngIf="i > 0">
-                <mat-label>ID Destino</mat-label>
-                <input matInput formControlName="idDestino" placeholder="DE123456">
+                <mat-label>{{ esOrigen(i) ? 'Nombre Remitente' : 'Nombre Destinatario' }}</mat-label>
+                <input matInput formControlName="nombreRemitenteDestinatario">
               </mat-form-field>
             </div>
-            
-            <!-- Origen (solo en primera ubicación) -->
-            <div *ngIf="i === 0" formGroupName="origen">
-              <div class="subsection-title">Datos del Origen</div>
-              <div class="form-row">
-                <mat-form-field appearance="outline">
-                  <mat-label>Nombre Remitente</mat-label>
-                  <input matInput formControlName="nombreRemitente">
-                </mat-form-field>
-                
-                <mat-form-field appearance="outline">
-                  <mat-label>Número de Estación</mat-label>
-                  <input matInput formControlName="numEstacion" placeholder="EF001">
-                </mat-form-field>
-                
-                <mat-form-field appearance="outline">
-                  <mat-label>Nombre Estación</mat-label>
-                  <input matInput formControlName="nombreEstacion">
-                </mat-form-field>
-              </div>
-              
-              <div class="form-row">
-                <mat-form-field appearance="outline">
-                  <mat-label>Fecha/Hora Salida</mat-label>
-                  <input matInput type="datetime-local" formControlName="fechaHoraSalida">
-                </mat-form-field>
-              </div>
+
+            <div class="form-row">
+              <mat-form-field appearance="outline">
+                <mat-label>{{ esOrigen(i) ? 'Fecha/Hora de salida' : 'Fecha/Hora de llegada' }}</mat-label>
+                <input matInput type="datetime-local" step="1" formControlName="fechaHoraSalidaLlegada">
+                <mat-error *ngIf="ubicacion.get('fechaHoraSalidaLlegada')?.hasError('required')">Campo requerido</mat-error>
+              </mat-form-field>
+
+              <mat-form-field appearance="outline" *ngIf="!esOrigen(i)">
+                <mat-label>Distancia recorrida (km)</mat-label>
+                <input matInput formControlName="distanciaRecorrida" type="number" step="0.01" min="0.01">
+                <mat-hint>Desde la ubicación anterior</mat-hint>
+                <mat-error *ngIf="ubicacion.get('distanciaRecorrida')?.invalid">Indica una distancia mayor a 0</mat-error>
+              </mat-form-field>
             </div>
-            
-            <!-- Destino -->
-            <div formGroupName="destino">
-              <div class="subsection-title">Datos del Destino</div>
-              <div class="form-row">
-                <mat-form-field appearance="outline">
-                  <mat-label>Número de Estación</mat-label>
-                  <input matInput formControlName="numEstacion" placeholder="EF002">
-                </mat-form-field>
-                
-                <mat-form-field appearance="outline">
-                  <mat-label>Nombre Estación</mat-label>
-                  <input matInput formControlName="nombreEstacion">
-                </mat-form-field>
-                
-                <mat-form-field appearance="outline">
-                  <mat-label>Fecha/Hora Prog. Llegada</mat-label>
-                  <input matInput type="datetime-local" formControlName="fechaHoraProgLlegada">
-                </mat-form-field>
-              </div>
-            </div>
-            
-            <!-- Domicilio -->
+
+            <!-- Domicilio (obligatorio en autotransporte) -->
             <div formGroupName="domicilio">
               <div class="subsection-title">Domicilio</div>
               <div class="form-row">
@@ -238,24 +190,39 @@
                   <mat-label>Calle</mat-label>
                   <input matInput formControlName="calle">
                 </mat-form-field>
-                
+
                 <mat-form-field appearance="outline">
-                  <mat-label>Colonia</mat-label>
-                  <input matInput formControlName="colonia" placeholder="Código de colonia">
+                  <mat-label>Número exterior</mat-label>
+                  <input matInput formControlName="numeroExterior">
                 </mat-form-field>
-                
+
                 <mat-form-field appearance="outline">
-                  <mat-label>Localidad</mat-label>
-                  <input matInput formControlName="localidad" placeholder="Código">
+                  <mat-label>Número interior</mat-label>
+                  <input matInput formControlName="numeroInterior">
                 </mat-form-field>
               </div>
-              
+
               <div class="form-row">
                 <mat-form-field appearance="outline">
-                  <mat-label>Municipio</mat-label>
-                  <input matInput formControlName="municipio" placeholder="Código">
+                  <mat-label>Colonia</mat-label>
+                  <input matInput formControlName="colonia" placeholder="0001">
+                  <mat-hint>Clave del catálogo SAT</mat-hint>
                 </mat-form-field>
-                
+
+                <mat-form-field appearance="outline">
+                  <mat-label>Localidad</mat-label>
+                  <input matInput formControlName="localidad" placeholder="06">
+                  <mat-hint>Clave del catálogo SAT</mat-hint>
+                </mat-form-field>
+
+                <mat-form-field appearance="outline">
+                  <mat-label>Municipio</mat-label>
+                  <input matInput formControlName="municipio" placeholder="015">
+                  <mat-hint>Clave del catálogo SAT</mat-hint>
+                </mat-form-field>
+              </div>
+
+              <div class="form-row">
                 <mat-form-field appearance="outline">
                   <mat-label>Estado</mat-label>
                   <mat-select formControlName="estado">
@@ -292,33 +259,43 @@
                     <mat-option value="YUC">YUC - Yucatán</mat-option>
                     <mat-option value="ZAC">ZAC - Zacatecas</mat-option>
                   </mat-select>
+                  <mat-error>Campo requerido</mat-error>
                 </mat-form-field>
-                
+
                 <mat-form-field appearance="outline">
                   <mat-label>País</mat-label>
                   <mat-select formControlName="pais">
                     <mat-option value="MEX">MEX - México</mat-option>
                     <mat-option value="USA">USA - Estados Unidos</mat-option>
+                    <mat-option value="CAN">CAN - Canadá</mat-option>
                   </mat-select>
                 </mat-form-field>
-                
+
                 <mat-form-field appearance="outline">
                   <mat-label>Código Postal</mat-label>
-                  <input matInput formControlName="codigoPostal" placeholder="20297">
+                  <input matInput formControlName="codigoPostal" maxlength="5" placeholder="37000">
+                  <mat-error>CP de 5 dígitos</mat-error>
+                </mat-form-field>
+              </div>
+
+              <div class="form-row">
+                <mat-form-field appearance="outline" class="full-width">
+                  <mat-label>Referencia</mat-label>
+                  <input matInput formControlName="referencia">
                 </mat-form-field>
               </div>
             </div>
           </div>
         </div>
-        
-        <!-- Botón agregar ubicación intermedia -->
+
+        <!-- Agregar destino -->
         <div class="add-button-container">
-          <button type="button" mat-stroked-button color="primary" (click)="addUbicacionIntermedia()">
-            <mat-icon>add_location</mat-icon> Agregar punto intermedio
+          <button type="button" mat-stroked-button color="primary" (click)="addDestino()">
+            <mat-icon>add_location</mat-icon> Agregar destino
           </button>
         </div>
       </div>
-      
+
       <!-- ===== PESTAÑA MERCANCÍAS ===== -->
       <div class="tab-content" *ngIf="activeTab === 'Mercancias'">
         <div class="section-title">Información de las Mercancías</div>
@@ -400,24 +377,14 @@
                   <mat-form-field appearance="outline">
                     <mat-label>ID Origen</mat-label>
                     <mat-select formControlName="idOrigen" required>
-                      <ng-container *ngFor="let ub of getUbicaciones().controls; let idx=index">
-                      <mat-option [value]="ub.get('idOrigen')?.value"
-                                  *ngIf="ub.get('idOrigen')?.value">
-                        {{ ub.get('idOrigen')?.value }}
-                      </mat-option>
-                      </ng-container>
+                      <mat-option *ngFor="let id of getIdsUbicacion('Origen')" [value]="id">{{ id }}</mat-option>
                     </mat-select>
                   </mat-form-field>
                   
                   <mat-form-field appearance="outline">
                     <mat-label>ID Destino</mat-label>
                     <mat-select formControlName="idDestino" required>
-                      <ng-container *ngFor="let ub of getUbicaciones().controls; let idx=index">
-                      <mat-option [value]="ub.get('idDestino')?.value"
-                                  *ngIf="ub.get('idDestino')?.value">
-                        {{ ub.get('idDestino')?.value }}
-                      </mat-option>
-                      </ng-container>
+                      <mat-option *ngFor="let id of getIdsUbicacion('Destino')" [value]="id">{{ id }}</mat-option>
                     </mat-select>
                   </mat-form-field>
                   
