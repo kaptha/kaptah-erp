@@ -155,6 +155,30 @@ export class CfdiController {
     }
   }
 
+  @Post('carta-porte')
+  @RequirePermission('cfdi.crear')
+  async createCartaPorteCfdi(
+    @Body() body: { cfdi: any; csdPassword: string },
+    @CurrentUser() user: User,
+    @FirebaseToken() firebaseToken: string,
+    @Query('cuentaUid') cuentaUid?: string,
+  ) {
+    try {
+      const isCertificateValid = await this.cfdiService.validateUserCertificate(firebaseToken, cuentaUid || user.uid);
+      if (!isCertificateValid) {
+        throw new HttpException(
+          'Su certificado CSD no es valido o ha expirado.',
+          HttpStatus.BAD_REQUEST
+        );
+      }
+      const ownerUid = cuentaUid || user.uid;
+      return await this.cfdiService.createCartaPorteCfdi(body, { ...user, uid: ownerUid }, firebaseToken);
+    } catch (error) {
+      this.logger.error('Error creando CFDI con Carta Porte:', error);
+      throw error;
+    }
+  }
+
   @Post('egreso')
   @RequirePermission('cfdi.crear')
   async generateEgressCfdi(

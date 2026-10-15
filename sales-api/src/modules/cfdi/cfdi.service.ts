@@ -29,6 +29,8 @@ import { PdfGeneratorService } from './services/pdf-generator.service';
 import { CfdiTemplateService } from './services/cfdi-template.service';
 import { QueueClientService } from '../queue-client/queue-client.service';
 import { traducirErrorSifei } from './timbrado/sifei-error-map';
+import { CfdiCartaPorte, validarCartaPorte, generarIdCCP, PATRONES_CP } from './carta-porte/carta-porte.model';
+import { buildCartaPorteXml } from './carta-porte/carta-porte-xml.builder';
 
 @Injectable()
 export class CfdiService {
@@ -328,7 +330,7 @@ export class CfdiService {
  * @param firebaseToken Token de Firebase del usuario para obtener su certificado CSD
  * @returns XML CFDI firmado con sello digital
  */
-async signCfdi(xmlContent: string, firebaseToken: string, csdPassword: string, cuentaUid?: string): Promise<string> {
+async signCfdi(xmlContent: string, firebaseToken: string, csdPassword: string, cuentaUid?: string, omitirAjustes: boolean = false): Promise<string> {
     try {
       this.logger.debug('Iniciando proceso de sellado de CFDI con certificado dinámico');    
     // Validar que el token esté presente
@@ -342,7 +344,9 @@ async signCfdi(xmlContent: string, firebaseToken: string, csdPassword: string, c
     }
     
     // Paso 0: Corregir valores en el XML
-    const correctedXml = this.fixCfdiValues(xmlContent);
+    // (Carta Porte omite el ajuste: su XML ya trae los decimales exactos del XSD y,
+    //  en Traslado con moneda XXX, SubTotal/Total deben ir como "0" sin decimales)
+    const correctedXml = omitirAjustes ? xmlContent : this.fixCfdiValues(xmlContent);
     this.logger.debug('CFDI corregido con valores actualizados');
     
     // Paso 1: Obtener información del certificado del usuario
@@ -595,6 +599,132 @@ private calculateTotal(conceptos: any[]): number {
   const impuestos = subtotal * 0.16; // IVA 16% (ajustar según tu lógica)
   return subtotal + impuestos;
 }
+
+  /**
+   * Crear CFDI con Complemento Carta Porte 3.1 (Traslado o Ingreso de transportista)
+   * Recibe el JSON del modal (nombres del XSD) y sigue el mismo flujo que Ingreso:
+   * XML -> sello -> cadena original -> timbrado SIFEI -> BD.
+   */
+  async createCartaPorteCfdi(
+    dto: { cfdi: CfdiCartaPorte; csdPassword: string },
+    user: any,
+    firebaseToken: string,
+  ) {
+    try {
+      this.logger.log('🚚 Iniciando creación de CFDI con Carta Porte 3.1...');
+
+      const cfdi = dto?.cfdi;
+      if (!cfdi || !cfdi.Complemento?.CartaPorte) {
+        throw new BadRequestException('Falta el complemento Carta Porte en la solicitud');
+      }
+      if (!dto.csdPassword) {
+        throw new BadRequestException('La contraseña del certificado es requerida');
+      }
+      if (cfdi.TipoDeComprobante !== 'T' && cfdi.TipoDeComprobante !== 'I') {
+        throw new BadRequestException('Carta Porte solo se emite en CFDI de Traslado (T) o de Ingreso (I)');
+      }
+
+      // IdCCP: se respeta el del modal si es valido; si no, se genera
+      const cartaPorte = cfdi.Complemento.CartaPorte;
+      if (!PATRONES_CP.idCCP.test(cartaPorte.IdCCP || '')) {
+        cartaPorte.IdCCP = generarIdCCP();
+      }
+
+      // 1. Reglas de negocio (las mismas que valida el modal)
+      const errores = validarCartaPorte(cfdi);
+      if (errores.length > 0) {
+        throw new BadRequestException({
+          titulo: 'Carta Porte incompleta',
+          message: errores.join(' '),
+          errores,
+        });
+      }
+      const esTraslado = cfdi.TipoDeComprobante === 'T';
+
+      // 2. XML (la fecha la asigna el backend)
+      const xmlContent = buildCartaPorteXml(cfdi, SatFormatHelper.formatDateTime());
+      this.logger.log('✅ XML de Carta Porte generado');
+
+      // 3. Sello con el CSD de la cuenta
+      const xmlFirmado = await this.signCfdi(xmlContent, firebaseToken, dto.csdPassword, user.uid, true);
+      this.logger.log('✅ CFDI con Carta Porte firmado');
+
+      // 4. Cadena original: debe incluir el complemento (si no, el PAC rechazaria el sello)
+      let cadenaOriginalStr: string = null;
+      try {
+        const verification = await this.verifyCfdi(xmlFirmado, firebaseToken, user.uid);
+        this.logger.log(`🔍 Verificación local del sello (Carta Porte): ${verification.valid ? '✅ VÁLIDO' : '❌ INVÁLIDO'}`);
+        cadenaOriginalStr = verification.originalString || null;
+        if (verification.error) this.logger.warn('🔍 Error verificación (Carta Porte): ' + verification.error);
+      } catch (e) {
+        this.logger.warn('🔍 No se pudo verificar localmente (Carta Porte): ' + e.message);
+      }
+      if (!cadenaOriginalStr || !cadenaOriginalStr.includes(cartaPorte.IdCCP)) {
+        throw new BadRequestException({
+          titulo: 'Cadena original sin Carta Porte',
+          message: 'La cadena original no incluye el complemento Carta Porte 3.1. Revisa que resources/xslt/cartaporte31.xslt esté desplegado e incluido en cadenaoriginal_4_0.xslt. El CFDI no se envió al PAC.',
+        });
+      }
+
+      // 5. Timbrado con SIFEI
+      this.logger.log('XML_CARTA_PORTE_PARA_PAC: ' + xmlFirmado);
+      const resultadoTimbrado = await this.timbradoService.timbrarCfdi(xmlFirmado);
+      if (!resultadoTimbrado.success) {
+        const errorTraducido = traducirErrorSifei(resultadoTimbrado.rawResponse || resultadoTimbrado.error || '');
+        throw new BadRequestException({
+          message: errorTraducido.mensaje,
+          titulo: errorTraducido.titulo,
+          campo: errorTraducido.campo || null,
+          codigo: errorTraducido.codigo || resultadoTimbrado.codigoError,
+          errorOriginal: resultadoTimbrado.error,
+        });
+      }
+      this.logger.log(`✅ CFDI con Carta Porte timbrado - UUID: ${resultadoTimbrado.uuid}`);
+
+      // 6. Guardar en BD
+      const xmlTimbrado = resultadoTimbrado.cfdiTimbrado;
+      const registro = this.cfdiRepository.create({
+        user_id: user.uid,
+        tipo_cfdi: esTraslado ? 'traslado' : 'ingreso',
+        status: 'vigente',
+        emisor_rfc: cfdi.Emisor?.Rfc,
+        emisor_nombre: cfdi.Emisor?.Nombre,
+        receptor_rfc: cfdi.Receptor?.Rfc,
+        receptor_nombre: cfdi.Receptor?.Nombre,
+        serie: cfdi.Serie || null,
+        folio: cfdi.Folio || null,
+        forma_pago: esTraslado ? null : cfdi.FormaPago,
+        metodo_pago: esTraslado ? null : cfdi.MetodoPago,
+        subtotal: this.extractTotalFromXml(xmlTimbrado, 'SubTotal') ?? 0,
+        total: this.extractTotalFromXml(xmlTimbrado, 'Total') ?? 0,
+        moneda: esTraslado ? 'XXX' : (cfdi.Moneda || 'MXN'),
+        tipo_cambio: 1,
+        createdAt: new Date(),
+        xml: xmlTimbrado,
+        uuid: resultadoTimbrado.uuid,
+        selloCFD: xmlFirmado.match(/Sello="([^"]+)"/)?.[1] || null,
+        selloSAT: resultadoTimbrado.selloSAT || null,
+        noCertificadoSAT: resultadoTimbrado.noCertificadoSAT || null,
+        cadenaOriginal: cadenaOriginalStr,
+        fechaTimbrado: resultadoTimbrado.fechaTimbrado ? new Date(resultadoTimbrado.fechaTimbrado) : null,
+      });
+      const savedCfdi = await this.cfdiRepository.save(registro);
+      this.logger.log(`📋 CFDI con Carta Porte guardado con ID: ${savedCfdi.id}`);
+
+      return {
+        success: true,
+        message: 'CFDI con Carta Porte timbrado exitosamente',
+        cfdiId: savedCfdi.id,
+        uuid: resultadoTimbrado.uuid,
+        idCCP: cartaPorte.IdCCP,
+        fechaTimbrado: resultadoTimbrado.fechaTimbrado,
+        status: 'vigente',
+      };
+    } catch (error) {
+      this.logger.error('❌ Error al crear CFDI con Carta Porte:', error.message);
+      throw error;
+    }
+  }
 
   /**
    * Crear CFDI de Egreso (modificado para usar colas)
@@ -1917,6 +2047,3 @@ async sendCfdiByEmail(
   }
 }
 }
-
-
-
