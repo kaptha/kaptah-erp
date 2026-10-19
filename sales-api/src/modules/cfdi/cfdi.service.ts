@@ -225,7 +225,8 @@ export class CfdiService {
         }
       }
       
-      const total = subtotal + totalImpuestosTrasladados - totalImpuestosRetenidos;
+      const descuentoComp = parseFloat(comprobante.getAttribute('Descuento') || '0');
+      const total = Math.round((subtotal - descuentoComp + totalImpuestosTrasladados - totalImpuestosRetenidos) * 100) / 100;
       comprobante.setAttribute('Total', total.toFixed(2));
       
       this.logger.debug(`Valores corregidos - Subtotal: ${subtotal.toFixed(2)}, Traslados: ${totalImpuestosTrasladados.toFixed(2)}, Retenciones: ${totalImpuestosRetenidos.toFixed(2)}, Total: ${total.toFixed(2)}`);
@@ -943,7 +944,7 @@ private generateNominaXml(data: any, user: any): string {
                 TipoDeComprobante="N" 
                 Exportacion="01" 
                 MetodoPago="PUE"
-                LugarExpedicion="${data.lugarExpedicion || data.emisor?.codigoPostal || ''}">
+                LugarExpedicion="${data.lugarExpedicion || data.comprobante?.lugarExpedicion || data.emisor?.codigoPostal || ''}">
 <cfdi:Emisor Rfc="${data.emisor?.rfc || ''}" Nombre="${data.emisor?.nombre || ''}" RegimenFiscal="${data.emisor?.regimenFiscal || ''}"/>
 <cfdi:Receptor Rfc="${data.receptor?.rfc || ''}" Nombre="${data.receptor?.nombre || ''}" DomicilioFiscalReceptor="${data.receptor?.domicilioFiscalReceptor || ''}" RegimenFiscalReceptor="${data.receptor?.regimenFiscalReceptor || ''}" UsoCFDI="CN01"/>
 <cfdi:Conceptos>
@@ -981,11 +982,24 @@ private generateNominaXml(data: any, user: any): string {
  */
 private generateComplementoNomina(data: any): string {
   const nominaRaw = data.nomina || {};
+  // NOM105: para TipoRegimen 02/13 el SAT exige OtroPago 002 (subsidio), aunque sea en ceros
+  const tipoRegimenN = String(nominaRaw.receptor?.tipoRegimen || '02').padStart(2, '0');
+  const otrosPagosN: any[] = [...(nominaRaw.otrosPagos || [])];
+  const tiene002 = otrosPagosN.some((o: any) => String(o.tipoOtroPago).padStart(3, '0') === '002');
+  if (!tiene002 && (tipoRegimenN === '02' || tipoRegimenN === '13')) {
+    otrosPagosN.push({ tipoOtroPago: '002', clave: '002', concepto: 'Subsidio para el empleo', importe: 0, subsidioCausado: 0 });
+  }
+  const otrosPagosValidos = otrosPagosN.filter((o: any) =>
+    String(o.tipoOtroPago).padStart(3, '0') === '002' || parseFloat(o.importe || 0) > 0);
+  const totalOtrosPagosN = otrosPagosValidos.reduce((s: number, o: any) => s + parseFloat(o.importe || 0), 0);
+
   // NOM96 y similares: el SAT no acepta percepciones ni deducciones en cero
   const nomina = {
     ...nominaRaw,
     percepciones: (nominaRaw.percepciones || []).filter((p: any) => (parseFloat(p.importeGravado || 0) + parseFloat(p.importeExento || 0)) > 0),
     deducciones: (nominaRaw.deducciones || []).filter((d: any) => parseFloat(d.importe || 0) > 0),
+    otrosPagos: otrosPagosValidos,
+    totalOtrosPagos: otrosPagosValidos.length > 0 ? totalOtrosPagosN.toFixed(2) : undefined,
   };
   
   let complementoXml = `<nomina12:Nomina Version="1.2" 
@@ -1117,7 +1131,6 @@ private generateComplementoNomina(data: any): string {
       if (tipoOP === '002') {
         // Subsidio para el empleo: requiere nodo SubsidioAlEmpleo (regla NOM105)
         const subsidioCausado = parseFloat(otroPago.subsidioCausado ?? otroPago.importe ?? 0);
-        if (importeOP <= 0 && subsidioCausado <= 0) { continue; }
         complementoXml += `
     <nomina12:OtroPago TipoOtroPago="002" Clave="${otroPago.clave}" Concepto="${otroPago.concepto}" Importe="${importeOP.toFixed(2)}">
       <nomina12:SubsidioAlEmpleo SubsidioCausado="${subsidioCausado.toFixed(2)}" />
