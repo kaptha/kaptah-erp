@@ -81,6 +81,7 @@ export class HeaderComponent implements OnInit{
     localStorage.setItem('activeRol', account.rol || '');
     localStorage.removeItem('activeCuentaRfc');
     localStorage.removeItem('userPermissions');
+    Object.keys(localStorage).filter(k => k.startsWith('kaptah_dashboard_cache')).forEach(k => localStorage.removeItem(k));
 
     forkJoin({
       user: this.usersService.getUserFromMySQL(account.cuentaFirebaseUid).pipe(catchError(() => of(null))),
@@ -138,6 +139,7 @@ export class HeaderComponent implements OnInit{
     localStorage.removeItem('user');
     localStorage.removeItem('firebaseUid');
     localStorage.removeItem('userPermissions');
+    Object.keys(localStorage).filter(k => k.startsWith('kaptah_dashboard_cache')).forEach(k => localStorage.removeItem(k));
     localStorage.removeItem('userRole');
     localStorage.removeItem('activeCuentaUid');
     localStorage.removeItem('activeCuentaNombre');

@@ -301,9 +301,15 @@ export class DashboardComponent implements OnInit, OnDestroy {
   // CACHE
   // ==========================================
 
+  // Cache por cuenta activa: un contador que cambia de cliente no debe ver datos de otro
+  private cacheKey(): string {
+    const cuenta = localStorage.getItem('activeCuentaUid') || localStorage.getItem('firebaseUid') || 'sin-cuenta';
+    return `${CACHE_KEY}_${cuenta}`;
+  }
+
   private getFromCache(): any | null {
     try {
-      const raw = localStorage.getItem(CACHE_KEY);
+      const raw = localStorage.getItem(this.cacheKey());
       if (!raw) return null;
 
       const { data, timestamp, periodo } = JSON.parse(raw);
@@ -324,7 +330,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
 
   private saveToCache(data: any) {
     try {
-      localStorage.setItem(CACHE_KEY, JSON.stringify({
+      localStorage.setItem(this.cacheKey(), JSON.stringify({
         data,
         timestamp: Date.now(),
         periodo: { fechaInicio: this.fechaInicio, fechaFin: this.fechaFin }
