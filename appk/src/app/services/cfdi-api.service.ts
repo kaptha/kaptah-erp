@@ -523,6 +523,37 @@ export class CfdiApiService {
   );
 }
 
+  /**
+   * Lista paginada de CFDI de ingreso del periodo (tab "CFDIs" de Ingresos).
+   * Reusa busqueda-rapida: con query vacío solo filtra por fechas.
+   */
+  listarCfdisIngresosPeriodo(params: {
+    fechaInicio: string;
+    fechaFin: string;
+    query?: string;
+    metodoPago?: string;
+    formaPago?: string;
+    offset?: number;
+    limit?: number;
+  }): Observable<CfdiSearchResponse> {
+    return this.http.get<CfdiSearchResponse>(
+      `${this.baseUrl}/cfdis/ingresos/busqueda-rapida`,
+      {
+        params: this.buildHttpParams({
+          query: params.query,
+          fechaInicio: params.fechaInicio,
+          fechaFin: params.fechaFin,
+          metodoPago: params.metodoPago,
+          formaPago: params.formaPago,
+          offset: params.offset ?? 0,
+          limit: params.limit ?? 25
+        }),
+        headers: this.getHeaders()
+      }
+    ).pipe(
+      catchError(this.handleError)
+    );
+  }
   getCfdisPendientesPago(fechaInicio?: string, fechaFin?: string): Observable<any> {
     const userRfc = this.getCurrentUserRfc();
 

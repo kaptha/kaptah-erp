@@ -1,3 +1,4 @@
+import { MatPaginatorModule } from '@angular/material/paginator';
 import { MatDatepickerModule } from '@angular/material/datepicker';
 import { NgModule, CUSTOM_ELEMENTS_SCHEMA, NO_ERRORS_SCHEMA } from '@angular/core';
 import { CommonModule, DatePipe, CurrencyPipe, SlicePipe } from '@angular/common';
@@ -51,6 +52,7 @@ import { PdfViewerModule } from 'ng2-pdf-viewer';
     PagesComponent
   ],
   imports: [
+    MatPaginatorModule,
     MatDatepickerModule,
     CommonModule,
     SharedModule, // SharedModule debe incluir RouterModule
