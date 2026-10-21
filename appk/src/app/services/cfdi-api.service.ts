@@ -612,6 +612,41 @@ export class CfdiApiService {
      EGRESOS
   ========================================================= */
 
+  /**
+   * Lista paginada de CFDI de egreso del periodo (tab "CFDIs" de Egresos).
+   * Mismos criterios que el análisis: facturas y notas de crédito recibidas + nómina pagada.
+   */
+  listarCfdisEgresosPeriodo(params: {
+    fechaInicio: string;
+    fechaFin: string;
+    query?: string;
+    tipoComprobante?: string;
+    metodoPago?: string;
+    formaPago?: string;
+    soloAlertas?: boolean;
+    offset?: number;
+    limit?: number;
+  }): Observable<CfdiSearchResponse> {
+    return this.http.get<CfdiSearchResponse>(
+      `${this.baseUrl}/cfdis/egresos/periodo`,
+      {
+        params: this.buildHttpParams({
+          fechaInicio: params.fechaInicio,
+          fechaFin: params.fechaFin,
+          query: params.query,
+          tipoComprobante: params.tipoComprobante,
+          metodoPago: params.metodoPago,
+          formaPago: params.formaPago,
+          soloAlertas: params.soloAlertas ? 'true' : undefined,
+          offset: params.offset ?? 0,
+          limit: params.limit ?? 25
+        }),
+        headers: this.getHeaders()
+      }
+    ).pipe(
+      catchError(this.handleError)
+    );
+  }
   getAnalisisCompletoEgresos(fechaInicio: string, fechaFin: string): Observable<any> {
     const userRfc = this.getCurrentUserRfc();
 

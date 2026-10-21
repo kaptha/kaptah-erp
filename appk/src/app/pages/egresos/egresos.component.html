@@ -46,7 +46,7 @@
   <!-- CONTENIDO -->
   <div *ngIf="!isLoading && analisisCompleto; else noDataTemplate">
 
-    <mat-tab-group class="egresos-tabs" animationDuration="250ms">
+    <mat-tab-group class="egresos-tabs" animationDuration="250ms" [(selectedIndex)]="tabIndex">
 
       <!-- ===================================================== -->
       <!-- TAB 1: RESUMEN FISCAL -->
@@ -216,6 +216,15 @@
                     <div class="fiscal-content">
                       <h4>IEPS Retenido</h4>
                       <p class="amount">{{ formatCurrency(informacionFiscal.iepsRetenido) }}</p>
+                    </div>
+                  </div>
+
+                  <div class="fiscal-item">
+                    <mat-icon color="warn">remove_circle</mat-icon>
+                    <div class="fiscal-content">
+                      <h4>Retenciones Locales</h4>
+                      <p class="amount">{{ formatCurrency(informacionFiscal.retencionesLocales) }}</p>
+                      <small>Cedular estatal</small>
                     </div>
                   </div>
 
@@ -583,80 +592,222 @@
       </mat-tab>
 
       <!-- ===================================================== -->
-      <!-- TAB 3: CFDIs -->
+      <!-- TAB 3: CFDIs DEL PERIODO -->
       <!-- ===================================================== -->
       <mat-tab label="CFDIs">
         <div class="tab-wrapper">
 
           <mat-card class="section-card full-width">
             <mat-card-header>
-              <mat-card-title>📄 Consulta de CFDIs de Egresos</mat-card-title>
+              <mat-card-title>📄 CFDIs recibidos del periodo</mat-card-title>
               <mat-card-subtitle>
-                Búsqueda, revisión y descarga documental de CFDI recibidos
+                {{ formatNumber(totalCfdisPeriodo) }} comprobantes {{ periodoTexto }}
               </mat-card-subtitle>
             </mat-card-header>
+
             <mat-card-content>
-              <div class="cfdi-actions">
-                <button mat-raised-button color="primary" (click)="openSearchPanel()">
-                  <mat-icon>search</mat-icon>
-                  Abrir búsqueda avanzada
+
+              <!-- FILTROS RÁPIDOS DENTRO DEL PERIODO -->
+              <div class="cfdi-toolbar">
+                <mat-form-field appearance="outline" class="cfdi-toolbar__buscar">
+                  <mat-label>Filtrar por proveedor, RFC, folio o UUID</mat-label>
+                  <mat-icon matPrefix>search</mat-icon>
+                  <input
+                    matInput
+                    [(ngModel)]="filtroCfdis"
+                    (ngModelChange)="onFiltroCfdisChange($event)"
+                    autocomplete="off">
+                  <button
+                    mat-icon-button
+                    matSuffix
+                    type="button"
+                    *ngIf="filtroCfdis"
+                    (click)="limpiarFiltroCfdis()"
+                    aria-label="Limpiar filtro">
+                    <mat-icon>close</mat-icon>
+                  </button>
+                </mat-form-field>
+
+                <mat-form-field appearance="outline" class="cfdi-toolbar__metodo">
+                  <mat-label>Tipo</mat-label>
+                  <mat-select [(ngModel)]="filtroTipoCfdis" (selectionChange)="onFiltroSelectChange()">
+                    <mat-option value="">Todos</mat-option>
+                    <mat-option value="I">Facturas</mat-option>
+                    <mat-option value="E">Notas de crédito</mat-option>
+                    <mat-option value="N">Nómina</mat-option>
+                  </mat-select>
+                </mat-form-field>
+
+                <mat-form-field appearance="outline" class="cfdi-toolbar__metodo">
+                  <mat-label>Método de pago</mat-label>
+                  <mat-select [(ngModel)]="filtroMetodoCfdis" (selectionChange)="onFiltroSelectChange()">
+                    <mat-option value="">Todos</mat-option>
+                    <mat-option value="PUE">PUE</mat-option>
+                    <mat-option value="PPD">PPD</mat-option>
+                  </mat-select>
+                </mat-form-field>
+
+                <button
+                  mat-stroked-button
+                  type="button"
+                  class="cfdi-toolbar__avanzada"
+                  [class.cfdi-toggle--activo]="soloAlertas"
+                  (click)="toggleSoloAlertas()">
+                  <mat-icon>warning_amber</mat-icon>
+                  Solo con alertas
+                </button>
+
+                <button mat-stroked-button color="primary" type="button" class="cfdi-toolbar__avanzada" (click)="openSearchPanel()">
+                  <mat-icon>tune</mat-icon>
+                  Búsqueda avanzada
                 </button>
               </div>
-            </mat-card-content>
-          </mat-card>
 
-          <mat-card class="section-card full-width" *ngIf="searchResults.length > 0">
-            <mat-card-header>
-              <mat-card-title>📋 Resultados recientes de búsqueda</mat-card-title>
-            </mat-card-header>
-            <mat-card-content>
-              <div class="results-list">
-                <mat-card *ngFor="let cfdi of searchResults" class="result-card" (click)="selectCfdi(cfdi)">
-                  <mat-card-content>
-                    <div class="result-header">
-                      <div class="result-info">
-                        <h4>{{ cfdi.nombre_emisor || 'Sin nombre' }}</h4>
-                        <p class="rfc">RFC: {{ cfdi.rfc_emisor || 'N/A' }}</p>
-                      </div>
-                      <mat-chip [color]="getEstadoBadgeColor(cfdi.estado_procesamiento)" selected>
-                        {{ cfdi.estado_procesamiento || 'PROCESADO' }}
-                      </mat-chip>
-                    </div>
+              <!-- TABLA -->
+              <div class="cfdi-tabla-wrap">
+                <div class="cfdi-tabla-loading" *ngIf="isLoadingCfdis">
+                  <mat-spinner diameter="36"></mat-spinner>
+                </div>
 
-                    <div class="result-details">
-                      <div class="detail-item">
-                        <mat-icon>receipt</mat-icon>
-                        <span>{{ cfdi.serie || '' }}{{ cfdi.folio || 'S/N' }}</span>
-                      </div>
-                      <div class="detail-item">
-                        <mat-icon>calendar_today</mat-icon>
-                        <span>{{ formatDate(cfdi.fecha) }}</span>
-                      </div>
-                      <div class="detail-item">
-                        <mat-icon>attach_money</mat-icon>
-                        <span class="amount">{{ formatCurrency(cfdi.total) }}</span>
-                      </div>
-                    </div>
+                <div class="table-responsive" *ngIf="cfdisPeriodo.length > 0">
+                  <table mat-table [dataSource]="cfdisPeriodo" class="cfdi-tabla">
 
-                    <div class="result-uuid">
-                      <small>UUID: {{ cfdi.folio_fiscal || 'N/A' }}</small>
-                    </div>
-                  </mat-card-content>
-                </mat-card>
+                    <ng-container matColumnDef="fecha">
+                      <th mat-header-cell *matHeaderCellDef>Fecha</th>
+                      <td mat-cell *matCellDef="let c">
+                        <div class="cfdi-stack">
+                          <span>{{ formatDate(c.fecha) }}</span>
+                          <small>{{ formatHora(c.fecha) }}</small>
+                        </div>
+                      </td>
+                    </ng-container>
+
+                    <ng-container matColumnDef="tipo">
+                      <th mat-header-cell *matHeaderCellDef>Tipo</th>
+                      <td mat-cell *matCellDef="let c">
+                        <span
+                          class="cfdi-pill"
+                          [class.cfdi-pill--nc]="c.tipo_comprobante === 'E'"
+                          [class.cfdi-pill--nomina]="c.tipo_comprobante === 'N'">
+                          {{ getTipoComprobanteLabel(c.tipo_comprobante) }}
+                        </span>
+                      </td>
+                    </ng-container>
+
+                    <ng-container matColumnDef="folio">
+                      <th mat-header-cell *matHeaderCellDef>Serie-Folio</th>
+                      <td mat-cell *matCellDef="let c" class="cfdi-nowrap">
+                        {{ c.serie || '' }}{{ c.serie && c.folio ? '-' : '' }}{{ c.folio || 'S/N' }}
+                      </td>
+                    </ng-container>
+
+                    <ng-container matColumnDef="proveedor">
+                      <th mat-header-cell *matHeaderCellDef>Proveedor</th>
+                      <td mat-cell *matCellDef="let c">
+                        <div class="cfdi-stack">
+                          <strong class="cfdi-cliente">{{ c.contraparte_nombre }}</strong>
+                          <small>
+                            {{ c.contraparte_rfc }}<ng-container *ngIf="c.tipo_comprobante === 'N'"> · empleado</ng-container>
+                          </small>
+                          <small class="cfdi-alerta" *ngFor="let a of c.alertas">
+                            <mat-icon class="cfdi-alerta__icono">warning_amber</mat-icon>{{ a }}
+                          </small>
+                        </div>
+                      </td>
+                    </ng-container>
+
+                    <ng-container matColumnDef="metodo">
+                      <th mat-header-cell *matHeaderCellDef>Pago</th>
+                      <td mat-cell *matCellDef="let c">
+                        <div class="cfdi-stack">
+                          <span
+                            class="cfdi-pill"
+                            [class.cfdi-pill--ppd]="c.metodo_pago === 'PPD'"
+                            [class.cfdi-pill--pue]="c.metodo_pago === 'PUE'">
+                            {{ c.metodo_pago || '—' }}
+                          </span>
+                          <small>{{ getFormaPagoLabel(c.forma_pago) }}</small>
+                        </div>
+                      </td>
+                    </ng-container>
+
+                    <ng-container matColumnDef="subtotal">
+                      <th mat-header-cell *matHeaderCellDef class="cfdi-num">Subtotal</th>
+                      <td mat-cell *matCellDef="let c" class="cfdi-num">
+                        {{ formatMoneda(c.sub_total, c.moneda) }}
+                      </td>
+                    </ng-container>
+
+                    <ng-container matColumnDef="iva">
+                      <th mat-header-cell *matHeaderCellDef class="cfdi-num">IVA</th>
+                      <td mat-cell *matCellDef="let c" class="cfdi-num">
+                        {{ formatMoneda(c.iva_trasladado, c.moneda) }}
+                      </td>
+                    </ng-container>
+
+                    <ng-container matColumnDef="total">
+                      <th mat-header-cell *matHeaderCellDef class="cfdi-num">Total</th>
+                      <td mat-cell *matCellDef="let c" class="cfdi-num">
+                        <div class="cfdi-stack cfdi-stack--right">
+                          <strong [class.cfdi-ret]="c.tipo_comprobante === 'E'">
+                            {{ c.tipo_comprobante === 'E' ? '−' : '' }}{{ formatMoneda(c.total, c.moneda) }}
+                          </strong>
+                          <small *ngIf="esMonedaExtranjera(c)">
+                            {{ c.moneda }} · TC {{ c.tipo_cambio || '—' }}
+                          </small>
+                          <small class="cfdi-ret" *ngIf="tieneRetencionFila(c)">
+                            Ret. {{ formatMoneda(c.total_impuestos_retenidos, c.moneda) }}
+                          </small>
+                          <small class="cfdi-ret" *ngIf="tieneRetencionLocalFila(c)">
+                            Ret. local {{ formatMoneda(c.retenciones_locales, c.moneda) }}
+                          </small>
+                          <small *ngIf="tieneTrasladoLocalFila(c)">
+                            Trasl. local {{ formatMoneda(c.traslados_locales, c.moneda) }}
+                          </small>
+                        </div>
+                      </td>
+                    </ng-container>
+
+                    <ng-container matColumnDef="acciones">
+                      <th mat-header-cell *matHeaderCellDef></th>
+                      <td mat-cell *matCellDef="let c" class="cfdi-acciones">
+                        <button mat-icon-button type="button" title="Copiar UUID" aria-label="Copiar UUID"
+                          (click)="copiarUuid(c.folio_fiscal, $event)">
+                          <mat-icon>content_copy</mat-icon>
+                        </button>
+                        <button mat-icon-button type="button" title="Descargar XML" aria-label="Descargar XML"
+                          (click)="descargarXmlFila(c, $event)">
+                          <mat-icon>code</mat-icon>
+                        </button>
+                        <button mat-icon-button type="button" title="Descargar PDF" aria-label="Descargar PDF"
+                          (click)="descargarPdfFila(c, $event)">
+                          <mat-icon>picture_as_pdf</mat-icon>
+                        </button>
+                      </td>
+                    </ng-container>
+
+                    <tr mat-header-row *matHeaderRowDef="columnasCfdis"></tr>
+                    <tr mat-row *matRowDef="let row; columns: columnasCfdis" class="cfdi-row" (click)="selectCfdi(row)"></tr>
+                  </table>
+                </div>
+
+                <div class="empty-state" *ngIf="!isLoadingCfdis && cfdisPeriodo.length === 0">
+                  <mat-icon>description</mat-icon>
+                  <p *ngIf="hayFiltrosCfdis">Ningún CFDI del periodo coincide con el filtro</p>
+                  <p *ngIf="!hayFiltrosCfdis">No hay CFDI recibidos en este periodo</p>
+                </div>
               </div>
-            </mat-card-content>
-          </mat-card>
 
-          <mat-card class="section-card full-width" *ngIf="searchResults.length === 0">
-            <mat-card-content>
-              <div class="empty-state-main">
-                <mat-icon>description</mat-icon>
-                <h2>Sin resultados cargados</h2>
-                <p>
-                  Usa la búsqueda avanzada para localizar CFDIs por RFC, nombre,
-                  UUID, serie, folio o monto.
-                </p>
-              </div>
+              <mat-paginator
+                *ngIf="totalCfdisPeriodo > 0"
+                [length]="totalCfdisPeriodo"
+                [pageIndex]="pageIndexCfdis"
+                [pageSize]="pageSizeCfdis"
+                [pageSizeOptions]="pageSizeOptionsCfdis"
+                (page)="onPageCfdis($event)"
+                showFirstLastButtons>
+              </mat-paginator>
+
             </mat-card-content>
           </mat-card>
 
@@ -872,6 +1023,13 @@
 
     <div class="detail-content" *ngIf="selectedCfdi">
 
+      <!-- ALERTAS DE DEDUCIBILIDAD -->
+      <div class="cfdi-alertas-detalle" *ngIf="selectedCfdi.alertas?.length">
+        <div class="cfdi-alerta" *ngFor="let a of selectedCfdi.alertas">
+          <mat-icon class="cfdi-alerta__icono">warning_amber</mat-icon>{{ a }}
+        </div>
+      </div>
+
       <!-- INFORMACIÓN GENERAL -->
       <mat-card class="detail-section">
         <mat-card-header>
@@ -892,6 +1050,10 @@
               <span>{{ formatDate(selectedCfdi.fecha) }}</span>
             </div>
             <div class="info-item">
+              <label>Tipo:</label>
+              <span>{{ getTipoComprobanteLabel(selectedCfdi.tipo_comprobante) }}</span>
+            </div>
+            <div class="info-item">
               <label>Estado:</label>
               <mat-chip [color]="getEstadoBadgeColor(selectedCfdi.estado_procesamiento)" selected>
                 {{ selectedCfdi.estado_procesamiento || 'PROCESADO' }}
@@ -899,7 +1061,7 @@
             </div>
             <div class="info-item">
               <label>Método de Pago:</label>
-              <span>{{ selectedCfdi.metodo_pago || 'N/A' }}</span>
+              <span>{{ getMetodoPagoLabel(selectedCfdi.metodo_pago) }}</span>
             </div>
             <div class="info-item" *ngIf="selectedCfdi.forma_pago">
               <label>Forma de Pago:</label>
@@ -990,6 +1152,14 @@
               <label>Total Impuestos Retenidos:</label>
               <span class="text-danger">{{ formatCurrency(selectedCfdi.total_impuestos_retenidos) }}</span>
             </div>
+            <div class="info-item" *ngIf="tieneRetencionLocalFila(selectedCfdi)">
+              <label>Retenciones Locales:</label>
+              <span class="text-danger">{{ formatCurrency(selectedCfdi.retenciones_locales) }}</span>
+            </div>
+            <div class="info-item" *ngIf="tieneTrasladoLocalFila(selectedCfdi)">
+              <label>Traslados Locales:</label>
+              <span>{{ formatCurrency(selectedCfdi.traslados_locales) }}</span>
+            </div>
             <div class="info-item">
               <label>Total:</label>
               <span class="amount-total">{{ formatCurrency(selectedCfdi.total || 0) }}</span>
@@ -1016,6 +1186,10 @@
             <div class="info-item" *ngIf="selectedCfdi.ieps_retenido && selectedCfdi.ieps_retenido > 0">
               <label>IEPS Retenido:</label>
               <span class="text-danger">{{ formatCurrency(selectedCfdi.ieps_retenido) }}</span>
+            </div>
+            <div class="info-item" *ngFor="let imp of impuestosLocales(selectedCfdi, 'retencion')">
+              <label>Retención local {{ imp.impuesto }} ({{ formatTasa(imp.tasa) }}):</label>
+              <span class="text-danger">{{ formatCurrency(imp.importe) }}</span>
             </div>
           </div>
         </mat-card-content>

@@ -2,9 +2,10 @@ import { Component, OnDestroy, OnInit } from '@angular/core';
 import { FormControl } from '@angular/forms';
 import { BreakpointObserver, Breakpoints } from '@angular/cdk/layout';
 import { MAT_DATE_LOCALE, provideNativeDateAdapter } from '@angular/material/core';
-import { Subscription } from 'rxjs';
+import { MatPaginatorIntl, PageEvent } from '@angular/material/paginator';
+import { Subject, Subscription } from 'rxjs';
 import { forkJoin, of } from 'rxjs';
-import { catchError, finalize } from 'rxjs/operators';
+import { catchError, debounceTime, distinctUntilChanged, finalize } from 'rxjs/operators';
 import { CfdiApiService } from '../../services/cfdi-api.service';
 
 type AtajoPeriodo = 'mes' | 'mesAnterior' | 'anio' | 'anioAnterior';
@@ -59,6 +60,7 @@ interface InformacionFiscalEgresos {
   isrRetenido: number;
   ivaRetenido: number;
   iepsRetenido: number;
+  retencionesLocales: number;
   cfdisPago: number;
   totalRetenciones: number;
 }
@@ -86,12 +88,20 @@ interface ConceptoCfdi {
   importe: number;
 }
 
+interface ImpuestoLocalCfdi {
+  tipo: 'retencion' | 'traslado';
+  impuesto: string;
+  tasa: number;
+  importe: number;
+}
+
 interface CfdiEgresoDetalle {
   folio_fiscal: string;
   serie?: string;
   folio?: string;
   fecha: string;
   estado_procesamiento?: string;
+  tipo_comprobante?: string;
   metodo_pago?: string;
   forma_pago?: string;
   moneda?: string;
@@ -113,11 +123,19 @@ interface CfdiEgresoDetalle {
   iva_retenido?: number;
   isr_retenido?: number;
   ieps_retenido?: number;
+  retenciones_locales?: number | string;
+  traslados_locales?: number | string;
+  impuestos_locales_detalle?: ImpuestoLocalCfdi[] | null;
   total?: number;
 
   conceptos_detalle?: ConceptoCfdi[];
   impuestos?: any[];
   retenciones?: any[];
+
+  // Calculados en el frontend para la tabla
+  contraparte_nombre?: string;
+  contraparte_rfc?: string;
+  alertas?: string[];
 }
 
 interface AdvancedSearchEgresosPayload {
@@ -145,13 +163,36 @@ interface AnalisisEgresosResponse {
   proveedoresNuevos?: ProveedorNuevo[];
 }
 
+// Textos del paginador en español (solo para este componente)
+export function paginadorEgresosEnEspanol(): MatPaginatorIntl {
+  const intl = new MatPaginatorIntl();
+  intl.itemsPerPageLabel = 'Por página';
+  intl.nextPageLabel = 'Siguiente';
+  intl.previousPageLabel = 'Anterior';
+  intl.firstPageLabel = 'Primera página';
+  intl.lastPageLabel = 'Última página';
+  intl.getRangeLabel = (page: number, pageSize: number, length: number) => {
+    if (!length || !pageSize) {
+      return `0 de ${length || 0}`;
+    }
+    const inicio = page * pageSize;
+    const fin = Math.min(inicio + pageSize, length);
+    return `${inicio + 1} – ${fin} de ${length}`;
+  };
+  return intl;
+}
+
 @Component({
   selector: 'app-egresos',
   templateUrl: './egresos.component.html',
   styleUrls: ['./egresos.component.css'],
   standalone: false,
-  // Calendario de Material en español (es-MX), solo para este componente
-  providers: [provideNativeDateAdapter(), { provide: MAT_DATE_LOCALE, useValue: 'es-MX' }]
+  // Calendario de Material en español (es-MX) y paginador en español, solo para este componente
+  providers: [
+    provideNativeDateAdapter(),
+    { provide: MAT_DATE_LOCALE, useValue: 'es-MX' },
+    { provide: MatPaginatorIntl, useFactory: paginadorEgresosEnEspanol }
+  ]
 })
 export class EgresosComponent implements OnInit, OnDestroy {
   // =========================================================
@@ -161,6 +202,8 @@ export class EgresosComponent implements OnInit, OnDestroy {
   isSearching = false;
   sideSheetOpen = false;
   detailPanelOpen = false;
+  // Conserva la pestaña activa cuando se recarga el análisis al cambiar el periodo
+  tabIndex = 0;
 
   // =========================================================
   // FILTERS
@@ -225,6 +268,7 @@ export class EgresosComponent implements OnInit, OnDestroy {
     isrRetenido: 0,
     ivaRetenido: 0,
     iepsRetenido: 0,
+    retencionesLocales: 0,
     cfdisPago: 0,
     totalRetenciones: 0
   };
@@ -246,6 +290,45 @@ export class EgresosComponent implements OnInit, OnDestroy {
   proveedoresNuevos: ProveedorNuevo[] = [];
 
   // =========================================================
+  // CFDIs DEL PERIODO (tab "CFDIs")
+  // =========================================================
+  cfdisPeriodo: CfdiEgresoDetalle[] = [];
+  totalCfdisPeriodo = 0;
+  pageIndexCfdis = 0;
+  pageSizeCfdis = 25;
+  readonly pageSizeOptionsCfdis = [25, 50, 100];
+  isLoadingCfdis = false;
+  filtroCfdis = '';
+  filtroTipoCfdis = '';
+  filtroMetodoCfdis = '';
+  soloAlertas = false;
+
+  private periodoActual = { inicio: '', fin: '' };
+  private filtroCfdis$ = new Subject<string>();
+  private cfdisSub?: Subscription;
+
+  private readonly columnasCfdisEscritorio = [
+    'fecha', 'tipo', 'folio', 'proveedor', 'metodo', 'subtotal', 'iva', 'total', 'acciones'
+  ];
+  private readonly columnasCfdisMovil = ['fecha', 'proveedor', 'total'];
+
+  get columnasCfdis(): string[] {
+    return this.esMovil ? this.columnasCfdisMovil : this.columnasCfdisEscritorio;
+  }
+
+  get periodoTexto(): string {
+    const { inicio, fin } = this.periodoActual;
+    if (!inicio || !fin) {
+      return '';
+    }
+    return `del ${this.formatDate(inicio)} al ${this.formatDate(fin)}`;
+  }
+
+  get hayFiltrosCfdis(): boolean {
+    return !!(this.filtroCfdis || this.filtroTipoCfdis || this.filtroMetodoCfdis || this.soloAlertas);
+  }
+
+  // =========================================================
   // VISUAL CONFIG
   // =========================================================
   colorScheme: any = {
@@ -262,6 +345,7 @@ export class EgresosComponent implements OnInit, OnDestroy {
   });
 
   private readonly numberFormatter = new Intl.NumberFormat('es-MX');
+  private readonly formattersMoneda = new Map<string, Intl.NumberFormat>();
 
   constructor(private cfdiApiService: CfdiApiService, private breakpoints: BreakpointObserver) {}
 
@@ -285,11 +369,22 @@ export class EgresosComponent implements OnInit, OnDestroy {
         .subscribe((r) => (this.esMovil = r.matches))
     );
 
+    // Filtro de texto del tab CFDIs: espera a que el usuario deje de escribir
+    this.subs.add(
+      this.filtroCfdis$
+        .pipe(debounceTime(400), distinctUntilChanged())
+        .subscribe(() => {
+          this.pageIndexCfdis = 0;
+          this.loadCfdisPeriodo();
+        })
+    );
+
     this.loadAnalisisCompleto();
   }
 
   ngOnDestroy(): void {
     this.subs.unsubscribe();
+    this.cfdisSub?.unsubscribe();
   }
 
   // YYYY-MM-DD en hora local (toISOString convertía a UTC y después de las 18:00 daba el día siguiente)
@@ -338,6 +433,11 @@ export class EgresosComponent implements OnInit, OnDestroy {
     if (!fechaInicio || !fechaFin) {
       return;
     }
+
+    // La lista de CFDIs sigue al mismo periodo que el análisis
+    this.periodoActual = { inicio: fechaInicio, fin: fechaFin };
+    this.pageIndexCfdis = 0;
+    this.loadCfdisPeriodo();
 
     this.isLoading = true;
 
@@ -437,6 +537,153 @@ export class EgresosComponent implements OnInit, OnDestroy {
   }
 
   // =========================================================
+  // CFDIs DEL PERIODO
+  // =========================================================
+  loadCfdisPeriodo(): void {
+    const { inicio, fin } = this.periodoActual;
+    if (!inicio || !fin) {
+      return;
+    }
+
+    // Si cambian de página o de periodo rápido, se cancela la petición anterior
+    this.cfdisSub?.unsubscribe();
+    this.isLoadingCfdis = true;
+
+    this.cfdisSub = this.cfdiApiService
+      .listarCfdisEgresosPeriodo({
+        fechaInicio: inicio,
+        fechaFin: fin,
+        query: this.filtroCfdis.trim(),
+        tipoComprobante: this.filtroTipoCfdis,
+        metodoPago: this.filtroMetodoCfdis,
+        soloAlertas: this.soloAlertas,
+        offset: this.pageIndexCfdis * this.pageSizeCfdis,
+        limit: this.pageSizeCfdis
+      })
+      .pipe(finalize(() => (this.isLoadingCfdis = false)))
+      .subscribe({
+        next: (response: any) => {
+          const lista: CfdiEgresoDetalle[] = (response?.cfdis || []).map((c: CfdiEgresoDetalle) =>
+            this.prepararFila(c)
+          );
+          this.cfdisPeriodo = lista;
+          this.totalCfdisPeriodo = Number(response?.total ?? lista.length) || 0;
+        },
+        error: (error) => {
+          console.error('❌ Error cargando CFDIs de egreso del periodo:', error);
+          this.cfdisPeriodo = [];
+          this.totalCfdisPeriodo = 0;
+        }
+      });
+  }
+
+  // En nómina la contraparte es el empleado (receptor); en lo demás, el proveedor (emisor)
+  private prepararFila(c: CfdiEgresoDetalle): CfdiEgresoDetalle {
+    const esNomina = c.tipo_comprobante === 'N';
+    return {
+      ...c,
+      contraparte_nombre: (esNomina ? c.nombre_receptor : c.nombre_emisor) || 'Sin nombre',
+      contraparte_rfc: (esNomina ? c.rfc_receptor : c.rfc_emisor) || 'Sin RFC',
+      alertas: this.calcularAlertas(c)
+    };
+  }
+
+  // Avisos de deducibilidad (orientativos; la decisión final es del contador)
+  private calcularAlertas(c: CfdiEgresoDetalle): string[] {
+    const alertas: string[] = [];
+    if (c.tipo_comprobante !== 'I') {
+      return alertas;
+    }
+    if (c.forma_pago === '01' && Math.abs(Number(c.total || 0)) > 2000) {
+      alertas.push('Pago en efectivo mayor a $2,000: posiblemente no deducible');
+    }
+    if ((c.uso_cfdi || '').toUpperCase() === 'S01') {
+      alertas.push('Uso S01: sin efectos fiscales');
+    }
+    return alertas;
+  }
+
+  onFiltroCfdisChange(valor: string): void {
+    this.filtroCfdis$.next((valor || '').trim());
+  }
+
+  limpiarFiltroCfdis(): void {
+    this.filtroCfdis = '';
+    this.filtroCfdis$.next('');
+  }
+
+  onFiltroSelectChange(): void {
+    this.pageIndexCfdis = 0;
+    this.loadCfdisPeriodo();
+  }
+
+  toggleSoloAlertas(): void {
+    this.soloAlertas = !this.soloAlertas;
+    this.onFiltroSelectChange();
+  }
+
+  onPageCfdis(event: PageEvent): void {
+    this.pageIndexCfdis = event.pageIndex;
+    this.pageSizeCfdis = event.pageSize;
+    this.loadCfdisPeriodo();
+  }
+
+  copiarUuid(uuid: string | undefined, event: Event): void {
+    event.stopPropagation();
+    if (!uuid || !navigator.clipboard) {
+      return;
+    }
+    navigator.clipboard.writeText(uuid).catch((err) => console.error('No se pudo copiar el UUID:', err));
+  }
+
+  descargarXmlFila(cfdi: CfdiEgresoDetalle, event: Event): void {
+    event.stopPropagation();
+    this.descargarXml(cfdi);
+  }
+
+  descargarPdfFila(cfdi: CfdiEgresoDetalle, event: Event): void {
+    event.stopPropagation();
+    this.descargarPdf(cfdi);
+  }
+
+  esMonedaExtranjera(cfdi: CfdiEgresoDetalle | null): boolean {
+    const moneda = (cfdi?.moneda || 'MXN').toUpperCase();
+    return moneda !== 'MXN' && moneda !== 'XXX';
+  }
+
+  tieneRetencionFila(cfdi: CfdiEgresoDetalle): boolean {
+    return Number(cfdi?.total_impuestos_retenidos || 0) > 0;
+  }
+
+  tieneRetencionLocalFila(cfdi: CfdiEgresoDetalle): boolean {
+    return Number(cfdi?.retenciones_locales || 0) > 0;
+  }
+
+  tieneTrasladoLocalFila(cfdi: CfdiEgresoDetalle): boolean {
+    return Number(cfdi?.traslados_locales || 0) > 0;
+  }
+
+  impuestosLocales(cfdi: CfdiEgresoDetalle | null, tipo: 'retencion' | 'traslado'): ImpuestoLocalCfdi[] {
+    return (cfdi?.impuestos_locales_detalle || []).filter((i) => i.tipo === tipo);
+  }
+
+  formatTasa(tasa: number | string | null | undefined): string {
+    const pct = (Number(tasa) || 0) * 100;
+    return `${Number(pct.toFixed(4))}%`;
+  }
+
+  getTipoComprobanteLabel(tipo: string | undefined): string {
+    const tipos: Record<string, string> = {
+      I: 'Factura',
+      E: 'Nota de crédito',
+      P: 'Pago',
+      N: 'Nómina',
+      T: 'Traslado'
+    };
+    return tipos[(tipo || '').toUpperCase()] || tipo || '—';
+  }
+
+  // =========================================================
   // VIEW MODEL HELPERS
   // =========================================================
   private enrichClasificaciones<T extends { total: number }>(
@@ -485,6 +732,12 @@ export class EgresosComponent implements OnInit, OnDestroy {
     this.sideSheetOpen = true;
     this.searchQuery = '';
     this.searchResults = [];
+
+    // Precarga el periodo actual en el rango de fechas de la búsqueda avanzada
+    if (!this.searchFilters.fechaInicio && !this.searchFilters.fechaFin) {
+      this.searchFilters.fechaInicio = this.fechaInicioControl.value;
+      this.searchFilters.fechaFin = this.fechaFinControl.value;
+    }
   }
 
   closeSearchPanel(): void {
@@ -608,7 +861,7 @@ export class EgresosComponent implements OnInit, OnDestroy {
   // CFDI DETAIL
   // =========================================================
   selectCfdi(cfdi: CfdiEgresoDetalle): void {
-    this.selectedCfdi = { ...cfdi };
+    this.selectedCfdi = cfdi.alertas ? { ...cfdi } : this.prepararFila(cfdi);
     this.detailPanelOpen = true;
 
     if (cfdi.folio_fiscal) {
@@ -722,9 +975,10 @@ export class EgresosComponent implements OnInit, OnDestroy {
     }
 
     return (
-      (cfdi.iva_retenido || 0) > 0 ||
-      (cfdi.isr_retenido || 0) > 0 ||
-      (cfdi.ieps_retenido || 0) > 0
+      Number(cfdi.iva_retenido || 0) > 0 ||
+      Number(cfdi.isr_retenido || 0) > 0 ||
+      Number(cfdi.ieps_retenido || 0) > 0 ||
+      Number(cfdi.retenciones_locales || 0) > 0
     );
   }
 
@@ -761,20 +1015,66 @@ export class EgresosComponent implements OnInit, OnDestroy {
     return `${meses[monthIndex] || month} ${year}`;
   }
 
+  // La fecha del CFDI se guarda sin zona horaria: se toma la parte YYYY-MM-DD tal cual,
+  // porque convertirla a hora de México la recorría un día en CFDI emitidos de madrugada.
   formatDate(date: string | Date | null | undefined): string {
     if (!date) {
       return '-';
     }
 
-    return new Date(date).toLocaleDateString('es-MX', {
+    if (typeof date === 'string') {
+      const m = date.match(/^(\d{4})-(\d{2})-(\d{2})/);
+      if (m) {
+        return `${m[3]}/${m[2]}/${m[1]}`;
+      }
+    }
+
+    const d = new Date(date);
+    if (isNaN(d.getTime())) {
+      return '-';
+    }
+
+    return d.toLocaleDateString('es-MX', {
       year: 'numeric',
       month: '2-digit',
       day: '2-digit'
     });
   }
 
-  formatCurrency(amount: number | null | undefined): string {
-    return this.currencyFormatter.format(amount ?? 0);
+  formatHora(date: string | Date | null | undefined): string {
+    if (typeof date !== 'string') {
+      return '';
+    }
+    const m = date.match(/[T ](\d{2}):(\d{2})/);
+    return m ? `${m[1]}:${m[2]}` : '';
+  }
+
+  // Los decimal de Postgres llegan como string ("1234.50"); se convierten antes de formatear
+  formatCurrency(amount: number | string | null | undefined): string {
+    return this.currencyFormatter.format(Number(amount ?? 0) || 0);
+  }
+
+  formatMoneda(amount: number | string | null | undefined, moneda?: string): string {
+    const codigo = (moneda || 'MXN').toUpperCase();
+    if (codigo === 'MXN' || codigo === 'XXX') {
+      return this.formatCurrency(amount);
+    }
+
+    let formatter = this.formattersMoneda.get(codigo);
+    if (!formatter) {
+      try {
+        formatter = new Intl.NumberFormat('es-MX', {
+          style: 'currency',
+          currency: codigo,
+          minimumFractionDigits: 2
+        });
+      } catch (e) {
+        return `${this.formatNumber(Number(amount ?? 0) || 0)} ${codigo}`;
+      }
+      this.formattersMoneda.set(codigo, formatter);
+    }
+
+    return formatter.format(Number(amount ?? 0) || 0);
   }
 
   formatNumber(num: number | null | undefined): string {
@@ -805,14 +1105,43 @@ export class EgresosComponent implements OnInit, OnDestroy {
 
     const formasPago: Record<string, string> = {
       '01': 'Efectivo',
-      '02': 'Cheque',
-      '03': 'Transferencia',
-      '04': 'Tarjeta de Crédito',
-      '28': 'Tarjeta de Débito',
-      '99': 'Por Definir'
+      '02': 'Cheque nominativo',
+      '03': 'Transferencia electrónica',
+      '04': 'Tarjeta de crédito',
+      '05': 'Monedero electrónico',
+      '06': 'Dinero electrónico',
+      '08': 'Vales de despensa',
+      '12': 'Dación en pago',
+      '13': 'Pago por subrogación',
+      '14': 'Pago por consignación',
+      '15': 'Condonación',
+      '17': 'Compensación',
+      '23': 'Novación',
+      '24': 'Confusión',
+      '25': 'Remisión de deuda',
+      '26': 'Prescripción o caducidad',
+      '27': 'A satisfacción del acreedor',
+      '28': 'Tarjeta de débito',
+      '29': 'Tarjeta de servicios',
+      '30': 'Aplicación de anticipos',
+      '31': 'Intermediario pagos',
+      '99': 'Por definir'
     };
 
     return formasPago[codigo] || codigo;
+  }
+
+  getMetodoPagoLabel(codigo: string | undefined): string {
+    if (!codigo) {
+      return 'No especificado';
+    }
+
+    const metodos: Record<string, string> = {
+      PUE: 'Pago en una sola exhibición',
+      PPD: 'Pago en parcialidades o diferido'
+    };
+
+    return metodos[codigo] || codigo;
   }
 
   getUsoCfdiLabel(codigo: string | undefined): string {
@@ -842,6 +1171,9 @@ export class EgresosComponent implements OnInit, OnDestroy {
       D08: 'Gastos de transportación escolar',
       D09: 'Depósitos en cuentas',
       D10: 'Pagos por servicios educativos',
+      S01: 'Sin efectos fiscales',
+      CP01: 'Pagos',
+      CN01: 'Nómina',
       P01: 'Por definir'
     };
 

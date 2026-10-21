@@ -1240,3 +1240,105 @@ mat-chip {
   color: #374151;
   opacity: 1;
 }
+
+
+/* ===== KAPTAH: tab CFDIs del periodo ===== */
+.cfdi-toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  align-items: flex-start;
+}
+.cfdi-toolbar__buscar { flex: 1 1 280px; }
+.cfdi-toolbar__metodo { flex: 0 0 170px; }
+.cfdi-toolbar__avanzada { height: 56px; }
+
+.cfdi-tabla-wrap { position: relative; min-height: 120px; }
+.cfdi-tabla-loading {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(255, 255, 255, 0.65);
+  z-index: 2;
+}
+
+.cfdi-tabla { width: 100%; }
+.cfdi-tabla .cfdi-row { cursor: pointer; }
+.cfdi-tabla .cfdi-row:hover { background: rgba(102, 126, 234, 0.06); }
+.cfdi-tabla th.mat-mdc-header-cell,
+.cfdi-tabla td.mat-mdc-cell { padding: 8px 10px; }
+
+.cfdi-stack { display: flex; flex-direction: column; line-height: 1.3; }
+.cfdi-stack--right { align-items: flex-end; }
+.cfdi-stack small { color: rgba(0, 0, 0, 0.55); font-size: 12px; }
+.cfdi-cliente {
+  max-width: 280px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.cfdi-nowrap { white-space: nowrap; }
+.cfdi-num {
+  text-align: right !important;
+  white-space: nowrap;
+  font-variant-numeric: tabular-nums;
+}
+.cfdi-ret { color: #c62828 !important; }
+
+.cfdi-pill {
+  display: inline-block;
+  align-self: flex-start;
+  padding: 2px 8px;
+  border-radius: 10px;
+  font-size: 12px;
+  font-weight: 600;
+  background: #eceff1;
+  color: #455a64;
+}
+.cfdi-pill--pue { background: #e6f4ea; color: #1e7e34; }
+.cfdi-pill--ppd { background: #fff4e5; color: #b26a00; }
+
+.cfdi-acciones { white-space: nowrap; text-align: right; }
+
+@media (max-width: 600px) {
+  .cfdi-toolbar__metodo,
+  .cfdi-toolbar__avanzada { flex: 1 1 100%; width: 100%; }
+  .cfdi-cliente { max-width: 160px; }
+}
+
+/* ===== KAPTAH: ajustes paginador y columnas CFDIs ===== */
+:host ::ng-deep .mat-mdc-paginator-page-size-label { white-space: nowrap; }
+:host ::ng-deep .mat-mdc-paginator-page-size-select { width: 84px !important; }
+:host ::ng-deep .mat-mdc-paginator .mat-mdc-form-field-infix { min-width: 0; width: auto; }
+.cfdi-tabla .mat-column-proveedor { width: 32%; }
+.cfdi-cliente { max-width: 420px; }
+
+/* ===== KAPTAH: egresos (tipo, alertas) ===== */
+.cfdi-pill--nc { background: #fdecea; color: #c62828; }
+.cfdi-pill--nomina { background: #e8eaf6; color: #3949ab; }
+.cfdi-alerta {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  color: #b26a00 !important;
+  font-size: 12px;
+  line-height: 1.3;
+}
+.cfdi-alerta__icono { font-size: 16px; width: 16px; height: 16px; }
+.cfdi-alertas-detalle {
+  background: #fff4e5;
+  border: 1px solid #ffd8a8;
+  border-radius: 8px;
+  padding: 10px 12px;
+  margin-bottom: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.cfdi-toggle--activo {
+  background: #fff4e5 !important;
+  border-color: #b26a00 !important;
+  color: #b26a00 !important;
+}

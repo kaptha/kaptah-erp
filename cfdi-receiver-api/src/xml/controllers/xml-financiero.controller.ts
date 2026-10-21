@@ -444,6 +444,41 @@ async busquedaAvanzadaIngresos(
   }
 }
 /**
+ * Lista paginada de CFDIs de EGRESO del periodo (tab CFDIs de Egresos)
+ */
+@Get('cfdis/egresos/periodo')
+async listarCfdisEgresosPeriodo(
+  @Query('fechaInicio') fechaInicio: string,
+  @Query('fechaFin') fechaFin: string,
+  @Query('query') query?: string,
+  @Query('tipoComprobante') tipoComprobante?: string,
+  @Query('metodoPago') metodoPago?: string,
+  @Query('formaPago') formaPago?: string,
+  @Query('soloAlertas') soloAlertas?: string,
+  @Query('offset') offset?: number,
+  @Query('limit') limit?: number,
+  @Req() req?: any
+) {
+  const rfcUsuario = this.rfcCuenta(req);
+
+  if (!rfcUsuario) {
+    throw new Error('RFC de usuario no encontrado en el token');
+  }
+
+  return this.xmlFinancieroService.listarCfdisEgresosPeriodo(this.cuenta(req), rfcUsuario, {
+    fechaInicio,
+    fechaFin,
+    query,
+    tipoComprobante,
+    metodoPago,
+    formaPago,
+    soloAlertas: soloAlertas === 'true',
+    offset: offset ? Number(offset) : 0,
+    limit: limit ? Number(limit) : 25
+  });
+}
+
+/**
  * Búsqueda rápida de CFDIs de EGRESO
  */
 @Get('cfdis/egresos/busqueda-rapida')

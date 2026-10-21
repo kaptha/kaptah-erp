@@ -1018,7 +1018,7 @@ async getAnalisisCompletoEgresos(
     const porTipoGasto = await this.clasificarPorTipoGasto(cfdis);
 
     // 8. INFORMACIÓN FISCAL
-    const informacionFiscal = await this.calcularInformacionFiscalEgresos(cfdis);
+    const informacionFiscal = this.agregarRetencionesLocalesEgresos(await this.calcularInformacionFiscalEgresos(cfdis), cfdis);
 
     // 9. GASTOS RECURRENTES
     // ✅ CORRECCIÓN: Pasar rfcUsuario como segundo parámetro
@@ -1448,6 +1448,98 @@ private async obtenerProveedoresNuevos(
  * Búsqueda rápida de egresos (incluye Tipo E, N y P)
  * ✅ BUSCA POR RFC DEL RECEPTOR (como patrón)
  */
+/**
+ * Lista paginada de CFDI de egreso del periodo para el tab "CFDIs" de Egresos.
+ * Usa los mismos criterios que getCfdisEgreso (el análisis), para que cuadre con los KPIs:
+ * facturas y notas de crédito recibidas (I, E) + nóminas pagadas como patrón (N), sin cancelados.
+ */
+async listarCfdisEgresosPeriodo(
+  usuarioId: string,
+  rfcUsuario: string,
+  filtros: {
+    fechaInicio?: string;
+    fechaFin?: string;
+    query?: string;
+    tipoComprobante?: string;
+    metodoPago?: string;
+    formaPago?: string;
+    soloAlertas?: boolean;
+    offset?: number;
+    limit?: number;
+  }
+): Promise<{ cfdis: any[]; total: number }> {
+  const qb = this.xmlFinancieroRepository
+    .createQueryBuilder('cfdi')
+    .where('cfdi.usuario_id = :usuarioId', { usuarioId })
+    .andWhere(
+      "((cfdi.rfc_receptor = :rfc AND cfdi.tipo_comprobante IN ('I', 'E')) OR (cfdi.rfc_emisor = :rfc AND cfdi.tipo_comprobante = 'N'))",
+      { rfc: rfcUsuario }
+    )
+    .andWhere("COALESCE(cfdi.estado_procesamiento, '') <> 'CANCELADO'");
+
+  if (filtros.fechaInicio) {
+    qb.andWhere('cfdi.fecha >= :fechaInicio', { fechaInicio: filtros.fechaInicio });
+  }
+  if (filtros.fechaFin) {
+    qb.andWhere('cfdi.fecha < CAST(:fechaFin AS date) + 1', { fechaFin: filtros.fechaFin });
+  }
+
+  if (filtros.query && filtros.query.trim() !== '') {
+    qb.andWhere(
+      '(cfdi.folio_fiscal ILIKE :search OR cfdi.nombre_emisor ILIKE :search OR cfdi.rfc_emisor ILIKE :search' +
+        ' OR cfdi.nombre_receptor ILIKE :search OR cfdi.rfc_receptor ILIKE :search' +
+        ' OR cfdi.folio ILIKE :search OR cfdi.serie ILIKE :search)',
+      { search: `%${filtros.query.trim()}%` }
+    );
+  }
+
+  if (filtros.tipoComprobante) {
+    qb.andWhere('cfdi.tipo_comprobante = :tipoComprobante', { tipoComprobante: filtros.tipoComprobante });
+  }
+  if (filtros.metodoPago) {
+    qb.andWhere('cfdi.metodo_pago = :metodoPago', { metodoPago: filtros.metodoPago });
+  }
+  if (filtros.formaPago) {
+    qb.andWhere('cfdi.forma_pago = :formaPago', { formaPago: filtros.formaPago });
+  }
+
+  // Alertas de deducibilidad: efectivo mayor a $2,000 o uso S01 (solo facturas)
+  if (filtros.soloAlertas) {
+    qb.andWhere(
+      "cfdi.tipo_comprobante = 'I' AND ((cfdi.forma_pago = '01' AND cfdi.total > 2000) OR UPPER(COALESCE(cfdi.uso_cfdi, '')) = 'S01')"
+    );
+  }
+
+  const total = await qb.getCount();
+  const cfdis = await qb
+    .orderBy('cfdi.fecha', 'DESC')
+    .skip(Math.max(Number(filtros.offset) || 0, 0))
+    .take(Math.min(Math.max(Number(filtros.limit) || 25, 1), 200))
+    .getMany();
+
+  return { cfdis, total };
+}
+
+/**
+ * Suma las retenciones locales (cedular) a la información fiscal de egresos.
+ * Las notas de crédito (E) restan; se usa el valor absoluto por si ya traen signo.
+ */
+private agregarRetencionesLocalesEgresos(informacion: any, cfdis: any[]): any {
+  const base = informacion || {};
+  const locales = Math.round(
+    (cfdis || []).reduce((suma: number, c: any) => {
+      const importe = Math.abs(Number(c?.retenciones_locales) || 0);
+      return suma + (c?.tipo_comprobante === 'E' ? -importe : importe);
+    }, 0) * 100
+  ) / 100;
+
+  return {
+    ...base,
+    retencionesLocales: locales,
+    totalRetenciones: Math.round(((Number(base.totalRetenciones) || 0) + locales) * 100) / 100
+  };
+}
+
 async buscarCfdisEgresos(
   usuarioId: string,
   rfcUsuario: string,
