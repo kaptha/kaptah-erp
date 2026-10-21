@@ -95,6 +95,16 @@ export class XmlFinanciero {
   @Column({ type: 'decimal', precision: 18, scale: 2, default: 0 })
   ieps_retenido: number;
 
+  // Impuestos locales (complemento implocal: p. ej. retención CEDULAR estatal, ISH)
+  @Column({ type: 'decimal', precision: 18, scale: 2, default: 0 })
+  retenciones_locales: number;
+
+  @Column({ type: 'decimal', precision: 18, scale: 2, default: 0 })
+  traslados_locales: number;
+
+  @Column({ type: 'json', nullable: true })
+  impuestos_locales_detalle: any;
+
   // Metadatos
   @Column()
   version: string;

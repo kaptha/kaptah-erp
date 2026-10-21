@@ -1,3 +1,4 @@
+import { extraerImpuestosLocales } from '../utils/impuestos-locales.util';
 import { Injectable, Logger } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
@@ -114,6 +115,7 @@ export class XmlFinancieroService {
       const datosFinancieros = await this.xmlParserService.parseXmlContent(xmlRecord.xml_completo);
       
       // Crear registro financiero
+      const locales = extraerImpuestosLocales(xmlRecord.xml_completo);
       const xmlFinanciero = this.xmlFinancieroRepository.create({
         xml_recibido_id: xmlRecord.id,
         usuario_id: xmlRecord.usuario_id,
@@ -153,6 +155,9 @@ export class XmlFinancieroService {
         iva_retenido: datosFinancieros.ivaRetenido || 0,
         isr_retenido: datosFinancieros.isrRetenido || 0,
         ieps_retenido: datosFinancieros.iepsRetenido || 0,
+        retenciones_locales: locales.retencionesLocales,
+        traslados_locales: locales.trasladosLocales,
+        impuestos_locales_detalle: locales.detalle,
         
         // Metadatos
         version: datosFinancieros.version,
