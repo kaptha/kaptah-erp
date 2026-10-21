@@ -65,6 +65,7 @@ interface RetencionesResumen {
   ivaRetenido: number;
   isrRetenido: number;
   iepsRetenido: number;
+  retencionesLocales: number;
   totalRetenido: number;
 }
 
@@ -233,6 +234,7 @@ export class IngresosComponent implements OnInit, OnDestroy {
     ivaRetenido: 0,
     isrRetenido: 0,
     iepsRetenido: 0,
+    retencionesLocales: 0,
     totalRetenido: 0
   };
 

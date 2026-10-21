@@ -110,7 +110,7 @@
                   <div class="kpi-content">
                     <h3>{{ formatCurrency(retenciones.totalRetenido) }}</h3>
                     <p>Retenciones totales</p>
-                    <small>ISR, IVA e IEPS retenido</small>
+                    <small>ISR, IVA, IEPS y locales (cedular)</small>
                   </div>
                 </div>
 
@@ -185,6 +185,10 @@
                   <div class="summary-row">
                     <span>IEPS retenido</span>
                     <strong class="text-danger">{{ formatCurrency(retenciones.iepsRetenido) }}</strong>
+                  </div>
+                  <div class="summary-row">
+                    <span>Retenciones locales (cedular)</span>
+                    <strong class="text-danger">{{ formatCurrency(retenciones.retencionesLocales) }}</strong>
                   </div>
                   <div class="summary-row total-row">
                     <span>Total retenido</span>

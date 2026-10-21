@@ -34,6 +34,24 @@ interface BuscarCfdisIngresosFiltros {
 
 @Injectable()
 export class XmlFinancieroService {
+  /**
+   * Suma las retenciones locales (complemento implocal, p. ej. CEDULAR) al resumen
+   * que regresa calcularRetenciones y recalcula totalRetenido.
+   */
+  private agregarRetencionesLocales(retenciones: any, cfdis: any[]): any {
+    const base = retenciones || {};
+    const locales = Math.round(
+      (cfdis || [])
+        .filter((c: any) => String(c?.estado_procesamiento || '').toUpperCase() !== 'CANCELADO')
+        .reduce((suma: number, c: any) => suma + (Number(c?.retenciones_locales) || 0), 0) * 100
+    ) / 100;
+
+    return {
+      ...base,
+      retencionesLocales: locales,
+      totalRetenido: Math.round(((Number(base.totalRetenido) || 0) + locales) * 100) / 100
+    };
+  }
   private readonly logger = new Logger(XmlFinancieroService.name);
 
   constructor(
@@ -625,7 +643,7 @@ async getAnalisisCompletoIngresos(
     const porUsoCfdi = await this.agruparPorUsoCfdi(cfdis);
 
     // 8. RETENCIONES
-    const retenciones = await this.calcularRetenciones(cfdis);
+    const retenciones = this.agregarRetencionesLocales(await this.calcularRetenciones(cfdis), cfdis);
 
     // 9. CLIENTES INACTIVOS
     const clientesInactivos = await this.obtenerClientesInactivos(
