@@ -2,9 +2,10 @@ import { Component, OnDestroy, OnInit } from '@angular/core';
 import { FormControl } from '@angular/forms';
 import { BreakpointObserver, Breakpoints } from '@angular/cdk/layout';
 import { MAT_DATE_LOCALE, provideNativeDateAdapter } from '@angular/material/core';
-import { Subscription } from 'rxjs';
+import { MatPaginatorIntl, PageEvent } from '@angular/material/paginator';
+import { Subject, Subscription } from 'rxjs';
 import { forkJoin, of } from 'rxjs';
-import { catchError, finalize } from 'rxjs/operators';
+import { catchError, debounceTime, distinctUntilChanged, finalize } from 'rxjs/operators';
 import { CfdiApiService } from '../../services/cfdi-api.service';
 
 type AtajoPeriodo = 'mes' | 'mesAnterior' | 'anio' | 'anioAnterior';
@@ -89,12 +90,21 @@ interface PartidaCfdi {
   importe: number;
 }
 
+interface ImpuestoLocalCfdi {
+  tipo: 'retencion' | 'traslado';
+  impuesto: string;
+  tasa: number;
+  importe: number;
+}
+
 interface CfdiDetalle {
   folio_fiscal: string;
   serie?: string;
   folio?: string;
   fecha: string;
   estado_procesamiento?: string;
+  tipo_comprobante?: string;
+  tipo_documento_label?: string;
   metodo_pago?: string;
   forma_pago?: string;
   moneda?: string;
@@ -118,6 +128,9 @@ interface CfdiDetalle {
   iva_retenido?: number;
   isr_retenido?: number;
   ieps_retenido?: number;
+  retenciones_locales?: number | string;
+  traslados_locales?: number | string;
+  impuestos_locales_detalle?: ImpuestoLocalCfdi[] | null;
   total?: number;
 
   conceptos_detalle?: PartidaCfdi[];
@@ -139,13 +152,36 @@ interface AnalisisIngresosResponse {
   clientesInactivos?: ClienteInactivo[];
 }
 
+// Textos del paginador en español (solo para este componente)
+export function paginadorEnEspanol(): MatPaginatorIntl {
+  const intl = new MatPaginatorIntl();
+  intl.itemsPerPageLabel = 'Por página';
+  intl.nextPageLabel = 'Siguiente';
+  intl.previousPageLabel = 'Anterior';
+  intl.firstPageLabel = 'Primera página';
+  intl.lastPageLabel = 'Última página';
+  intl.getRangeLabel = (page: number, pageSize: number, length: number) => {
+    if (!length || !pageSize) {
+      return `0 de ${length || 0}`;
+    }
+    const inicio = page * pageSize;
+    const fin = Math.min(inicio + pageSize, length);
+    return `${inicio + 1} – ${fin} de ${length}`;
+  };
+  return intl;
+}
+
 @Component({
   selector: 'app-ingresos',
   templateUrl: './ingresos.component.html',
   styleUrls: ['./ingresos.component.css'],
   standalone: false,
-  // Calendario de Material en español (es-MX), solo para este componente
-  providers: [provideNativeDateAdapter(), { provide: MAT_DATE_LOCALE, useValue: 'es-MX' }]
+  // Calendario de Material en español (es-MX) y paginador en español, solo para este componente
+  providers: [
+    provideNativeDateAdapter(),
+    { provide: MAT_DATE_LOCALE, useValue: 'es-MX' },
+    { provide: MatPaginatorIntl, useFactory: paginadorEnEspanol }
+  ]
 })
 export class IngresosComponent implements OnInit, OnDestroy {
   // =========================================================
@@ -173,6 +209,8 @@ export class IngresosComponent implements OnInit, OnDestroy {
   isSearching = false;
   sideSheetOpen = false;
   detailPanelOpen = false;
+  // Conserva la pestaña activa cuando se recarga el análisis al cambiar el periodo
+  tabIndex = 0;
 
   // =========================================================
   // DATA STATE
@@ -212,6 +250,39 @@ export class IngresosComponent implements OnInit, OnDestroy {
   chartDataTemporal: any[] = [];
 
   // =========================================================
+  // CFDIs DEL PERIODO (tab "CFDIs")
+  // =========================================================
+  cfdisPeriodo: CfdiDetalle[] = [];
+  totalCfdisPeriodo = 0;
+  pageIndexCfdis = 0;
+  pageSizeCfdis = 25;
+  readonly pageSizeOptionsCfdis = [25, 50, 100];
+  isLoadingCfdis = false;
+  filtroCfdis = '';
+  filtroMetodoCfdis = '';
+
+  private periodoActual = { inicio: '', fin: '' };
+  private filtroCfdis$ = new Subject<string>();
+  private cfdisSub?: Subscription;
+
+  private readonly columnasCfdisEscritorio = [
+    'fecha', 'folio', 'cliente', 'metodo', 'subtotal', 'iva', 'total', 'acciones'
+  ];
+  private readonly columnasCfdisMovil = ['fecha', 'cliente', 'total'];
+
+  get columnasCfdis(): string[] {
+    return this.esMovil ? this.columnasCfdisMovil : this.columnasCfdisEscritorio;
+  }
+
+  get periodoTexto(): string {
+    const { inicio, fin } = this.periodoActual;
+    if (!inicio || !fin) {
+      return '';
+    }
+    return `del ${this.formatDate(inicio)} al ${this.formatDate(fin)}`;
+  }
+
+  // =========================================================
   // SEARCH / CFDI DETAIL
   // =========================================================
   searchQuery = '';
@@ -249,6 +320,7 @@ export class IngresosComponent implements OnInit, OnDestroy {
   });
 
   private readonly numberFormatter = new Intl.NumberFormat('es-MX');
+  private readonly formattersMoneda = new Map<string, Intl.NumberFormat>();
 
   constructor(private cfdiApiService: CfdiApiService, private breakpoints: BreakpointObserver) {}
 
@@ -272,11 +344,22 @@ export class IngresosComponent implements OnInit, OnDestroy {
         .subscribe((r) => (this.esMovil = r.matches))
     );
 
+    // Filtro de texto del tab CFDIs: espera a que el usuario deje de escribir
+    this.subs.add(
+      this.filtroCfdis$
+        .pipe(debounceTime(400), distinctUntilChanged())
+        .subscribe(() => {
+          this.pageIndexCfdis = 0;
+          this.loadCfdisPeriodo();
+        })
+    );
+
     this.loadAnalisisCompleto();
   }
 
   ngOnDestroy(): void {
     this.subs.unsubscribe();
+    this.cfdisSub?.unsubscribe();
   }
 
   // YYYY-MM-DD en hora local (toISOString convertía a UTC y después de las 18:00 daba el día siguiente)
@@ -325,6 +408,11 @@ export class IngresosComponent implements OnInit, OnDestroy {
     if (!fechaInicio || !fechaFin) {
       return;
     }
+
+    // La lista de CFDIs sigue al mismo periodo que el análisis
+    this.periodoActual = { inicio: fechaInicio, fin: fechaFin };
+    this.pageIndexCfdis = 0;
+    this.loadCfdisPeriodo();
 
     this.isLoading = true;
 
@@ -410,6 +498,123 @@ export class IngresosComponent implements OnInit, OnDestroy {
   }
 
   // =========================================================
+  // CFDIs DEL PERIODO
+  // =========================================================
+  loadCfdisPeriodo(): void {
+    const { inicio, fin } = this.periodoActual;
+    if (!inicio || !fin) {
+      return;
+    }
+
+    // Si cambian de página o de periodo rápido, se cancela la petición anterior
+    this.cfdisSub?.unsubscribe();
+    this.isLoadingCfdis = true;
+
+    this.cfdisSub = this.cfdiApiService
+      .listarCfdisIngresosPeriodo({
+        fechaInicio: inicio,
+        fechaFin: fin,
+        query: this.filtroCfdis.trim(),
+        metodoPago: this.filtroMetodoCfdis,
+        offset: this.pageIndexCfdis * this.pageSizeCfdis,
+        limit: this.pageSizeCfdis
+      })
+      .pipe(finalize(() => (this.isLoadingCfdis = false)))
+      .subscribe({
+        next: (response: any) => {
+          const lista = this.quitarDuplicados(response?.cfdis || []);
+          this.cfdisPeriodo = lista;
+          this.totalCfdisPeriodo = Number(response?.total ?? lista.length) || 0;
+        },
+        error: (error) => {
+          console.error('❌ Error cargando CFDIs del periodo:', error);
+          this.cfdisPeriodo = [];
+          this.totalCfdisPeriodo = 0;
+        }
+      });
+  }
+
+  // El backend mezcla CFDIs de sales-api; se evita mostrar el mismo UUID dos veces
+  private quitarDuplicados(cfdis: CfdiDetalle[]): CfdiDetalle[] {
+    const vistos = new Set<string>();
+    return cfdis.filter((c) => {
+      const uuid = (c.folio_fiscal || '').toLowerCase();
+      if (!uuid) {
+        return true;
+      }
+      if (vistos.has(uuid)) {
+        return false;
+      }
+      vistos.add(uuid);
+      return true;
+    });
+  }
+
+  onFiltroCfdisChange(valor: string): void {
+    this.filtroCfdis$.next((valor || '').trim());
+  }
+
+  limpiarFiltroCfdis(): void {
+    this.filtroCfdis = '';
+    this.filtroCfdis$.next('');
+  }
+
+  onFiltroMetodoChange(): void {
+    this.pageIndexCfdis = 0;
+    this.loadCfdisPeriodo();
+  }
+
+  onPageCfdis(event: PageEvent): void {
+    this.pageIndexCfdis = event.pageIndex;
+    this.pageSizeCfdis = event.pageSize;
+    this.loadCfdisPeriodo();
+  }
+
+  copiarUuid(uuid: string | undefined, event: Event): void {
+    event.stopPropagation();
+    if (!uuid || !navigator.clipboard) {
+      return;
+    }
+    navigator.clipboard.writeText(uuid).catch((err) => console.error('No se pudo copiar el UUID:', err));
+  }
+
+  descargarXmlFila(cfdi: CfdiDetalle, event: Event): void {
+    event.stopPropagation();
+    this.descargarXml(cfdi);
+  }
+
+  descargarPdfFila(cfdi: CfdiDetalle, event: Event): void {
+    event.stopPropagation();
+    this.descargarPdf(cfdi);
+  }
+
+  tieneRetencionFila(cfdi: CfdiDetalle): boolean {
+    return Number(cfdi?.total_impuestos_retenidos || 0) > 0;
+  }
+
+  tieneRetencionLocalFila(cfdi: CfdiDetalle): boolean {
+    return Number(cfdi?.retenciones_locales || 0) > 0;
+  }
+
+  tieneTrasladoLocalFila(cfdi: CfdiDetalle): boolean {
+    return Number(cfdi?.traslados_locales || 0) > 0;
+  }
+
+  impuestosLocales(cfdi: CfdiDetalle | null, tipo: 'retencion' | 'traslado'): ImpuestoLocalCfdi[] {
+    return (cfdi?.impuestos_locales_detalle || []).filter((i) => i.tipo === tipo);
+  }
+
+  formatTasa(tasa: number | string | null | undefined): string {
+    const pct = (Number(tasa) || 0) * 100;
+    return `${Number(pct.toFixed(4))}%`;
+  }
+
+  esMonedaExtranjera(cfdi: CfdiDetalle | null): boolean {
+    const moneda = (cfdi?.moneda || 'MXN').toUpperCase();
+    return moneda !== 'MXN' && moneda !== 'XXX';
+  }
+
+  // =========================================================
   // ENRICH / VIEW MODEL
   // =========================================================
   private enrichClientes(clientes: ClienteResumen[]): ClienteResumen[] {
@@ -466,6 +671,12 @@ export class IngresosComponent implements OnInit, OnDestroy {
     this.sideSheetOpen = true;
     this.searchQuery = '';
     this.searchResults = [];
+
+    // Precarga el periodo actual en el rango de fechas de la búsqueda avanzada
+    if (!this.searchFilters.fechaInicio && !this.searchFilters.fechaFin) {
+      this.searchFilters.fechaInicio = this.fechaInicioControl.value;
+      this.searchFilters.fechaFin = this.fechaFinControl.value;
+    }
   }
 
   closeSearchPanel(): void {
@@ -509,7 +720,8 @@ export class IngresosComponent implements OnInit, OnDestroy {
       .pipe(finalize(() => (this.isSearching = false)))
       .subscribe({
         next: (response: any) => {
-          this.searchResults = response?.success ? response.cfdis || [] : [];
+          // busqueda-rapida responde { cfdis, total } sin "success"
+          this.searchResults = response?.cfdis || [];
         },
         error: (error) => {
           console.error('❌ Error en búsqueda rápida:', error);
@@ -536,17 +748,7 @@ export class IngresosComponent implements OnInit, OnDestroy {
       .pipe(finalize(() => (this.isSearching = false)))
       .subscribe({
         next: (response: any) => {
-          if (response?.success) {
-            this.searchResults = response.cfdis || [];
-            return;
-          }
-
-          if (response?.cfdis) {
-            this.searchResults = response.cfdis || [];
-            return;
-          }
-
-          this.searchResults = [];
+          this.searchResults = response?.cfdis || [];
         },
         error: (error) => {
           console.error('❌ Error en búsqueda avanzada:', error);
@@ -556,54 +758,54 @@ export class IngresosComponent implements OnInit, OnDestroy {
   }
 
   private buildAdvancedFilters(): AdvancedSearchFiltersPayload {
-  const filtros: AdvancedSearchFiltersPayload = {};
+    const filtros: AdvancedSearchFiltersPayload = {};
 
-  if (this.searchFilters.rfc?.trim()) {
-    filtros.rfc = this.searchFilters.rfc.trim();
+    if (this.searchFilters.rfc?.trim()) {
+      filtros.rfc = this.searchFilters.rfc.trim();
+    }
+
+    if (this.searchFilters.nombre?.trim()) {
+      filtros.nombre = this.searchFilters.nombre.trim();
+    }
+
+    if (this.searchFilters.uuid?.trim()) {
+      filtros.uuid = this.searchFilters.uuid.trim();
+    }
+
+    if (this.searchFilters.folio?.trim()) {
+      filtros.folio = this.searchFilters.folio.trim();
+    }
+
+    if (this.searchFilters.serie?.trim()) {
+      filtros.serie = this.searchFilters.serie.trim();
+    }
+
+    if (this.searchFilters.fechaInicio) {
+      filtros.fechaInicio = this.toInputDate(this.searchFilters.fechaInicio);
+    }
+
+    if (this.searchFilters.fechaFin) {
+      filtros.fechaFin = this.toInputDate(this.searchFilters.fechaFin);
+    }
+
+    if (this.searchFilters.montoMin !== null && this.searchFilters.montoMin !== undefined) {
+      filtros.montoMin = this.searchFilters.montoMin;
+    }
+
+    if (this.searchFilters.montoMax !== null && this.searchFilters.montoMax !== undefined) {
+      filtros.montoMax = this.searchFilters.montoMax;
+    }
+
+    if (this.searchFilters.metodoPago) {
+      filtros.metodoPago = this.searchFilters.metodoPago;
+    }
+
+    if (this.searchFilters.formaPago) {
+      filtros.formaPago = this.searchFilters.formaPago;
+    }
+
+    return filtros;
   }
-
-  if (this.searchFilters.nombre?.trim()) {
-    filtros.nombre = this.searchFilters.nombre.trim();
-  }
-
-  if (this.searchFilters.uuid?.trim()) {
-    filtros.uuid = this.searchFilters.uuid.trim();
-  }
-
-  if (this.searchFilters.folio?.trim()) {
-    filtros.folio = this.searchFilters.folio.trim();
-  }
-
-  if (this.searchFilters.serie?.trim()) {
-    filtros.serie = this.searchFilters.serie.trim();
-  }
-
-  if (this.searchFilters.fechaInicio) {
-    filtros.fechaInicio = this.toInputDate(this.searchFilters.fechaInicio);
-  }
-
-  if (this.searchFilters.fechaFin) {
-    filtros.fechaFin = this.toInputDate(this.searchFilters.fechaFin);
-  }
-
-  if (this.searchFilters.montoMin !== null && this.searchFilters.montoMin !== undefined) {
-    filtros.montoMin = this.searchFilters.montoMin;
-  }
-
-  if (this.searchFilters.montoMax !== null && this.searchFilters.montoMax !== undefined) {
-    filtros.montoMax = this.searchFilters.montoMax;
-  }
-
-  if (this.searchFilters.metodoPago) {
-    filtros.metodoPago = this.searchFilters.metodoPago;
-  }
-
-  if (this.searchFilters.formaPago) {
-    filtros.formaPago = this.searchFilters.formaPago;
-  }
-
-  return filtros;
-}
 
   // =========================================================
   // CFDI DETAIL
@@ -735,9 +937,10 @@ export class IngresosComponent implements OnInit, OnDestroy {
     }
 
     return (
-      (cfdi.iva_retenido || 0) > 0 ||
-      (cfdi.isr_retenido || 0) > 0 ||
-      (cfdi.ieps_retenido || 0) > 0
+      Number(cfdi.iva_retenido || 0) > 0 ||
+      Number(cfdi.isr_retenido || 0) > 0 ||
+      Number(cfdi.ieps_retenido || 0) > 0 ||
+      Number(cfdi.retenciones_locales || 0) > 0
     );
   }
 
@@ -764,9 +967,9 @@ export class IngresosComponent implements OnInit, OnDestroy {
       return 0;
     }
 
-    const total = cfdi.total || 0;
+    const total = Number(cfdi.total || 0);
     const pagado =
-      cfdi.pagos?.reduce((sum: number, pago: PagoCfdi) => sum + (pago.monto || 0), 0) || 0;
+      cfdi.pagos?.reduce((sum: number, pago: PagoCfdi) => sum + Number(pago.monto || 0), 0) || 0;
 
     return Math.max(total - pagado, 0);
   }
@@ -777,9 +980,9 @@ export class IngresosComponent implements OnInit, OnDestroy {
     }
 
     const pagado =
-      cfdi.pagos?.reduce((sum: number, pago: PagoCfdi) => sum + (pago.monto || 0), 0) || 0;
+      cfdi.pagos?.reduce((sum: number, pago: PagoCfdi) => sum + Number(pago.monto || 0), 0) || 0;
 
-    return this.getSafePercentage(pagado, cfdi.total);
+    return this.getSafePercentage(pagado, Number(cfdi.total));
   }
 
   // =========================================================
@@ -797,8 +1000,32 @@ export class IngresosComponent implements OnInit, OnDestroy {
     return `${meses[monthIndex] || month} ${year}`;
   }
 
-  formatCurrency(amount: number | null | undefined): string {
-    return this.currencyFormatter.format(amount ?? 0);
+  // Los decimal de Postgres llegan como string ("1234.50"); se convierten antes de formatear
+  formatCurrency(amount: number | string | null | undefined): string {
+    return this.currencyFormatter.format(Number(amount ?? 0) || 0);
+  }
+
+  formatMoneda(amount: number | string | null | undefined, moneda?: string): string {
+    const codigo = (moneda || 'MXN').toUpperCase();
+    if (codigo === 'MXN' || codigo === 'XXX') {
+      return this.formatCurrency(amount);
+    }
+
+    let formatter = this.formattersMoneda.get(codigo);
+    if (!formatter) {
+      try {
+        formatter = new Intl.NumberFormat('es-MX', {
+          style: 'currency',
+          currency: codigo,
+          minimumFractionDigits: 2
+        });
+      } catch (e) {
+        return `${this.formatNumber(Number(amount ?? 0) || 0)} ${codigo}`;
+      }
+      this.formattersMoneda.set(codigo, formatter);
+    }
+
+    return formatter.format(Number(amount ?? 0) || 0);
   }
 
   formatNumber(num: number | null | undefined): string {
@@ -809,16 +1036,38 @@ export class IngresosComponent implements OnInit, OnDestroy {
     return `${(num ?? 0).toFixed(2)}%`;
   }
 
+  // La fecha del CFDI se guarda sin zona horaria: se toma la parte YYYY-MM-DD tal cual,
+  // porque convertirla a hora de México la recorría un día en CFDI emitidos de madrugada.
   formatDate(date: string | Date | null | undefined): string {
     if (!date) {
       return '-';
     }
 
-    return new Date(date).toLocaleDateString('es-MX', {
+    if (typeof date === 'string') {
+      const m = date.match(/^(\d{4})-(\d{2})-(\d{2})/);
+      if (m) {
+        return `${m[3]}/${m[2]}/${m[1]}`;
+      }
+    }
+
+    const d = new Date(date);
+    if (isNaN(d.getTime())) {
+      return '-';
+    }
+
+    return d.toLocaleDateString('es-MX', {
       year: 'numeric',
       month: '2-digit',
       day: '2-digit'
     });
+  }
+
+  formatHora(date: string | Date | null | undefined): string {
+    if (typeof date !== 'string') {
+      return '';
+    }
+    const m = date.match(/[T ](\d{2}):(\d{2})/);
+    return m ? `${m[1]}:${m[2]}` : '';
   }
 
   formatRfc(rfc: string): string {
@@ -916,4 +1165,3 @@ export class IngresosComponent implements OnInit, OnDestroy {
     return usos[codigo] || codigo;
   }
 }
-

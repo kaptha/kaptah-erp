@@ -1127,3 +1127,69 @@ td.mat-cell {
   color: #374151;
   opacity: 1;
 }
+
+/* ===== KAPTAH: tab CFDIs del periodo ===== */
+.cfdi-toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  align-items: flex-start;
+}
+.cfdi-toolbar__buscar { flex: 1 1 280px; }
+.cfdi-toolbar__metodo { flex: 0 0 170px; }
+.cfdi-toolbar__avanzada { height: 56px; }
+
+.cfdi-tabla-wrap { position: relative; min-height: 120px; }
+.cfdi-tabla-loading {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(255, 255, 255, 0.65);
+  z-index: 2;
+}
+
+.cfdi-tabla { width: 100%; }
+.cfdi-tabla .cfdi-row { cursor: pointer; }
+.cfdi-tabla .cfdi-row:hover { background: rgba(102, 126, 234, 0.06); }
+.cfdi-tabla th.mat-mdc-header-cell,
+.cfdi-tabla td.mat-mdc-cell { padding: 8px 10px; }
+
+.cfdi-stack { display: flex; flex-direction: column; line-height: 1.3; }
+.cfdi-stack--right { align-items: flex-end; }
+.cfdi-stack small { color: rgba(0, 0, 0, 0.55); font-size: 12px; }
+.cfdi-cliente {
+  max-width: 280px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.cfdi-nowrap { white-space: nowrap; }
+.cfdi-num {
+  text-align: right !important;
+  white-space: nowrap;
+  font-variant-numeric: tabular-nums;
+}
+.cfdi-ret { color: #c62828 !important; }
+
+.cfdi-pill {
+  display: inline-block;
+  align-self: flex-start;
+  padding: 2px 8px;
+  border-radius: 10px;
+  font-size: 12px;
+  font-weight: 600;
+  background: #eceff1;
+  color: #455a64;
+}
+.cfdi-pill--pue { background: #e6f4ea; color: #1e7e34; }
+.cfdi-pill--ppd { background: #fff4e5; color: #b26a00; }
+
+.cfdi-acciones { white-space: nowrap; text-align: right; }
+
+@media (max-width: 600px) {
+  .cfdi-toolbar__metodo,
+  .cfdi-toolbar__avanzada { flex: 1 1 100%; width: 100%; }
+  .cfdi-cliente { max-width: 160px; }
+}
