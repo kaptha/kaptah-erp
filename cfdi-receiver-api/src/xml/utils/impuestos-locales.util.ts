@@ -77,3 +77,4 @@ export function extraerImpuestosLocales(xml: string | null | undefined): Impuest
     detalle: detalle.length ? detalle : null
   };
 }
+// redeploy 2026-10-22 15:50
