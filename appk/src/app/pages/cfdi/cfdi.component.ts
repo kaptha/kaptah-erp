@@ -735,7 +735,31 @@ private createCFDI(cfdiData: Omit<CFDI, 'ID'>) {
     const maxPageIndex = Math.ceil(this.dataSource.filteredData.length / this.mobilePaginator.pageSize) - 1;
     return this.mobilePaginator.pageIndex >= maxPageIndex;
   }
-}
+
+  /**
+   * Descargar XML timbrado del CFDI
+   */
+  descargarXMLCfdi(cfdi: CFDI): void {
+    const xml = cfdi?.xml;
+    if (!xml || !xml.includes('TimbreFiscalDigital')) {
+      Sweetalert.fnc('error', 'Este CFDI no tiene XML timbrado disponible', null);
+      return;
+    }
+
+    const uuidMatch = xml.match(/TimbreFiscalDigital[^>]*\sUUID="([^"]+)"/);
+    const base = `${cfdi.serie || 'CFDI'}-${cfdi.folio || cfdi.ID}`;
+    const nombre = uuidMatch ? `${base}_${uuidMatch[1]}.xml` : `${base}.xml`;
+
+    const blob = new Blob([xml], { type: 'application/xml;charset=utf-8' });
+    const url = window.URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = nombre;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    window.URL.revokeObjectURL(url);
+  }}
 
 
 

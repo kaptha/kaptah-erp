@@ -1,4 +1,5 @@
 export interface CFDI {
+  xml?: string;
   ID: string;
   serie: string;
   folio: string;

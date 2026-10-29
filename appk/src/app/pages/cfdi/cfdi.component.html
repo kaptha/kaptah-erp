@@ -152,11 +152,11 @@
               <mat-icon>visibility</mat-icon>
               <span>Ver Detalle</span>
             </button>
-            <button mat-menu-item>
+            <button mat-menu-item (click)="descargarPDFCfdi(cfdi)">
               <mat-icon>picture_as_pdf</mat-icon>
               <span>Descargar PDF</span>
             </button>
-            <button mat-menu-item>
+            <button mat-menu-item (click)="descargarXMLCfdi(cfdi)">
               <mat-icon>code</mat-icon>
               <span>Descargar XML</span>
             </button>
@@ -243,16 +243,16 @@
         <button mat-icon-button color="accent" [matMenuTriggerFor]="mobileActionMenu" matTooltip="Más opciones">
           <mat-icon>more_vert</mat-icon>
         </button>
-        <mat-menu #mobileActionMenu="matMenu" (click)="verDetalleCFDI(cfdi)">
+        <mat-menu #mobileActionMenu="matMenu">
           <button mat-menu-item (click)="verDetalleCFDI(cfdi)">
             <mat-icon>visibility</mat-icon>
             <span>Ver Detalle</span>
           </button>
-          <button mat-menu-item (click)="verDetalleCFDI(cfdi)">
+          <button mat-menu-item (click)="descargarPDFCfdi(cfdi)">
             <mat-icon>picture_as_pdf</mat-icon>
             <span>Descargar PDF</span>
           </button>
-          <button mat-menu-item>
+          <button mat-menu-item (click)="descargarXMLCfdi(cfdi)">
             <mat-icon>code</mat-icon>
             <span>Descargar XML</span>
           </button>

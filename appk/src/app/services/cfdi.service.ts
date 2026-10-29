@@ -207,6 +207,7 @@ export class CFDIService {
     
     return {
       ID: cfdi.id,
+      xml: cfdi.xml,
       serie: xmlData.serie || 'A',
       folio: xmlData.folio || '0000',
       fecha: cfdi.createdAt,
