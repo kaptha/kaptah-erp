@@ -226,7 +226,10 @@ export class CfdiService {
       }
       
       const descuentoComp = parseFloat(comprobante.getAttribute('Descuento') || '0');
-      const total = Math.round((subtotal - descuentoComp + totalImpuestosTrasladados - totalImpuestosRetenidos) * 100) / 100;
+      const impLocal = xmlDoc.getElementsByTagName('implocal:ImpuestosLocales')[0];
+      const locRet = impLocal ? parseFloat(impLocal.getAttribute('TotaldeRetenciones') || '0') : 0;
+      const locTras = impLocal ? parseFloat(impLocal.getAttribute('TotaldeTraslados') || '0') : 0;
+      const total = Math.round((subtotal - descuentoComp + totalImpuestosTrasladados - totalImpuestosRetenidos + locTras - locRet) * 100) / 100;
       comprobante.setAttribute('Total', total.toFixed(2));
       
       this.logger.debug(`Valores corregidos - Subtotal: ${subtotal.toFixed(2)}, Traslados: ${totalImpuestosTrasladados.toFixed(2)}, Retenciones: ${totalImpuestosRetenidos.toFixed(2)}, Total: ${total.toFixed(2)}`);
@@ -1625,7 +1628,8 @@ async generateCfdi(tipo: 'I' | 'E' | 'N' | 'P', data: any, user: any): Promise<s
     }
     
     // PASO 3: Calcular el total correcto
-    const total = subtotal + totalTraslados - totalRetenciones;
+    const locales = this.buildImpuestosLocales(data.impuestosLocales);
+    const total = subtotal + totalTraslados - totalRetenciones + locales.totalTraslados - locales.totalRetenciones;
     
     this.logger.debug(`Cálculos: Subtotal=${subtotal.toFixed(2)}, Traslados=${totalTraslados.toFixed(2)}, Retenciones=${totalRetenciones.toFixed(2)}, Total=${total.toFixed(2)}`);
     
@@ -1644,11 +1648,11 @@ async generateCfdi(tipo: 'I' | 'E' | 'N' | 'P', data: any, user: any): Promise<s
     
     // PASO 6: Construir el XML con los valores calculados
     const xmlTemplate = `<?xml version="1.0" encoding="UTF-8"?>
-<cfdi:Comprobante xmlns:cfdi="http://www.sat.gob.mx/cfd/4" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.sat.gob.mx/cfd/4 http://www.sat.gob.mx/sitio_internet/cfd/4/cfdv40.xsd" Version="4.0" Serie="${data.serie || ''}" Folio="${data.folio || ''}" Fecha="${fecha}" FormaPago="${formaPago}" SubTotal="${subtotal.toFixed(2)}" Moneda="${data.moneda || 'MXN'}" Total="${total.toFixed(2)}" TipoDeComprobante="${tipo}" Exportacion="${data.exportacion || '01'}" MetodoPago="${metodoPago}" LugarExpedicion="${data.lugarExpedicion || ''}">
+<cfdi:Comprobante xmlns:cfdi="http://www.sat.gob.mx/cfd/4" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"${locales.ns} xsi:schemaLocation="http://www.sat.gob.mx/cfd/4 http://www.sat.gob.mx/sitio_internet/cfd/4/cfdv40.xsd${locales.schema}" Version="4.0" Serie="${data.serie || ''}" Folio="${data.folio || ''}" Fecha="${fecha}" FormaPago="${formaPago}" SubTotal="${subtotal.toFixed(2)}" Moneda="${data.moneda || 'MXN'}" Total="${total.toFixed(2)}" TipoDeComprobante="${tipo}" Exportacion="${data.exportacion || '01'}" MetodoPago="${metodoPago}" LugarExpedicion="${data.lugarExpedicion || ''}">
 <cfdi:Emisor Rfc="${data.emisor?.rfc || ''}" Nombre="${data.emisor?.nombre || ''}" RegimenFiscal="${data.emisor?.regimenFiscal || ''}"/>
 <cfdi:Receptor Rfc="${data.receptor?.rfc || ''}" Nombre="${data.receptor?.nombre || ''}" DomicilioFiscalReceptor="${data.receptor?.domicilioFiscalReceptor || ''}" RegimenFiscalReceptor="${data.receptor?.regimenFiscalReceptor || ''}" UsoCFDI="${data.receptor?.usoCFDI || ''}"/>
 <cfdi:Conceptos>${this.generateConceptos(data.conceptos || [])}
-</cfdi:Conceptos>${this.generateImpuestos(data.conceptos || [])}
+</cfdi:Conceptos>${this.generateImpuestos(data.conceptos || [])}${locales.complemento}
 </cfdi:Comprobante>`;
     
     return xmlTemplate;
@@ -2059,4 +2063,43 @@ async sendCfdiByEmail(
     throw new Error(`Error encolando email: ${error.message}`);
   }
 }
-}
+
+  /**
+   * Complemento Impuestos Locales (implocal 1.0) para CFDI de ingreso/egreso.
+   * Tasas como fraccion (0.05 = 5%), mismo formato que los XML ya timbrados por SIFEI.
+   * Si no hay impuestos locales regresa cadenas vacias y el XML queda igual que antes.
+   */
+  private buildImpuestosLocales(locales: any): { ns: string; schema: string; complemento: string; totalRetenciones: number; totalTraslados: number } {
+    const vacio = { ns: '', schema: '', complemento: '', totalRetenciones: 0, totalTraslados: 0 };
+    const retenciones = (locales?.retenciones || []).filter((r: any) => r && String(r.nombre || '').trim() && Number(r.importe) > 0);
+    const traslados = (locales?.traslados || []).filter((t: any) => t && String(t.nombre || '').trim() && Number(t.importe) > 0);
+    if (retenciones.length === 0 && traslados.length === 0) {
+      return vacio;
+    }
+
+    const esc = (v: any) => String(v).trim().replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+    const tasa = (v: any) => String(Number(Number(v || 0).toFixed(6)));
+    const monto = (v: any) => (Math.round(Number(v || 0) * 100) / 100).toFixed(2);
+
+    const totalRetenciones = Math.round(retenciones.reduce((s: number, r: any) => s + Number(r.importe), 0) * 100) / 100;
+    const totalTraslados = Math.round(traslados.reduce((s: number, t: any) => s + Number(t.importe), 0) * 100) / 100;
+
+    let xml = `<implocal:ImpuestosLocales version="1.0" TotaldeRetenciones="${totalRetenciones.toFixed(2)}" TotaldeTraslados="${totalTraslados.toFixed(2)}">`;
+    for (const r of retenciones) {
+      xml += `<implocal:RetencionesLocales ImpLocRetenido="${esc(r.nombre)}" TasadeRetencion="${tasa(r.tasa)}" Importe="${monto(r.importe)}"/>`;
+    }
+    for (const t of traslados) {
+      xml += `<implocal:TrasladosLocales ImpLocTrasladado="${esc(t.nombre)}" TasadeTraslado="${tasa(t.tasa)}" Importe="${monto(t.importe)}"/>`;
+    }
+    xml += '</implocal:ImpuestosLocales>';
+
+    this.logger.debug(`Impuestos locales: retenciones=${totalRetenciones.toFixed(2)}, traslados=${totalTraslados.toFixed(2)}`);
+
+    return {
+      ns: ' xmlns:implocal="http://www.sat.gob.mx/implocal"',
+      schema: ' http://www.sat.gob.mx/implocal http://www.sat.gob.mx/sitio_internet/cfd/implocal/implocal.xsd',
+      complemento: `\n<cfdi:Complemento>${xml}</cfdi:Complemento>`,
+      totalRetenciones,
+      totalTraslados
+    };
+  }}

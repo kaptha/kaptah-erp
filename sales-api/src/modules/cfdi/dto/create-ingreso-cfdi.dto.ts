@@ -48,6 +48,11 @@ export class CreateIngresoCfdiDto {
     };
   }>;
 
+  // Complemento de impuestos locales (implocal). Tasas como fraccion: 0.05 = 5%
+  impuestosLocales?: {
+    retenciones?: Array<{ nombre: string; tasa: number; importe: number }>;
+    traslados?: Array<{ nombre: string; tasa: number; importe: number }>;
+  };
   // Calculados automáticamente
   subtotal?: number;
   total?: number;
