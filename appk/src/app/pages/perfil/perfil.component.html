@@ -336,13 +336,13 @@
               <!-- Impuesto Column -->
               <ng-container matColumnDef="impuesto">
                 <th mat-header-cell *matHeaderCellDef>Impuesto</th>
-                <td mat-cell *matCellDef="let impuesto">{{impuesto.impuesto}}</td>
+                <td mat-cell *matCellDef="let impuesto">{{ impuesto.impuesto === 'Federal' ? 'Federal (revisar)' : impuesto.impuesto }}</td>
               </ng-container>
 
               <!-- Tasa Column -->
               <ng-container matColumnDef="tasa">
                 <th mat-header-cell *matHeaderCellDef>Tasa</th>
-                <td mat-cell *matCellDef="let impuesto">{{impuesto.tasa}}%</td>
+                <td mat-cell *matCellDef="let impuesto">{{ (impuesto.tasa * 100) | number:'1.0-4' }}%</td>
               </ng-container>
 
               <!-- Valor Cuota Column -->

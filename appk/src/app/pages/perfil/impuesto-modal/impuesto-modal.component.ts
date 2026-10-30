@@ -13,6 +13,10 @@ import { ImpuestosService } from '../../../services/impuestos.service';
 export class ImpuestoModalComponent {
   impuestoForm: FormGroup;
 
+  get esLocal(): boolean {
+    return this.impuestoForm?.get('impuesto')?.value === 'Local';
+  }
+
   constructor(
     private fb: FormBuilder,
     private dialogRef: MatDialogRef<ImpuestoModalComponent>,

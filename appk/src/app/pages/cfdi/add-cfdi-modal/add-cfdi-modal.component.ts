@@ -658,7 +658,11 @@ private obtenerNombreUnidad(claveUnidad?: string): string {
     // Agregar impuestos del usuario
     this.impuestosUsuario.forEach(impuesto => {
       // ✅ Convertir nombre de impuesto a código SAT
-      const codigoImpuesto = mapeoImpuestos[impuesto.impuesto] || '002';
+      const ambito = String(impuesto.impuesto || '').trim();
+      const esLocal = ambito.toLowerCase() === 'local';
+      const aliasUp = String(impuesto.alias || '').toUpperCase();
+      const inferido = /\bISR\b/.test(aliasUp) ? '001' : /\bIEPS\b/.test(aliasUp) ? '003' : '002';
+      const codigoImpuesto = esLocal ? 'LOCAL' : (ambito === 'Federal' || !mapeoImpuestos[ambito] ? inferido : mapeoImpuestos[ambito]);
       
       const impuestoControl = this.fb.group({
         id: [impuesto.id],
@@ -666,6 +670,7 @@ private obtenerNombreUnidad(claveUnidad?: string): string {
         uso: [impuesto.uso],
         tipo_impuesto: [impuesto.tipo_impuesto],
         impuesto: [codigoImpuesto],  // ✅ Usar código SAT en lugar del nombre
+        local: [esLocal],
         impuestoOriginal: [impuesto.impuesto],  // ✅ Guardar nombre original para referencia
         tasa: [impuesto.tasa],
         valor_cuota: [impuesto.valor_cuota],
@@ -677,7 +682,7 @@ private obtenerNombreUnidad(claveUnidad?: string): string {
       // Agregar a traslados o retenciones según el tipo
       if (impuesto.tipo_impuesto === 'Traslado') {
         trasladosArray.push(impuestoControl);
-      } else if (impuesto.tipo_impuesto === 'Retención') {
+      } else if (/^retenci/i.test(String(impuesto.tipo_impuesto || ''))) {
         retencionesArray.push(impuestoControl);
       }
     });
@@ -890,7 +895,7 @@ private obtenerNombreUnidad(claveUnidad?: string): string {
     const conceptosTransformados = formValue.conceptos.map((concepto: any) => {
       const esObjetoImpuesto = concepto.objetoImp === '02' || concepto.objetoImp === '03';
       const trasladosSeleccionados = concepto.impuestos?.traslados
-        ?.filter((t: any) => t.selected && esObjetoImpuesto)
+        ?.filter((t: any) => t.selected && esObjetoImpuesto && !t.local)
         .map((t: any) => ({
           base: concepto.importe,
           impuesto: t.impuesto,
@@ -900,7 +905,7 @@ private obtenerNombreUnidad(claveUnidad?: string): string {
         })) || [];
       
       const retencionesSeleccionadas = concepto.impuestos?.retenciones
-        ?.filter((r: any) => r.selected && esObjetoImpuesto)
+        ?.filter((r: any) => r.selected && esObjetoImpuesto && !r.local)
         .map((r: any) => ({
           base: concepto.importe,
           impuesto: r.impuesto,
@@ -936,6 +941,9 @@ private obtenerNombreUnidad(claveUnidad?: string): string {
       return conceptoTransformado;
     });
 
+    // Impuestos locales (implocal): se juntan a nivel comprobante por tipo, nombre y tasa
+    const impuestosLocales = this.agruparImpuestosLocales(formValue.conceptos);
+
     // Construir objeto CFDI en el formato esperado
     const cfdiPayload = {
       serie: formValue.serie,
@@ -959,7 +967,8 @@ private obtenerNombreUnidad(claveUnidad?: string): string {
         regimenFiscalReceptor: formValue.regimenFiscalReceptor,
         usoCFDI: this.validarUsoCFDI(formValue.usoCfdi, formValue.regimenFiscalReceptor)  // ✅ Validar uso CFDI
       },
-      conceptos: conceptosTransformados
+      conceptos: conceptosTransformados,
+      ...(impuestosLocales ? { impuestosLocales } : {})
     };
 
     return cfdiPayload;
@@ -1045,4 +1054,36 @@ private obtenerNombreUnidad(claveUnidad?: string): string {
       fiscalReg: '612'
     };
   }
-}
+
+  /**
+   * Junta los impuestos locales seleccionados en todos los conceptos.
+   * Van a nivel comprobante (complemento implocal), nunca dentro de cfdi:Impuestos.
+   * La tasa viaja como fraccion (0.05 = 5%), igual que en el catalogo del perfil.
+   */
+  private agruparImpuestosLocales(conceptos: any[]): { retenciones: any[]; traslados: any[] } | null {
+    const grupos = new Map<string, { tipo: string; nombre: string; tasa: number; importe: number }>();
+    for (const concepto of conceptos || []) {
+      const items: any[] = [
+        ...(concepto?.impuestos?.traslados || []).map((t: any) => ({ ...t, _tipo: 'traslado' })),
+        ...(concepto?.impuestos?.retenciones || []).map((r: any) => ({ ...r, _tipo: 'retencion' }))
+      ];
+      for (const imp of items) {
+        if (!imp.local || !imp.selected) continue;
+        const nombre = String(imp.alias || '').trim().toUpperCase();
+        const tasa = Number(imp.tasa) || 0;
+        const key = `${imp._tipo}|${nombre}|${tasa}`;
+        const grupo = grupos.get(key) || { tipo: imp._tipo, nombre, tasa, importe: 0 };
+        grupo.importe += Number(imp.importe) || 0;
+        grupos.set(key, grupo);
+      }
+    }
+    const redondear = (n: number) => Math.round(n * 100) / 100;
+    const lista = Array.from(grupos.values()).filter(g => g.nombre && g.importe > 0);
+    if (lista.length === 0) {
+      return null;
+    }
+    const salida = (tipo: string) => lista
+      .filter(g => g.tipo === tipo)
+      .map(g => ({ nombre: g.nombre, tasa: g.tasa, importe: redondear(g.importe) }));
+    return { retenciones: salida('retencion'), traslados: salida('traslado') };
+  }}
