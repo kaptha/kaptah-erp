@@ -42,6 +42,10 @@ export class ServiciosComponent implements OnInit {
     this.checkScreenSize();
   }
 
+  private normalizarTexto(valor: any): string {
+    return (valor ?? '').toString().normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase().trim();
+  }
+
   ngOnInit() {
     this.loadData();
   }
@@ -99,7 +103,7 @@ export class ServiciosComponent implements OnInit {
    */
   createFilter(): (data: any, filter: string) => boolean {
     return (data: any, filter: string): boolean => {
-      const searchTerms = filter.toLowerCase().split(' ');
+      const searchTerms = this.normalizarTexto(filter).split(/\s+/).filter(t => t);
       
       // Datos a buscar
       const searchableData = [
@@ -107,7 +111,7 @@ export class ServiciosComponent implements OnInit {
         data.descripcion,
         data.categoria,
         data.codServicios
-      ].map(value => value?.toLowerCase() || '');
+      ].map(value => this.normalizarTexto(value));
       
       // Comprobar que todos los términos de búsqueda existen en algún campo
       return searchTerms.every(term => 

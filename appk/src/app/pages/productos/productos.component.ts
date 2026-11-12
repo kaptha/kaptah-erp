@@ -46,6 +46,7 @@ export class ProductosComponent implements OnInit {
     private categoryService: CategoryService
   ) {
     this.dataSource = new MatTableDataSource();
+    this.configurarFiltro();
     this.checkScreenSize();
   }
 
@@ -313,6 +314,19 @@ private downloadFile(content: string, fileName: string, contentType: string) {
 
   refrescar() {
     this.loadProducts();
+  }
+
+  private normalizarTexto(valor: any): string {
+    return (valor ?? '').toString().normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase().trim();
+  }
+
+  private configurarFiltro(): void {
+    this.dataSource.filterPredicate = (p: any, filtro: string): boolean => {
+      const texto = this.normalizarTexto([
+        p.sku, p.name, p.description, p.barcode, p.sat_key ?? p.satKey, this.getCategoryName(p.categoryId)
+      ].join(' '));
+      return this.normalizarTexto(filtro).split(/\s+/).filter(t => t).every(t => texto.includes(t));
+    };
   }
 
   applyFilter(event: Event) {
