@@ -132,11 +132,12 @@ export class CFDIComponent implements OnInit {
 
   // ✅ CFDI de Ingreso
   createIngresoCFDI() {
-    this.dialog.open(AddCfdiModalComponent, {
+    const dialogRef = this.dialog.open(AddCfdiModalComponent, {
       width: this.isMobile ? '95%' : '900px',
     maxWidth: this.isMobile ? '100vw' : '1200px',
     data: { isEditing: false, tipo: 'Ingreso' }
     });
+    dialogRef.afterClosed().subscribe(result => { if (result !== undefined) { this.loadCFDIs(); } });
   }
 
   /**
